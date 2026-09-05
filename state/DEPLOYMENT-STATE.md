@@ -28,8 +28,8 @@ The versions and model choices recorded below describe this validation run; they
 | Runtime | OrbStack |
 | Version | OrbStack 2.2.3; Docker Engine 29.4.0; Docker Compose 5.1.2 |
 | Startup behavior | WeKnora and Open WebUI use `restart: unless-stopped`; Hermes Gateway runs as the user LaunchAgent `ai.hermes.gateway` |
-| OrbStack login startup | Actual `orb config get app.start_at_login` is `false`; OrbStack must be launched manually after login for Docker/Compose recovery |
-| Host reboot rehearsal | Not executed; exact 14-step post-reboot continuation is documented in `docs/OPERATIONS.md` |
+| OrbStack login startup | Actual `orb config get app.start_at_login` is `false`; the first post-login probe found OrbStack stopped, and automatic Mac/OrbStack recovery is not claimed |
+| Host reboot rehearsal | Executed 2026-09-05; Hermes recovered at login, but OrbStack was stopped at the first post-login probe and the full stack is not an automatic-recovery PASS |
 
 ## WeKnora
 
@@ -222,8 +222,40 @@ Actual startup-boundary conclusion:
   launched at GUI login, subject to the post-reboot health check.
 
 Pre-reboot status: `READY FOR REAL REBOOT TEST`.
-This is preparation evidence only; reboot recovery remains
-`REBOOT RECOVERY NOT YET EXECUTED`.
+This was preparation evidence only.
+
+Post-reboot validation recorded on 2026-09-05:
+
+- The Mac booted at `2026-09-05 23:13:22` local time; the first post-login
+  probe therefore observed a real host reboot rather than a container restart.
+- Hermes LaunchAgent `ai.hermes.gateway` recovered automatically at GUI login:
+  `state = running`, `runs = 1`, `last exit code = (never exited)`, and the
+  API health endpoint returned HTTP 200.
+- OrbStack was `Stopped` at the first post-login probe. Docker then failed to
+  connect because `$HOME/.orbstack/run/docker.sock` was absent, so WeKnora and
+  Open WebUI could not yet have recovered. Read-only diagnosis confirmed
+  `orb config get app.start_at_login` is `false`; macOS Background Task records
+  show the OrbStack login item as disabled, while only the privileged helper
+  LaunchDaemon is installed. The helper is not the OrbStack app/VM startup.
+- During the read-only diagnostic window, without changing configuration or
+  running `open -a OrbStack`, OrbStack processes appeared at `23:17:37` and
+  the Docker socket became available. The existing Docker restart policies then
+  recovered all five WeKnora containers and `eaio-open-webui`; all configured
+  health checks became healthy. This conditional container recovery does not
+  prove automatic Mac/OrbStack recovery.
+- After services were available, the Open WebUI General, Sales, and QC
+  grounded chats returned HTTP 200 with WeKnora source titles. The complete
+  Profile key matrix, Sales/QC terminal-denial probes, and unauthorized model
+  probes were repeated successfully. Employee Hermes `memory_enabled` and
+  `user_profile_enabled` remained `false` for `general`, `sales`, and `qc`.
+- Exact intervention boundary: OrbStack was unavailable at the first
+  post-login check and became available during CLI diagnostics; no config write
+  or explicit app launch was performed. Automatic reboot recovery is therefore
+  not claimed.
+
+Reboot recovery status: `NOT AUTOMATIC — OrbStack was stopped at the first
+post-login probe; dependent Compose services recovered only after the runtime
+became available`.
 
 ## Acceptance Status
 
@@ -235,7 +267,10 @@ Reference `docs/ACCEPTANCE-TESTS.md`.
 - Memory isolation: `DISABLED` — employee Hermes long-term memory is deliberately off; no cross-user memory channel is enabled.
 - Dangerous-tool isolation: `PASS` — Sales and QC terminal escape probes returned `NO_TERMINAL_TOOL`; employee toolsets are WeKnora read-only retrieval only.
 - Backup restore: `PASS` — native backup artifacts passed checksums; an isolated restore recovered WeKnora PostgreSQL/Knowledge Bases, Open WebUI state, Hermes Profiles/configuration, and representative grounded access.
-- Reboot recovery: `REBOOT RECOVERY NOT YET EXECUTED` — no host reboot was performed; startup configuration and exact continuation checks are documented only.
+- Reboot recovery: `NOT AUTOMATIC` — the real reboot was observed, Hermes
+  recovered at login, but OrbStack was stopped at the first post-login probe;
+  after OrbStack became available, Docker restart policies recovered WeKnora
+  and Open WebUI and all post-recovery functional/security checks passed.
 
 ## Known Issues / Limitations
 
@@ -245,12 +280,16 @@ Reference `docs/ACCEPTANCE-TESTS.md`.
 - Hermes v0.21.0 multiplex registration is name-sensitive; the employee MCP servers intentionally use unique names (`weknora_general`, `weknora_sales`, `weknora_qc`) so each Profile receives its own read-only tool scope.
 - Hermes emits an unsandboxed/network-access warning because the local process binds `0.0.0.0`; keep the host firewall and loopback-only UI bindings in place.
 - Backup generations and secrets currently remain on the same Mac; no encrypted independent copy or retention schedule has been configured.
-- Mac/OrbStack reboot recovery is not yet evidenced by a post-reboot run.
+- Mac/OrbStack automatic reboot recovery was not proven: OrbStack's actual
+  login startup setting is disabled, and the first post-login probe found no
+  OrbStack runtime or Docker socket.
 
 ## Pending Decisions
 
 - Replace synthetic documents and demo credentials with approved company data and secret management.
 - Move a successful backup generation to encrypted independent storage and configure retention/monitoring.
-- Execute the documented Mac/OrbStack reboot recovery rehearsal and record the post-reboot checks.
+- Decide whether to enable OrbStack's existing login-start setting for a future
+  automatic-recovery run, then repeat the reboot test without treating delayed
+  CLI-triggered availability as proof of automatic recovery.
 - Validate a supported per-user Hermes session-key/header mapping before enabling employee long-term memory.
 - Review and pin current upstream releases before any production deployment; decide separately on messaging, Kanban/Cron, and restricted engineering delegation.

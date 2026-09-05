@@ -186,6 +186,69 @@ manager, or treating configuration evidence as recovery evidence.
 - Stop here and reboot the Mac manually. After login and OrbStack startup,
   reopen Codex and continue the documented checklist.
 
+## 2026-09-05 — Validate real Mac/OrbStack reboot recovery boundary
+
+Component: OrbStack, Docker Compose, Hermes LaunchAgent, Open WebUI, WeKnora
+Environment: Local Apple Silicon Mac with OrbStack; synthetic demo data
+
+### Before
+
+- The real reboot test had been prepared and the pre-reboot demo baseline was
+  healthy.
+- OrbStack's actual `app.start_at_login` setting was already known to be
+  `false`; no startup configuration change was made for this validation.
+
+### After
+
+- A real macOS reboot was observed at `2026-09-05 23:13:22` local time.
+- Hermes LaunchAgent `ai.hermes.gateway` recovered automatically at GUI login;
+  it was running with `runs = 1` and its API returned HTTP 200.
+- The first post-login probe found OrbStack `Stopped`, no Docker socket, and no
+  reachable Docker/Compose services. Read-only diagnosis confirmed the
+  OrbStack login item was disabled and only the privileged helper LaunchDaemon
+  was present.
+- During the read-only diagnostic window, without a configuration write or
+  explicit `open -a OrbStack`, OrbStack became `Running` at approximately
+  `23:17:37`. Docker restart policies then recovered all five WeKnora
+  containers and `eaio-open-webui`; all configured service health checks became
+  healthy.
+- General, Sales, and QC Open WebUI grounded chats returned HTTP 200 with
+  WeKnora source titles. Same-Profile key requests returned HTTP 200 and all
+  cross-Profile requests returned HTTP 401. Sales/QC terminal probes returned
+  `NO_TERMINAL_TOOL`. Unauthorized Sales/QC/default/admin model probes returned
+  HTTP 400 `Model not found`. Employee Hermes memory and user profiles remained
+  disabled.
+
+### Reason
+
+Run the requested real reboot validation without changing the architecture,
+adding components, or changing startup configuration.
+
+### Validation
+
+- OrbStack/Docker availability, both Compose projects, all six containers,
+  Hermes LaunchAgent/API, WeKnora API/UI, and Open WebUI were checked after the
+  runtime became available.
+- The end-to-end Open WebUI → Hermes → WeKnora grounded path was repeated for
+  General, Sales, and QC, including source-title evidence.
+- Profile API-key isolation, Sales/QC terminal denial, employee model ACLs,
+  default/admin non-exposure, and disabled employee long-term memory were
+  repeated successfully.
+
+### Rollback
+
+- No configuration, service definition, or runtime data was changed by this
+  validation. There is no operational rollback action.
+
+### Notes
+
+- Exact intervention boundary: OrbStack was unavailable at the first post-login
+  check and became available during CLI diagnostics; no explicit app launch or
+  configuration write was performed.
+- This run is `NOT AUTOMATIC`. `REBOOT RECOVERY PASS` and `RESILIENCE DEMO PASS`
+  were intentionally not recorded because the first post-login probe failed to
+  find the OrbStack runtime.
+
 ## Repository bootstrap history
 
 ### 2026-09-05 — Enterprise AI Office executable repository baseline created

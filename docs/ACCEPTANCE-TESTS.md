@@ -422,10 +422,18 @@ Verify:
 [ ] employee can complete a smoke-test query
 ```
 
-Local demo status: `REBOOT RECOVERY NOT YET EXECUTED`. The Codex session cannot
-safely survive a Mac reboot and prove post-reboot state. Use the exact
-continuation commands in `docs/BACKUP-RESTORE.md` and record the result before
-marking this section passed.
+Local demo result (2026-09-05): `NOT AUTOMATIC`. The Mac reboot was observed
+at `2026-09-05 23:13:22`. Hermes LaunchAgent recovered at GUI login, but the
+first post-login probe found OrbStack `Stopped`, `app.start_at_login=false`, a
+disabled OrbStack login item, and no Docker socket. During the read-only
+diagnostic window OrbStack later became available without a configuration write
+or explicit `open -a OrbStack`; Docker restart policies then recovered WeKnora
+and Open WebUI. The complete grounded-chat, Profile key, RBAC, terminal-denial,
+and disabled-memory checks passed after services were available.
+
+Because OrbStack was unavailable at the first post-login probe, this run does
+not satisfy the automatic reboot-recovery criterion. Do not mark this section
+`PASS`, `REBOOT RECOVERY PASS`, or `RESILIENCE DEMO PASS`.
 
 ## 27. Network exposure audit
 

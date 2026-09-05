@@ -392,9 +392,35 @@ Use this exact post-reboot order for the current MacBook demo:
 14. Default/admin exposure: confirm employee model lists contain only their
     allowed assistants and no default/admin Profile is exposed.
 
-Record each result after the real reboot. Until this sequence completes, record
-`REBOOT RECOVERY NOT YET EXECUTED`; `restart: unless-stopped` and LaunchAgent
-`KeepAlive` are only startup configuration evidence.
+Before the real reboot, record the sequence as `REBOOT RECOVERY NOT YET
+EXECUTED`. Afterward, record each observed result; `restart: unless-stopped`
+and LaunchAgent `KeepAlive` are only startup configuration evidence until the
+post-reboot checks actually run.
+
+### 16.1 Observed 2026-09-05 reboot result
+
+The Mac was actually rebooted and booted at `2026-09-05 23:13:22` local time.
+The first post-login probe found:
+
+- Hermes LaunchAgent `ai.hermes.gateway` running with `runs = 1`, no prior exit,
+  and Hermes API HTTP 200; this recovered automatically at GUI login.
+- OrbStack `Stopped`, no running OrbStack process, and no Docker socket. Docker
+  and both Compose projects were consequently unavailable at that first probe.
+- Read-only diagnosis found `orb config get app.start_at_login` = `false`, a
+  disabled OrbStack macOS Background Task/login item, and only the privileged
+  helper LaunchDaemon. The helper does not start the OrbStack app/VM.
+
+During the read-only diagnostic window, without a configuration write or
+`open -a OrbStack`, OrbStack became `Running` at approximately `23:17:37` and
+Docker became reachable. The existing Compose restart policies then recovered
+all five WeKnora containers and `eaio-open-webui`; they became healthy. The
+post-recovery General/Sales/QC grounded chats, Profile key matrix, terminal
+denial, employee model ACL, and disabled-memory checks all passed.
+
+This result is recorded as `NOT AUTOMATIC`: the first post-login probe did not
+have OrbStack or Docker available, and the later CLI-window availability is not
+treated as proof that the Mac/OrbStack stack recovered automatically. Do not
+record `REBOOT RECOVERY PASS` or `RESILIENCE DEMO PASS` for this run.
 
 ## 17. Incident notes
 
