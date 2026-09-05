@@ -1,0 +1,11 @@
+# Enterprise AI Office baseline Hermes default/admin Profile
+# Validated schema family: Hermes Agent 0.21.0 reference commit recorded in config/validated-stack.yaml.
+# Copy/adapt into the protected default Hermes home. Do not put secrets here.
+
+gateway:
+  multiplex_profiles: true
+  multiplex_profile_allowlist:
+    - general
+
+# The default/admin Profile is control-plane only.
+# Add specialist profile names to the allowlist only when company configuration enables them.
