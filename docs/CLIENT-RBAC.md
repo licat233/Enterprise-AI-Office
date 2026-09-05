@@ -1,295 +1,246 @@
 # Employee Client and RBAC Standard
 
-This document defines how human employees access Enterprise AI Office through the Web client and how those identities map to Hermes Profiles.
+This document defines how human employees access Enterprise AI Office through Open WebUI and how those identities map to Hermes Profiles.
+
+For deployment execution, follow `DEPLOY.md` first.
 
 ## 1. Client roles
 
 ### Open WebUI
 
-Default multi-user employee Web portal.
+Baseline multi-user employee Web portal.
 
 Responsibilities:
 
 - user authentication;
 - groups;
-- resource/model/assistant access;
+- Assistant/resource access;
 - chat UX;
-- conversation history.
+- conversation history;
+- attachments when enabled.
 
-### hermes-webui
+### Administrative surfaces
 
-Administrative Hermes control surface.
+Open WebUI admin, Hermes CLI/hermes-webui when enabled, and WeKnora admin are control-plane surfaces.
 
-Responsibilities may include:
-
-- Profiles;
-- SOUL;
-- Skills;
-- MCP;
-- models;
-- memory;
-- Cron;
-- Kanban;
-- Gateway/settings.
-
-It is not the ordinary employee client.
+They are not ordinary employee clients.
 
 ### Messaging platforms
 
-Feishu, WeCom, Weixin, or another approved Hermes Gateway platform may provide mobile/remote employee access.
-
-They complement the Web client rather than becoming a separate agent architecture.
+Messaging surfaces are optional extensions. Enable only those the company actually uses.
 
 ## 2. Identity mapping
 
-Keep human and agent identity separate.
+Keep human identity and AI work-role identity separate.
 
 ```text
 Human employee
 → Open WebUI user
-→ Group membership
-→ Authorized assistant resource
+→ Group/resource authorization
+→ Assistant
 → Hermes Profile
 ```
 
-Example:
+Baseline:
 
 ```text
-Alice
-  groups: Sales, All-Employees
-  assistants: General Assistant, Sales Assistant
+ordinary employee
+→ All-Employees
+→ General Assistant
+→ `general`
 ```
 
-## 3. Recommended generic groups
+Additional mappings come from company configuration.
 
-A company may start with:
+## 3. Baseline groups
+
+The generic baseline is:
 
 ```text
 All-Employees
-Sales
-QC
-Marketing
-Engineering
-Operations
-Management
 AI-Admins
 ```
 
-Only create groups that correspond to real authorization needs.
+Create additional groups only when a real authorization boundary requires them.
 
-## 4. Default permissions
+A department name by itself is not sufficient reason to create a group unless different resource access is needed.
+
+## 4. Default employee permissions
 
 Global/default employee permissions should be minimal.
 
-Normal users should not automatically receive:
+The validated baseline keeps:
 
-- model workspace administration;
+```text
+Normal chat              enabled
+Conversation history     enabled
+File upload              enabled unless company policy disables it
+Chat System Prompt       disabled
+Advanced Chat Parameters disabled
+```
+
+Normal employees should not automatically receive:
+
+- model/provider administration;
 - Knowledge administration;
-- prompt/system prompt administration;
 - tool administration;
 - API-key management;
 - public sharing;
-- unrestricted assistant creation;
-- admin settings.
+- unrestricted Assistant creation;
+- system/admin settings.
 
-Grant additional capabilities through specific groups when needed.
+Use Open WebUI's native permission model for the installed release rather than source edits or CSS hiding.
 
 ## 5. Resource visibility
 
-Each Hermes-backed employee assistant should be private/restricted and explicitly shared with authorized groups/users.
+Every Hermes-backed employee Assistant should be private/restricted and explicitly shared with intended groups/users.
 
-Do not rely on hiding UI entries as the security control. Verify unauthorized direct access is rejected.
-
-## 6. Reference assistant mapping
+Baseline:
 
 ```text
-All-Employees → General Assistant → general Profile
-Sales         → Sales Assistant   → sales Profile
-QC            → QC Assistant      → qc Profile
-Marketing     → Marketing Assistant → marketing Profile
-Engineering   → Engineering Assistant → engineering Profile
+All-Employees → General Assistant → Hermes `general`
 ```
 
-Management may be granted selected cross-department assistants according to company policy.
+Do not rely on UI visibility alone as the security control. Verify unauthorized direct resource/API access is rejected.
+
+## 6. Specialist mappings
+
+If company configuration enables a specialist Profile:
+
+1. create only the authorization group(s) actually needed;
+2. create the matching private Assistant resource;
+3. connect it server-side to that Profile;
+4. grant it only to intended users/groups;
+5. run the conditional specialist RBAC tests in `docs/ACCEPTANCE-TESTS.md`.
+
+Do not infer specialist groups from the optional templates under `profiles/`.
 
 ## 7. Admin separation
 
-AI administrators may use Open WebUI admin, WeKnora admin, Hermes CLI, and hermes-webui.
+AI administrators may use approved administrative surfaces.
 
 Ordinary employees must not receive administrative Hermes credentials merely to use chat.
 
+The Hermes default/admin Profile is never the ordinary employee General Assistant.
+
 ## 8. Hermes Profile connections
 
-Open WebUI should connect server-side to Hermes employee-facing Profile API endpoints using Profile-scoped credentials where supported.
+Open WebUI connects server-side to employee-facing Hermes Profile API endpoints using Profile-scoped credentials.
 
-Conceptually:
+Baseline conceptual route:
 
 ```text
-General connection   → /p/general/...   → general Profile key
-Sales connection     → /p/sales/...     → sales Profile key
-QC connection        → /p/qc/...        → qc Profile key
-Marketing connection → /p/marketing/... → marketing Profile key
+General Assistant → /p/general/... → `general` Profile key
 ```
 
-Exact URLs depend on the installed Hermes release and must be verified from current upstream behavior.
+Exact URLs and supported connection behavior must match the pinned Hermes/Open WebUI versions.
+
+For every additional employee Profile, create a distinct connection using that Profile's own key.
 
 ## 9. Credential handling
 
-Hermes API keys belong in server-side connection configuration or protected secrets, not in employee browsers.
+Hermes API keys belong in server-side connection configuration or protected secrets, never in employee browsers or Git.
 
 Use a unique credential per employee-facing Profile.
 
+When multiple employee Profiles are enabled, run the complete pairwise cross-Profile credential test.
+
 ## 10. Long-term memory scope
 
-Where Hermes/Open WebUI versions support it, use a stable user-scoped session-key header for long-term memory isolation.
+Open WebUI conversation history is independent of Hermes long-term memory.
 
-Conceptual values:
+Employee Hermes long-term memory is disabled by baseline policy until a stable user-scoped Open WebUI → Hermes memory/session mechanism passes the cross-user isolation test for the exact deployed versions.
+
+Do not invent or assume a mapping between browser chat IDs and persistent Hermes memory scope.
+
+## 11. Cross-user memory gate
+
+Only when enabling Hermes employee long-term memory:
+
+- use two distinct employees authorized for the same Profile;
+- store a unique private marker for User A;
+- attempt retrieval from User B;
+- verify User B cannot recover User A's private data;
+- verify intended User A continuity if user-scoped memory is the design.
+
+If isolation cannot be proven, keep Hermes employee long-term memory disabled and rely on Open WebUI conversation history.
+
+## 12. RBAC acceptance model
+
+For every enabled employee Assistant:
 
 ```text
-general:webui:<USER_ID>
-sales:webui:<USER_ID>
-qc:webui:<USER_ID>
+intended user/group    → allow
+unauthorized user/group → deny
+ordinary employee      → admin/default deny
 ```
 
-Use stable non-secret user IDs rather than display names that may change or collide.
+Test both UI visibility and direct unauthorized access.
 
-Exact dynamic-header syntax must be verified against the deployed Open WebUI release.
+Do not create unused Assistants merely to populate an RBAC matrix.
 
-## 11. Transcript identity
+## 13. Group permissions are additive
 
-Transcript/conversation IDs and long-term memory keys are different concerns.
+When the selected Open WebUI release uses additive group permissions, configure global defaults conservatively.
 
-If a separate Hermes transcript/session header is used, validate it independently. Do not assume a browser chat ID is automatically a valid persistent Hermes memory scope.
+Do not grant broad global permissions and expect another group to subtract them later.
 
-## 12. Cross-user memory acceptance test
-
-Use at least two users on the same department Profile.
-
-User A supplies a unique private marker and asks the agent to remember it.
-
-User B then tries to retrieve that marker.
-
-Expected: User B cannot access it.
-
-If the test fails, disable user long-term memory and rely on Open WebUI conversation history until corrected.
-
-## 13. Cross-Profile memory acceptance test
-
-The same user should not accidentally leak user-scoped Sales memory into Marketing or another Profile unless an intentionally shared memory provider is designed and approved.
-
-## 14. RBAC test matrix
-
-At minimum test:
-
-| User | General | Sales | QC | Marketing | Engineering | Admin |
-| --- | --- | --- | --- | --- | --- | --- |
-| Sales test | allow | allow | deny | deny unless justified | deny | deny |
-| QC test | allow | deny | allow | deny | deny | deny |
-| Marketing test | allow | deny | deny | allow | deny | deny |
-| Engineering test | allow | deny by default | deny by default | deny by default | allow | deny |
-| AI Admin | as configured | as configured | as configured | as configured | as configured | allow |
-
-Adapt this matrix to the actual company.
-
-## 15. Group permissions are additive
-
-When the selected client uses additive group permissions, configure global defaults conservatively.
-
-Do not give broad global permissions and expect another group to subtract them later.
-
-## 16. New user onboarding
+## 14. New employee onboarding
 
 For each new employee:
 
-1. create/activate user according to company auth policy;
-2. assign only required groups;
-3. verify effective assistant/resource access;
-4. do not grant admin by convenience;
-5. test one authorized and one unauthorized assistant.
+1. create/activate identity according to company auth policy;
+2. assign only required groups/resources;
+3. verify effective Assistant access;
+4. do not grant admin for convenience;
+5. test at least one authorized path and, when applicable, one unauthorized path.
 
-## 17. Employee departure / role change
+## 15. Employee departure / role change
 
 When a user leaves or changes roles:
 
 - disable/remove user access promptly;
-- update group memberships;
-- review API tokens personally issued to that user, if any;
+- update group memberships/resource grants;
+- review personal tokens if any were issued;
 - preserve business records according to company policy;
-- do not delete shared department Profiles just because one employee left.
+- do not delete shared Profiles merely because one employee left.
 
-## 18. File upload policy
+## 16. File upload policy
 
-Do not assume every Open WebUI file workflow is automatically compatible with Hermes API behavior.
+File upload may be enabled for temporary conversation context when the deployed Open WebUI/Hermes path supports the intended file types and company policy permits it.
 
-Before enabling ad-hoc employee file upload through the Hermes connection, test the installed versions and approved file types.
+Durable authoritative company knowledge should be ingested through WeKnora knowledge-management workflows rather than treated as chat attachments.
 
-Official company knowledge ingestion should continue through WeKnora knowledge-management workflows.
+## 17. Remote browser access
 
-### Employee Settings permissions (validated 2026-09-06)
+If Open WebUI is reachable outside the approved local network, place it behind an approved private/identity-aware access layer with appropriate authentication and TLS/network controls.
 
-Open WebUI `v0.11.3` provides native default permissions at:
-`Admin Panel → Users → Groups → Default permissions`. For this employee demo,
-the administrator set `Allow Chat System Prompt` and `Allow Chat Params` to
-`off`, while leaving `Allow File Upload` enabled. Sales and QC employee UI
-checks confirmed that System Prompt and Advanced Parameters were no longer
-available for editing; normal chat, attachment upload, assistant visibility,
-and conversation history remained available. Use this native permission
-mechanism rather than source changes, CSS, or a proxy.
+Remote access is not part of the baseline unless company configuration enables it.
 
-### Local demo employee-client observation (2026-09-06)
+## 18. Messaging identity
 
-The pinned local Open WebUI demo was tested from the employee UI with `sales-test-a`
-and `qc-test`. Sales saw `General Assistant` and `Sales Assistant`; QC saw
-`General Assistant` and `Quality Control Assistant`. The employee account menu
-contained status, Notes, Calendar, Settings, and Sign Out, with no provider,
-model, Profile, MCP, WeKnora, API-key, or admin controls.
+When messaging is enabled, authenticated enterprise users/chats must map deterministically to approved Profiles.
 
-The native text-file attachment flow worked for a non-sensitive temporary demo
-file. The assistant displayed the attachment as a source and identified it as
-attachment context rather than durable company knowledge. This does not change
-the rule that authoritative company knowledge belongs in WeKnora.
+Do not infer privileged Profile selection from arbitrary message text.
 
-The employee UI rendered WeKnora source titles and knowledge-base names as
-human-readable inline text; this is functionally usable but is not a rich,
-expandable citation card. A five-turn Sales conversation survived refresh and
-logout/login. Employee long-term memory remained disabled.
+Use supported routing, allowlists/pairing, and platform identity controls.
 
-The final employee-client cleanup disabled the two unnecessary employee
-Settings controls through native Open WebUI default permissions. The Sales and
-QC Settings pages no longer exposed System Prompt or Advanced Parameters;
-File Upload, normal chat, assistant visibility, and history remained usable.
-The synthetic Products & Technical document was rewritten to remove local
-infrastructure details and reindexed; a subsequent Sales answer still showed
-the source title without endpoint leakage.
-
-## 19. Remote browser access
-
-If Open WebUI must be reachable outside the office, place it behind one approved private/identity-aware access layer.
-
-Do not expose the portal directly without authentication/TLS/network controls.
-
-## 20. Messaging identity
-
-Messaging platforms must map authenticated enterprise users/chats to approved Profiles.
-
-Do not infer privileged Profile selection from arbitrary user text.
-
-Use supported routing configuration, separate bot credentials, or explicit route rules.
-
-## 21. Client acceptance checklist
+## 19. Client acceptance checklist
 
 ```text
-[ ] Admin account secured
-[ ] Default user permissions minimal
-[ ] Department groups created
-[ ] Employee assistants private/restricted
-[ ] Profile API credentials unique
-[ ] Sales cannot access QC
-[ ] QC cannot access Sales
-[ ] Normal users cannot access admin surfaces
-[ ] Direct unauthorized resource request fails
-[ ] Cross-user memory test passes or long-term memory disabled
-[ ] Conversation history works
-[ ] Logout/session behavior tested
-[ ] Remote-access boundary documented if enabled
+[ ] Admin account/access secured
+[ ] Baseline All-Employees and AI-Admins boundaries configured
+[ ] Default employee permissions minimal
+[ ] General Assistant private/restricted to intended employees
+[ ] Hermes default/admin not employee-exposed
+[ ] Employee Profile API credentials server-side and unique
+[ ] Ordinary employee login/chat/history works
+[ ] Grounded answer/source path works
+[ ] Direct unauthorized resource request fails closed
+[ ] Specialist groups/resources exist only when configured
+[ ] Long-term memory disabled or isolation proven
+[ ] File upload tested if enabled
+[ ] Remote-access boundary tested if enabled
 ```
+
+Specific validation results from an individual deployment belong in `state/DEPLOYMENT-STATE.md` and `state/CHANGELOG.md`.
