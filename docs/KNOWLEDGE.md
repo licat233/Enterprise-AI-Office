@@ -4,20 +4,9 @@ This document defines how Enterprise AI Office organizes and governs company kno
 
 ## 1. Knowledge platform
 
-WeKnora is the v1 enterprise knowledge platform.
+WeKnora is the enterprise knowledge platform.
 
-It owns:
-
-- document ingestion;
-- parsing;
-- chunking;
-- embeddings;
-- hybrid retrieval;
-- reranking;
-- citations;
-- Knowledge Bases;
-- document metadata;
-- knowledge-management UI/workflows.
+It owns document ingestion, parsing, chunking, embedding, retrieval, source traceability, metadata, and Knowledge Base management.
 
 ## 2. Knowledge vs memory
 
@@ -25,64 +14,56 @@ Do not use Hermes Profile memory as the primary store for durable company facts.
 
 ```text
 WeKnora
-= shared company knowledge
+= authoritative shared company knowledge
 
 Hermes Profile memory
-= role-specific operating experience / context
+= optional operating continuity/context subject to its memory policy
 ```
 
-Examples that belong in WeKnora:
+Company facts such as specifications, manuals, SOPs, policies, company profile, certifications, brand guidance, training material, and technical FAQs belong in WeKnora.
 
-- product specifications;
-- manuals;
-- SOPs;
-- policies;
-- company profile;
-- certifications;
-- brand guidelines;
-- training material;
-- technical FAQs.
+## 3. Knowledge Base baseline
 
-## 3. Knowledge Base design
-
-Do not create one Knowledge Base per file, person, or small topic.
-
-Split Knowledge Bases when either of these materially differs:
-
-- semantic domain;
-- permission boundary.
-
-A generic starting point may be:
+A generic deployment may begin with one shared employee Knowledge Base, for example:
 
 ```text
-Company & Brand
-Products & Technical
-Sales & Marketing
-Operations & SOP
+Company Knowledge
 ```
 
-Sensitive finance, HR, supplier-cost, legal, or customer-confidential data should be separated only when there is a real permission/data-boundary requirement.
+Create another Knowledge Base only when at least one material boundary justifies it:
 
-## 4. Folder, tag, metadata first
+- semantic domain;
+- permission/access;
+- lifecycle/retention;
+- operational ownership;
+- confidentiality/data handling.
 
-Before creating another Knowledge Base, consider whether folder/tag/metadata organization inside an existing KB is sufficient.
+Do not create one Knowledge Base per file, person, department name, or small topic merely because such categories exist.
 
-Typical metadata:
+## 4. Prefer organization inside a Knowledge Base first
+
+Before creating another top-level Knowledge Base, consider whether folders, tags, metadata, document status, or filters inside the existing Knowledge Base are sufficient.
+
+Useful metadata may include:
 
 ```text
 Product
 Document Type
 Language
-Source Department
+Source Owner
 Effective Date
 Status
 Version
 Confidentiality
 ```
 
-## 5. Document status
+Add metadata that helps real retrieval/governance; do not create fields only for schema completeness.
 
-Recommended lifecycle tags:
+## 5. Document status and provenance
+
+Use clear lifecycle/status metadata so the system can distinguish current truth from useful history.
+
+Possible statuses include:
 
 ```text
 current
@@ -92,98 +73,65 @@ reference
 legacy
 ```
 
-`current` means the document is the preferred current operational reference.
+When a new document replaces an old one, preserve the prior version when history/provenance matters and mark the preferred current source accordingly.
 
-`superseded` means the document remains useful as history/evidence but should not be treated as the latest truth.
+## 6. File naming
 
-## 6. Preserve useful history
+Use descriptive names where practical.
 
-Do not delete old documents merely to make the knowledge base look clean.
-
-When a new document replaces an old one:
+Example pattern:
 
 ```text
-new version → current
-old version → superseded
+Subject_DocumentType_Language_Date_Version.ext
 ```
 
-Preserve provenance when historical documents may matter for audits, customer communications, or understanding earlier decisions.
+Avoid ambiguous names that make source identification difficult.
 
-## 7. File naming
+## 7. Ingestion quality
 
-Use consistent descriptive names where practical.
+Do not dump an entire shared drive into WeKnora by default.
 
-Example:
+Start with high-value, current, frequently used, well-understood knowledge.
+
+RAG quality cannot compensate for duplicated, obsolete, contradictory, or poorly governed source material.
+
+## 8. Seed corpus for Core Ready
+
+A deployment needs only a small non-sensitive seed corpus to prove the technical knowledge path.
+
+The seed should contain at least one known fact that can be retrieved and cited through:
 
 ```text
-Product_Model_DocumentType_Language_Date_Version.pdf
+WeKnora
+→ Hermes `general`
+→ Open WebUI General Assistant
 ```
 
-Avoid ambiguous names such as:
+The seed corpus is a functional validation fixture, not a substitute for production company knowledge.
 
-```text
-final.pdf
-final2.pdf
-new-final-final.pdf
-use-this-one.pdf
-```
+## 9. Production corpus
 
-## 8. Ingestion quality
+Production knowledge should be selected from the company's real work and access requirements.
 
-Do not dump an entire shared drive into WeKnora on day one.
-
-Start with:
-
-```text
-high value
-+
-current
-+
-frequently used
-+
-well understood
-```
-
-knowledge.
-
-RAG quality cannot compensate for large amounts of duplicated, obsolete, or contradictory source material.
-
-## 9. Pilot corpus
-
-A good initial corpus includes representative examples of:
-
-- product specifications;
-- manuals;
-- catalogs;
-- certificates;
-- company profile;
-- key SOPs;
-- training documents;
-- sales/marketing FAQs.
+Prioritize documents that employees actually need, then expand based on retrieval failures and user feedback rather than attempting exhaustive ingestion before launch.
 
 ## 10. Parsing validation
 
-An upload success message is not enough.
+For Core Ready, verify the seed document parses and its known fact is retrievable.
 
-Inspect representative parsed content and retrieval for:
+For Production Ready, test the representative file formats the company will actually use, such as PDFs, DOCX, XLSX/tables, scanned/OCR material, or image-heavy documents where relevant.
 
-- English PDF;
-- Chinese PDF;
-- tables;
-- DOCX;
-- XLSX;
-- scanned/OCR document;
-- image-heavy document if relevant.
+Verify important numeric values, units, model names, tables, and other critical structure survive parsing sufficiently for retrieval.
 
-Verify important numeric values, units, model names, and table structure survive parsing sufficiently for retrieval.
+Do not require file-format tests for formats the company does not use.
 
 ## 11. Retrieval strategy
 
-Start with the upstream-recommended hybrid retrieval/rerank configuration.
+Start with the selected WeKnora release's supported/default retrieval approach.
 
-Do not immediately hand-tune many thresholds, chunk sizes, top-k values, and external vector databases before measuring real failures.
+Do not immediately tune many thresholds, chunk sizes, top-k values, rerankers, or external vector stores before measuring real retrieval failures.
 
-When an answer fails, diagnose in order:
+When an answer fails, diagnose in this order:
 
 ```text
 source quality
@@ -192,32 +140,24 @@ source quality
 → metadata
 → embedding/retrieval
 → rerank
-→ prompt/agent reasoning
+→ agent reasoning
 ```
 
-## 12. Model benchmark
+## 12. Golden Questions
 
-Before large-scale rollout, create a company-specific Golden Question Set.
-
-Include:
-
-- exact product/technical facts;
-- SOP questions;
-- cross-language questions;
-- table/spreadsheet lookups;
-- source-citation questions;
-- conflicting-document questions;
-- unknown/unanswerable questions.
+Before or during real production rollout, build a company-specific Golden Question Set from actual employee work.
 
 Evaluate:
 
-- retrieval recall;
+- source retrieval;
 - answer correctness;
-- citation correctness;
-- cross-language quality;
-- hallucination behavior;
-- latency;
-- cost.
+- source/citation correctness;
+- cross-language behavior where relevant;
+- unknown-answer behavior;
+- conflicting-source behavior;
+- latency/cost where operationally important.
+
+Do not invent a generic question set that forces the company to model work it does not have.
 
 ## 13. Embedding model changes
 
@@ -226,116 +166,116 @@ Treat an embedding-model change as high risk.
 Before changing:
 
 - record current model/dimension;
-- back up;
 - understand reindex requirements;
+- protect/backup the current state as appropriate;
 - create a migration/reindex plan;
-- rerun Golden Questions;
+- rerun representative retrieval tests;
 - define rollback.
 
-Do not silently switch embeddings in production.
+Do not silently switch embeddings in an established deployment.
 
 ## 14. Knowledge conflict behavior
 
-When retrieved sources materially conflict, the agent should not silently pick one.
+When authoritative-looking sources materially conflict, the assistant should surface the conflict rather than silently choose or invent a reconciliation.
 
-Expected response pattern:
-
-```text
-A conflict exists.
-Source A says X.
-Source B says Y.
-The current authoritative value cannot be safely established from the available sources.
-```
-
-A responsible human/knowledge maintainer should then correct document status or source quality.
+The knowledge maintainer/domain owner should then resolve document status or source quality.
 
 ## 15. Unknown-answer behavior
 
-If the knowledge base does not contain sufficient evidence, the agent should say so.
+If approved company knowledge does not provide sufficient evidence, the assistant should say so.
 
-Do not let general model priors become invented company facts.
+Do not allow general model priors to become invented company facts.
 
 ## 16. Language behavior
 
 Company knowledge may be multilingual.
 
-Benchmark at least:
+Test cross-language retrieval only for language combinations the company actually needs.
 
-- Chinese question → English source;
-- English question → Chinese source;
-- Chinese answer;
-- English answer.
-
-Do not assume strong monolingual benchmark performance implies strong cross-language enterprise retrieval.
+Do not assume monolingual retrieval performance guarantees multilingual performance.
 
 ## 17. Knowledge permissions
 
-Normal employees primarily consume knowledge through authorized assistants.
+Normal employees primarily consume knowledge through authorized Assistants.
 
-Knowledge Maintainers/Contributors may receive WeKnora UI permissions to upload, organize, and update sources.
+Knowledge maintainers may receive WeKnora administration/contributor permissions required to ingest, organize, and update sources.
 
-Do not grant every employee unrestricted KB administration.
+Do not give every employee unrestricted knowledge administration.
+
+Split or protect Knowledge Bases when real permission/data boundaries require it.
 
 ## 18. Sensitive data
 
-Do not ingest credentials, passwords, private keys, or secret configuration values into WeKnora.
+Do not ingest credentials, passwords, private keys, tokens, or secret configuration values into WeKnora.
 
-Before ingesting Confidential/Restricted data, verify:
+Before ingesting confidential/restricted information, review:
 
-- WeKnora permission boundaries;
-- external model data flow;
-- regulatory/contractual requirements;
-- backup/storage exposure.
+- access boundaries;
+- model/provider data flow;
+- contractual/regulatory obligations;
+- storage/backup exposure.
 
 ## 19. Hermes integration
 
-Hermes should access WeKnora through supported MCP/API interfaces.
+Hermes accesses WeKnora through supported MCP/API interfaces.
 
-Prefer read-oriented retrieval tools for normal knowledge work.
+Normal employee Profiles should receive a least-privilege read-oriented retrieval surface.
 
 Avoid direct database coupling.
 
-## 20. Nested agent reasoning
+## 20. Nested reasoning
 
-WeKnora may have its own Agent capabilities. They can be useful for specialized knowledge reasoning.
+If WeKnora provides its own agent/reasoning features, use them only when they add concrete value to a knowledge workflow.
 
-Do not automatically route every Hermes knowledge query through another Agent layer.
+Do not route every Hermes retrieval through another agent layer automatically.
 
-Use the simplest supported retrieval path that solves the task.
+## 21. Knowledge ownership
 
-## 21. Knowledge ingestion ownership
+A production deployment should identify at least one human role responsible for knowledge hygiene.
 
-Define at least one human role responsible for knowledge hygiene.
+Responsibilities may include:
 
-Typical responsibilities:
+- adding/updating approved sources;
+- marking superseded material;
+- resolving conflicting versions;
+- maintaining useful metadata;
+- investigating retrieval failures;
+- coordinating with domain owners.
 
-- upload current documents;
-- mark superseded material;
-- resolve conflicting versions;
-- maintain metadata/tags;
-- investigate bad retrieval sources;
-- coordinate with domain owners.
+This is an operational responsibility, not a requirement to create a dedicated AI Profile or organizational department.
 
 ## 22. Change traceability
 
-When a critical company fact changes, preserve enough provenance to answer:
+For critical company facts, preserve enough provenance to determine:
 
-- what is current now?
-- what was true before?
-- when did it change?
-- which source supports the current answer?
+- what is current now;
+- what was true before when relevant;
+- when it changed;
+- which source supports the current answer.
 
 ## 23. Knowledge acceptance checklist
 
+### Core Ready
+
 ```text
-[ ] KB boundaries make semantic/permission sense
-[ ] Pilot corpus is current and high quality
-[ ] Representative formats parse correctly
-[ ] Exact technical values survive retrieval
-[ ] Chinese/English cross-language tests pass
-[ ] Citations point to correct sources
-[ ] Unknown questions do not hallucinate company facts
+[ ] Company-configured Knowledge Base exists
+[ ] Seed document ingestion completes
+[ ] Known fact is retrievable
+[ ] Source evidence is visible
+[ ] Hermes `general` retrieves through supported MCP/API
+[ ] Unknown company fact is not invented
+```
+
+### Production Ready
+
+```text
+[ ] Knowledge Base boundaries match real semantic/permission needs
+[ ] Production corpus is current and useful
+[ ] Representative company file formats parse correctly
+[ ] Critical values survive retrieval
+[ ] Required language/cross-language behavior is tested
+[ ] Source evidence is correct
 [ ] Conflicting sources are surfaced
-[ ] Sensitive data boundary reviewed
-[ ] Knowledge maintainer role defined
+[ ] Sensitive-data boundary is reviewed
+[ ] Knowledge ownership is defined
 ```
