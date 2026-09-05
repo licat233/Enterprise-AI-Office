@@ -1,78 +1,65 @@
-# Deployment Blueprint
+# Deployment Reference
 
-This document defines the generic deployment sequence for Enterprise AI Office. It is an execution blueprint, not a claim that every adopting company has identical hardware or credentials.
+This document provides implementation detail for the execution contract in `DEPLOY.md`.
+
+For deployment tasks, follow `DEPLOY.md` first. This document may explain how a phase is implemented, but it must not expand the baseline deployment by treating optional examples as required components.
 
 ## 1. Deployment objective
 
-A deployment is complete only when the full path works:
+The baseline deployment is complete at `CORE READY` only when this path works from the real employee client:
 
 ```text
 Employee
-→ approved client
-→ authorized Hermes Profile
-→ company knowledge / tools
-→ response or task execution
+→ Open WebUI
+→ General Assistant
+→ Hermes `general` Profile
+→ WeKnora MCP/API
+→ grounded company answer + source
 ```
 
-and the system is recoverable after failure/reboot.
+`PRODUCTION READY` is a separate, higher standard defined in `DEPLOY.md` and the operational/security documents.
 
-## 2. Reference host model
+## 2. First validated target
 
-Initial reference deployment:
+The first validated reference path is:
 
 ```text
-Company-owned host
+Apple Silicon macOS
 │
 ├── Host-native
-│   ├── Hermes Agent
-│   ├── Codex
-│   └── Claude Code
+│   └── Hermes Agent
 │
-└── Containers
+└── OrbStack / Docker
     ├── WeKnora
     └── Open WebUI
 ```
 
-The first ARMOR deployment targets a Mac Studio. Other companies may use another supported host. Preserve component responsibilities even when the host changes.
+Validated versions are recorded in `state/DEPLOYMENT-STATE.md`. The initial reproducibility baseline is:
+
+- WeKnora `v0.8.0`;
+- Hermes Agent `v0.21.0`;
+- Open WebUI `v0.11.3`.
+
+These are tested reference versions, not permanent requirements. Do not silently upgrade them during an ordinary deployment.
 
 ## 3. Pre-deployment inventory
 
-Before installing anything, record:
+Before installing or changing anything, record:
 
-- OS and version;
-- CPU architecture;
-- RAM;
-- total/free disk;
-- hostname;
-- LAN address strategy;
-- Docker/container runtime and version;
-- Git;
-- Python;
-- Node.js if needed;
-- existing Hermes installation;
-- existing Codex installation/authentication;
-- existing Claude Code installation/authentication;
-- backup destination;
+- OS/version and CPU architecture;
+- RAM and free disk;
+- container runtime/version;
+- Git and required runtime tools;
+- existing Hermes installation/state;
+- existing Enterprise AI Office runtime directories;
 - intended employee access method;
-- intended enterprise messaging platform, if any.
+- protected secrets/configuration location.
 
-Do not create duplicate runtimes or accounts before inspecting what already exists.
+Run `scripts/preflight.sh` as a read-only first step.
 
-## 4. Operations repository checkout
+If an existing deployment is present, reconcile it with `state/DEPLOYMENT-STATE.md` before mutation.
 
-Clone this repository to a stable administrative location.
-
-Recommended pattern:
-
-```text
-/Users/Shared/enterprise-ai-office/ops/Enterprise-AI-Office
-```
-
-on macOS, or an equivalent administrative path on Linux.
-
-Company-specific runtime data should not be committed to this public repository.
-
-## 5. Runtime directory pattern
+## 4. Runtime layout
 
 Suggested macOS reference layout:
 
@@ -81,362 +68,262 @@ Suggested macOS reference layout:
 ├── ops/
 ├── runtime/
 │   ├── WeKnora/
-│   ├── open-webui/
-│   └── hermes-webui/
+│   └── open-webui/
 ├── company-skills/
 ├── backup-work/
 └── logs/
 ```
 
-Hermes should continue to use its upstream home convention (`~/.hermes`) unless a real deployment reason requires otherwise.
+Hermes should use its supported upstream home convention unless a real deployment reason requires otherwise.
 
-## 6. Version selection
+Company-private values and secrets must remain outside this public repository.
 
-For WeKnora, Hermes Agent, Open WebUI, and hermes-webui:
+## 5. Company configuration
 
-1. identify the current stable upstream release;
-2. read release notes;
-3. inspect breaking changes/security notes;
-4. choose a tested exact version/tag/commit;
-5. record it in `state/DEPLOYMENT-STATE.md`.
+Resolve target state from the adopting company's configuration before creating runtime objects.
 
-Do not build production around an unreviewed floating `main` or `latest` reference.
-
-## 7. WeKnora deployment
-
-Use the upstream standard production-oriented deployment, normally Docker Compose for the reference implementation.
-
-Expected core responsibilities include:
-
-- WeKnora application/frontend;
-- document parser/DocReader;
-- PostgreSQL-based storage/retrieval stack;
-- Redis/task infrastructure where required by the selected upstream release;
-- persistent uploaded-file storage.
-
-### WeKnora rules
-
-- Use strong generated secrets.
-- Do not publish PostgreSQL or Redis to the public network.
-- Persist database and uploaded files.
-- Use the official/default retrieval stack first.
-- Do not add Qdrant/Milvus/Weaviate merely because they are available.
-- Start with a small high-quality pilot corpus.
-
-### Initial Knowledge Bases
-
-A generic starting point may be:
+Baseline objects are:
 
 ```text
-Company & Brand
-Products & Technical
-Sales & Marketing
-Operations & SOP
+Hermes Profiles
+├── default/admin     # control plane; not employee exposed
+└── general           # baseline employee assistant
+
+Open WebUI groups
+├── All-Employees
+└── AI-Admins
+
+Knowledge
+└── company-defined shared employee Knowledge Base(s)
 ```
 
-Adopting companies should change these to match their real semantic and permission boundaries.
+Specialist Profiles, department groups, additional Knowledge Bases, Skills, tools, credentials, automation, and integrations are opt-in.
 
-## 8. WeKnora model configuration
+A template present in this repository is not sufficient reason to instantiate it.
 
-Configure the required model roles for the selected upstream release, typically:
+## 6. WeKnora deployment
 
-- embedding;
-- reranking;
-- chat/reasoning if used inside WeKnora;
-- VLM/parser model only when needed.
+Use the pinned upstream release plus the smallest validated Enterprise AI Office adapter.
 
-Record exact model IDs and embedding dimensions in deployment state.
+Requirements:
 
-Changing the embedding model later is a high-risk operation because it may require reindexing.
+- persist the database and uploaded documents;
+- keep PostgreSQL/Redis/internal parser services off public interfaces;
+- configure the required model roles;
+- create only Knowledge Bases declared by company configuration;
+- use a small non-sensitive seed document to prove ingestion and retrieval before integrating Hermes.
 
-## 9. WeKnora MCP/API bridge
+Start with the upstream/default retrieval stack. Add reranking or alternate retrieval infrastructure only when measured retrieval quality justifies it.
 
-Prefer supported WeKnora MCP/API surfaces for Hermes integration.
+Changing the embedding model later is a high-risk operation because reindexing may be required.
 
-Validate the currently supported MCP tool inventory. At minimum verify the tools needed for:
+## 7. WeKnora → Hermes bridge
 
-- listing visible Knowledge Bases;
-- searching chunks/documents;
-- viewing source documents/chunks.
+Use supported WeKnora MCP/API surfaces.
 
-Do not give Hermes direct SQL access to the WeKnora database for normal retrieval.
+The baseline employee Profile needs read-only knowledge operations sufficient to:
 
-## 10. Hermes installation
+- discover or address its allowed Knowledge Base(s);
+- retrieve relevant chunks/documents;
+- expose human-readable source evidence.
 
-Install or update Hermes Agent using the currently supported upstream method.
+Do not give normal retrieval flows direct SQL access to WeKnora's database.
 
-Reference posture: host-native.
+Scope credentials to the Knowledge Bases and retrieval actions the Profile actually needs.
 
-Configure:
+## 8. Hermes deployment
 
-- model/provider;
-- API server;
-- Gateway;
-- Profiles;
-- MCP;
-- Skills;
-- toolsets;
-- credentials;
-- Cron/Kanban only as required.
+Use the pinned/tested Hermes release and supported upstream installation method.
 
-## 11. Hermes Profile creation
+On the validated macOS path, Hermes is host-native.
 
-Do not create a large Profile fleet before real roles exist.
+Baseline configuration:
 
-A reference company may start with:
+- privileged `default` / admin Profile retained as control plane;
+- `general` employee Profile created from `profiles/general/SOUL.md`;
+- WeKnora MCP/API registered for `general`;
+- least-privilege retrieval tools for `general`;
+- distinct employee Profile API credential;
+- employee long-term memory disabled until isolation is proven;
+- explicit served-Profile allowlist where supported.
 
-```text
-default / admin-orchestrator
-general
-sales
-qc
-marketing
-engineering
-```
+Do not expose the default/admin Profile as an employee model.
 
-Company-specific deployments may use a different role set.
+For every specialist Profile requested by company configuration, define its purpose, SOUL, Knowledge Base access, tools, credentials, model policy, memory policy, and client group mapping, then run role-specific acceptance.
 
-For each Profile, define:
+## 9. Skills
 
-- purpose;
-- SOUL;
-- allowed Skills;
-- allowed tools/toolsets;
-- WeKnora access;
-- model/provider;
-- credentials;
-- terminal/workspace policy;
-- memory policy;
-- Cron policy.
+Load company-owned shared Skills through supported external Skill directories where practical.
 
-## 12. Hermes multi-Profile Gateway
+A Profile should receive only the shared and role-specific Skills it needs.
 
-If the selected Hermes release supports and the deployment benefits from it, enable the supported multi-Profile/multiplex Gateway mechanism.
+Do not duplicate authoritative company facts into SOUL or Skill text when they belong in WeKnora.
 
-Use an explicit Profile allowlist where available. Do not automatically serve every experimental Profile installed on the host.
+## 10. Tool least privilege
 
-Each employee-facing Profile must have a distinct API credential.
-
-Validation requirement:
-
-```text
-general key → general PASS
-general key → sales FAIL
-sales key   → sales PASS
-sales key   → qc FAIL
-```
-
-The privileged administrative/default Profile must not be exposed as a normal employee assistant.
-
-## 13. Skills layout
-
-Use Hermes upstream Skills plus company-owned Skills.
-
-Prefer shared external Skill directories instead of copying the same Skill into every Profile.
-
-Example:
-
-```text
-company-skills/
-├── shared/
-├── sales/
-├── qc/
-├── marketing/
-└── engineering/
-```
-
-Each Profile loads only the shared and role-specific directories it needs.
-
-## 14. Tool least privilege
-
-Before employee access is enabled, explicitly review each Profile's tools.
-
-Default business Profiles should not have unrestricted:
+Normal employee Profiles default to no unrestricted:
 
 - terminal;
-- filesystem write;
-- Docker;
-- system settings;
+- filesystem writes;
+- Docker control;
+- host configuration;
 - GitHub administration;
-- coding-agent delegation.
+- Codex / Claude Code delegation;
+- raw credential access.
 
-An Engineering Profile may have stronger tools only with deliberate workspace and credential boundaries.
+Stronger tools are enabled only for roles whose work requires them and only with explicit workspace/credential boundaries.
 
-## 15. Open WebUI deployment
+## 11. Open WebUI deployment
 
-Deploy Open WebUI independently from WeKnora so the two upstream projects can be upgraded and rolled back separately.
+Deploy Open WebUI independently with persistent state and a pinned/tested version.
 
-Use a tested pinned release.
+Baseline configuration:
 
-Configure:
+- provision the administrator;
+- disable open self-signup after provisioning unless company policy requires it;
+- create `All-Employees` and `AI-Admins`;
+- create a server-side General Assistant connection to Hermes `general`;
+- keep Profile API keys server-side;
+- do not expose default/admin as an employee assistant;
+- set ordinary employee permissions to minimal enterprise defaults.
 
-- first admin account;
-- authentication policy;
-- default user permissions;
-- employee groups;
-- Hermes Profile connections/resources;
-- resource ACLs.
-
-## 16. Open WebUI group model
-
-A typical starting set:
+Validated ordinary employee settings:
 
 ```text
-All-Employees
-Sales
-QC
-Marketing
-Engineering
-Management
-AI-Admins
+Chat                     enabled
+History                  enabled
+File Upload              enabled unless company policy disables it
+Chat System Prompt       disabled
+Advanced Chat Parameters disabled
 ```
 
-Global defaults should be minimal. Permissions are granted through groups.
+Build specialist groups and assistant resources only from company configuration.
 
-## 17. Hermes connections in Open WebUI
+## 12. Employee-client acceptance
 
-Create one server-side OpenAI-compatible connection/resource per employee-facing Hermes Profile using the currently supported Profile API route.
+Backend health alone is not sufficient.
 
-Do not expose Profile API keys to browsers or users.
+Using a real ordinary employee account, verify:
 
-For multi-user memory scoping, configure the supported Hermes session-key header using Open WebUI dynamic user variables where compatible.
+- login succeeds;
+- only permitted assistants are visible;
+- General Assistant can chat normally;
+- a company-knowledge question produces a grounded answer;
+- source evidence is visible;
+- follow-up context works;
+- history survives refresh/re-login;
+- file upload works when enabled;
+- admin/default resources are absent;
+- unapproved terminal/system tools are absent;
+- unauthorized direct access fails closed.
 
-Example conceptual mapping:
+Record the result in `state/DEPLOYMENT-STATE.md`.
 
-```text
-sales:webui:<USER_ID>
-qc:webui:<USER_ID>
-marketing:webui:<USER_ID>
-```
+## 13. Optional specialist Profiles
 
-Exact header syntax must be validated against the currently installed upstream versions.
+Create a specialist Profile only when the company configuration defines a real specialist role or boundary.
 
-## 18. Memory isolation gate
+For each enabled specialist Profile, validate:
 
-Before enabling employee long-term memory, execute the cross-user test in `ACCEPTANCE-TESTS.md`.
+- group → Assistant → Profile mapping;
+- distinct API credential;
+- Knowledge Base scope;
+- least-privilege tools;
+- cross-Profile/direct unauthorized denial;
+- role-specific behavior.
 
-If User B can recover private memory entered by User A through the same department Profile, long-term employee memory must be disabled until the isolation mechanism is corrected.
+Do not infer organization structure from the optional templates under `profiles/`.
 
-Do not solve a memory-isolation failure with prompt instructions alone.
+## 14. Optional capabilities
 
-## 19. hermes-webui deployment
+The following are extensions, not Core Ready requirements unless explicitly enabled by company configuration:
 
-Deploy hermes-webui only as an administrative control surface.
+- hermes-webui;
+- Codex / Claude Code delegation;
+- Kanban;
+- Cron;
+- enterprise messaging;
+- remote browser access;
+- employee Hermes long-term memory;
+- SSO/enterprise identity integration.
 
-It may expose Profile configuration, Skills, MCP, memory, Cron, Kanban, providers, and other machine-level settings.
+When enabled, use their dedicated documentation and acceptance tests.
 
-Restrict access to AI administrators/authorized maintainers.
+## 15. Network posture
 
-## 20. Codex and Claude Code integration
-
-Verify host-native Codex and Claude Code independently first.
-
-Then verify Hermes can delegate coding work through the currently supported mechanisms.
-
-Test only in a disposable/test repository before granting access to a production repository.
-
-When entering a real repository, the coding worker must read repository-local instructions such as `AGENTS.md`, `CLAUDE.md`, and project documentation.
-
-## 21. Kanban initialization
-
-Initialize Kanban only when durable multi-agent work is needed.
-
-Test:
-
-- create task;
-- assign Profile;
-- dispatcher pickup;
-- worker execution;
-- comment/review;
-- completion;
-- persistence after Gateway restart.
-
-Do not treat Kanban as an employee-wide project management system unless its access model has been separately designed.
-
-## 22. Cron initialization
-
-Create a harmless temporary scheduled job.
-
-Verify:
-
-- schedule;
-- execution;
-- history;
-- pause/resume;
-- delivery;
-- persistence across Gateway restart.
-
-Remove the test job afterward.
-
-## 23. Messaging integration
-
-Enable only the enterprise messaging platform the company actually uses.
-
-Configure:
-
-- platform app/bot credentials;
-- allowlist/pairing/enterprise identity;
-- approved chats/users;
-- Profile routing;
-- file/media behavior if needed;
-- Cron delivery if needed.
-
-If no platform is selected yet, leave messaging disabled. It is not a blocker for Web v1.
-
-## 24. Network posture
-
-Default:
+Baseline trust path:
 
 ```text
 Employee → Open WebUI
-Knowledge Maintainer → WeKnora UI
-AI Admin → hermes-webui / admin tools
-Open WebUI → internal Hermes API
-Hermes → internal WeKnora MCP/API
+Open WebUI → Hermes employee Profile API
+Hermes → WeKnora MCP/API
+AI Admin → protected administrative surfaces
 ```
 
-Do not expose PostgreSQL, Redis, DocReader, or raw Hermes administrative endpoints publicly.
+Do not publicly expose PostgreSQL, Redis, parser/internal services, raw credentials, or privileged Hermes administrative routes.
 
-## 25. Backup before production
+Remote employee access requires a separately approved private/identity-aware access design.
 
-Implement backup according to `BACKUP-RESTORE.md` before production access.
+## 16. Backup, restore, and reboot
 
-At minimum back up:
+These are production-readiness concerns unless the requested task explicitly includes them.
 
-- WeKnora database;
-- WeKnora uploaded files;
-- Open WebUI persistent state;
-- Hermes home/Profiles;
-- company Skills/configuration;
-- encrypted secrets separately;
-- this operations repository.
+Before a real production rollout, implement and validate the controls required by:
 
-Perform one real restore test before declaring production ready.
+- `docs/BACKUP-RESTORE.md`;
+- `docs/SECURITY.md`;
+- `docs/OPERATIONS.md`.
 
-## 26. Reboot test
+Do not claim `PRODUCTION READY` without the relevant recovery and operational controls.
 
-Restart the host.
+A bounded functional/demo deployment may reach `CORE READY` without pretending those production controls were validated.
 
-Verify required services recover automatically or according to documented startup procedures:
+## 17. Deployment state
 
-- Docker runtime;
-- WeKnora;
-- Open WebUI;
-- Hermes Gateway;
-- Profiles;
-- MCP bridge;
-- Cron/Kanban state.
+Every real deployment must record actual runtime truth, including:
 
-A system that only works until the next reboot is not deployed.
+- host/runtime;
+- exact component versions;
+- model/provider roles;
+- enabled Knowledge Bases;
+- enabled Profiles;
+- employee groups/assistant mappings;
+- memory state;
+- network exposure;
+- enabled optional capabilities;
+- acceptance status;
+- known limitations.
 
-## 27. Final acceptance
+Use `state/DEPLOYMENT-STATE.md` as the runtime record, not as a source of universal defaults.
 
-Run all checks in `docs/ACCEPTANCE-TESTS.md`.
+## 18. Dry-run planning
 
-Only then mark the deployment Production Ready in `state/DEPLOYMENT-STATE.md`.
+A dry-run deployability review should resolve:
 
-## 28. Company-specific overlay
+```text
+host
+→ exact versions
+→ runtime paths
+→ company Knowledge Bases
+→ Profiles/groups
+→ credentials required
+→ WeKnora deployment
+→ Hermes integration
+→ Open WebUI RBAC
+→ employee acceptance
+→ deployment-state output
+```
 
-Do not edit generic architecture merely to encode one company's private details.
+It should identify only genuine missing human inputs and should not mutate the host.
 
-Store private deployment values in the adopting company's private configuration/ops layer and use `reference/` in this public project only for sanitized examples.
+## 19. Final statuses
+
+Use the execution statuses defined in `DEPLOY.md`:
+
+```text
+CORE READY
+BLOCKED — REQUIRED INPUT
+FAIL — <specific failed boundary>
+```
+
+Use `PRODUCTION READY` only after the additional production controls relevant to that deployment are validated.
