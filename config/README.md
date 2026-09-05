@@ -2,6 +2,8 @@
 
 This directory defines the public, reusable configuration boundary for an Enterprise AI Office deployment.
 
+For deployment execution, follow root [`DEPLOY.md`](../DEPLOY.md).
+
 ## `company.example.yaml`
 
 `company.example.yaml` describes deployment **intent**:
@@ -27,15 +29,45 @@ The example starts from a small reusable baseline:
 - `ai-admins` is the administrative group;
 - a shared `Company Knowledge` Knowledge Base provides the initial employee knowledge boundary.
 
-Extend Profiles, groups, Knowledge Bases, Skills, integrations, automation, and privileged capabilities only when the adopting company's actual organization and operating requirements justify them. Repository examples and templates are reusable options rather than a deployment checklist.
+Extend Profiles, groups, Knowledge Bases, Skills, integrations, automation, and privileged capabilities only when the adopting company's actual requirements justify them. Repository examples and templates are reusable options rather than a deployment checklist.
+
+## `validated-stack.yaml`
+
+`validated-stack.yaml` is the machine-readable reproducibility baseline for the first successfully validated reference stack.
+
+It records:
+
+- supported reference host/runtime;
+- exact tested component versions/commits;
+- baseline Profile/group posture;
+- baseline employee-memory and Open WebUI permission posture;
+- which capabilities are optional unless company configuration enables them.
+
+It is not a permanent version policy and does not contain company secrets.
+
+For an ordinary Golden Path deployment, prefer this tested stack unless the task explicitly includes upgrade qualification. Upgrade work follows `docs/UPGRADE.md`.
 
 ## Important: schema vs installer
 
-The current YAML is a reference configuration schema for humans and AI agents. It is not yet guaranteed to be consumed directly by an installer.
+The current company YAML is a declarative configuration schema for humans and AI agents. It is not a generic one-command installer input.
 
-An implementation agent must not pretend that a parser/installer exists when it does not.
+An implementation agent should combine:
 
-As the project matures, validated automation may consume this schema. Until then it is the canonical declarative description of what a company wants built.
+```text
+DEPLOY.md execution contract
++
+company configuration intent
++
+validated-stack.yaml tested baseline
++
+infrastructure adapters/templates
++
+protected deployment secrets
+```
+
+to reach the target state.
+
+Do not invent a parser/installer that the repository does not contain, and do not stop merely because no monolithic installer exists.
 
 ## Private company overlay
 
@@ -53,16 +85,18 @@ Do not commit to this public repository:
 
 ## `config/.env.example`
 
-This is a non-secret environment-variable template for local scripts and deployment adaptation.
+This is a non-secret input inventory/template for deployment adaptation.
 
-Copy it to an untracked/protected `.env` only when needed.
+Copy/adapt it only in a protected deployment-specific location. Add specialist credentials only for Profiles/integrations actually enabled.
 
 ## Configuration precedence
 
 Conceptually:
 
 ```text
-Generic project defaults / standards
+Generic architecture / Golden Path
+        ↓
+Validated stack baseline
         ↓
 Company configuration
         ↓
@@ -75,8 +109,8 @@ Actual runtime state
 
 Runtime reality must be recorded in `state/DEPLOYMENT-STATE.md`.
 
-## Do not fork generic architecture for company values
+## Company values do not fork the architecture
 
-Differences in specialist roles belong in company configuration rather than separate architecture variants.
+Differences in specialist roles, Knowledge Bases, groups, and optional integrations belong in company configuration rather than separate generic architectures.
 
-Generic architecture should change only when the underlying reusable system model changes.
+Generic architecture should change only when the reusable system model changes.
