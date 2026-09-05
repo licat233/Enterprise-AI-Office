@@ -17,6 +17,12 @@ This directory defines the public, reusable configuration boundary for an Enterp
 
 It is deliberately free of production secrets.
 
+### Profile configuration baseline
+
+The privileged Hermes `default` / admin Profile belongs to the control plane. The baseline employee-facing Profile is `general`.
+
+Company configuration should declare additional specialist Profiles only when actual work requires a distinct role, workflow, knowledge boundary, tool or credential boundary, automation owner, or risk boundary. Templates available in `profiles/` are a library rather than a deployment checklist.
+
 ## Important: schema vs installer
 
 The current YAML is a reference configuration schema for humans and AI agents. It is not yet guaranteed to be consumed directly by an installer.
@@ -65,6 +71,6 @@ Runtime reality must be recorded in `state/DEPLOYMENT-STATE.md`.
 
 ## Do not fork generic architecture for company values
 
-If Company A has a Procurement Profile and Company B does not, this is a company configuration difference — not a reason to create two incompatible architectures.
+Differences in specialist roles belong in company configuration rather than separate architecture variants.
 
 Generic architecture should change only when the underlying reusable system model changes.
