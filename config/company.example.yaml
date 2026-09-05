@@ -1,0 +1,233 @@
+# Enterprise AI Office — generic company configuration example
+#
+# Copy this file into a company-private deployment layer and replace placeholders.
+# Do NOT commit production secrets here.
+# This is a declarative intent/configuration schema, not yet a guaranteed one-command installer input.
+
+schema_version: 1
+
+company:
+  id: example-company
+  name: Example Company
+  display_name: Example Company
+  primary_language: en
+  additional_languages:
+    - zh-CN
+  timezone: Asia/Shanghai
+
+# Deployment environment describes intent. Exact runtime commands remain governed
+# by docs/DEPLOYMENT.md and the installed upstream versions.
+deployment:
+  environment: production
+  host:
+    type: mac-studio # examples: mac-studio, mac-mini, linux-server
+    hostname: enterprise-ai-office
+  employee_access:
+    web_client: open-webui
+    remote_browser_access: disabled # disabled | tailscale | cloudflare-access | other
+  admin_client: hermes-webui
+
+knowledge:
+  platform: weknora
+  deployment: standard
+  knowledge_bases:
+    - id: company-brand
+      name: Company & Brand
+      description: Company profile, policies, brand and shared company information.
+      allowed_groups:
+        - all-employees
+    - id: products-technical
+      name: Products & Technical
+      description: Product specifications, manuals, certificates and technical knowledge.
+      allowed_groups:
+        - all-employees
+    - id: sales-marketing
+      name: Sales & Marketing
+      description: Sales material, customer-facing explanations and marketing knowledge.
+      allowed_groups:
+        - sales
+        - marketing
+        - management
+    - id: operations-sop
+      name: Operations & SOP
+      description: Internal procedures, checklists, training and operational manuals.
+      allowed_groups:
+        - all-employees
+  data_classification:
+    levels:
+      - public
+      - internal
+      - confidential
+      - restricted
+  initial_ingestion_policy:
+    allow:
+      - public
+      - internal
+    require_review:
+      - confidential
+      - restricted
+
+agent_runtime:
+  platform: hermes-agent
+  deployment: host-native
+  privileged_default_profile_employee_exposed: false
+  multi_profile_gateway:
+    enabled: true
+    explicit_allowlist: true
+  employee_long_term_memory:
+    enabled: false
+    # Keep disabled until docs/ACCEPTANCE-TESTS.md cross-user isolation passes.
+
+profiles:
+  - id: general
+    display_name: General Assistant
+    template: profiles/general/SOUL.md
+    employee_groups:
+      - all-employees
+    knowledge_bases:
+      - company-brand
+      - products-technical
+      - operations-sop
+    capabilities:
+      terminal: false
+      code_execution: false
+      codex: false
+      claude_code: false
+      web_search: optional
+    memory_policy: safe-shared-role-only
+
+  - id: sales
+    display_name: Sales Assistant
+    template: profiles/sales/SOUL.md
+    employee_groups:
+      - sales
+      - management
+    knowledge_bases:
+      - company-brand
+      - products-technical
+      - sales-marketing
+    capabilities:
+      terminal: false
+      code_execution: false
+      codex: false
+      claude_code: false
+      web_search: optional
+    memory_policy: safe-shared-role-only
+
+  - id: qc
+    display_name: QC Assistant
+    template: profiles/qc/SOUL.md
+    employee_groups:
+      - qc
+      - management
+    knowledge_bases:
+      - products-technical
+      - operations-sop
+    capabilities:
+      terminal: false
+      code_execution: false
+      codex: false
+      claude_code: false
+      web_search: optional
+    memory_policy: safe-shared-role-only
+
+  - id: marketing
+    display_name: Marketing Assistant
+    template: profiles/marketing/SOUL.md
+    employee_groups:
+      - marketing
+      - management
+    knowledge_bases:
+      - company-brand
+      - products-technical
+      - sales-marketing
+    capabilities:
+      terminal: false
+      code_execution: false
+      codex: false
+      claude_code: false
+      web_search: true
+    memory_policy: safe-shared-role-only
+
+  - id: engineering
+    display_name: Engineering Assistant
+    template: profiles/engineering/SOUL.md
+    employee_groups:
+      - engineering
+    knowledge_bases:
+      - products-technical
+      - operations-sop
+    capabilities:
+      terminal: true
+      code_execution: true
+      codex: true
+      claude_code: true
+      web_search: true
+    terminal_policy:
+      require_explicit_workdir: true
+      allow_host_root_as_workdir: false
+      prefer_repo_local_agent_instructions: true
+    memory_policy: role-memory-with-project-boundaries
+
+employee_access:
+  web:
+    platform: open-webui
+    groups:
+      - id: all-employees
+        display_name: All Employees
+      - id: sales
+        display_name: Sales
+      - id: qc
+        display_name: Quality Control
+      - id: marketing
+        display_name: Marketing
+      - id: engineering
+        display_name: Engineering
+      - id: management
+        display_name: Management
+      - id: ai-admins
+        display_name: AI Administrators
+    default_permissions: minimal
+    assistant_resources_private_by_default: true
+
+  messaging:
+    enabled: false
+    platform: null # feishu | wecom | weixin | other
+    authorization: allowlist-or-enterprise-identity
+    allow_all_users: false
+
+operations:
+  backup:
+    schedule: daily
+    daily_retention: 14
+    weekly_retention: 4
+    require_off_primary_disk_copy: true
+    restore_test_frequency: monthly
+  upgrades:
+    automatic_core_updates: false
+    pin_tested_versions: true
+  health:
+    weekly_review: true
+
+# Model IDs intentionally remain placeholders because providers/models change rapidly.
+# Exact deployed values belong in state/DEPLOYMENT-STATE.md.
+models:
+  hermes:
+    provider: <SELECT_PROVIDER>
+    default_model: <SELECT_MODEL>
+  weknora:
+    embedding_provider: <SELECT_PROVIDER>
+    embedding_model: <SELECT_MODEL>
+    embedding_dimension: <VERIFY_DIMENSION>
+    rerank_provider: <SELECT_PROVIDER>
+    rerank_model: <SELECT_MODEL>
+
+# Secrets are references only. Never put real values in this public template.
+secrets:
+  policy: external-protected-storage
+  required_placeholders:
+    - HERMES_PROFILE_API_KEYS
+    - MODEL_PROVIDER_KEYS
+    - WEKNORA_DATABASE_SECRETS
+    - REDIS_SECRETS_IF_REQUIRED
+    - MESSAGING_CREDENTIALS_IF_ENABLED
