@@ -374,6 +374,13 @@ If not validated, leave ad-hoc employee file upload disabled or limited and use 
 [ ] off-primary-disk copy exists
 ```
 
+Local demo evidence (2026-09-05): `scripts/backup.sh` completed a PostgreSQL
+custom-format dump plus `pg_restore --list`, WeKnora file-volume export, Open
+WebUI data-volume export, Hermes/Profile/config/Skill state export, protected
+credential archive, manifest, and checksums. The archive remains on the demo
+host pending an encrypted independent copy, so the off-primary-disk checkbox is
+not satisfied.
+
 ## 25. Restore test
 
 Restore into an isolated test environment where practical.
@@ -391,6 +398,13 @@ Verify:
 
 A backup without a successful restore test does not satisfy production acceptance.
 
+Local demo evidence (2026-09-05): an isolated temporary Compose/OrbStack
+restore opened both demo Knowledge Bases, exposed their document records,
+served a grounded Sales answer through restored Hermes MCP configuration,
+restored Open WebUI sign-in and model ACL state, and passed the Profile key,
+RBAC, terminal-denial, and disabled-memory regression checks. The test target
+used separate volumes and loopback ports; the live services remained running.
+
 ## 26. Reboot recovery
 
 Restart the host.
@@ -407,6 +421,11 @@ Verify:
 [ ] Cron/Kanban state intact
 [ ] employee can complete a smoke-test query
 ```
+
+Local demo status: `REBOOT RECOVERY NOT YET EXECUTED`. The Codex session cannot
+safely survive a Mac reboot and prove post-reboot state. Use the exact
+continuation commands in `docs/BACKUP-RESTORE.md` and record the result before
+marking this section passed.
 
 ## 27. Network exposure audit
 

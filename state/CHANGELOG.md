@@ -82,6 +82,65 @@ Build the requested macOS/OrbStack Enterprise AI Office demonstration while pres
 - This is a local synthetic demo, not a production deployment. Hermes binds `0.0.0.0:8642` so OrbStack can reach the host process; keep it trusted-local-only.
 - Employee MCP server names are intentionally unique per Profile because Hermes v0.21.0 multiplex registration is name-sensitive.
 
+## 2026-09-05 — Validate local backup and isolated restore
+
+Component: WeKnora, Hermes Agent, Open WebUI, backup/restore helpers
+Environment: Local Apple Silicon Mac with OrbStack; synthetic demo data
+
+### Before
+
+- The end-to-end demo was healthy, but no complete backup/restore rehearsal had
+  been recorded.
+- The host reboot recovery test had not been executed.
+
+### After
+
+- Added `scripts/backup.sh` for the inspected runtime: WeKnora PostgreSQL
+  logical backup, WeKnora file storage, Open WebUI data, runtime configuration,
+  Hermes Profiles/state/Skills/MCP, repository templates, protected credentials,
+  a non-secret manifest, and checksums.
+- Added guarded `scripts/restore.sh`, requiring a new target and
+  `--confirm-isolated`; it restores into new temporary Docker resources and
+  never stops or overwrites the live demo.
+- Updated the backup/restore, operations, acceptance, and deployment-state
+  documentation with the tested procedure and reboot continuation checklist.
+
+### Reason
+
+Verify that the current MacBook/OrbStack demo has a recoverable state without
+adding components or changing the approved architecture.
+
+### Validation
+
+- Backup generation completed with PostgreSQL `pg_restore --list`, volume
+  archive, manifest, and SHA-256 checks passing; secret values were not printed
+  or committed.
+- An isolated temporary Compose restore recovered both Knowledge Bases and
+  document records; a restored Hermes Sales query returned the expected
+  workflow and source title through the restored MCP configuration.
+- Restored Open WebUI users signed in with Sales/QC model ACLs; unauthorized
+  direct model probes returned HTTP 400 `Model not found`.
+- Restored Hermes Profile key matrix returned only same-Profile HTTP 200s and
+  cross-Profile HTTP 401s. Sales/QC terminal probes returned
+  `NO_TERMINAL_TOOL`; employee memory remained disabled.
+- `scripts/restore.sh` self-test also materialized a fresh temporary PostgreSQL
+  container and both data volumes successfully.
+- Host reboot recovery was intentionally not run because the active Codex
+  session cannot safely resume and prove post-reboot state.
+
+### Rollback
+
+- The new helpers are ordinary repository files and can be reverted through
+  Git. The live demo was not modified by the isolated restore.
+- Remove only the exact temporary containers/volumes/targets listed by the
+  restore helper after inspection; retain the successful backup generation.
+
+### Notes
+
+- The backup is still on the primary Mac and has no configured retention or
+  encrypted off-device copy; this is not production disaster-recovery sign-off.
+- Current final status is `PARTIAL — reboot recovery not yet executed`.
+
 ## Repository bootstrap history
 
 ### 2026-09-05 — Enterprise AI Office executable repository baseline created

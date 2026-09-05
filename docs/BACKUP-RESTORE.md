@@ -195,6 +195,46 @@ Restore into an isolated temporary environment when practical.
 
 Avoid overwriting the live production system just to test backups.
 
+### 15.1 Validated MacBook/OrbStack demo procedure
+
+The local reference demo was validated on 2026-09-05 with the following
+deployment-specific procedure:
+
+1. `scripts/backup.sh` discovered the running WeKnora PostgreSQL, WeKnora
+   `/data/files`, and Open WebUI `/app/backend/data` volumes.
+2. WeKnora PostgreSQL was exported as a custom-format `pg_dump`; the archive
+   was independently inspected with `pg_restore --list` and contained 657 TOC
+   entries. The live PostgreSQL volume was not copied as a raw live database.
+3. The WeKnora data-files volume was archived even though this synthetic demo's
+   current document records use PostgreSQL-backed metadata/content and the
+   volume was empty. A future upload that uses `/data/files` will therefore be
+   covered by the same artifact.
+4. Open WebUI data, WeKnora runtime configuration, Hermes Profiles/state/
+   Skills/MCP configuration, repository Profile/Skill templates, the Hermes
+   LaunchAgent definition, and a restricted runtime-credentials archive were
+   captured. Secrets were not written to the repository or manifest.
+5. `MANIFEST.txt` and `SHA256SUMS` were created. The successful backup is stored
+   under `$EAIO_RUNTIME_DIR/backups/<timestamp>` on the demo host; it still
+   needs an encrypted copy on independent storage before production use.
+
+The backup was restored into a separate temporary Compose project and separate
+Docker volumes. The restored WeKnora app/API became healthy, both demo Knowledge
+Bases and their document records were present, and a Sales Profile query through
+the restored MCP bridge returned the expected workflow plus the
+`Demo Products & Technical` source title. A temporary Open WebUI instance
+accepted all three restored demo accounts and retained the expected model ACLs.
+The full Profile key matrix, unauthorized Open WebUI model probes, terminal
+denial probes, and disabled employee-memory settings also passed against the
+restored material. The temporary target used loopback-only ports and was
+discarded after verification.
+
+After this manual restore procedure succeeded, `scripts/restore.sh` was added.
+It is a guarded restore-materialization helper: it requires a new target and
+`--confirm-isolated`, verifies checksums, restores PostgreSQL and both data
+archives into newly named temporary Docker resources, and never stops or
+overwrites the live demo. Run the isolated service bring-up and acceptance
+checks before relying on a newly restored target.
+
 ## 16. Restore verification
 
 A restore is successful only when at least these checks pass:
@@ -212,6 +252,26 @@ A restore is successful only when at least these checks pass:
 [ ] Cron definitions are present if required
 [ ] Secrets can be restored/re-entered securely
 ```
+
+For this MacBook demo, a host reboot was not executed because the active Codex
+session cannot safely resume and prove post-reboot state. The exact continuation
+check is:
+
+```sh
+OPEN_WEBUI_HEALTH_URL=http://127.0.0.1:3000 \
+WEKNORA_HEALTH_URL=http://127.0.0.1:18080/health \
+HERMES_HEALTH_URL=http://127.0.0.1:8642/health \
+./scripts/health-check.sh
+docker compose ls
+docker ps
+launchctl print "gui/$(id -u)/ai.hermes.gateway"
+curl -fsS http://127.0.0.1:18080/health
+curl -fsS http://127.0.0.1:8642/health
+```
+
+Then repeat the employee sign-in, Profile key matrix, RBAC, MCP grounding, and
+terminal-denial checks from `docs/ACCEPTANCE-TESTS.md`. Until those commands are
+run after a real Mac/OrbStack reboot, reboot recovery remains unexecuted.
 
 ## 17. Full disaster recovery order
 

@@ -286,6 +286,42 @@ A backup incident is operationally significant if:
 - restore verification is overdue;
 - storage retention unexpectedly collapses.
 
+### 13.1 Validated local demo commands
+
+The current MacBook demo uses the deployment-specific helpers below. Inspect
+`state/DEPLOYMENT-STATE.md` and confirm the live container names before running
+them; do not point them at an inferred or broad path.
+
+```sh
+./scripts/backup.sh \
+  "$EAIO_RUNTIME_DIR/backups/$(date -u +%Y%m%dT%H%M%SZ)"
+```
+
+The backup must finish with `PASS backup complete`, and both the manifest and
+checksums must be retained. Move the completed directory to encrypted storage
+independent of the Mac. Do not add the generated archive to Git.
+
+For a restore rehearsal, use a new target and explicit confirmation:
+
+```sh
+./scripts/restore.sh \
+  "$EAIO_RUNTIME_DIR/backups/<timestamp>" \
+  "$EAIO_RUNTIME_DIR/restore-tests/<new-target>" \
+  --confirm-isolated
+```
+
+This creates new named Docker volumes and a temporary PostgreSQL container. It
+does not stop the live `weknora`, `open-webui`, or Hermes services. Bring up a
+separate Compose project with unused loopback ports, point the restored Hermes
+Profile MCP URLs at the restored WeKnora API, and run the restore and security
+checks before deleting only the exact temporary resources listed by the helper.
+
+The 2026-09-05 rehearsal used a separate WeKnora API/frontend, Open WebUI,
+and Hermes gateway port and verified Knowledge Bases, grounded retrieval,
+Profile-key isolation, Open WebUI group/model ACL, terminal denial, and disabled
+employee memory. This is evidence for the local demo only, not a production
+off-device backup or reboot test.
+
 ## 14. Version review
 
 When an upstream release appears:
@@ -312,7 +348,29 @@ Examples:
 
 Do not log every harmless UI click.
 
-## 16. Incident notes
+## 16. Host reboot recovery rehearsal
+
+A real host reboot is an acceptance test, not something to infer from a healthy
+pre-reboot process. On the current MacBook demo, prepare the exact post-reboot
+continuation below and record the result in `state/DEPLOYMENT-STATE.md`:
+
+```sh
+OPEN_WEBUI_HEALTH_URL=http://127.0.0.1:3000 \
+WEKNORA_HEALTH_URL=http://127.0.0.1:18080/health \
+HERMES_HEALTH_URL=http://127.0.0.1:8642/health \
+./scripts/health-check.sh
+docker compose ls
+docker ps
+launchctl print "gui/$(id -u)/ai.hermes.gateway"
+```
+
+Then verify the two WeKnora services and Hermes health endpoints, employee
+sign-in, the Profile key matrix, Open WebUI RBAC, a grounded query, and the
+Sales/QC terminal-denial probe. Until a post-reboot check has completed, record
+`REBOOT RECOVERY NOT YET EXECUTED`; a configured `restart: unless-stopped` or
+LaunchAgent `KeepAlive` is only startup configuration evidence.
+
+## 17. Incident notes
 
 For a meaningful incident, record:
 
@@ -329,7 +387,7 @@ Preventive action if justified
 
 Avoid long speculative narratives. Preserve actionable facts.
 
-## 17. No silent architecture drift
+## 18. No silent architecture drift
 
 Maintenance convenience must not gradually change architecture.
 
@@ -341,7 +399,7 @@ Examples of silent drift to avoid:
 - adding another vector DB before measuring retrieval need;
 - sharing one API key across all Profiles for convenience.
 
-## 18. Degraded-mode decisions
+## 19. Degraded-mode decisions
 
 Prefer graceful temporary degradation over unsafe emergency expansion.
 
@@ -352,7 +410,7 @@ Examples:
 - pause a failing Cron job;
 - keep messaging disabled while Web access works.
 
-## 19. Handover to another AI agent
+## 20. Handover to another AI agent
 
 Before ending a maintenance session after material work:
 
@@ -362,7 +420,7 @@ Before ending a maintenance session after material work:
 - leave no unexplained temporary debug configuration;
 - report remaining known issues explicitly.
 
-## 20. Operational anti-patterns
+## 21. Operational anti-patterns
 
 Avoid:
 

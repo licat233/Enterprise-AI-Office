@@ -28,6 +28,7 @@ The versions and model choices recorded below describe this validation run; they
 | Runtime | OrbStack |
 | Version | OrbStack 2.2.3; Docker Engine 29.4.0; Docker Compose 5.1.2 |
 | Startup behavior | WeKnora and Open WebUI use `restart: unless-stopped`; Hermes Gateway runs as the user LaunchAgent `ai.hermes.gateway` |
+| Host reboot rehearsal | Not executed; exact post-reboot continuation is documented in `docs/BACKUP-RESTORE.md` |
 
 ## WeKnora
 
@@ -172,11 +173,13 @@ Demo users `sales-test-a` and `sales-test-b` are in `All-Employees` and `Sales`.
 | --- | --- |
 | Schedule | Not configured for this local demo |
 | Retention | Not configured |
-| Primary destination | One protected pre-change Hermes Profile archive at `$HERMES_HOME/backups/eaio-pre-deployment-20260905/default-profile.tar.gz` |
+| Backup method | `scripts/backup.sh`: PostgreSQL logical dump, Docker volume archives, runtime configuration, Hermes state/Profiles, protected credentials, manifest, and checksums |
+| Primary destination | Protected local generation under `$EAIO_RUNTIME_DIR/backups/<timestamp>`; the pre-change Hermes archive remains separately preserved |
 | Off-primary-disk copy | No |
 | Secrets recovery method | Protected local credential files; no secret values recorded here |
-| Last successful backup | 2026-09-05, Hermes default Profile pre-change archive |
-| Last restore test | Not run |
+| Last successful backup | 2026-09-05, native demo backup generation `20260905T145754Z`; checksum and archive inspection passed |
+| Last restore test | 2026-09-05, isolated temporary Compose/OrbStack restore; WeKnora, Open WebUI, Hermes, RBAC, key isolation, MCP, and terminal-denial checks passed |
+| Restore helper | `scripts/restore.sh` requires a new target plus `--confirm-isolated`; it never overwrites or cleans live state |
 
 ## Network Exposure
 
@@ -198,8 +201,8 @@ Reference `docs/ACCEPTANCE-TESTS.md`.
 - Profile key isolation: `PASS` — each employee Profile key returned HTTP 200 only for its own route and HTTP 401 for the other two routes.
 - Memory isolation: `DISABLED` — employee Hermes long-term memory is deliberately off; no cross-user memory channel is enabled.
 - Dangerous-tool isolation: `PASS` — Sales and QC terminal escape probes returned `NO_TERMINAL_TOOL`; employee toolsets are WeKnora read-only retrieval only.
-- Backup restore: `NOT_RUN`.
-- Reboot recovery: `NOT_RUN`.
+- Backup restore: `PASS` — native backup artifacts passed checksums; an isolated restore recovered WeKnora PostgreSQL/Knowledge Bases, Open WebUI state, Hermes Profiles/configuration, and representative grounded access.
+- Reboot recovery: `REBOOT RECOVERY NOT YET EXECUTED` — no host reboot was performed; startup configuration and exact continuation checks are documented only.
 
 ## Known Issues / Limitations
 
@@ -208,10 +211,13 @@ Reference `docs/ACCEPTANCE-TESTS.md`.
 - The scoped WeKnora viewer key supports retrieval from the two demo KBs. `list_shared_knowledge_bases` correctly returns 403 because that endpoint is outside the key's `retrieve` capability/scope.
 - Hermes v0.21.0 multiplex registration is name-sensitive; the employee MCP servers intentionally use unique names (`weknora_general`, `weknora_sales`, `weknora_qc`) so each Profile receives its own read-only tool scope.
 - Hermes emits an unsandboxed/network-access warning because the local process binds `0.0.0.0`; keep the host firewall and loopback-only UI bindings in place.
+- Backup generations and secrets currently remain on the same Mac; no encrypted independent copy or retention schedule has been configured.
+- Mac/OrbStack reboot recovery is not yet evidenced by a post-reboot run.
 
 ## Pending Decisions
 
 - Replace synthetic documents and demo credentials with approved company data and secret management.
-- Define and test full WeKnora/Hermes/Open WebUI backup, restore, and host-reboot recovery.
+- Move a successful backup generation to encrypted independent storage and configure retention/monitoring.
+- Execute the documented Mac/OrbStack reboot recovery rehearsal and record the post-reboot checks.
 - Validate a supported per-user Hermes session-key/header mapping before enabling employee long-term memory.
 - Review and pin current upstream releases before any production deployment; decide separately on messaging, Kanban/Cron, and restricted engineering delegation.
