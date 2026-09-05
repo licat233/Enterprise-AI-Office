@@ -1,61 +1,86 @@
 # WeKnora Deployment Adapter
 
-WeKnora is the Enterprise AI Office knowledge platform and the source of truth for durable company facts. The validated local demo uses the pinned upstream release `v0.8.0` at commit `1edcd54b43606d9079bb36650efe3f68707a79ea`.
+WeKnora is the Enterprise AI Office knowledge platform and the source of truth for durable company facts.
 
-## Local demo deployment
+For deployment execution, follow `DEPLOY.md` first.
 
-The runtime checkout is outside Git at `$EAIO_RUNTIME_DIR/WeKnora`. The demo uses WeKnora's upstream core Compose stack only; PostgreSQL, Redis, the application, frontend, and document reader run in Docker, with database and document storage kept in persistent Docker-managed storage. Optional Qdrant, Neo4j, Milvus, Weaviate, Langfuse, and other feature stacks are not enabled.
+## Validated reference release
 
-The small [docker-compose.demo.override.yml](docker-compose.demo.override.yml) mounts the tested built-in model configuration read-only. The runtime is started with the upstream Compose file plus this override. Published ports are loopback-only:
+The first validated local deployment used WeKnora `v0.8.0` at commit `1edcd54b43606d9079bb36650efe3f68707a79ea`.
+
+This is a tested reproducibility baseline, not a permanent version requirement. Do not silently substitute a newer release during an ordinary deployment; treat an upgrade as a separate compatibility decision.
+
+## Deployment posture
+
+Use the supported upstream deployment plus the smallest validated Enterprise AI Office adapter.
+
+Baseline requirements:
+
+- persist the database and uploaded/original documents;
+- keep PostgreSQL, Redis/cache, parser/DocReader, and other internal services off public interfaces;
+- configure only the model roles required by the selected WeKnora version;
+- create only the Knowledge Bases declared by company configuration;
+- validate ingestion and retrieval with a small non-sensitive seed document before connecting Hermes.
+
+The repository does not require optional vector databases, graph databases, tracing stacks, or other feature services unless a real requirement justifies them.
+
+## Models
+
+The validated reference deployment proved that the architecture can use a provider other than the initial attempted provider.
+
+Exact provider/model IDs belong in protected deployment configuration and `state/DEPLOYMENT-STATE.md`, not in the generic architecture.
+
+When selecting models:
+
+- record the embedding model and dimension exactly;
+- record any chat/reasoning model used by WeKnora;
+- add reranking only when retrieval evaluation shows a need;
+- treat embedding-model changes as high-risk because reindexing may be required.
+
+## Knowledge Bases
+
+Knowledge Base structure is company configuration.
+
+The generic baseline may use one shared employee Knowledge Base such as:
 
 ```text
-WeKnora API: http://127.0.0.1:18080
-WeKnora UI:  http://127.0.0.1:8088
+Company Knowledge
 ```
 
-Do not use this local demo posture as a production default. Production requires reviewed secrets, backup/restore, network policy, model-provider approval, and a tested upgrade path.
+Additional Knowledge Bases are created only when distinct semantic, access, lifecycle, or operational boundaries justify them.
 
-## Models and knowledge bases
-
-The OpenAI built-in configuration was retained but was quota-exhausted during the first ingestion attempt. The validated demo therefore uses protected DashScope credentials with the following demo-only configuration; these are not permanent project model requirements:
-
-- embedding: `qwen3.7-text-embedding`, dimension `1024`;
-- chat/KnowledgeQA: `qwen-plus`;
-- reranker: none configured. Reranking remains optional and should be added only if real retrieval evaluation shows that ranking quality requires it.
-
-Two synthetic knowledge bases were created and populated:
-
-```text
-Company & Brand
-Products & Technical
-```
-
-Runtime-generated knowledge-base IDs are intentionally not part of this reusable adapter. Deployment-specific identifiers may be recorded in sanitized deployment state when operationally useful, but adopters must create and discover their own IDs rather than copy a reference instance.
-
-The corpus is outside Git at `$EAIO_RUNTIME_DIR/demo-corpus`. Both documents completed ingestion, and hybrid retrieval returned source-backed chunks. Replace the synthetic content with approved company documents before real use.
+Do not copy runtime-generated Knowledge Base IDs from a reference deployment.
 
 ## Knowledge bridge
 
-Hermes uses the supported WeKnora MCP server over the API; it does not connect directly to WeKnora PostgreSQL. Each employee Profile receives the seven read-only retrieval tools:
+Hermes accesses WeKnora through supported MCP/API surfaces rather than direct database access.
 
-```text
-list_knowledge_bases
-list_shared_knowledge_bases
-get_knowledge_base
-hybrid_search
-list_knowledge
-get_knowledge
-list_chunks
-```
+For the baseline `general` Profile, provide the smallest read-only retrieval capability needed to:
 
-The WeKnora viewer key is scoped to the two demo KBs with the `retrieve` capability. As expected for that scope, `list_shared_knowledge_bases` returns 403; direct KB listing and `hybrid_search` succeed. Never put the key in Git or in a user-visible client.
+- address/discover approved Knowledge Bases;
+- retrieve relevant chunks/documents;
+- expose human-readable source evidence.
+
+Scope retrieval credentials to the Knowledge Bases and actions the Profile actually needs. Keep those credentials outside Git and out of the employee browser.
+
+Exact MCP tool names may vary by upstream release; verify the installed release instead of hard-coding a historical tool inventory as a permanent contract.
 
 ## Persistent data and credentials
 
-The runtime `.env`, admin credentials, viewer key, and model-provider credentials are protected outside this repository. The credential file is `$EAIO_RUNTIME_DIR/credentials/weknora-admin.env`; do not print or commit its values. The deployment state records locations and non-secret identifiers only.
+Production secrets and runtime `.env` files belong in protected storage outside this public repository.
 
-Identify the exact Docker volumes and external runtime directory before backup or migration. A production deployment must back up PostgreSQL, uploaded/original files, application configuration, and secret-recovery material, then perform a restore test.
+Before backup or migration, identify the actual runtime directory, database/storage volumes, uploaded-file storage, configuration, and secret-recovery material.
+
+Use `docs/BACKUP-RESTORE.md` for production recovery requirements.
 
 ## Validation
 
-The local demo passed service health, model-provider connectivity, document ingestion, KB listing, hybrid retrieval, source-title/file traceability, and Hermes MCP grounding through General, Sales, and QC Profiles. Run the WeKnora sections of `docs/ACCEPTANCE-TESTS.md` before employee rollout.
+Core Ready requires:
+
+- required WeKnora services healthy;
+- seed document ingestion complete;
+- known fact retrievable;
+- source evidence visible;
+- Hermes `general` can retrieve the same approved knowledge through supported MCP/API integration.
+
+Specific demo Knowledge Bases, provider choices, runtime IDs, and specialist Profile results are recorded in `state/DEPLOYMENT-STATE.md` as evidence rather than generic provisioning defaults.
