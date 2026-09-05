@@ -157,9 +157,29 @@ sound stack
 
 ---
 
-## Documentation map
+## Start here — for AI agents
 
-**AI agents should start with [`AGENTS.md`](AGENTS.md).** It is the repository-local operating contract for deployment and maintenance.
+**AI engineering agents must read [`AGENTS.md`](AGENTS.md) before making material changes.**
+
+Recommended reading order:
+
+1. [`README.md`](README.md)
+2. [`AGENTS.md`](AGENTS.md)
+3. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+4. [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
+5. [`docs/SECURITY.md`](docs/SECURITY.md)
+6. [`docs/PROFILE-STANDARD.md`](docs/PROFILE-STANDARD.md)
+7. [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md)
+8. [`docs/CLIENT-RBAC.md`](docs/CLIENT-RBAC.md)
+9. [`docs/OPERATIONS.md`](docs/OPERATIONS.md)
+10. [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md)
+11. [`docs/UPGRADE.md`](docs/UPGRADE.md)
+12. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md)
+13. actual deployment state / reference implementation.
+
+---
+
+## Documentation map
 
 | Document | Purpose |
 | --- | --- |
@@ -174,30 +194,16 @@ sound stack
 | [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md) | Backup scope, retention, disaster recovery and restore verification |
 | [`docs/UPGRADE.md`](docs/UPGRADE.md) | Version discipline, upgrade workflow and rollback rules |
 | [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) | Production readiness test suite |
+| [`config/README.md`](config/README.md) | Generic vs company-private configuration boundary |
+| [`config/company.example.yaml`](config/company.example.yaml) | Declarative company configuration example |
+| [`profiles/README.md`](profiles/README.md) | Reusable Hermes Profile template rules |
+| [`skills/README.md`](skills/README.md) | Company-owned/shared Skills architecture |
+| [`infrastructure/README.md`](infrastructure/README.md) | Upstream-version-pinned infrastructure adapter policy |
+| [`scripts/README.md`](scripts/README.md) | Safe operational helper-script policy |
 | [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md) | Template for recording the actual deployed system |
 | [`state/CHANGELOG.md`](state/CHANGELOG.md) | Material deployment-change history template |
 | [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Upstream project/license boundaries |
 | [`reference/armor/README.md`](reference/armor/README.md) | ARMOR reference implementation index |
-
----
-
-## Agent-readable by design
-
-A deployment or maintenance agent should be able to determine from this repository:
-
-- what must be installed;
-- what must **not** be installed by default;
-- which component owns each responsibility;
-- how Profiles should be created;
-- how knowledge is exposed to Hermes;
-- how employees are mapped to authorized assistants;
-- which tools each role may use;
-- how the system is tested before production;
-- how configuration/data are backed up;
-- how upgrades are performed and rolled back;
-- which architecture decisions an agent is not allowed to silently change.
-
-The repository documentation is intentionally explicit because it is meant to survive handover between different AI agents and human maintainers.
 
 ---
 
@@ -207,8 +213,14 @@ The repository documentation is intentionally explicit because it is meant to su
 Enterprise-AI-Office/
 ├── AGENTS.md
 ├── README.md
+├── CONTRIBUTING.md
 ├── LICENSE
 ├── THIRD_PARTY_NOTICES.md
+├── .gitignore
+├── config/
+│   ├── README.md
+│   ├── .env.example
+│   └── company.example.yaml
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── DEPLOYMENT.md
@@ -220,54 +232,66 @@ Enterprise-AI-Office/
 │   ├── BACKUP-RESTORE.md
 │   ├── UPGRADE.md
 │   └── ACCEPTANCE-TESTS.md
+├── profiles/
+│   ├── README.md
+│   ├── general/SOUL.md
+│   ├── sales/SOUL.md
+│   ├── qc/SOUL.md
+│   ├── marketing/SOUL.md
+│   └── engineering/SOUL.md
+├── skills/
+│   ├── README.md
+│   └── shared/
+│       ├── company-knowledge/SKILL.md
+│       └── enterprise-security/SKILL.md
+├── infrastructure/
+│   ├── README.md
+│   ├── weknora/README.md
+│   ├── open-webui/README.md
+│   └── hermes/README.md
+├── scripts/
+│   ├── README.md
+│   ├── preflight.sh
+│   └── health-check.sh
 ├── reference/
-│   └── armor/
-│       └── README.md
+│   └── armor/README.md
 ├── state/
 │   ├── DEPLOYMENT-STATE.md
 │   └── CHANGELOG.md
 └── ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md
 ```
 
-The next implementation layer will add reusable company configuration, Profile/SOUL templates, infrastructure examples, health/backup tooling, and machine-executable validation.
-
 ---
 
 ## Current status
 
-The repository is in the **architecture-complete / implementation-bootstrap** stage.
+The repository is in the **implementation-bootstrap** stage.
 
 ### Completed baseline
 
 - v1 technology stack and responsibility boundaries;
-- AI agent operating contract;
-- generic architecture;
-- deployment blueprint;
-- security model;
-- Hermes Profile standard;
-- knowledge governance standard;
-- employee client/RBAC model;
-- operations manual;
-- backup/restore standard;
-- upgrade/rollback standard;
-- production acceptance tests;
+- deterministic AI agent operating contract;
+- generic architecture and deployment blueprint;
+- security / Profile / knowledge / RBAC standards;
+- operations, backup, upgrade and acceptance manuals;
+- generic company configuration schema;
+- reusable General/Sales/QC/Marketing/Engineering SOUL templates;
+- initial shared company Skills;
+- infrastructure adapter policy;
+- read-only host preflight and health-check tooling;
 - deployment-state and changelog templates;
 - first ARMOR reference design;
 - Apache-2.0 project license and third-party license boundary documentation.
 
 ### Not yet complete
 
-- generic company configuration schema;
-- reusable Profile / SOUL templates;
-- reusable Skill templates;
-- reproducible infrastructure manifests/examples;
-- environment templates;
-- automated health checks;
-- backup/restore scripts;
-- acceptance-test automation;
+- version-validated WeKnora/Open WebUI/Hermes deployment manifests/overrides;
+- production backup/restore wrappers for a validated runtime;
+- automated acceptance-test harness;
+- company-specific installer/config compiler;
 - one-command deployment.
 
-Do not interpret the current repository as a finished installer.
+These will be added after the first real ARMOR deployment validates exact upstream versions and runtime behavior. The project intentionally avoids shipping untested automation that only looks complete.
 
 ---
 
@@ -280,7 +304,7 @@ Start here:
 - [`reference/armor/README.md`](reference/armor/README.md)
 - [ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范](<ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md>)
 
-The ARMOR material is a concrete implementation reference. Other companies must configure their own organization rather than blindly copy ARMOR-specific values.
+Other companies must configure their own organization rather than blindly copy ARMOR-specific values.
 
 ---
 
@@ -346,20 +370,20 @@ This repository is licensed under the **Apache License 2.0**. See [`LICENSE`](LI
 
 This license covers this project's original documentation, templates, scripts, configuration examples and other original content. Independent upstream software keeps its own license and terms.
 
-See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before distributing or rebranding a deployment. In particular, Open WebUI currently uses its own license with branding conditions that adopters should review for their deployment size and intended branding.
+See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before distributing or rebranding a deployment. Open WebUI currently uses its own license with branding conditions that adopters should review for their deployment size and intended branding.
 
 ---
 
 ## Immediate roadmap
 
-1. Define a generic company configuration schema.
-2. Add reusable Hermes Profile / SOUL templates.
-3. Add shared and department Skill templates.
-4. Add reproducible WeKnora / Open WebUI infrastructure examples.
-5. Add health, backup and restore scripts.
-6. Automate key acceptance tests.
-7. Deploy the ARMOR reference implementation.
-8. Feed real operational findings back into the generic project.
+1. Validate exact upstream versions in the ARMOR Mac Studio deployment.
+2. Convert verified runtime configuration into reusable infrastructure overrides/templates.
+3. Add safe production backup/restore wrappers using the verified service/volume names.
+4. Automate repeatable acceptance tests.
+5. Validate Open WebUI ↔ Hermes multi-user/Profile memory isolation in the real environment.
+6. Validate Codex / Claude Code delegation under the long-running Hermes service account.
+7. Validate Kanban, Cron and selected enterprise messaging integration.
+8. Feed reusable lessons back into the generic project.
 
 The goal is not to predict every future requirement.
 
