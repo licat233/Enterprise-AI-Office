@@ -6,6 +6,30 @@ This directory contains tested Enterprise AI Office configuration/compatibility 
 
 For deployment execution, follow `DEPLOY.md` first.
 
+## Baseline configuration artifacts
+
+For the validated Core Ready path, use these as the starting point rather than rebuilding the baseline from prose:
+
+```text
+infrastructure/hermes/
+├── default.config.example.yaml
+├── default.env.example
+├── general.config.example.yaml
+└── general.env.example
+```
+
+They encode the verified configuration shape for:
+
+- default/admin as the multiplex control plane;
+- an explicit served-Profile allowlist;
+- `general` as the baseline employee Profile;
+- Profile-scoped API credentials;
+- employee long-term memory disabled;
+- WeKnora MCP integration;
+- an API-server toolset restricted to the read-only WeKnora MCP surface.
+
+Replace placeholders with protected deployment values. Recheck the pinned Hermes/WeKnora upstream documentation if the validated versions change.
+
 ## Default posture
 
 The validated macOS path keeps Hermes host-native.
@@ -45,13 +69,15 @@ For every employee-facing Profile:
 - keep privileged/default routes out of the employee client;
 - keep the API on the smallest trusted network boundary that still allows the selected client runtime to reach it.
 
+With the validated multiplex model, the default Profile owns the port-binding API server and named employee routes use `/p/<profile>/...`; the named Profile keeps its own `API_SERVER_KEY` secret scope.
+
 If multiple employee Profiles are enabled, run the complete cross-Profile credential matrix from `docs/ACCEPTANCE-TESTS.md`.
 
 ## Knowledge bridge
 
 Register WeKnora through supported MCP/API configuration.
 
-The baseline `general` Profile should receive only the read-only retrieval operations needed for its approved Knowledge Bases and source evidence.
+The baseline `general` template launches the pinned WeKnora MCP server over stdio and uses a `tools.include` whitelist so the employee API surface receives only approved read-only retrieval operations.
 
 Do not couple Hermes directly to WeKnora's database schema for normal retrieval.
 
