@@ -59,6 +59,7 @@ Environment: Local Apple Silicon Mac with OrbStack; synthetic demo data
 - Disabled employee long-term Profile memory because a validated per-user Hermes session-header mapping is not available in this connection path.
 - Added the tested Open WebUI Compose manifest and minimal WeKnora demo override. Marked the operational helper scripts executable.
 - Created a protected pre-change Hermes default Profile archive before modifying the existing installation.
+- Captured the reusable demo findings in commit `cabbef0f226b45e497c71e4003aed38c20f07c0f` and pushed them to `origin/main`.
 
 ### Reason
 
@@ -75,7 +76,7 @@ Build the requested macOS/OrbStack Enterprise AI Office demonstration while pres
 
 - Stop the demo Compose services from the configured EAIO runtime directory and remove the three demo Profile configs if reverting the local setup.
 - Restore the protected pre-change Hermes default Profile archive only after confirming the exact target and preserving current user changes.
-- Repository changes are ordinary Git changes and have not been committed or pushed.
+- Repository documentation/adapters can be rolled back with normal Git history; prefer `git revert` of the relevant committed change instead of rewriting published `main` history.
 
 ### Notes
 
