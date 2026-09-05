@@ -23,6 +23,11 @@ services:
       ENABLE_OPENAI_API: "true"
       ENABLE_OLLAMA_API: "false"
 
+      # Baseline ordinary-employee chat permissions.
+      USER_PERMISSIONS_CHAT_SYSTEM_PROMPT: "false"
+      USER_PERMISSIONS_CHAT_PARAMS: "false"
+      USER_PERMISSIONS_CHAT_FILE_UPLOAD: "true"
+
       # Keep employee model/resource authorization enforced and block the generic
       # OpenAI catch-all passthrough surface unless a reviewed requirement enables it.
       BYPASS_MODEL_ACCESS_CONTROL: "false"
