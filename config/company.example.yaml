@@ -78,6 +78,10 @@ agent_runtime:
     enabled: false
     # Keep disabled until docs/ACCEPTANCE-TESTS.md cross-user isolation passes.
 
+# The Hermes default/admin Profile belongs to the control plane. `general` is the
+# baseline employee-facing Profile. Add specialist Profiles only when the
+# adopting company's real work requires a distinct role, workflow, knowledge,
+# tool, credential, automation, or risk boundary.
 profiles:
   - id: general
     display_name: General Assistant
@@ -95,79 +99,6 @@ profiles:
       claude_code: false
       web_search: optional
     memory_policy: safe-shared-role-only
-
-  - id: sales
-    display_name: Sales Assistant
-    template: profiles/sales/SOUL.md
-    employee_groups:
-      - sales
-      - management
-    knowledge_bases:
-      - company-brand
-      - products-technical
-      - sales-marketing
-    capabilities:
-      terminal: false
-      code_execution: false
-      codex: false
-      claude_code: false
-      web_search: optional
-    memory_policy: safe-shared-role-only
-
-  - id: qc
-    display_name: QC Assistant
-    template: profiles/qc/SOUL.md
-    employee_groups:
-      - qc
-      - management
-    knowledge_bases:
-      - products-technical
-      - operations-sop
-    capabilities:
-      terminal: false
-      code_execution: false
-      codex: false
-      claude_code: false
-      web_search: optional
-    memory_policy: safe-shared-role-only
-
-  - id: marketing
-    display_name: Marketing Assistant
-    template: profiles/marketing/SOUL.md
-    employee_groups:
-      - marketing
-      - management
-    knowledge_bases:
-      - company-brand
-      - products-technical
-      - sales-marketing
-    capabilities:
-      terminal: false
-      code_execution: false
-      codex: false
-      claude_code: false
-      web_search: true
-    memory_policy: safe-shared-role-only
-
-  - id: engineering
-    display_name: Engineering Assistant
-    template: profiles/engineering/SOUL.md
-    employee_groups:
-      - engineering
-    knowledge_bases:
-      - products-technical
-      - operations-sop
-    capabilities:
-      terminal: true
-      code_execution: true
-      codex: true
-      claude_code: true
-      web_search: true
-    terminal_policy:
-      require_explicit_workdir: true
-      allow_host_root_as_workdir: false
-      prefer_repo_local_agent_instructions: true
-    memory_policy: role-memory-with-project-boundaries
 
 employee_access:
   web:
