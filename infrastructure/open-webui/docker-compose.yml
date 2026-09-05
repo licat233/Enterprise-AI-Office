@@ -1,5 +1,5 @@
-# Enterprise AI Office demo/reference adapter.
-# Tested with Open WebUI v0.11.3; review the upstream release before reuse.
+# Enterprise AI Office validated Open WebUI reference adapter.
+# Tested with Open WebUI v0.11.3; review against the pinned release before reuse.
 # Keep this as a dedicated Compose project separate from WeKnora.
 services:
   open-webui:
@@ -11,10 +11,22 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       WEBUI_URL: http://127.0.0.1:3000
+
+      # v0.11.3 can create the first admin non-interactively when the user DB is empty.
+      # Open WebUI disables signup after that admin is created.
+      WEBUI_ADMIN_EMAIL: ${OPEN_WEBUI_ADMIN_EMAIL:?set OPEN_WEBUI_ADMIN_EMAIL in protected deployment environment}
+      WEBUI_ADMIN_PASSWORD: ${OPEN_WEBUI_ADMIN_PASSWORD:?set OPEN_WEBUI_ADMIN_PASSWORD in protected deployment environment}
+      WEBUI_ADMIN_NAME: ${OPEN_WEBUI_ADMIN_NAME:-AI Administrator}
       ENABLE_SIGNUP: "false"
       ENABLE_LOGIN_FORM: "true"
+
       ENABLE_OPENAI_API: "true"
       ENABLE_OLLAMA_API: "false"
+
+      # Keep employee model/resource authorization enforced and block the generic
+      # OpenAI catch-all passthrough surface unless a reviewed requirement enables it.
+      BYPASS_MODEL_ACCESS_CONTROL: "false"
+      ENABLE_OPENAI_API_PASSTHROUGH: "false"
     volumes:
       - open-webui-data:/app/backend/data
     restart: unless-stopped
