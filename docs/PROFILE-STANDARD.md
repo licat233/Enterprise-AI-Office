@@ -6,7 +6,7 @@ A Profile is an AI role or specialist. It is not a human user account and it is 
 
 ## 1. When to create a Profile
 
-Create a Profile when at least one of the following is true:
+Create an additional specialist Profile when at least one of the following is true:
 
 - a distinct business role exists;
 - a distinct SOUL / behavioral contract is required;
@@ -18,20 +18,22 @@ Create a Profile when at least one of the following is true:
 
 Do not create a Profile merely because another employee exists.
 
-## 2. Reference Profile set
+## 2. Core Profile model
 
-A common starting set may be:
+A baseline Enterprise AI Office deployment has two core roles:
 
 ```text
-default      # privileged admin / orchestrator
+default      # privileged admin / orchestrator; control plane
 general      # broad employee assistant
-sales        # sales specialist
-qc           # quality specialist
-marketing    # marketing specialist
-engineering  # restricted technical specialist
 ```
 
-These names are examples. Adopting companies should model real roles.
+The `default` / admin Profile is part of the control plane and is not exposed as a normal employee assistant.
+
+The `general` Profile is the baseline employee-facing assistant for company-wide work.
+
+Specialist Profiles are opt-in. Add them only when the adopting company's real work requires a distinct role, workflow, knowledge boundary, tool or credential boundary, automation owner, model policy, memory policy, or risk boundary.
+
+The templates under `profiles/` are reusable examples, not a deployment checklist.
 
 ## 3. Profile contract
 
@@ -124,9 +126,11 @@ Company-owned reusable Skills should be version-controlled outside runtime Profi
 
 External Skill directories are preferred for shared company Skills because they make ownership explicit and reduce accidental autonomous modification.
 
-## 8. Tool policy
+## 8. Tool policy examples
 
 Tool access must follow least privilege.
+
+`general` is the baseline employee Profile. The specialist examples below illustrate role-specific least-privilege patterns; use only those that match actual company needs.
 
 ### General
 
