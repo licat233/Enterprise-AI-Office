@@ -402,11 +402,11 @@ Each upstream project has its own license, release cycle and security model. Pro
 
 ---
 
-## License status
+## License
 
-This repository is currently public but **does not yet contain a project license**.
+This repository is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for the full license text.
 
-Before the project is presented as a formally open-source reusable distribution, an explicit repository license must be selected and added. Upstream components remain governed by their own licenses regardless of the license selected for this repository.
+The repository license applies to the original documentation, templates, scripts, configuration examples and other project content published here. Independent upstream projects such as WeKnora, Hermes Agent, Open WebUI, Codex and Claude Code remain governed by their own licenses and terms.
 
 ---
 
