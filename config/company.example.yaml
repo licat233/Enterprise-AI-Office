@@ -31,26 +31,9 @@ knowledge:
   platform: weknora
   deployment: standard
   knowledge_bases:
-    - id: company-brand
-      name: Company & Brand
-      description: Company profile, policies, brand and shared company information.
-      allowed_groups:
-        - all-employees
-    - id: products-technical
-      name: Products & Technical
-      description: Product specifications, manuals, certificates and technical knowledge.
-      allowed_groups:
-        - all-employees
-    - id: sales-marketing
-      name: Sales & Marketing
-      description: Sales material, customer-facing explanations and marketing knowledge.
-      allowed_groups:
-        - sales
-        - marketing
-        - management
-    - id: operations-sop
-      name: Operations & SOP
-      description: Internal procedures, checklists, training and operational manuals.
+    - id: company-general
+      name: Company Knowledge
+      description: Shared company information approved for employee use.
       allowed_groups:
         - all-employees
   data_classification:
@@ -79,9 +62,8 @@ agent_runtime:
     # Keep disabled until docs/ACCEPTANCE-TESTS.md cross-user isolation passes.
 
 # The Hermes default/admin Profile belongs to the control plane. `general` is the
-# baseline employee-facing Profile. Add specialist Profiles only when the
-# adopting company's real work requires a distinct role, workflow, knowledge,
-# tool, credential, automation, or risk boundary.
+# baseline employee-facing Profile. Extend this list only for roles the company
+# actually intends to operate.
 profiles:
   - id: general
     display_name: General Assistant
@@ -89,9 +71,7 @@ profiles:
     employee_groups:
       - all-employees
     knowledge_bases:
-      - company-brand
-      - products-technical
-      - operations-sop
+      - company-general
     capabilities:
       terminal: false
       code_execution: false
@@ -106,16 +86,6 @@ employee_access:
     groups:
       - id: all-employees
         display_name: All Employees
-      - id: sales
-        display_name: Sales
-      - id: qc
-        display_name: Quality Control
-      - id: marketing
-        display_name: Marketing
-      - id: engineering
-        display_name: Engineering
-      - id: management
-        display_name: Management
       - id: ai-admins
         display_name: AI Administrators
     default_permissions: minimal
