@@ -17,11 +17,17 @@ This directory defines the public, reusable configuration boundary for an Enterp
 
 It is deliberately free of production secrets.
 
-### Profile configuration baseline
+### Configuration baseline
 
-The privileged Hermes `default` / admin Profile belongs to the control plane. The baseline employee-facing Profile is `general`.
+The example starts from a small reusable baseline:
 
-Company configuration should declare additional specialist Profiles only when actual work requires a distinct role, workflow, knowledge boundary, tool or credential boundary, automation owner, or risk boundary. Templates available in `profiles/` are a library rather than a deployment checklist.
+- Hermes `default` / admin belongs to the control plane;
+- `general` is the baseline employee-facing Profile;
+- `all-employees` is the baseline employee group;
+- `ai-admins` is the administrative group;
+- a shared `Company Knowledge` Knowledge Base provides the initial employee knowledge boundary.
+
+Extend Profiles, groups, Knowledge Bases, Skills, integrations, automation, and privileged capabilities only when the adopting company's actual organization and operating requirements justify them. Repository examples and templates are reusable options rather than a deployment checklist.
 
 ## Important: schema vs installer
 
