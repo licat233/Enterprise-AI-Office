@@ -45,6 +45,8 @@ Additional Profiles, groups, Knowledge Bases, Skills, integrations, automation, 
 
 ## 3. Validated reference stack
 
+The machine-readable reproducibility baseline is [`config/validated-stack.yaml`](config/validated-stack.yaml).
+
 The first validated Golden Path is based on the successful local reference deployment recorded in `state/DEPLOYMENT-STATE.md`:
 
 ```text
@@ -71,6 +73,8 @@ Before mutation, resolve from the company configuration or protected operator in
 - any explicitly requested specialist roles or optional integrations;
 - protected runtime/secrets location.
 
+Use `config/company.example.yaml` as the public schema reference and `config/.env.example` as the non-secret input inventory. Real deployment values belong in a protected company-specific layer.
+
 Generate internal service secrets when safe to do so and store them outside Git with restrictive permissions.
 
 If a required external credential is missing, report exactly what is missing and stop with `BLOCKED — REQUIRED INPUT` rather than guessing.
@@ -91,16 +95,17 @@ Exit condition: the target host and existing state are understood.
 ### Phase B — Resolve target state
 
 1. Read the company configuration.
-2. Start from the baseline `default/admin + general` Profile model.
-3. Build only the groups, Knowledge Bases, Profiles, Skills, tools, and integrations required by that configuration.
-4. Resolve exact component versions and runtime paths.
-5. Identify all required secrets without printing them.
+2. Read `config/validated-stack.yaml` for the tested reference versions and baseline feature posture.
+3. Start from the baseline `default/admin + general` Profile model.
+4. Build only the groups, Knowledge Bases, Profiles, Skills, tools, and integrations required by that configuration.
+5. Resolve runtime paths and protected secret locations.
+6. Identify all required secrets without printing them.
 
 Exit condition: there is one unambiguous target state and no unresolved required input.
 
 ### Phase C — Deploy WeKnora
 
-1. Deploy the pinned WeKnora release using the supported upstream deployment plus the repository adapter.
+1. Deploy the pinned WeKnora release using the supported upstream deployment plus `infrastructure/weknora/` guidance.
 2. Keep database/cache services internal.
 3. Persist database and uploaded documents.
 4. Configure the required embedding/chat model roles.
@@ -112,30 +117,36 @@ Exit condition: WeKnora is healthy and retrieval returns the seeded source.
 ### Phase D — Deploy Hermes
 
 1. Install/configure the pinned Hermes release host-native for the validated macOS path.
-2. Preserve the privileged default/admin Profile as control-plane only.
-3. Create the `general` employee Profile from `profiles/general/SOUL.md`.
-4. Add specialist Profiles only when requested by company configuration.
-5. Register WeKnora through supported MCP/API integration.
-6. Give normal employee Profiles least-privilege retrieval tools only unless their work explicitly requires more.
-7. Use a distinct API credential for every employee-facing Profile.
-8. Keep employee long-term memory disabled until the documented cross-user isolation gate passes.
+2. Use the baseline artifacts in `infrastructure/hermes/` as the starting configuration:
+   - `default.config.example.yaml`;
+   - `default.env.example`;
+   - `general.config.example.yaml`;
+   - `general.env.example`.
+3. Preserve the privileged default/admin Profile as control-plane only.
+4. Create the `general` employee Profile from `profiles/general/SOUL.md`.
+5. Fill the WeKnora MCP path/URL/key placeholders with protected deployment values.
+6. Add specialist Profiles only when requested by company configuration.
+7. Keep normal employee API toolsets least-privilege; the baseline General template exposes only the approved read-only WeKnora MCP surface.
+8. Use a distinct API credential for every employee-facing Profile.
+9. Keep employee long-term memory disabled until the documented cross-user isolation gate passes.
 
 Exit condition: the `general` Profile answers a grounded company query through its supported API and exposes source evidence.
 
 ### Phase E — Deploy Open WebUI
 
-1. Deploy the pinned Open WebUI release with persistent state.
-2. Provision the administrator, then disable open self-signup unless company policy says otherwise.
-3. Create baseline groups `All-Employees` and `AI-Admins`.
-4. Create a server-side General Assistant connection to the Hermes `general` Profile.
-5. Do not expose the Hermes default/admin Profile as an employee assistant.
-6. Set ordinary employee permissions to the validated baseline:
+1. Deploy the pinned Open WebUI release using `infrastructure/open-webui/docker-compose.yml` as the validated reference adapter, reviewing it against the selected pinned release before reuse.
+2. Persist Open WebUI state.
+3. Provision the administrator, then disable open self-signup unless company policy says otherwise.
+4. Create baseline groups `All-Employees` and `AI-Admins`.
+5. Create a server-side General Assistant connection to the Hermes `general` Profile.
+6. Do not expose the Hermes default/admin Profile as an employee assistant.
+7. Set ordinary employee permissions to the validated baseline:
    - normal chat: enabled;
    - history: enabled;
    - file upload: enabled unless company policy disables it;
    - user System Prompt editing: disabled;
    - Advanced Parameters editing: disabled.
-7. Add specialist groups and assistant connections only from company configuration.
+8. Add specialist groups and assistant connections only from company configuration.
 
 Exit condition: a normal employee account sees only permitted assistants and can use General Assistant successfully.
 
@@ -195,11 +206,12 @@ Do not add optional systems merely to make the deployment look more complete.
 When asked to validate deployability without installing anything:
 
 1. run read-only preflight;
-2. read company configuration;
-3. resolve the exact target state and versions;
-4. produce the phase-by-phase actions and expected exit evidence;
-5. identify only genuine required human inputs;
-6. do not mutate the host.
+2. read company configuration and `config/validated-stack.yaml`;
+3. resolve the exact target state, versions, runtime paths, and protected inputs;
+4. map every Golden Path phase to the repository artifact or pinned upstream mechanism that implements it;
+5. produce the phase-by-phase actions and expected exit evidence;
+6. identify only genuine required human inputs;
+7. do not mutate the host.
 
 A dry run is successful only if the agent can reach an unambiguous execution plan without inventing company requirements.
 
