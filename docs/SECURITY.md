@@ -1,12 +1,10 @@
 # Security Standard
 
-This document defines the minimum security posture for Enterprise AI Office.
+This document defines the security posture for Enterprise AI Office.
 
-The project is an enterprise AI work system. It can access company knowledge, tools, files, code repositories, external services, and automation. Security must therefore be enforced by architecture and permissions, not merely by prompts.
+Security is enforced by architecture, authentication, authorization, tool/credential boundaries, and network/data controls — not by prompt wording alone.
 
 ## 1. Security model
-
-Enterprise AI Office uses layered controls:
 
 ```text
 Human identity and RBAC
@@ -17,9 +15,9 @@ Profile tool/credential least privilege
         +
 Network boundaries
         +
-Data classification
+Data handling/classification
         +
-Backups and recovery
+Recovery controls appropriate to deployment stage
 ```
 
 No single layer is sufficient by itself.
@@ -28,351 +26,269 @@ No single layer is sufficient by itself.
 
 ### Employee Web boundary
 
-Open WebUI authenticates human users and determines which employee-facing assistant resources they may access.
+Open WebUI authenticates human users and controls which employee Assistant resources they may access.
 
 ### Agent boundary
 
-Hermes Profiles define AI role behavior and tool/credential capability.
+Hermes Profiles define AI work-role behavior and capability scope.
 
 ### Knowledge boundary
 
-WeKnora controls enterprise knowledge storage, retrieval, and its own tenant/workspace/KB permissions.
+WeKnora stores/retrieves enterprise knowledge and enforces its own knowledge access boundaries.
 
 ### Admin boundary
 
-hermes-webui, Hermes CLI, WeKnora admin, Open WebUI admin, host shell, and Docker administration are privileged administrative surfaces.
+Open WebUI admin, WeKnora admin, Hermes CLI/hermes-webui when enabled, host shell, container administration, and the Hermes default/admin Profile are privileged surfaces.
 
 ### Host boundary
 
-The host OS contains secrets, repositories, CLIs, local files, containers, and potentially powerful credentials. Profile isolation alone does not protect the host.
+The host may contain secrets, repositories, CLIs, files, containers, and powerful credentials. Hermes Profile isolation is not an OS sandbox.
 
-## 3. Default-deny principle
+## 3. Baseline identity/capability model
 
-Start with the least privilege required for normal employee work.
+```text
+Control plane
+└── Hermes default/admin Profile
 
-Do not grant a tool or resource merely because it is available.
+Employee plane
+└── Hermes `general` Profile
+```
 
-Normal business Profiles should default to no access to:
+The default/admin Profile must not be available as an ordinary employee Assistant.
+
+Additional employee Profiles are created only from company configuration and must receive their own access, tool, credential, and acceptance boundaries.
+
+## 4. Default-deny principle
+
+Start with the least privilege required for the work.
+
+Normal employee Profiles should default to no access to:
 
 - arbitrary shell/terminal;
-- unrestricted filesystem write;
-- Docker control;
-- host system administration;
-- GitHub organization/repository administration;
-- Codex or Claude Code;
+- unrestricted filesystem writes;
+- Docker/host administration;
+- GitHub administration;
+- Codex or Claude Code delegation;
 - SSH/private keys;
-- broad cloud credentials;
-- unrelated department systems.
+- broad cloud/service credentials;
+- unrelated company systems.
 
-## 4. Profile is not a sandbox
+Do not grant a tool or resource merely because it exists in Hermes or this repository.
 
-A Hermes Profile separates Hermes configuration, state, memory, sessions, Skills, credentials, and related Profile data.
+## 5. Profile is not a sandbox
 
-It does not automatically sandbox all host access.
-
-If a Profile has a local terminal tool under the service user's account, that Profile may be able to access whatever that OS user can access.
+A Hermes Profile separates Hermes-scoped configuration/state, but local host tools can still act with the privileges of the OS/service identity.
 
 Therefore:
 
-- do not rely on SOUL instructions as a security control;
+- do not rely on SOUL/refusal text as a security boundary;
 - remove unneeded dangerous tools;
-- scope working directories;
-- use OS/container isolation when stronger enforcement is required;
-- scope credentials per role.
+- scope workspaces and credentials;
+- use stronger OS/container isolation when the risk model requires it.
 
-## 5. Human RBAC is not enough
+## 6. Human RBAC is not enough
 
-Even if Sales users can only see the Sales Assistant, the Sales Profile itself is unsafe if it has unrestricted terminal or admin tools.
-
-Security must satisfy both:
+Both must hold:
 
 ```text
-Sales user → only Sales/General assistants
+Human user → only authorized Assistants
 AND
-Sales Profile → only Sales-required capabilities
+Each Assistant/Profile → only the capabilities its work requires
 ```
 
-## 6. Employee portal vs admin console
+A perfectly hidden dangerous tool is still dangerous if the Profile can invoke it.
 
-`hermes-webui` is an administrative surface.
+## 7. Employee portal vs admin surfaces
 
-Do not expose it as the ordinary employee client unless upstream later provides and the project explicitly validates a safe multi-user administrative permission model.
+Open WebUI is the baseline employee Web client.
 
-Open WebUI is the default employee Web surface.
-
-## 7. Privileged Profile
-
-The default/admin/orchestrator Hermes Profile must not be exposed to ordinary employees.
-
-If it has broad access to Profiles, tools, credentials, Kanban, Cron, system files, coding agents, or admin APIs, it is a privileged system identity.
+Administrative surfaces are restricted to authorized administrators/maintainers and must not be exposed merely to let employees chat.
 
 ## 8. Per-Profile API credentials
 
-Every employee-facing Hermes Profile must use a distinct API credential where supported.
+Every employee-facing Hermes Profile must use a distinct supported API credential.
 
-Required behavior:
+Baseline:
 
 ```text
-sales credential → sales PASS
-sales credential → qc FAIL
-qc credential    → qc PASS
-qc credential    → sales FAIL
+`general` credential → `general` route PASS
+`general` credential → privileged default/admin route FAIL
 ```
 
-Do not share one global Hermes API key across all department Profiles if the upstream supports Profile-scoped credentials.
+When multiple employee-facing Profiles are enabled, run the complete pairwise matrix:
+
+```text
+for each Profile A:
+  A key → A route PASS
+  A key → every other employee Profile route FAIL
+```
+
+Any unintended cross-Profile key acceptance is a blocker. UI hiding does not replace this backend check.
 
 ## 9. Secrets handling
 
-Never commit secrets to this repository.
+Never commit real secrets.
 
-Secrets include:
+This includes API keys, database/cache passwords, encryption keys, OAuth secrets, bot tokens, cloud credentials, SSH private keys, GitHub tokens, SMTP credentials, and enterprise integration credentials.
 
-- `.env` credentials;
-- model API keys;
-- DB passwords;
-- Redis passwords;
-- encryption keys;
-- OAuth client secrets;
-- bot tokens;
-- cloud keys;
-- SSH private keys;
-- GitHub tokens;
-- SMTP passwords;
-- CRM/ERP keys.
+Tracked examples use placeholders only. Runtime secrets belong in protected deployment storage/profile secret scopes.
 
-Repository examples must use placeholders such as:
+## 10. Secret generation/recovery
 
-```text
-<GENERATE_STRONG_SECRET>
-<MODEL_API_KEY>
-<PROFILE_API_KEY>
-```
+Generate internal service credentials with cryptographically strong randomness.
 
-## 10. Secret generation
+Do not use human-readable production defaults.
 
-Use cryptographically strong random secrets.
+A production deployment also needs a secure credential recovery method appropriate to its environment; Git is not that recovery store.
 
-Do not use human-readable production defaults such as:
+## 11. Data classification
 
-```text
-admin123
-password123
-companyname123
-weknora123
-```
+A production adopter should define practical data sensitivity levels appropriate to its business and use them to decide:
 
-## 11. Secrets backup
+- what may enter WeKnora;
+- which users/Profiles may retrieve it;
+- which external model providers may receive it;
+- how it is stored/backed up.
 
-Secrets must not be in Git, but production credentials still require a secure recovery method.
+The example configuration uses `public`, `internal`, `confidential`, and `restricted`, but adopters may use their own taxonomy.
 
-Maintain an encrypted backup or enterprise credential store appropriate to the deployment.
+## 12. External model boundary
 
-A backup that restores databases but loses every integration credential is incomplete.
+When a remote model/embedding/rerank/VLM provider is used, assume relevant request/document content may leave the company-controlled host according to that provider's service behavior.
 
-## 12. Data classification
+Before sending sensitive information, review provider data-use/retention, location/compliance, contractual restrictions, and whether approved private/local inference is required.
 
-Before ingesting company data, classify at minimum:
+Never ingest credentials/private keys into the knowledge base.
 
-```text
-Public
-Internal
-Confidential
-Restricted
-```
+## 13. Knowledge ingestion safety
 
-The names may be changed by the adopting company, but the concept must exist.
+Start with approved, current, high-value knowledge.
 
-## 13. External model boundary
+Do not blindly ingest an entire shared drive containing sensitive personal/financial data, secrets, customer-confidential material, or obsolete/conflicting drafts.
 
-When using a remote LLM/embedding/rerank/VLM provider, assume relevant query/document content may leave the company-controlled host according to that provider's API behavior.
+Knowledge Base separation should follow real semantic/data/access boundaries rather than assumed department structure.
 
-Before sending Confidential/Restricted data to an external model, verify:
+## 14. Prompt-injection treatment
 
-- provider data-use terms;
-- retention behavior;
-- regional/compliance requirements;
-- contractual restrictions;
-- whether local or approved private inference is required.
+Documents, Web pages, emails, attachments, and retrieved knowledge are data sources.
 
-Do not upload secrets, passwords, private keys, or credential material into the knowledge base.
+Instructions embedded in those sources do not grant authorization and must not override system/repository/Profile security boundaries.
 
-## 14. Initial knowledge ingestion policy
+## 15. Knowledge conflict / unknown safety
 
-For early deployment, prioritize high-value current company knowledge that is appropriate for the selected model/data boundary.
+When credible sources conflict, surface the conflict rather than silently invent a reconciliation.
 
-Do not blindly ingest entire shared drives containing:
+When approved knowledge lacks sufficient evidence, say so rather than converting general model priors into company facts.
 
-- payroll;
-- employee personal data;
-- passwords;
-- banking information;
-- highly sensitive contracts;
-- unrestricted customer secrets;
-- raw credentials;
-- old/conflicting drafts.
+## 16. Employee long-term memory privacy
 
-## 15. Prompt injection treatment
+Open WebUI conversation history is separate from Hermes long-term memory.
 
-Documents, Web pages, emails, retrieved knowledge, user attachments, and external content are data sources.
+Baseline employee Hermes long-term memory is disabled.
 
-Instructions inside retrieved content must not override:
+Enable it only after the exact deployed user/session mapping passes the cross-user isolation test in `docs/ACCEPTANCE-TESTS.md`.
 
-- system safety rules;
-- repository operating rules;
-- Profile SOUL/security rules;
-- authorization boundaries.
+If isolation fails or is unresolved, keep it disabled.
 
-A document saying `ignore previous instructions` is not authorization.
+## 17. Messaging security
 
-## 16. Knowledge conflict safety
+Only applies when messaging is enabled.
 
-When authoritative-looking sources materially disagree, the agent should expose the conflict rather than silently choose a convenient answer.
+Use supported enterprise identity/allowlists/pairing, approved users/chats, deterministic Profile routing, protected app credentials, and safe delivery targets.
 
-Example:
+Do not default to allow-all access.
 
-```text
-Source A: 12 V
-Source B: 24 V
-```
+## 18. Network exposure
 
-Expected behavior:
-
-- cite both sources;
-- identify the conflict;
-- avoid inventing a reconciliation;
-- escalate to a knowledge maintainer or responsible human when the correct current fact cannot be established.
-
-## 17. Memory privacy
-
-Department Profile memory is potentially shared state.
-
-Do not allow ordinary employee private information, private customer conversations, personal data, or one user's secrets to be written into shared Profile memory by default.
-
-Before enabling user-scoped long-term Hermes memory behind a shared Profile, pass the cross-user isolation test in `ACCEPTANCE-TESTS.md`.
-
-If that test fails, disable long-term employee memory.
-
-## 18. Messaging security
-
-For Feishu, WeCom, Weixin, Slack, Telegram, or other Gateway platforms:
-
-- prefer enterprise identity/allowlists/pairing;
-- restrict approved users/chats;
-- use explicit Profile routing;
-- do not default to allow-all in production;
-- treat bot/app credentials as secrets;
-- ensure scheduled delivery does not leak into the wrong channel.
-
-## 19. Network exposure
-
-Recommended default:
+Baseline principles:
 
 ### Employee-accessible
-- Open WebUI on the approved LAN/private access layer.
+- Open WebUI only through the approved network/access layer.
 
 ### Restricted
-- WeKnora UI to knowledge maintainers/admins as required.
-- hermes-webui to AI admins only.
-- Hermes API to internal trusted callers.
+- WeKnora administration to maintainers/admins as required;
+- Hermes/hermes-webui administrative surfaces to AI admins;
+- Hermes employee API to trusted internal callers such as the selected Open WebUI runtime.
 
 ### Internal only
-- PostgreSQL;
-- Redis;
-- DocReader/internal parser services;
-- internal model/storage services unless explicitly required.
+- database/cache/parser/internal services unless a reviewed requirement says otherwise.
 
-Do not publish raw databases directly to the Internet.
+Do not publish raw databases or privileged endpoints to the public Internet.
 
-## 20. Remote access
+## 19. Remote access
 
-Prefer enterprise messaging for mobile/remote employee access when practical.
+Remote browser access is optional.
 
-If remote browser access is required, choose one mature private-access layer such as an approved VPN, Tailscale, or Cloudflare Access/Tunnel based on company needs.
+When required, select one mature private/identity-aware access layer appropriate to the company rather than stacking products without a reason.
 
-Do not stack multiple access products without a reason.
+## 20. Privileged technical Profiles
 
-## 21. Engineering Profile security
+If a technical Profile receives terminal, files, Git, GitHub, Codex, Claude Code, or other powerful tools, define and verify:
 
-Engineering may need terminal, files, Git, GitHub, Codex, or Claude Code.
+- explicit workspace/repository scope;
+- repository-local instructions;
+- least-privilege credentials;
+- branch/review policy where relevant;
+- OS/CLI identity isolation where required;
+- sandbox/container boundary for higher-risk workloads;
+- no unrelated enterprise credentials.
 
-Mitigations include:
+## 21. Host-native credential sharing
 
-- explicit working directory/repository;
-- repository-local `AGENTS.md`/rules;
-- least-privilege GitHub credentials;
-- branch/review policy appropriate to the repo;
-- profile-specific OS/CLI identity where required;
-- sandbox/container backend for higher-risk workloads;
-- no unrelated company credentials in the Engineering Profile.
+Host-native CLIs may read credentials from the service user's normal HOME.
 
-## 22. OAuth and shared host credentials
+Do not assume Hermes Profile `.env` isolation automatically isolates Git/SSH/cloud/other CLI credentials.
 
-Host-native CLIs may use credentials from the service user's normal HOME.
+Use Profile-specific HOME/credential isolation or another stronger boundary when distinct privileged identities are required.
 
-If multiple powerful Profiles have terminal access, they may see the same CLI identity unless Profile-specific HOME/credential isolation is configured.
+## 22. Kanban security
 
-Do not assume Profile `.env` isolation automatically isolates every external CLI credential.
+Only applies when Kanban is enabled.
 
-## 23. Kanban security
+Kanban is durable agent-work state, not automatically a per-employee authorization system. Do not expose unrestricted board administration to all chat users by default.
 
-Kanban is a durable agent work queue, not automatically a per-employee authorization boundary.
+## 23. Cron security
 
-Do not expose unrestricted Kanban administration to every employee simply because they can chat with an agent.
+Only applies when Cron is enabled.
 
-Use it for authorized agent workflows and management/orchestration roles.
+Before enabling unattended work, verify owner Profile, tools/credentials, model/cost policy, output destination, manual test, and failure behavior.
 
-## 24. Cron security
+## 24. Logging
 
-Cron jobs are unattended execution.
+Operational logs must not become a secret dump.
 
-Before enabling a recurring job:
+Do not record complete credentials or sensitive retrieved content unnecessarily. Use elevated debug logging only when needed and remove it afterward.
 
-- confirm the owning Profile;
-- confirm tool/credential scope;
-- confirm output destination;
-- confirm model/provider/cost policy;
-- test manually;
-- confirm failure behavior.
+## 25. Destructive actions
 
-Do not allow scheduled tasks to silently inherit broader credentials after a configuration change.
+Destructive production actions require explicit intent and appropriate recovery protection.
 
-## 25. Logging
+Examples include deleting Knowledge Bases, Profiles, databases/volumes, backup generations, unknown Git work, or performing irreversible storage migrations.
 
-Logs should be useful for operations without becoming a secret dump.
+## 26. Core Ready security gate
 
-Do not log complete API keys, passwords, private tokens, or sensitive retrieved documents unnecessarily.
+For a Core Ready baseline, verify at minimum:
 
-Use debug logging temporarily during troubleshooting and revert to normal production logging afterward.
+```text
+[ ] Ordinary employee authentication works
+[ ] General Assistant is authorized correctly
+[ ] default/admin is not employee-exposed
+[ ] `general` API credential boundary passes
+[ ] `general` has no unapproved dangerous tools
+[ ] WeKnora access is least-privilege/read-oriented
+[ ] Employee System Prompt/advanced controls follow baseline policy
+[ ] Employee Hermes long-term memory is disabled or isolation is proven
+[ ] Direct unauthorized resource access fails closed
+[ ] Internal data services are not publicly exposed
+[ ] Secrets are outside Git
+```
 
-## 26. Destructive-action controls
+## 27. Production Ready security gate
 
-Destructive operations require explicit intent and appropriate backup.
+Before claiming Production Ready, additionally run the production/security sections relevant to enabled capabilities in `docs/ACCEPTANCE-TESTS.md`, including data/access review, prompt-injection test, recovery controls, network exposure, and each enabled optional integration's authorization tests.
 
-Examples:
+Do not enable optional capabilities merely to have more security tests to run.
 
-- deleting a production KB;
-- deleting Profiles;
-- database reset;
-- deleting persistent volumes;
-- destructive storage migration;
-- hard Git reset over unknown work;
-- deleting backup history.
+## 28. Boundary changes require review
 
-## 27. Security acceptance
-
-Before production, verify all security checks in `docs/ACCEPTANCE-TESTS.md`, including:
-
-- cross-Profile API-key rejection;
-- unauthorized resource denial;
-- normal Profile terminal denial;
-- memory isolation;
-- prompt-injection resistance;
-- knowledge-conflict behavior;
-- backup restoration;
-- network exposure audit.
-
-## 28. Security changes are architecture changes when boundaries move
-
-A change that materially alters who can access which data/tools, or moves data across a new trust boundary, is not merely a configuration tweak.
-
-Document and review it accordingly.
+A change that materially alters who can access data/tools, adds a new external data path, or expands privileges is a security/architecture change and should be documented/reviewed accordingly.
