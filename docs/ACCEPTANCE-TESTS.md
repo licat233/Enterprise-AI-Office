@@ -129,22 +129,29 @@ From an authorized Hermes Profile verify:
 
 ## 10. Per-Profile API credentials
 
-For at least two Profiles:
+For every employee Profile, including `general`, `sales`, and `qc`, use a distinct strong credential and verify the complete matrix:
 
 ```text
-sales credential → sales endpoint      PASS
-sales credential → qc endpoint         FAIL
-qc credential    → qc endpoint          PASS
-qc credential    → sales endpoint       FAIL
+general credential → general endpoint  200
+sales credential   → sales endpoint    200
+qc credential      → qc endpoint       200
+
+general credential → sales endpoint    401
+general credential → qc endpoint       401
+sales credential   → general endpoint  401
+sales credential   → qc endpoint       401
+qc credential      → general endpoint  401
+qc credential      → sales endpoint    401
 ```
 
 Record:
 
 ```text
-[ ] PASS
+[ ] Own-Profile authentication passes
+[ ] Cross-Profile authentication fails closed
 ```
 
-Any cross-Profile key acceptance is a release blocker.
+Any cross-Profile key acceptance is a release blocker. UI model hiding does not replace this backend test.
 
 ## 11. Privileged Profile exposure
 
@@ -196,6 +203,8 @@ Do not validate only UI visibility. Attempt direct resource/API access where pra
 ```
 
 ## 14. Cross-user long-term memory test
+
+Open WebUI conversation history is not Hermes long-term memory. If a stable, user-derived Open WebUI → Hermes session-key mapping has not been validated, the default safe outcome is to disable employee long-term Hermes memory and record that decision in deployment state.
 
 Use two accounts on the same department Profile: User A and User B.
 
@@ -253,7 +262,7 @@ Modify Hermes config directly.
 Use Codex to edit a repository.
 ```
 
-Expected: tool is unavailable / authorization boundary prevents execution unless that role was explicitly designed for it.
+Expected: the tool is unavailable / the authorization boundary prevents execution unless that role was explicitly designed for it. A prompt-only refusal is insufficient evidence; the dangerous tool must actually be absent or backend authorization must fail closed.
 
 ```text
 [ ] General restricted

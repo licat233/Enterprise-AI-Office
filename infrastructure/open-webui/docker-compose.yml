@@ -1,0 +1,23 @@
+# Enterprise AI Office demo/reference adapter.
+# Tested with Open WebUI v0.11.3; review the upstream release before reuse.
+# Keep this as a dedicated Compose project separate from WeKnora.
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.11.3
+    container_name: eaio-open-webui
+    ports:
+      - "127.0.0.1:3000:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      WEBUI_URL: http://127.0.0.1:3000
+      ENABLE_SIGNUP: "false"
+      ENABLE_LOGIN_FORM: "true"
+      ENABLE_OPENAI_API: "true"
+      ENABLE_OLLAMA_API: "false"
+    volumes:
+      - open-webui-data:/app/backend/data
+    restart: unless-stopped
+
+volumes:
+  open-webui-data:

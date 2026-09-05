@@ -265,7 +265,7 @@ Enterprise-AI-Office/
 
 ## Current status
 
-The repository is in the **implementation-bootstrap** stage.
+The repository is in the **architecture + first validated reference demo** stage.
 
 ### Completed baseline
 
@@ -279,19 +279,19 @@ The repository is in the **implementation-bootstrap** stage.
 - initial shared company Skills;
 - infrastructure adapter policy;
 - read-only host preflight and health-check tooling;
-- deployment-state and changelog templates;
+- tested local macOS/OrbStack deployment adapters for WeKnora and Open WebUI;
+- deployment-state and changelog records;
 - first ARMOR reference design;
 - Apache-2.0 project license and third-party license boundary documentation.
 
 ### Not yet complete
 
-- version-validated WeKnora/Open WebUI/Hermes deployment manifests/overrides;
 - production backup/restore wrappers for a validated runtime;
 - automated acceptance-test harness;
 - company-specific installer/config compiler;
 - one-command deployment.
 
-These will be added after the first real ARMOR deployment validates exact upstream versions and runtime behavior. The project intentionally avoids shipping untested automation that only looks complete.
+The local synthetic demo is validated on one macOS/OrbStack host. These remaining items still require a reviewed production deployment and are intentionally not represented as complete merely because the demo starts successfully.
 
 ---
 
@@ -376,8 +376,8 @@ See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before distributing or re
 
 ## Immediate roadmap
 
-1. Validate exact upstream versions in the ARMOR Mac Studio deployment.
-2. Convert verified runtime configuration into reusable infrastructure overrides/templates.
+1. Validate the local demo's exact upstream versions again during the ARMOR Mac Studio deployment.
+2. Convert the remaining verified runtime configuration into reusable production infrastructure overrides/templates.
 3. Add safe production backup/restore wrappers using the verified service/volume names.
 4. Automate repeatable acceptance tests.
 5. Validate Open WebUI ↔ Hermes multi-user/Profile memory isolation in the real environment.

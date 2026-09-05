@@ -39,6 +39,49 @@ Environment:
 
 ---
 
+## 2026-09-05 — First end-to-end Enterprise AI Office demo validated
+
+Component: WeKnora, Hermes Agent, Open WebUI, deployment adapters
+Environment: Local Apple Silicon Mac with OrbStack; synthetic demo data
+
+### Before
+
+- Repository contained architecture and deployment templates, but no validated local runtime record.
+- The local host had an existing Hermes installation that required inspection before reuse.
+
+### After
+
+- Pinned and started WeKnora `v0.8.0` and Open WebUI `v0.11.3` with loopback-only container ports.
+- Kept Hermes `0.21.0` host-native and enabled the `general`, `sales`, and `qc` Profile gateway routes with distinct API keys.
+- Added read-only WeKnora MCP access, synthetic Company & Brand and Products & Technical KBs, and completed document ingestion using the protected Qwen/DashScope fallback after the initial OpenAI quota failure.
+- Configured Open WebUI groups, employee model ACLs, and three server-side Hermes connections. The privileged default/admin Profile is not employee-exposed.
+- Validated the end-to-end path: Open WebUI → authorized Hermes Profile → WeKnora MCP → grounded knowledge answer with source title.
+- Disabled employee long-term Profile memory because a validated per-user Hermes session-header mapping is not available in this connection path.
+- Added the tested Open WebUI Compose manifest and minimal WeKnora demo override. Marked the operational helper scripts executable.
+- Created a protected pre-change Hermes default Profile archive before modifying the existing installation.
+
+### Reason
+
+Build the requested macOS/OrbStack Enterprise AI Office demonstration while preserving the repository's source-of-truth, RBAC, least-privilege, and production-boundary requirements.
+
+### Validation
+
+- Container health, Open WebUI sign-in, group/model visibility, direct Profile key isolation, and grounded Open WebUI chats passed.
+- General, Sales, and QC grounded Profile answers returned source titles from WeKnora.
+- Sales and QC terminal escape probes returned `NO_TERMINAL_TOOL`.
+- Employee memory remained deliberately disabled; backup restore and host reboot recovery were not run.
+
+### Rollback
+
+- Stop the demo Compose services from the configured EAIO runtime directory and remove the three demo Profile configs if reverting the local setup.
+- Restore the protected pre-change Hermes default Profile archive only after confirming the exact target and preserving current user changes.
+- Repository changes are ordinary Git changes and have not been committed or pushed.
+
+### Notes
+
+- This is a local synthetic demo, not a production deployment. Hermes binds `0.0.0.0:8642` so OrbStack can reach the host process; keep it trusted-local-only.
+- Employee MCP server names are intentionally unique per Profile because Hermes v0.21.0 multiplex registration is name-sensitive.
+
 ## Repository bootstrap history
 
 ### 2026-09-05 — Enterprise AI Office executable repository baseline created

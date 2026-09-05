@@ -1,0 +1,7 @@
+# Enterprise AI Office demo/reference override for WeKnora v0.8.0.
+# This file is not standalone: apply it together with the pinned upstream
+# WeKnora Compose file from the runtime checkout.
+services:
+  app:
+    volumes:
+      - ./config/builtin_models.yaml:/app/config/builtin_models.yaml:ro

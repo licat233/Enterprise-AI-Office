@@ -1,210 +1,217 @@
 # Enterprise AI Office Deployment State
 
-> Template. Fill this file in a private/company deployment or sanitized reference implementation. Do not commit production secrets.
+> Sanitized local-demo record. Secrets, tokens, passwords, and host identifiers are intentionally omitted.
 
-Last updated: Not deployed
-Deployment status: `not-deployed`
-Company / environment: `<COMPANY_OR_ENVIRONMENT>`
+Last updated: 2026-09-05
+Deployment status: `local-demo-validated`
+Demo readiness: `DEMO READY`
+Company / environment: `MacBook local demo / first generic reference validation`
+
+The versions and model choices recorded below describe this validation run; they are not permanent Enterprise AI Office requirements.
 
 ## Host
 
 | Field | Value |
 | --- | --- |
-| Host type | `<HOST_TYPE>` |
-| OS | `<OS_AND_VERSION>` |
-| CPU / architecture | `<CPU>` |
-| RAM | `<RAM>` |
-| Storage | `<STORAGE>` |
-| Hostname | `<HOSTNAME>` |
-| LAN / private address strategy | `<NETWORK_STRATEGY>` |
+| Host type | Apple Silicon Mac with OrbStack |
+| OS | macOS 14.8.7 |
+| CPU / architecture | arm64 |
+| RAM | 16 GB |
+| Storage | Approximately 201 GB free at validation |
+| Hostname | Omitted |
+| LAN / private address strategy | Loopback-only published container ports; Hermes is trusted-local-only because its listener also serves the OrbStack bridge |
 
 ## Container Runtime
 
 | Field | Value |
 | --- | --- |
-| Runtime | `<DOCKER_OR_OTHER>` |
-| Version | `<VERSION>` |
-| Startup behavior | `<STARTUP_BEHAVIOR>` |
+| Runtime | OrbStack |
+| Version | OrbStack 2.2.3; Docker Engine 29.4.0; Docker Compose 5.1.2 |
+| Startup behavior | WeKnora and Open WebUI use `restart: unless-stopped`; Hermes Gateway runs as the user LaunchAgent `ai.hermes.gateway` |
 
 ## WeKnora
 
 | Field | Value |
 | --- | --- |
-| Version / tag | `<VERSION>` |
-| Commit if applicable | `<COMMIT>` |
-| Deployment method | `<COMPOSE_OR_OTHER>` |
-| Database | `<POSTGRES_VERSION_OR_STACK>` |
-| File storage | `<LOCAL_MINIO_S3_OTHER>` |
-| Embedding model | `<MODEL>` |
-| Embedding dimension | `<DIMENSION>` |
-| Rerank model | `<MODEL>` |
-| Chat model if used | `<MODEL>` |
-| MCP/API bridge | `<METHOD>` |
-| Knowledge Bases | `<LIST_OR_LINK>` |
+| Version / tag | `v0.8.0` |
+| Commit if applicable | `1edcd54b43606d9079bb36650efe3f68707a79ea` |
+| Deployment method | Pinned upstream Compose core stack under `$EAIO_RUNTIME_DIR/WeKnora` |
+| Database | Upstream PostgreSQL container, internal-only; `pg_isready` accepting connections |
+| Cache | Upstream Redis container, internal-only; authenticated `PING` returned `PONG` |
+| File storage | Upstream persistent Docker-managed storage under the external runtime directory |
+| Embedding model | DashScope `qwen3.7-text-embedding` |
+| Embedding dimension | `1024` |
+| Rerank model | None configured for this demo |
+| Chat model if used | DashScope `qwen-plus` |
+| MCP/API bridge | Official WeKnora MCP server over the supported API; read-only retrieval tools |
+| Knowledge Bases | `Company & Brand` (`33362e35-04e8-4ce2-b2c0-8e70169063c7`); `Products & Technical` (`aa32f6dd-96a2-414f-a781-00ce162a1545`) |
+
+The corpus is synthetic and stored outside Git at `$EAIO_RUNTIME_DIR/demo-corpus`. Both demo documents were ingested and completed successfully. The WeKnora API is published at `http://127.0.0.1:18080`; its UI is at `http://127.0.0.1:8088`.
 
 ## Hermes Agent
 
 | Field | Value |
 | --- | --- |
-| Version / release | `<VERSION>` |
-| Commit if applicable | `<COMMIT>` |
-| Installation | `<HOST_NATIVE_OR_OTHER>` |
-| Gateway service | `<STATUS>` |
-| API listener | `<INTERNAL_ADDRESS_OR_DESCRIPTION>` |
-| Multi-Profile/multiplex | `<ENABLED_DISABLED>` |
-| Served Profile allowlist | `<PROFILES>` |
-| Default model/provider | `<MODEL_PROVIDER>` |
-| Memory provider | `<MEMORY_POLICY_PROVIDER>` |
+| Version / release | `0.21.0` |
+| Commit if applicable | `f1ccf436a27522c1bb5d36383a6f13b950676338` |
+| Version note | Hermes reports a newer upstream update is available; no unreviewed upgrade was applied |
+| Installation | Host-native under the existing Hermes installation |
+| Gateway service | LaunchAgent `ai.hermes.gateway`, healthy |
+| API listener | `0.0.0.0:8642` for the local OrbStack bridge; health endpoint `http://127.0.0.1:8642/health` |
+| Multi-Profile/multiplex | Enabled |
+| Served Profile allowlist | `general`, `sales`, `qc` |
+| Default model/provider | `gpt-5.5` via `openai-codex` |
+| Memory provider | Employee Profile memory and user profiles disabled; conversation history remains in Open WebUI |
 
 ### Profiles
 
 #### default / admin
 
-- Purpose: `<PURPOSE>`
-- Employee exposed: `false`
-- Model: `<MODEL>`
-- Tools/toolsets: `<SUMMARY>`
-- MCP: `<SUMMARY>`
-- Credentials boundary: `<SUMMARY>`
+- Purpose: privileged Hermes administration and engineering control surface.
+- Employee exposed: `false`.
+- Model: `gpt-5.5` via `openai-codex`.
+- Tools/toolsets: privileged local Hermes capabilities plus the read-only WeKnora bridge; not an employee toolset.
+- MCP: root-level WeKnora server.
+- Credentials boundary: separate privileged API key; never configured as an Open WebUI employee connection.
 
 #### general
 
-- Purpose: `<PURPOSE>`
-- Employee groups: `<GROUPS>`
-- Model: `<MODEL>`
-- Tools/toolsets: `<SUMMARY>`
-- MCP: `<SUMMARY>`
-- Memory policy: `<POLICY>`
+- Purpose: broad office assistant grounded in approved knowledge.
+- Employee groups: `All-Employees`.
+- Model: `gpt-5.5` via `openai-codex`.
+- Tools/toolsets: seven read-only WeKnora retrieval tools only.
+- MCP: profile-scoped `weknora_general` server.
+- Memory policy: disabled (`memory: false`, `user_profile: false`).
 
 #### sales
 
-- Status: `<ENABLED_DISABLED_NOT_APPLICABLE>`
-- Employee groups: `<GROUPS>`
-- Model: `<MODEL>`
-- Tools/toolsets: `<SUMMARY>`
-- MCP: `<SUMMARY>`
-- Memory policy: `<POLICY>`
+- Status: `enabled`.
+- Employee groups: `Sales`.
+- Model: `gpt-5.5` via `openai-codex`.
+- Tools/toolsets: seven read-only WeKnora retrieval tools only.
+- MCP: profile-scoped `weknora_sales` server.
+- Memory policy: disabled (`memory: false`, `user_profile: false`).
 
 #### qc
 
-- Status: `<ENABLED_DISABLED_NOT_APPLICABLE>`
-- Employee groups: `<GROUPS>`
-- Model: `<MODEL>`
-- Tools/toolsets: `<SUMMARY>`
-- MCP: `<SUMMARY>`
-- Memory policy: `<POLICY>`
+- Status: `enabled`.
+- Employee groups: `QC`.
+- Model: `gpt-5.5` via `openai-codex`.
+- Tools/toolsets: seven read-only WeKnora retrieval tools only.
+- MCP: profile-scoped `weknora_qc` server.
+- Memory policy: disabled (`memory: false`, `user_profile: false`).
 
 #### marketing
 
-- Status: `<ENABLED_DISABLED_NOT_APPLICABLE>`
-- Employee groups: `<GROUPS>`
-- Model: `<MODEL>`
-- Tools/toolsets: `<SUMMARY>`
-- MCP: `<SUMMARY>`
-- Memory policy: `<POLICY>`
+- Status: `not enabled in this demo`.
+- Employee groups: none.
 
 #### engineering
 
-- Status: `<ENABLED_DISABLED_NOT_APPLICABLE>`
-- Employee groups: `<GROUPS>`
-- Model: `<MODEL>`
-- Terminal/backend policy: `<SUMMARY>`
-- Working directory/repositories: `<SUMMARY>`
-- Codex: `<ENABLED_DISABLED>`
-- Claude Code: `<ENABLED_DISABLED>`
+- Status: `not enabled in this demo`.
+- Employee groups: none. Coding delegation and engineering tool expansion were not part of this local validation.
 
 ## Open WebUI
 
 | Field | Value |
 | --- | --- |
-| Version | `<VERSION>` |
-| Deployment method | `<METHOD>` |
-| Employee URL / access method | `<PRIVATE_ACCESS_DESCRIPTION>` |
-| Authentication | `<METHOD>` |
-| Groups | `<GROUPS>` |
-| Hermes Profile resources | `<MAPPING>` |
-| Long-term memory header/scoping | `<METHOD_OR_DISABLED>` |
+| Version | `v0.11.3` |
+| Image commit | `2a960a59fe1dbbd35282f0556b3666d81102e781` |
+| Deployment method | Pinned Compose manifest; persistent named volume `open-webui-data` |
+| Employee URL / access method | `http://127.0.0.1:3000`, local login form |
+| Authentication | Open WebUI local accounts; admin and demo-user credentials are in protected files outside Git |
+| Signup | Disabled after provisioning; login form enabled |
+| Groups | `All-Employees`, `Sales`, `QC` |
+| Hermes Profile resources | General Assistant → `general`; Sales Assistant → `sales`; QC Assistant → `qc` |
+| Long-term memory header/scoping | Disabled deliberately; the deployed Open WebUI connection path does not provide a validated per-user Hermes session-header mapping |
+
+Demo users `sales-test-a` and `sales-test-b` are in `All-Employees` and `Sales`. Demo user `qc-test` is in `All-Employees` and `QC`. Model visibility was verified through the employee `/api/v1/models` route: Sales users see `general` and `sales`; the QC user sees `general` and `qc`. No default/admin connection is present.
 
 ## hermes-webui
 
 | Field | Value |
 | --- | --- |
-| Repository | `<REPOSITORY>` |
-| Version / commit | `<VERSION>` |
-| Deployment | `<METHOD>` |
-| Access boundary | `admin-only` |
+| Repository | Not deployed in this demo |
+| Version / commit | Not applicable |
+| Deployment | Not applicable |
+| Access boundary | `admin-only` when introduced; not an employee surface |
 
 ## Specialized Coding Agents
 
 | Component | Version / status | Authentication / notes |
 | --- | --- | --- |
-| Codex | `<VERSION_STATUS>` | `<NON_SECRET_SUMMARY>` |
-| Claude Code | `<VERSION_STATUS>` | `<NON_SECRET_SUMMARY>` |
+| Codex | Available on host; not wired into employee Profiles | No employee delegation enabled |
+| Claude Code | Available/recognized on host; not wired into employee Profiles | No employee delegation enabled |
 
 ## Messaging
 
 | Field | Value |
 | --- | --- |
-| Platform | `<FEISHU_WECOM_WEIXIN_OTHER_DISABLED>` |
-| Status | `<STATUS>` |
-| Authorization method | `<ALLOWLIST_PAIRING_ENTERPRISE_IDENTITY>` |
-| Profile routing | `<SUMMARY>` |
+| Platform | Disabled in this demo |
+| Status | Not configured |
+| Authorization method | Not applicable |
+| Profile routing | Not applicable |
 
 ## Kanban
 
-- Enabled: `<true_false>`
-- Boards: `<LIST>`
-- Dispatcher mode: `<MODE>`
-- Business-critical workflows: `<SUMMARY>`
+- Enabled: `not configured in this demo`
+- Boards: none created
+- Dispatcher mode: not applicable
+- Business-critical workflows: none
 
 ## Cron
 
-- Enabled: `<true_false>`
-- Business-critical jobs: `<SUMMARY>`
-- Model/provider pinning policy: `<SUMMARY>`
-- Delivery targets: `<SUMMARY>`
+- Enabled: `not configured in this demo`
+- Business-critical jobs: none
+- Model/provider pinning policy: not applicable
+- Delivery targets: none
 
 ## Backup
 
 | Field | Value |
 | --- | --- |
-| Schedule | `<SCHEDULE>` |
-| Retention | `<RETENTION>` |
-| Primary destination | `<DESTINATION_DESCRIPTION>` |
-| Off-primary-disk copy | `<YES_NO_DESTINATION>` |
-| Secrets recovery method | `<METHOD_WITHOUT_SECRET>` |
-| Last successful backup | `<DATE>` |
-| Last restore test | `<DATE>` |
+| Schedule | Not configured for this local demo |
+| Retention | Not configured |
+| Primary destination | One protected pre-change Hermes Profile archive at `$HERMES_HOME/backups/eaio-pre-deployment-20260905/default-profile.tar.gz` |
+| Off-primary-disk copy | No |
+| Secrets recovery method | Protected local credential files; no secret values recorded here |
+| Last successful backup | 2026-09-05, Hermes default Profile pre-change archive |
+| Last restore test | Not run |
 
 ## Network Exposure
 
-Document which services are reachable from which networks. Do not record secrets.
-
 ```text
-Open WebUI: <EXPOSURE>
-WeKnora UI: <EXPOSURE>
-hermes-webui: <EXPOSURE>
-Hermes API: <EXPOSURE>
-PostgreSQL: <EXPOSURE>
-Redis: <EXPOSURE>
+Open WebUI: 127.0.0.1:3000 only
+WeKnora UI: 127.0.0.1:8088 only
+hermes-webui: not deployed
+Hermes API: process listens on 0.0.0.0:8642 so the OrbStack bridge can reach it; treat as trusted-local-only and do not expose externally
+PostgreSQL: internal Docker network only
+Redis: internal Docker network only
 ```
 
 ## Acceptance Status
 
 Reference `docs/ACCEPTANCE-TESTS.md`.
 
-- Functional: `<PASS_FAIL_NOT_RUN>`
-- RBAC: `<PASS_FAIL_NOT_RUN>`
-- Profile key isolation: `<PASS_FAIL_NOT_RUN>`
-- Memory isolation: `<PASS_FAIL_DISABLED_NOT_RUN>`
-- Dangerous-tool isolation: `<PASS_FAIL_NOT_RUN>`
-- Backup restore: `<PASS_FAIL_NOT_RUN>`
-- Reboot recovery: `<PASS_FAIL_NOT_RUN>`
+- Functional: `PASS` — WeKnora app/document reader/PostgreSQL health checks, Redis authenticated `PING`, frontend/API liveness, Open WebUI health, both KB ingestions, direct Profile answers, grounded employee chats, and citations/source titles all passed.
+- RBAC: `PASS` — group membership and employee model visibility verified; unauthorized direct chat attempts returned HTTP 400 `Model not found` for the other department's model.
+- Profile key isolation: `PASS` — each employee Profile key returned HTTP 200 only for its own route and HTTP 401 for the other two routes.
+- Memory isolation: `DISABLED` — employee Hermes long-term memory is deliberately off; no cross-user memory channel is enabled.
+- Dangerous-tool isolation: `PASS` — Sales and QC terminal escape probes returned `NO_TERMINAL_TOOL`; employee toolsets are WeKnora read-only retrieval only.
+- Backup restore: `NOT_RUN`.
+- Reboot recovery: `NOT_RUN`.
 
 ## Known Issues / Limitations
 
-- `<ISSUE_OR_NONE>`
+- This is a local synthetic demonstration, not a production deployment.
+- The initial OpenAI model configuration was quota-exhausted during ingestion, so the validated demo uses the protected DashScope Qwen model configuration. Replace it with an approved production provider before rollout.
+- The scoped WeKnora viewer key supports retrieval from the two demo KBs. `list_shared_knowledge_bases` correctly returns 403 because that endpoint is outside the key's `retrieve` capability/scope.
+- Hermes v0.21.0 multiplex registration is name-sensitive; the employee MCP servers intentionally use unique names (`weknora_general`, `weknora_sales`, `weknora_qc`) so each Profile receives its own read-only tool scope.
+- Hermes emits an unsandboxed/network-access warning because the local process binds `0.0.0.0`; keep the host firewall and loopback-only UI bindings in place.
 
 ## Pending Decisions
 
-- `<DECISION_OR_NONE>`
+- Replace synthetic documents and demo credentials with approved company data and secret management.
+- Define and test full WeKnora/Hermes/Open WebUI backup, restore, and host-reboot recovery.
+- Validate a supported per-user Hermes session-key/header mapping before enabling employee long-term memory.
+- Review and pin current upstream releases before any production deployment; decide separately on messaging, Kanban/Cron, and restricted engineering delegation.
