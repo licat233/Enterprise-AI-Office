@@ -1,0 +1,51 @@
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+private/
+
+# Runtime / deployment-local state
+runtime/
+local/
+.tmp/
+tmp/
+.cache/
+logs/
+*.log
+
+# Backups must not be committed to the public repo
+backup/
+backups/
+backup-work/
+*.dump
+*.sql.gz
+*.tar.gz
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Local deployment-state overrides
+state/DEPLOYMENT-STATE.local.md
+state/*.private.md
+
+# Container/local generated data
+data/
+volumes/
