@@ -225,6 +225,17 @@ Before enabling ad-hoc employee file upload through the Hermes connection, test 
 
 Official company knowledge ingestion should continue through WeKnora knowledge-management workflows.
 
+### Employee Settings permissions (validated 2026-09-06)
+
+Open WebUI `v0.11.3` provides native default permissions at:
+`Admin Panel → Users → Groups → Default permissions`. For this employee demo,
+the administrator set `Allow Chat System Prompt` and `Allow Chat Params` to
+`off`, while leaving `Allow File Upload` enabled. Sales and QC employee UI
+checks confirmed that System Prompt and Advanced Parameters were no longer
+available for editing; normal chat, attachment upload, assistant visibility,
+and conversation history remained available. Use this native permission
+mechanism rather than source changes, CSS, or a proxy.
+
 ### Local demo employee-client observation (2026-09-06)
 
 The pinned local Open WebUI demo was tested from the employee UI with `sales-test-a`
@@ -242,6 +253,14 @@ The employee UI rendered WeKnora source titles and knowledge-base names as
 human-readable inline text; this is functionally usable but is not a rich,
 expandable citation card. A five-turn Sales conversation survived refresh and
 logout/login. Employee long-term memory remained disabled.
+
+The final employee-client cleanup disabled the two unnecessary employee
+Settings controls through native Open WebUI default permissions. The Sales and
+QC Settings pages no longer exposed System Prompt or Advanced Parameters;
+File Upload, normal chat, assistant visibility, and history remained usable.
+The synthetic Products & Technical document was rewritten to remove local
+infrastructure details and reindexed; a subsequent Sales answer still showed
+the source title without endpoint leakage.
 
 ## 19. Remote browser access
 

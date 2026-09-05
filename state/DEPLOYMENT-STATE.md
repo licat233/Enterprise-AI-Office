@@ -125,6 +125,7 @@ The corpus is synthetic and stored outside Git at `$EAIO_RUNTIME_DIR/demo-corpus
 | Signup | Disabled after provisioning; login form enabled |
 | Groups | `All-Employees`, `Sales`, `QC` |
 | Hermes Profile resources | General Assistant → `general`; Sales Assistant → `sales`; QC Assistant → `qc` |
+| Default employee permissions | Native Open WebUI defaults: `Allow Chat System Prompt = off`, `Allow Chat Params = off`, `Allow File Upload = on`; normal chat and history remain enabled |
 | Long-term memory header/scoping | Disabled deliberately; the deployed Open WebUI connection path does not provide a validated per-user Hermes session-header mapping |
 
 Demo users `sales-test-a` and `sales-test-b` are in `All-Employees` and `Sales`. Demo user `qc-test` is in `All-Employees` and `QC`. Model visibility was verified through the employee `/api/v1/models` route: Sales users see `general` and `sales`; the QC user sees `general` and `qc`. No default/admin connection is present.
@@ -136,9 +137,11 @@ titles, preserved a five-turn Sales conversation through refresh and
 logout/login, and read a small temporary text attachment as attachment context
 without treating it as durable company knowledge. The employee account menu
 did not expose administration, providers, MCP, WeKnora, Profiles, or API keys.
-The employee Settings page did expose user-level System Prompt and Advanced
-Parameters controls. The synthetic Products & Technical source also caused one
-Sales answer to surface local demo endpoint details.
+The final cleanup used the native Default permissions editor to remove employee
+System Prompt and Advanced Parameters editing while keeping file upload,
+normal chat, and history available. The Products & Technical source was
+reindexed after local infrastructure details were removed; the follow-up Sales
+grounded answer still showed its source title without endpoint leakage.
 
 ## hermes-webui
 
@@ -276,8 +279,8 @@ Reference `docs/ACCEPTANCE-TESTS.md`.
 - RBAC: `PASS` — group membership and employee model visibility verified; unauthorized direct chat attempts returned HTTP 400 `Model not found` for the other department's model.
 - Profile key isolation: `PASS` — each employee Profile key returned HTTP 200 only for its own route and HTTP 401 for the other two routes.
 - Memory isolation: `DISABLED` — employee Hermes long-term memory is deliberately off; no cross-user memory channel is enabled.
-- Dangerous-tool isolation: `PARTIAL` for this client run — Sales and QC terminal requests produced no tool call and a human-readable unavailable-capability response, but the exact `NO_TERMINAL_TOOL` marker was not observed. The deployed employee toolsets remain WeKnora read-only retrieval only.
-- Employee client: `PASS WITH LIMITATIONS` — login, assistant visibility, grounded chat, source visibility, follow-up context, conversation persistence, temporary text attachment handling, and direct unauthorized model rejection passed. Source presentation is plain inline text, employee settings expose technical user-level controls, and the synthetic corpus contains local endpoint details that should not be used as production employee knowledge.
+- Dangerous-tool isolation: `PASS` — Sales and QC terminal requests produced no terminal/system tool call; the employee toolsets remain WeKnora read-only retrieval only, and the backend boundary is fail-closed. A specific natural-language refusal marker is not required.
+- Employee client: `PASS` — Sales/QC login, assistant visibility, native permission cleanup, grounded chat, source visibility, conversation persistence, temporary text attachment handling, direct unauthorized model rejection, file upload, and history passed. Source presentation remains plain inline text rather than a rich citation card.
 - Backup restore: `PASS` — native backup artifacts passed checksums; an isolated restore recovered WeKnora PostgreSQL/Knowledge Bases, Open WebUI state, Hermes Profiles/configuration, and representative grounded access.
 - Reboot recovery: `NOT AUTOMATIC` — the real reboot was observed, Hermes
   recovered at login, but OrbStack was stopped at the first post-login probe;
@@ -295,15 +298,8 @@ Reference `docs/ACCEPTANCE-TESTS.md`.
 - Mac/OrbStack automatic reboot recovery was not proven: OrbStack's actual
   login startup setting is disabled, and the first post-login probe found no
   OrbStack runtime or Docker socket.
-- The current employee UI did not emit the historical exact `NO_TERMINAL_TOOL`
-  marker for Sales/QC terminal probes, although no terminal tool call occurred
-  and the Profiles remain configured with read-only WeKnora tools.
-- The synthetic Products & Technical document contains local demo endpoint
-  details; one grounded Sales response surfaced them. Replace or sanitize the
-  demo corpus before production use.
-- Open WebUI employee Settings exposes user-level System Prompt and Advanced
-  Parameters controls. This is a usability/least-confusion concern, not an
-  employee provider or admin credential surface.
+- A rich expandable citation-card presentation is not part of this demo; source
+  titles remain readable inline in the employee UI.
 
 ## Pending Decisions
 

@@ -38,6 +38,17 @@ QC            → QC Assistant      → Hermes qc Profile
 
 `sales-test-a` and `sales-test-b` belong to `All-Employees` and `Sales`. `qc-test` belongs to `All-Employees` and `QC`. The employee `/api/v1/models` route was verified to expose `general,sales` to Sales users and `general,qc` to the QC user. The Hermes default/admin Profile has no Open WebUI employee connection.
 
+### Employee Settings permissions
+
+For the pinned Open WebUI `v0.11.3` demo, use the native administrator path
+`Admin Panel → Users → Groups → Default permissions` to set `Allow Chat System
+Prompt` and `Allow Chat Params` to `off` for ordinary users. Keep `Allow File
+Upload` enabled. The effective Sales and QC employee Settings pages were
+rechecked after saving: neither exposed System Prompt or Advanced Parameters,
+while normal chat, file upload, assistant visibility, and history remained
+available. Do not implement this boundary with source changes, CSS, or a
+proxy.
+
 ## Hermes connections
 
 Create server-side OpenAI-compatible connections/resources for employee-facing Hermes Profiles using the supported profile routes. Use a distinct Profile API key for each connection:
@@ -73,9 +84,9 @@ Observed on 2026-09-06 from the pinned Open WebUI employee UI:
 - Sales responses were customer-oriented and refused unsupported shelf-lighting and delivery claims. QC responses separated available demo workflow guidance from missing approved specifications and placed the inspection checklist on hold pending evidence.
 - A five-turn Sales conversation survived refresh and logout/login. Employee long-term memory and user profiles remained disabled.
 - A small temporary text attachment was read in the current conversation and explicitly treated as attachment context rather than durable company knowledge. Official knowledge remains a WeKnora ingestion concern.
-- Open WebUI direct unauthorized model requests returned HTTP 400 `Model not found` for cross-department and default/admin model names. The employee settings page exposes user-level system-prompt and advanced-parameter controls; it does not expose provider credentials or administration.
-- Sales/QC terminal requests returned a human-readable unavailable-capability response and no tool call, but the exact `NO_TERMINAL_TOOL` marker was not observed in this run. Keep the backend least-privilege checks and treat the marker mismatch as a validation limitation, not as evidence of terminal access.
-- One grounded Sales answer surfaced local demo endpoint details because those details are present in the synthetic Products & Technical document. Do not use that corpus as production employee knowledge without sanitizing or replacing the demo material.
+- Open WebUI direct unauthorized model requests returned HTTP 400 `Model not found` for cross-department and default/admin model names. The employee account menu did not expose provider credentials or administration, and the final Settings checks did not expose System Prompt or Advanced Parameters.
+- Sales/QC terminal requests returned a human-readable unavailable-capability response and no tool call. The employee Profile toolsets remained read-only WeKnora retrieval only; a specific `NO_TERMINAL_TOOL` marker is not required by the acceptance criterion.
+- The synthetic Products & Technical document was rewritten to remove local infrastructure details and reindexed. A subsequent Sales grounded answer still showed `Demo Products & Technical.md` and did not expose an endpoint or runtime detail.
 
 ## License note
 

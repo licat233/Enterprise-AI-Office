@@ -39,6 +39,66 @@ Environment:
 
 ---
 
+## 2026-09-06 — Final employee client permission and corpus cleanup
+
+Component: Open WebUI employee client, WeKnora synthetic demo corpus
+Environment: Local Apple Silicon Mac with OrbStack; synthetic demo data
+
+### Before
+
+- Ordinary employee Settings exposed System Prompt and Advanced Parameters.
+- The Products & Technical synthetic document contained local demo
+  infrastructure details.
+- Earlier terminal probes used `NO_TERMINAL_TOOL` as an observation, although
+  the actual security evidence was the absence of a tool call and the
+  read-only employee Profile toolsets.
+
+### After
+
+- Used Open WebUI `v0.11.3` native Default permissions to set `Allow Chat
+  System Prompt = off` and `Allow Chat Params = off` for ordinary users.
+- Kept File Upload enabled; normal chat, assistant visibility, and history
+  remained enabled in the Sales and QC UI.
+- Rewrote and reindexed the Products & Technical synthetic document so it
+  contains only simulated enterprise product and quality-workflow knowledge.
+- Removed the temporary local attachment fixture and deleted the temporary
+  Sales smoke-test chat after verifying the upload and refresh behavior.
+- Kept employee Hermes long-term memory and user profiles disabled.
+
+### Reason
+
+Finish the bounded synthetic employee-client demo without adding components or
+changing the architecture.
+
+### Validation
+
+- Sales and QC Settings pages no longer exposed System Prompt or Advanced
+  Parameters after the native permission change.
+- Sales grounded chat returned source `Demo Products & Technical.md` after
+  reindexing and contained no local endpoint/runtime detail.
+- Sales and QC model visibility remained `general,sales` and `general,qc`.
+- Profile key isolation remained same-Profile HTTP 200 and cross-Profile HTTP
+  401. Cross-department and default/admin Open WebUI requests returned HTTP 400
+  `Model not found`.
+- Sales/QC terminal requests returned HTTP 200 with no terminal/system tool
+  call; the employee Profile toolsets remained read-only WeKnora retrieval
+  only. No specific refusal marker was required.
+- File upload, normal chat, source visibility, history, and employee
+  long-term-memory-disabled checks passed.
+
+### Rollback
+
+Re-enable the two native Default permissions in Open WebUI if the previous demo
+behavior is specifically needed. Restore the prior synthetic document only for
+an isolated test; do not reintroduce infrastructure details into employee
+knowledge.
+
+### Notes
+
+This entry records only the final employee-client cleanup. Rich citation cards,
+OrbStack reboot recovery, employee Hermes long-term memory, branding, and
+production corpus work remain outside this demo stage.
+
 ## 2026-09-05 — First end-to-end Enterprise AI Office demo validated
 
 Component: WeKnora, Hermes Agent, Open WebUI, deployment adapters

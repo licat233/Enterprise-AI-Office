@@ -388,7 +388,10 @@ Use this exact post-reboot order for the current MacBook demo:
 12. Profile API-key isolation: repeat the complete 3×3 matrix; own routes
     must be HTTP 200 and cross-Profile routes HTTP 401.
 13. Sales/QC terminal restriction: repeat the terminal escape probes and
-    confirm `NO_TERMINAL_TOOL` / unavailable terminal capability.
+    confirm that no terminal/system tool call occurs, the employee Profile
+    toolset has no terminal/system tool, and backend authorization fails closed
+    if such access is attempted. A marker such as `NO_TERMINAL_TOOL` is not
+    required.
 14. Default/admin exposure: confirm employee model lists contain only their
     allowed assistants and no default/admin Profile is exposed.
 
@@ -446,18 +449,34 @@ Observed client behavior:
    400 `Model not found`. No employee admin/provider/API-key controls were
    present in the account menu.
 
-Limitations observed in this run:
+Pre-cleanup observations from this run:
 
 - Source evidence is readable inline text rather than a rich expandable
   citation card.
-- The employee Settings page exposes user-level System Prompt and Advanced
-  Parameters controls, which are not needed for a simple employee workflow.
 - Sales/QC terminal requests produced no tool call and stated that terminal
-  capability was unavailable, but the exact `NO_TERMINAL_TOOL` marker was not
-  observed in the current API/UI probe.
-- A grounded Sales answer repeated local demo endpoint details contained in
-  the synthetic Products & Technical document. Replace or sanitize demo corpus
-  content before any real employee rollout.
+  capability was unavailable. The exact `NO_TERMINAL_TOOL` marker is not a
+  required acceptance result; see `docs/ACCEPTANCE-TESTS.md`.
+- A pre-cleanup grounded Sales answer repeated local demo endpoint details
+  contained in the synthetic source; the final cleanup reindexed sanitized
+  content and the follow-up answer did not expose them.
+
+### 16.3 Final employee-client cleanup (2026-09-06)
+
+The native Open WebUI Default permissions editor was used for ordinary users:
+`Allow Chat System Prompt = off` and `Allow Chat Params = off`. Sales and QC
+were logged in again and their Settings pages no longer exposed those editing
+controls. File Upload, normal chat, assistant visibility, and conversation
+history remained available.
+
+The synthetic Products & Technical source was rewritten to contain only
+simulated enterprise product and quality-workflow knowledge, then reindexed.
+The Sales Assistant returned a grounded answer with source
+`Demo Products & Technical.md`; the answer contained no local endpoint or
+runtime details.
+
+The final terminal checks confirmed no terminal/system tool call for Sales or
+QC, and the deployed employee Profile toolsets remained read-only WeKnora
+retrieval only. Acceptance does not require a particular refusal string.
 
 ## 17. Incident notes
 
