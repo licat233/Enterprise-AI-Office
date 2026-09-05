@@ -177,7 +177,7 @@ Demo users `sales-test-a` and `sales-test-b` are in `All-Employees` and `Sales`.
 | Primary destination | Protected local generation under `$EAIO_RUNTIME_DIR/backups/<timestamp>`; the pre-change Hermes archive remains separately preserved |
 | Off-primary-disk copy | No |
 | Secrets recovery method | Protected local credential files; no secret values recorded here |
-| Last successful backup | 2026-09-05, native demo backup generation `20260905T145754Z`; checksum and archive inspection passed |
+| Last successful backup | 2026-09-05, native demo backup generation `20260905T150125Z`; checksum and archive inspection passed |
 | Last restore test | 2026-09-05, isolated temporary Compose/OrbStack restore; WeKnora, Open WebUI, Hermes, RBAC, key isolation, MCP, and terminal-denial checks passed |
 | Restore helper | `scripts/restore.sh` requires a new target plus `--confirm-isolated`; it never overwrites or cleans live state |
 
