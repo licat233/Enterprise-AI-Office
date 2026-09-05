@@ -1,0 +1,53 @@
+schema_version: 1
+validated_on: 2026-09-06
+status: first-reference-validated
+
+target:
+  host_os: macos
+  architecture: arm64
+  container_runtime: orbstack-docker
+
+components:
+  weknora:
+    version: v0.8.0
+    commit: 1edcd54b43606d9079bb36650efe3f68707a79ea
+    deployment: upstream-compose-plus-thin-adapter
+  hermes_agent:
+    version: 0.21.0
+    commit: f1ccf436a27522c1bb5d36383a6f13b950676338
+    deployment: host-native
+  open_webui:
+    version: v0.11.3
+    commit: 2a960a59fe1dbbd35282f0556b3666d81102e781
+    deployment: docker-compose
+
+baseline:
+  control_plane_profile: default
+  employee_profiles:
+    - general
+  employee_groups:
+    - all-employees
+    - ai-admins
+  employee_long_term_memory: false
+  open_webui:
+    chat: true
+    history: true
+    file_upload: true
+    user_system_prompt_editing: false
+    advanced_chat_parameters: false
+
+optional_capabilities:
+  specialist_profiles: company-configured
+  hermes_webui: disabled-unless-configured
+  codex_delegation: disabled-unless-configured
+  claude_code_delegation: disabled-unless-configured
+  kanban: disabled-unless-configured
+  cron: disabled-unless-configured
+  messaging: disabled-unless-configured
+  remote_access: disabled-unless-configured
+
+notes:
+  - This file is a reproducibility baseline, not a permanent version policy.
+  - Do not silently replace these versions during an ordinary Golden Path deployment.
+  - Upgrade qualification is a separate task governed by docs/UPGRADE.md.
+  - Runtime secrets, model-provider values, company Knowledge Bases, and private access data do not belong in this file.
