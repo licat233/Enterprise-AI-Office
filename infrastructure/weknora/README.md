@@ -26,9 +26,11 @@ The OpenAI built-in configuration was retained but was quota-exhausted during th
 Two synthetic knowledge bases were created and populated:
 
 ```text
-Company & Brand       33362e35-04e8-4ce2-b2c0-8e70169063c7
-Products & Technical  aa32f6dd-96a2-414f-a781-00ce162a1545
+Company & Brand
+Products & Technical
 ```
+
+Runtime-generated knowledge-base IDs are intentionally not part of this reusable adapter. Deployment-specific identifiers may be recorded in sanitized deployment state when operationally useful, but adopters must create and discover their own IDs rather than copy a reference instance.
 
 The corpus is outside Git at `$EAIO_RUNTIME_DIR/demo-corpus`. Both documents completed ingestion, and hybrid retrieval returned source-backed chunks. Replace the synthetic content with approved company documents before real use.
 
