@@ -202,6 +202,41 @@ Do not validate only UI visibility. Attempt direct resource/API access where pra
 [ ] PASS
 ```
 
+## 13.1 Employee client functional acceptance
+
+Run this section from the actual employee-facing Open WebUI UI, not only from
+Hermes or WeKnora API responses.
+
+Local demo evidence (2026-09-06):
+
+- Sales users `sales-test-a` and `sales-test-b` authenticated and saw only
+  `General Assistant` and `Sales Assistant`. QC user `qc-test` authenticated
+  and saw only `General Assistant` and `Quality Control Assistant`.
+- General, Sales, and QC UI chats completed source-backed WeKnora queries.
+  General answered company questions and preserved an unknown-category
+  boundary. Sales produced customer-facing, non-committal answers for missing
+  shelf-lighting and delivery evidence. QC produced an evidence-oriented
+  checklist and refused to invent product tolerances.
+- Source titles and knowledge-base names were visible as readable inline text.
+  The temporary attachment test also showed a `View source` control and the
+  assistant identified the file as attachment context rather than durable
+  company knowledge. The source UX is therefore usable but not a rich,
+  expandable citation-card experience.
+- A new five-turn Sales conversation retained context, survived browser
+  refresh, and remained available after logout/login. Employee long-term
+  memory and user profiles remained disabled.
+- Open WebUI direct unauthorized model requests returned HTTP 400 `Model not
+  found` for cross-department and default/admin model names. The employee
+  account menu did not expose admin/provider/API-key controls.
+- Sales/QC terminal requests produced no tool call and a human-readable
+  unavailable-capability response, but the exact `NO_TERMINAL_TOOL` marker was
+  not observed in this run. The existing Profile configurations remain
+  read-only WeKnora toolsets; keep this marker mismatch documented until a
+  repeatable exact probe is available.
+- One Sales grounded response surfaced local demo endpoint details present in
+  the synthetic Products & Technical source. This is a corpus/content hygiene
+  issue for production use, not a new client component requirement.
+
 ## 14. Cross-user long-term memory test
 
 Open WebUI conversation history is not Hermes long-term memory. If a stable, user-derived Open WebUI → Hermes session-key mapping has not been validated, the default safe outcome is to disable employee long-term Hermes memory and record that decision in deployment state.

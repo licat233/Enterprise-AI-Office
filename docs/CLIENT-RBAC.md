@@ -225,6 +225,24 @@ Before enabling ad-hoc employee file upload through the Hermes connection, test 
 
 Official company knowledge ingestion should continue through WeKnora knowledge-management workflows.
 
+### Local demo employee-client observation (2026-09-06)
+
+The pinned local Open WebUI demo was tested from the employee UI with `sales-test-a`
+and `qc-test`. Sales saw `General Assistant` and `Sales Assistant`; QC saw
+`General Assistant` and `Quality Control Assistant`. The employee account menu
+contained status, Notes, Calendar, Settings, and Sign Out, with no provider,
+model, Profile, MCP, WeKnora, API-key, or admin controls.
+
+The native text-file attachment flow worked for a non-sensitive temporary demo
+file. The assistant displayed the attachment as a source and identified it as
+attachment context rather than durable company knowledge. This does not change
+the rule that authoritative company knowledge belongs in WeKnora.
+
+The employee UI rendered WeKnora source titles and knowledge-base names as
+human-readable inline text; this is functionally usable but is not a rich,
+expandable citation card. A five-turn Sales conversation survived refresh and
+logout/login. Employee long-term memory remained disabled.
+
 ## 19. Remote browser access
 
 If Open WebUI must be reachable outside the office, place it behind one approved private/identity-aware access layer.

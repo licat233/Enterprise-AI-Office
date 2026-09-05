@@ -422,6 +422,43 @@ have OrbStack or Docker available, and the later CLI-window availability is not
 treated as proof that the Mac/OrbStack stack recovered automatically. Do not
 record `REBOOT RECOVERY PASS` or `RESILIENCE DEMO PASS` for this run.
 
+### 16.2 Observed employee-client validation (2026-09-06)
+
+The employee-facing Open WebUI flow was tested after the infrastructure
+validation without changing architecture or adding components. Direct health
+checks were HTTP 200 for Open WebUI, WeKnora, and Hermes; the Compose workloads
+were running and healthy.
+
+Observed client behavior:
+
+1. `sales-test-a` and `sales-test-b` saw `General Assistant` and `Sales
+   Assistant`; `qc-test` saw `General Assistant` and `Quality Control Assistant`.
+2. General, Sales, and QC completed grounded chats with readable source titles
+   and knowledge-base names. Sales handled unsupported product/delivery claims
+   conservatively; QC refused to invent specifications and produced a Hold-
+   pending-evidence checklist.
+3. A five-turn Sales conversation preserved context through refresh and
+   logout/login. Employee long-term memory and user profiles stayed disabled.
+4. A small temporary text attachment was read and shown with a source control;
+   the response identified it as attachment context, not durable WeKnora
+   knowledge.
+5. Cross-department and default/admin model requests failed closed with HTTP
+   400 `Model not found`. No employee admin/provider/API-key controls were
+   present in the account menu.
+
+Limitations observed in this run:
+
+- Source evidence is readable inline text rather than a rich expandable
+  citation card.
+- The employee Settings page exposes user-level System Prompt and Advanced
+  Parameters controls, which are not needed for a simple employee workflow.
+- Sales/QC terminal requests produced no tool call and stated that terminal
+  capability was unavailable, but the exact `NO_TERMINAL_TOOL` marker was not
+  observed in the current API/UI probe.
+- A grounded Sales answer repeated local demo endpoint details contained in
+  the synthetic Products & Technical document. Replace or sanitize demo corpus
+  content before any real employee rollout.
+
 ## 17. Incident notes
 
 For a meaningful incident, record:

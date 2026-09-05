@@ -83,6 +83,61 @@ Build the requested macOS/OrbStack Enterprise AI Office demonstration while pres
 - This is a local synthetic demo, not a production deployment. Hermes binds `0.0.0.0:8642` so OrbStack can reach the host process; keep it trusted-local-only.
 - Employee MCP server names are intentionally unique per Profile because Hermes v0.21.0 multiplex registration is name-sensitive.
 
+## 2026-09-06 — Validate employee-facing Open WebUI workflow
+
+Component: Open WebUI employee client, Hermes Profiles, WeKnora retrieval
+Environment: Local Apple Silicon Mac with OrbStack; synthetic demo data
+
+### Before
+
+- Backend health, RBAC, Profile-key isolation, backup/restore, and reboot
+  recovery boundaries were already recorded. The employee UI had not yet been
+  audited as a complete login-to-grounded-chat workflow.
+
+### After
+
+- Completed real UI sign-in tests for Sales and QC demo employees.
+- Verified employee-visible assistant lists, grounded conversations, readable
+  source names, follow-up context, refresh/logout-login conversation history,
+  temporary text attachment handling, and closed-fail unauthorized model
+  requests.
+- Kept employee Hermes long-term memory and user profiles disabled.
+
+### Reason
+
+Validate whether native Open WebUI is a usable employee client without adding a
+custom frontend, changing the architecture, or enabling new infrastructure.
+
+### Validation
+
+- Sales users exposed `general,sales`; QC exposed `general,qc` in the employee
+  model route. Cross-department and default/admin Open WebUI model requests
+  returned HTTP 400 `Model not found`.
+- General, Sales, and QC UI workflows completed grounded WeKnora chats. Sales
+  handled unsupported product and delivery claims conservatively; QC did not
+  invent technical tolerances and produced a Hold-pending-evidence checklist.
+- A five-turn Sales conversation survived refresh and logout/login. A small
+  temporary text attachment was read and identified as attachment context, not
+  durable company knowledge.
+- Sales/QC terminal requests made no tool call and returned human-readable
+  unavailable-capability responses, but the exact `NO_TERMINAL_TOOL` marker was
+  not observed in this run.
+
+### Rollback
+
+No deployment or configuration change was made. This entry is observational;
+revert only the documentation commit if the record itself must be corrected.
+
+### Notes
+
+- Source evidence is readable inline text rather than a rich expandable
+  citation card.
+- Open WebUI employee Settings exposes user-level System Prompt and Advanced
+  Parameters controls.
+- One grounded Sales answer surfaced local demo endpoint details present in the
+  synthetic Products & Technical document. Sanitize or replace that corpus
+  before production use.
+
 ## 2026-09-05 — Validate local backup and isolated restore
 
 Component: WeKnora, Hermes Agent, Open WebUI, backup/restore helpers

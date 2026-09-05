@@ -64,6 +64,19 @@ Do not assume all Open WebUI file upload features map cleanly to Hermes API inpu
 
 The local demo passed sign-in, group/model ACL, direct unauthorized chat probes (`400 Model not found`), direct Profile API-key isolation, least-privilege terminal probes, and grounded chat through Open WebUI. Run all authentication, group/resource ACL, direct unauthorized-access, and cross-user memory tests in `docs/ACCEPTANCE-TESTS.md` before employee rollout.
 
+## Employee-client validation
+
+Observed on 2026-09-06 from the pinned Open WebUI employee UI:
+
+- `sales-test-a` and `sales-test-b` authenticated and exposed only `General Assistant` and `Sales Assistant`; `qc-test` exposed only `General Assistant` and `Quality Control Assistant`.
+- General, Sales, and QC conversations completed grounded WeKnora queries. The UI showed source titles and knowledge-base names inline; attachment responses also exposed a human-readable `View source` entry.
+- Sales responses were customer-oriented and refused unsupported shelf-lighting and delivery claims. QC responses separated available demo workflow guidance from missing approved specifications and placed the inspection checklist on hold pending evidence.
+- A five-turn Sales conversation survived refresh and logout/login. Employee long-term memory and user profiles remained disabled.
+- A small temporary text attachment was read in the current conversation and explicitly treated as attachment context rather than durable company knowledge. Official knowledge remains a WeKnora ingestion concern.
+- Open WebUI direct unauthorized model requests returned HTTP 400 `Model not found` for cross-department and default/admin model names. The employee settings page exposes user-level system-prompt and advanced-parameter controls; it does not expose provider credentials or administration.
+- Sales/QC terminal requests returned a human-readable unavailable-capability response and no tool call, but the exact `NO_TERMINAL_TOOL` marker was not observed in this run. Keep the backend least-privilege checks and treat the marker mismatch as a validation limitation, not as evidence of terminal access.
+- One grounded Sales answer surfaced local demo endpoint details because those details are present in the synthetic Products & Technical document. Do not use that corpus as production employee knowledge without sanitizing or replacing the demo material.
+
 ## License note
 
 Open WebUI uses its own upstream license rather than this repository's Apache-2.0 license. Review `THIRD_PARTY_NOTICES.md` and the exact upstream license for the deployed version, especially before rebranding or large deployments.
