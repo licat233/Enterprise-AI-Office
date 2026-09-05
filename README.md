@@ -1,118 +1,428 @@
-# ARMOR Enterprise AI Office
+# Enterprise AI Office
 
-企业 AI 办公系统的产品设计、总体架构与长期运维规范。
+> An agent-readable blueprint for building a self-hosted enterprise AI workspace with **WeKnora + Hermes Agent + Open WebUI + Codex + Claude Code + MCP**.
 
-本仓库的定位是**设计基线**，用于明确 ARMOR Enterprise AI Office 的系统边界、组件职责、安全模型、用户体验方向和未来实施规范；它不是当前阶段的生产代码仓库，也不代表系统已经完成部署。
+Enterprise AI Office is a public architecture and implementation project for companies that want to build an internal AI office system around their own knowledge, roles, workflows, tools, and employees.
 
-## 项目定位
+The long-term goal is deliberately practical:
 
-ARMOR Enterprise AI Office 旨在设计一个统一的企业 AI 工作入口，使员工能够：
+> **A company should be able to give this repository to a capable AI engineering agent, let the agent read the repository, and have it understand how to deploy, configure, validate, operate, and safely evolve the complete system.**
+
+ARMOR is the first reference implementation and real-world validation environment for this architecture. The project itself, however, is intended to become reusable by other companies rather than remain ARMOR-specific.
+
+## 中文简介
+
+Enterprise AI Office 的目标，是提供一套**任何公司都可以参考、部署和持续迭代的企业 AI 办公系统蓝图**。
+
+项目采用 Agent-first 的建设方式：仓库不仅面向人类管理员，也面向 Hermes、Codex、Claude Code 等 AI Agent。未来一个合格的执行 Agent 应该能够通过阅读本仓库，理解系统架构、组件职责、安全边界、部署顺序、验收标准和长期维护规则，并据此完成整套系统的搭建与维护。
+
+ARMOR 是本项目的首个真实企业参考实现，但不是项目本身的唯一适用对象。
+
+---
+
+## What are we building?
+
+Not another chatbot.
+
+Enterprise AI Office is designed as an **AI work layer for a company**:
 
 ```text
-提出工作问题
-    ↓
-AI Agent 理解任务
-    ↓
-查询企业知识
-    ↓
-调用适当工具
-    ↓
-必要时执行任务
-    ↓
-返回可追溯的结果
+Employee
+   │
+   ▼
+Employee Client / Messaging
+   │
+   ▼
+Hermes Agent
+   │
+   ├── Company Knowledge
+   ├── Role-specific Skills
+   ├── Tools / MCP
+   ├── Memory
+   ├── Kanban
+   ├── Cron Automation
+   └── Specialized Coding Agents
 ```
 
-第一版优先建立稳定、可治理、可演进的基础架构，再根据真实业务使用情况持续迭代。
+An employee should be able to ask for work in natural language while the system decides whether it needs to:
 
-## v1 核心架构
+- search company knowledge;
+- reason over multiple internal documents;
+- use a department-specific workflow;
+- call an internal or external tool;
+- create or continue a durable task;
+- run scheduled work;
+- delegate a software-engineering task to Codex or Claude Code;
+- return a result with appropriate evidence and access boundaries.
 
-| 能力层 | 设计组件 | 主要职责 |
+---
+
+## Reference architecture
+
+The current v1 architecture is built around the following stack:
+
+| Layer | Technology | Responsibility |
 | --- | --- | --- |
-| Knowledge | WeKnora | 企业知识库、解析、检索、重排与引用 |
-| Agent Runtime | Hermes Agent | 任务理解、Profile、Skills、Tools、Memory 与 MCP 编排 |
-| Employee Access | Open WebUI | 员工 Web 入口、用户、分组与资源权限 |
-| Admin Control | hermes-webui | Hermes 管理与控制 |
-| Specialized Execution | Codex + Claude Code | 编程、仓库修改、测试与软件工程任务 |
-| Task Orchestration | Hermes Kanban | AI 工作任务的持久化编排 |
-| Automation | Hermes Cron | 定时任务与自动化执行 |
-| Operations | `armor-ai-office` repository | 配置、部署状态、备份、升级和变更记录 |
+| Enterprise Knowledge | **WeKnora** | Document ingestion, parsing, retrieval, reranking, citations, enterprise knowledge |
+| Primary Agent Runtime | **Hermes Agent** | Reasoning, Profiles, SOUL, Skills, Tools, Memory, MCP, orchestration |
+| Employee Web Client | **Open WebUI** | Users, groups, RBAC, chat interface and employee-facing access |
+| Hermes Admin Client | **hermes-webui** | Administrative access to Hermes configuration and all Profiles |
+| Role Architecture | **Hermes Profiles** | Department / specialist agents with isolated role configuration |
+| Knowledge Bridge | **WeKnora MCP** | Supported agent-to-knowledge integration boundary |
+| Durable Agent Work | **Hermes Kanban** | Persistent multi-agent task coordination |
+| Automation | **Hermes Cron** | Scheduled and recurring agent work |
+| Coding Execution | **Codex + Claude Code** | Software engineering, repository changes, testing and debugging |
+| Messaging / Remote Access | **Hermes Gateway** | Feishu, WeCom, Weixin and other supported messaging surfaces |
+| Operations & Governance | **This repository** | Architecture, deployment state, configuration standards, backup, upgrade and maintenance rules |
 
-总体架构采用：
+High-level topology:
 
 ```text
-员工入口
-  → Hermes Agent / Profiles
-  → WeKnora / 企业知识
-  → Codex、Claude Code 或其他授权工具
+                         Employees
+                             │
+              ┌──────────────┼──────────────┐
+              │              │              │
+          Open WebUI       Feishu        WeCom / Weixin
+              │              │              │
+              └──────────────┼──────────────┘
+                             │
+                             ▼
+                      Hermes Agent
+                             │
+             ┌───────────────┼────────────────┐
+             │               │                │
+         WeKnora          Codex          Claude Code
+             │
+             ▼
+      Company Knowledge
+
+Admin-only control surface:
+
+AI Administrator → hermes-webui → Full Hermes management
 ```
 
-## 设计原则
+---
 
-- 以真实业务需求推动版本演进，而不是堆叠技术功能。
-- 优先采用成熟的官方能力、官方扩展机制和薄适配层。
-- 不为了“先进”增加组件，也不为了“简单”删除必要的生产基础设施。
-- 明确 Source of Truth，避免多个系统争夺同一种事实的权威。
-- Profile、用户、知识、工具和长期记忆之间必须保持清晰的安全边界。
-- 遵循最小权限、默认拒绝和可验证的权限模型。
-- 除非有明确需求，不主动 fork 核心上游项目。
+## Why this architecture?
 
-## Source of Truth
+The components have intentionally different responsibilities.
 
-| 内容 | 权威系统 |
+### WeKnora is the knowledge layer
+
+Company facts, product specifications, SOPs, manuals, policies, training material and other durable organizational knowledge belong in the enterprise knowledge platform.
+
+### Hermes is the work runtime
+
+Hermes is not used merely as a chat wrapper. Its Profiles, Skills, SOUL, Memory, MCP support, Kanban, Cron, Bot Mode and Gateway make it the primary runtime for department and specialist agents.
+
+Examples:
+
+```text
+sales profile
+qc profile
+marketing profile
+engineering profile
+```
+
+Each Profile can have its own role, Skills, tools, credentials, memory and operating rules.
+
+### Open WebUI is the employee portal
+
+`hermes-webui` exposes machine-level Hermes administration and is therefore not treated as the normal multi-user employee client.
+
+Open WebUI provides the user / group / RBAC layer so employees only receive access to the assistants that their role permits.
+
+### Codex and Claude Code are specialist workers
+
+They are not intended to be the main employee interface. Hermes delegates appropriate engineering work to them while retaining the higher-level task and organizational context.
+
+---
+
+## Core design rules
+
+### 1. One responsibility, one authority
+
+Do not let multiple components compete to become the source of truth for the same thing.
+
+| Information | Authority |
 | --- | --- |
-| 企业知识 | WeKnora |
-| Agent 行为与角色配置 | Hermes Profiles、SOUL、Skills、Tools、MCP |
-| 用户身份与 Web 权限 | Open WebUI |
-| AI 工作任务状态 | Hermes Kanban |
-| 实际部署状态与运维记录 | `armor-ai-office` repository、`DEPLOYMENT-STATE.md` |
-| 现有 ARMOR Memory | 独立运行，v1 不自动同步、不双写 |
+| Company knowledge | WeKnora |
+| Agent behavior and role configuration | Hermes Profiles / SOUL / Skills / Tools / MCP |
+| Employee identity and Web access | Open WebUI |
+| Durable agent task state | Hermes Kanban |
+| Deployment and operations state | Enterprise-AI-Office repository |
 
-## 当前设计文档
+### 2. Profile is not a user account
 
-- [ARMOR Enterprise AI Office v1：总体架构、部署蓝图与长期运维规范](<ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md>)
+A Hermes Profile represents an **AI role**, not an individual employee.
 
-该文档定义 v1 的技术选型、六层职责模型、Profile 体系、知识库集成、权限与记忆隔离、部署顺序、验收标准、备份恢复和长期运维规范。
+```text
+Sales Employee A ─┐
+Sales Employee B ─┼──→ Sales Assistant ─→ sales Hermes Profile
+Sales Employee C ─┘
+```
 
-## 当前阶段
+Human identity remains in the employee access layer.
 
-| 项目 | 状态 |
-| --- | --- |
-| v1 总体架构 | `approved-design` |
-| 产品与用户场景设计 | 持续完善 |
-| 信息架构与交互流程 | 待设计 |
-| MVP 范围与优先级 | 待确定 |
-| 生产部署 | 不属于当前设计阶段 |
+### 3. Profiles are not security sandboxes
 
-后续设计工作将重点完善：
+Profile isolation separates Hermes state. It does not, by itself, restrict all host filesystem or operating-system access.
 
-1. 目标用户、部门角色与核心工作场景
-2. 员工端与管理端的信息架构
-3. AI Agent 交互流程和异常处理流程
-4. MVP 功能边界与版本路线图
-5. 权限、审计、安全和治理模型
-6. 设计决策记录与可验证的验收指标
+Security therefore requires both:
 
-## 仓库边界
+```text
+User / Group RBAC
++
+Profile-level least-privilege tools and credentials
+```
 
-本仓库用于沉淀：
+Normal employee Profiles should not automatically receive raw terminal, unrestricted filesystem, system administration, Docker, or coding-agent access.
 
-- 产品与系统设计
-- 架构决策
-- 组件职责与集成边界
-- 部署与运维蓝图
-- 安全、权限与治理规范
-- 验收标准和长期演进规则
+### 4. Knowledge is not memory
 
-除非另有明确说明，后续实施代码、基础设施配置和生产部署应在独立的实施仓库或明确的实施阶段中进行。
+Enterprise facts should not be copied into every department Profile's memory.
 
-## 变更原则
+```text
+WeKnora
+= shared company knowledge
 
-涉及以下内容的变更，需要单独记录并进行架构评审：
+Hermes Profile Memory
+= role-specific working experience / context
+```
 
-- 核心组件替换
-- Source of Truth 调整
-- 用户、Profile 或工具权限边界调整
-- 知识与记忆隔离策略调整
-- 生产部署模型调整
+### 5. Prefer upstream capabilities over custom infrastructure
 
-实现细节可以随上游版本变化进行兼容调整，但不得未经评审改变既定的架构意图和安全边界。
+Decision order:
+
+```text
+Existing official capability
+        ↓
+Official integration / extension
+        ↓
+Configuration
+        ↓
+Thin adapter
+        ↓
+Custom infrastructure only when truly necessary
+```
+
+### 6. Real usage drives versions
+
+The project does not attempt to design the final perfect system in v1.
+
+```text
+choose a sound stack
+        ↓
+build v1
+        ↓
+real employee usage
+        ↓
+observe concrete problems
+        ↓
+make the smallest justified improvement
+        ↓
+v2 → v3 → v4 → ...
+```
+
+---
+
+## Agent-readable by design
+
+This repository is intended to become executable documentation for AI engineering agents.
+
+A future deployment or maintenance agent should be able to determine from the repository:
+
+- what must be installed;
+- what must **not** be installed;
+- which component owns each responsibility;
+- how Profiles should be created;
+- how knowledge is exposed to Hermes;
+- how employee access is isolated;
+- which tools each role may use;
+- how the system is tested before production;
+- how configuration is backed up;
+- how upgrades are performed and rolled back;
+- which architecture decisions an agent is not allowed to silently change.
+
+The repository will therefore evolve toward a structure similar to:
+
+```text
+Enterprise-AI-Office/
+├── AGENTS.md
+├── README.md
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── DEPLOYMENT.md
+│   ├── OPERATIONS.md
+│   ├── SECURITY.md
+│   ├── PROFILE-STANDARD.md
+│   ├── KNOWLEDGE.md
+│   ├── CLIENT-RBAC.md
+│   ├── BACKUP-RESTORE.md
+│   ├── UPGRADE.md
+│   └── ACCEPTANCE-TESTS.md
+├── profiles/
+├── skills/
+├── infrastructure/
+├── scripts/
+└── state/
+```
+
+This is the target repository model, not a claim that all of these files already exist today.
+
+---
+
+## Current status
+
+The repository is currently in the **architecture / bootstrap stage**.
+
+What exists today:
+
+- the initial Enterprise AI Office architecture;
+- the first ARMOR reference design;
+- the selected v1 technology stack;
+- component boundaries;
+- Profile architecture principles;
+- knowledge / agent / client separation;
+- deployment and maintenance requirements;
+- initial security and acceptance-test principles.
+
+What is **not** yet complete:
+
+- a generic company configuration layer;
+- `AGENTS.md` implementation guardrails;
+- reusable deployment manifests;
+- environment templates;
+- automated health checks;
+- backup / restore scripts;
+- full acceptance-test automation;
+- one-command deployment.
+
+Do not interpret the current repository as a finished installer.
+
+The next project phase is to turn the approved architecture into a reusable, AI-agent-executable repository.
+
+---
+
+## Reference implementation: ARMOR
+
+ARMOR is the first company using this architecture as a real deployment target.
+
+The current detailed design is available here:
+
+- [ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范](<ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md>)
+
+The ARMOR document is valuable as a concrete reference implementation, but future generic deployment instructions must separate:
+
+```text
+Reusable Enterprise AI Office architecture
+```
+
+from:
+
+```text
+ARMOR-specific organization, paths, Profiles, credentials and business rules
+```
+
+A company adopting this project should configure its own organization rather than blindly copying ARMOR-specific values.
+
+---
+
+## Intended deployment model
+
+The first reference deployment targets a company-owned Mac Studio, but the architecture is not intended to be permanently Mac-only.
+
+The current reference approach is:
+
+```text
+Host OS
+├── Hermes Agent
+├── Codex
+└── Claude Code
+
+Containers
+├── WeKnora
+└── Open WebUI
+```
+
+Hermes is initially kept close to the host because engineering Profiles may need controlled access to local repositories, Git, Codex, Claude Code and host tools.
+
+Future Linux/server deployment support should preserve the same architecture boundaries instead of creating a different product.
+
+---
+
+## What this project is not
+
+This project is not intended to become:
+
+- a new RAG engine;
+- a new general-purpose Agent framework;
+- a replacement for WeKnora;
+- a fork of Hermes Agent;
+- a fork of Open WebUI;
+- a custom clone of Codex or Claude Code;
+- an architecture that adds a new service for every possible feature.
+
+The value of this repository is the **integration architecture, governance, deployment model and reusable enterprise operating standard** built around mature upstream projects.
+
+---
+
+## Architecture change policy
+
+Before adding another major component such as a new vector database, workflow engine, orchestration framework, proxy, SSO system or synchronization service, the proposal must answer:
+
+1. What concrete business problem exists?
+2. Why can the current stack not solve it?
+3. What measurable benefit does the new component provide?
+4. What new failure modes does it introduce?
+5. What is the maintenance burden?
+6. What data or security boundary changes?
+7. How is it backed up and restored?
+8. How can it be removed later?
+
+If the benefit is not clearly greater than the operational cost and risk, the default decision is:
+
+> **Not now.**
+
+---
+
+## Upstream projects
+
+Enterprise AI Office is an integration and operating architecture built on independent upstream projects, including:
+
+- Tencent WeKnora
+- Nous Research Hermes Agent
+- Open WebUI
+- hermes-webui
+- OpenAI Codex
+- Anthropic Claude Code
+- Model Context Protocol (MCP)
+
+Each upstream project has its own license, release cycle and security model. Production deployments should pin tested versions rather than blindly follow floating `latest` / `main` releases.
+
+---
+
+## License status
+
+This repository is currently public but **does not yet contain a project license**.
+
+Before the project is presented as a formally open-source reusable distribution, an explicit repository license must be selected and added. Upstream components remain governed by their own licenses regardless of the license selected for this repository.
+
+---
+
+## Project direction
+
+The immediate roadmap is intentionally narrow:
+
+1. Convert the ARMOR reference design into generic architecture documents.
+2. Add `AGENTS.md` so AI agents have a deterministic maintenance contract.
+3. Define the reusable repository structure and company configuration boundary.
+4. Create reproducible deployment instructions for WeKnora, Hermes and Open WebUI.
+5. Add Profile / Skills / RBAC templates.
+6. Add health, backup, restore and acceptance-test tooling.
+7. Deploy the ARMOR reference implementation.
+8. Feed real operational findings back into the generic project.
+
+The goal is not to predict every future requirement.
+
+The goal is to build a foundation that companies can actually operate, understand, maintain and improve.
