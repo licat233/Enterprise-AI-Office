@@ -2,102 +2,105 @@
 
 Hermes Agent is the primary Agent runtime for Enterprise AI Office.
 
-This directory is reserved for tested Enterprise AI Office configuration/compatibility notes layered on top of a pinned Hermes release.
+This directory contains tested Enterprise AI Office configuration/compatibility guidance layered on top of a pinned Hermes release.
+
+For deployment execution, follow `DEPLOY.md` first.
 
 ## Default posture
 
-Reference deployment keeps Hermes host-native initially so restricted engineering Profiles can use controlled access to:
+The validated macOS path keeps Hermes host-native.
 
-- local repositories;
-- Git / GitHub CLI;
-- Codex;
-- Claude Code;
-- approved host tools.
+The baseline Profile model is:
 
-Do not containerize Hermes merely to make all components look uniform if that complicates real work execution.
+```text
+default / admin   # privileged control plane
+general           # baseline employee-facing assistant
+```
 
-## Core capabilities used by Enterprise AI Office
+The default/admin Profile must not be exposed as a normal employee assistant.
+
+Specialist Profiles are optional and are created only when the adopting company's configuration requires a distinct role, knowledge boundary, tool/credential boundary, automation owner, model/memory policy, or risk boundary.
+
+Templates under `profiles/` are a library, not a provisioning list.
+
+## Core capabilities used by the baseline
 
 - Profiles;
 - SOUL;
-- Skills and external Skill directories;
+- Skills/external Skill directories as needed;
 - MCP;
-- API server;
-- multi-Profile/multiplex Gateway when appropriate;
-- Kanban;
-- Cron;
-- Bot Mode / role management;
-- messaging Gateway;
-- Codex / Claude Code integration.
+- employee Profile API;
+- explicit served Profile allowlisting where supported.
 
-## Production Profile model
-
-Create only Profiles justified by real roles.
-
-A reference company may use:
-
-```text
-default / admin
-general
-sales
-qc
-marketing
-engineering
-```
-
-The default/admin Profile is privileged and must not be exposed as a normal employee assistant.
+Kanban, Cron, Bot Mode, messaging Gateway, Codex, Claude Code, and stronger host tools are enabled only when required.
 
 ## Multi-Profile API
 
 Use the currently supported Hermes Profile routing/multiplex mechanism.
 
-Configure:
+For every employee-facing Profile:
 
-- explicit served Profile allowlist where available;
-- unique API key per employee-facing Profile;
-- internal-only API listener exposure;
-- correct Profile routing.
+- use a unique API credential;
+- serve only explicitly approved Profiles where allowlisting is supported;
+- keep privileged/default routes out of the employee client;
+- keep the API on the smallest trusted network boundary that still allows the selected client runtime to reach it.
 
-Run cross-Profile credential tests before production.
-
-## Skills
-
-Use upstream bundled Skills where appropriate and company-owned Skills from `skills/` via supported external Skill directory configuration.
-
-Do not copy common company Skills into every Profile unless there is a real reason.
-
-## Tools
-
-Business Profiles should default to least privilege.
-
-Engineering may receive stronger tools only under explicit workspace/repository and credential policies.
-
-Remember that Profile state isolation is not the same as host sandboxing.
+If multiple employee Profiles are enabled, run the complete cross-Profile credential matrix from `docs/ACCEPTANCE-TESTS.md`.
 
 ## Knowledge bridge
 
 Register WeKnora through supported MCP/API configuration.
 
-Prefer direct knowledge retrieval tools for straightforward queries.
+The baseline `general` Profile should receive only the read-only retrieval operations needed for its approved Knowledge Bases and source evidence.
+
+Do not couple Hermes directly to WeKnora's database schema for normal retrieval.
+
+## Skills
+
+Use upstream bundled Skills where appropriate and company-owned Skills through supported external Skill directories.
+
+Do not copy common company Skills into every Profile without a real reason.
+
+Authoritative company facts belong in WeKnora rather than SOUL/Profile memory.
+
+## Tools
+
+Normal employee Profiles default to least privilege.
+
+Do not grant arbitrary terminal, filesystem write, Docker, host administration, GitHub administration, raw credentials, or coding-agent delegation unless the role's actual work requires those capabilities and the workspace/credential boundary is explicit.
+
+Profile state isolation is not the same as host sandboxing.
 
 ## Memory
 
-Do not enable employee user-scoped long-term memory until the deployed client/Session-Key/memory-provider path passes isolation testing.
+Employee long-term memory is disabled by default until the deployed Open WebUI → Hermes user/session mapping passes the cross-user isolation test.
+
+Open WebUI conversation history can remain enabled independently.
 
 Shared Profile memory must not accumulate employee-private data.
 
-## Kanban and Cron
+## Optional technical workers
 
-Use Kanban for durable multi-agent work and Cron for scheduled automation.
+If a technical Profile is enabled, test Codex and/or Claude Code independently under the actual long-lived Hermes service account before enabling delegation.
 
-Do not treat either as a per-user employee permission system unless separately validated/designed.
+Use a disposable repository first and verify repository-local instructions, PATH, authentication, working directory, and credential scope.
 
-## Coding workers
+## Optional Kanban / Cron / messaging
 
-Test Codex and Claude Code independently under the host service account, then test Hermes delegation in a disposable repository.
+Enable these only when company configuration requires them.
 
-Check PATH/auth behavior under the actual long-lived Gateway/service environment, not only an interactive terminal.
+Run the corresponding conditional acceptance tests after enabling them.
 
 ## Validation
 
-Run the Hermes, Profile isolation, tool restriction, Codex/Claude Code, Kanban, Cron, messaging, and reboot sections in `docs/ACCEPTANCE-TESTS.md`.
+Baseline Core Ready requires:
+
+- Hermes health;
+- `general` Profile served;
+- grounded WeKnora access with source evidence;
+- employee Profile API credential boundary;
+- default/admin non-exposure;
+- least-privilege employee tools;
+- deliberate employee-memory disablement or proven isolation.
+
+See `DEPLOY.md` and `docs/ACCEPTANCE-TESTS.md`.
