@@ -364,11 +364,37 @@ docker ps
 launchctl print "gui/$(id -u)/ai.hermes.gateway"
 ```
 
-Then verify the two WeKnora services and Hermes health endpoints, employee
-sign-in, the Profile key matrix, Open WebUI RBAC, a grounded query, and the
-Sales/QC terminal-denial probe. Until a post-reboot check has completed, record
-`REBOOT RECOVERY NOT YET EXECUTED`; a configured `restart: unless-stopped` or
-LaunchAgent `KeepAlive` is only startup configuration evidence.
+Use this exact post-reboot order for the current MacBook demo:
+
+1. OrbStack runtime: after macOS login, launch OrbStack manually if needed
+   (`app.start_at_login` is currently `false`), then run `orb status` and wait
+   for `Running`.
+2. Docker Engine: run `docker info` and confirm the daemon is reachable.
+3. WeKnora containers: run `docker compose ls` and `docker ps`; confirm the
+   `weknora` project and its five containers are present.
+4. Open WebUI container: confirm `eaio-open-webui` is running and healthy.
+5. Hermes LaunchAgent: run `launchctl print gui/$(id -u)/ai.hermes.gateway`;
+   confirm the service is loaded and running.
+6. Hermes API: check `http://127.0.0.1:8642/health` for HTTP 200.
+7. WeKnora UI/API: check `http://127.0.0.1:8088` and
+   `http://127.0.0.1:18080/health`.
+8. Open WebUI: check `http://127.0.0.1:3000`, then sign in with a demo user.
+9. Open WebUI → General → Hermes → WeKnora: ask a known grounded question
+   and confirm the expected source title.
+10. Sales Assistant: ask the known Sales workflow question and confirm the
+    Sales source-backed answer.
+11. QC Assistant: ask the known QC workflow question and confirm the QC
+    source-backed answer.
+12. Profile API-key isolation: repeat the complete 3×3 matrix; own routes
+    must be HTTP 200 and cross-Profile routes HTTP 401.
+13. Sales/QC terminal restriction: repeat the terminal escape probes and
+    confirm `NO_TERMINAL_TOOL` / unavailable terminal capability.
+14. Default/admin exposure: confirm employee model lists contain only their
+    allowed assistants and no default/admin Profile is exposed.
+
+Record each result after the real reboot. Until this sequence completes, record
+`REBOOT RECOVERY NOT YET EXECUTED`; `restart: unless-stopped` and LaunchAgent
+`KeepAlive` are only startup configuration evidence.
 
 ## 17. Incident notes
 

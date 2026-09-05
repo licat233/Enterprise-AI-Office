@@ -142,6 +142,50 @@ adding components or changing the approved architecture.
   encrypted off-device copy; this is not production disaster-recovery sign-off.
 - Current final status is `PARTIAL — reboot recovery not yet executed`.
 
+## 2026-09-05 — Prepare real Mac/OrbStack reboot recovery validation
+
+Component: OrbStack, Docker Compose, Hermes LaunchAgent, operational state
+Environment: Local Apple Silicon Mac with OrbStack; synthetic demo data
+
+### Before
+
+- The demo was healthy and isolated backup/restore had passed, but the actual
+  host-reboot recovery test was still pending.
+
+### After
+
+- Recorded the live pre-reboot baseline and actual startup mechanisms in
+  `state/DEPLOYMENT-STATE.md` and `docs/OPERATIONS.md`.
+- Confirmed OrbStack is currently running but `app.start_at_login=false`; the
+  post-login test therefore requires manually launching OrbStack.
+- Confirmed live Compose project/container restart policies and the loaded
+  Hermes LaunchAgent's `RunAtLoad`/`KeepAlive` behavior.
+- Prepared the exact 14-step post-reboot checklist.
+
+### Reason
+
+Prepare a real reboot test without changing architecture, adding a startup
+manager, or treating configuration evidence as recovery evidence.
+
+### Validation
+
+- Explicit-endpoint health check: 6 PASS, 0 FAIL; only backup freshness marker
+  was WARN.
+- General, Sales, and QC Profile checks returned HTTP 200 with source-backed
+  answers.
+- `orb status` was `Running`; both Compose projects and all live containers were
+  present; Hermes LaunchAgent was loaded and running.
+- Real reboot recovery remains `REBOOT RECOVERY NOT YET EXECUTED`.
+
+### Rollback
+
+- This is documentation/state only; revert the preparation commit if needed.
+
+### Notes
+
+- Stop here and reboot the Mac manually. After login and OrbStack startup,
+  reopen Codex and continue the documented checklist.
+
 ## Repository bootstrap history
 
 ### 2026-09-05 — Enterprise AI Office executable repository baseline created

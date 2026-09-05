@@ -28,7 +28,8 @@ The versions and model choices recorded below describe this validation run; they
 | Runtime | OrbStack |
 | Version | OrbStack 2.2.3; Docker Engine 29.4.0; Docker Compose 5.1.2 |
 | Startup behavior | WeKnora and Open WebUI use `restart: unless-stopped`; Hermes Gateway runs as the user LaunchAgent `ai.hermes.gateway` |
-| Host reboot rehearsal | Not executed; exact post-reboot continuation is documented in `docs/BACKUP-RESTORE.md` |
+| OrbStack login startup | Actual `orb config get app.start_at_login` is `false`; OrbStack must be launched manually after login for Docker/Compose recovery |
+| Host reboot rehearsal | Not executed; exact 14-step post-reboot continuation is documented in `docs/OPERATIONS.md` |
 
 ## WeKnora
 
@@ -191,6 +192,38 @@ Hermes API: process listens on 0.0.0.0:8642 so the OrbStack bridge can reach it;
 PostgreSQL: internal Docker network only
 Redis: internal Docker network only
 ```
+
+## Reboot Preparation
+
+Pre-reboot baseline recorded on 2026-09-05:
+
+- `orb status`: `Running`; OrbStack helper/app processes are present.
+- `docker info`: reachable; the `weknora` and `open-webui` Compose projects are
+  running.
+- Actual live container policies: WeKnora app/docreader/frontend/PostgreSQL use
+  `unless-stopped`, Redis uses `always`, and Open WebUI uses `unless-stopped`.
+- `launchctl print gui/$(id -u)/ai.hermes.gateway`: LaunchAgent is loaded and
+  `state = running`; the plist has `RunAtLoad=1` and `KeepAlive=1`. The recorded
+  `last exit code = 78` is historical; the current Hermes process is running,
+  listening, and its health endpoint returns HTTP 200.
+- Explicit-endpoint health check: 6 PASS, 0 FAIL; backup freshness marker is
+  the only WARN.
+- General, Sales, and QC Profile model/chat checks returned HTTP 200 with
+  source-backed answers.
+
+Actual startup-boundary conclusion:
+
+- OrbStack app startup is not currently automatic at macOS login. Its
+  privileged helper LaunchDaemon is not equivalent to starting the OrbStack
+  app/VM.
+- Once OrbStack/Docker is available, the current Compose restart policies are
+  the mechanism expected to recover WeKnora and Open WebUI containers.
+- Hermes is independently managed by the loaded user LaunchAgent and should be
+  launched at GUI login, subject to the post-reboot health check.
+
+Pre-reboot status: `READY FOR REAL REBOOT TEST`.
+This is preparation evidence only; reboot recovery remains
+`REBOOT RECOVERY NOT YET EXECUTED`.
 
 ## Acceptance Status
 
