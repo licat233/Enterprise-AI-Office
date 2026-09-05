@@ -143,13 +143,23 @@ Before introducing a major new component such as LiteLLM, Dify, n8n, LangGraph, 
 
 If the justification is weak, default to `Not now`.
 
-## 9. Do not over-minimize either
+## 9. Configuration minimality and clean-state rule
+
+Build each deployment from the adopting company's actual requirements, not from every example, template, reference role, optional integration, or previously tested capability present in this repository.
+
+Repository templates are a library, not a deployment checklist. Instantiate an optional Profile, group, Knowledge Base, Skill, integration, automation, or service only when the company configuration or a real operating requirement justifies it.
+
+When correcting or simplifying the design, make the maintained documentation describe the intended current state cleanly. Do not preserve obsolete decisions as permanent negative rules, explanatory scars, or special-case warnings unless the historical fact is itself operationally necessary for safety, migration, compatibility, rollback, or incident response.
+
+Prefer a general positive rule that prevents a class of mistakes over a growing list of prohibitions against individual past mistakes. Git history and deployment changelogs carry history when history is needed; normative architecture and configuration documents should primarily describe how the system is meant to work now.
+
+## 10. Do not over-minimize either
 
 Do not remove useful production foundations merely to make the stack look smaller.
 
 PostgreSQL, Redis, RBAC, backups, hybrid retrieval, reranking, and other mature upstream components should remain when they solve real operational needs.
 
-## 10. Version discipline
+## 11. Version discipline
 
 Production must not blindly track floating `main` / `latest` tags.
 
@@ -162,7 +172,7 @@ For each core component:
 
 Do not enable unattended automatic upgrades for production core components.
 
-## 11. Pre-change inspection
+## 12. Pre-change inspection
 
 Before modifying an existing deployment:
 
@@ -176,7 +186,7 @@ Before modifying an existing deployment:
 
 Do not assume the machine matches the documentation. Reconcile documentation with reality first.
 
-## 12. Change risk classes
+## 13. Change risk classes
 
 ### Low risk
 
@@ -203,7 +213,7 @@ Examples:
 
 Flow: inspect → backup → plan → change → verify → rollback if needed → document.
 
-## 13. Secrets rules
+## 14. Secrets rules
 
 Never commit:
 
@@ -221,9 +231,9 @@ Do not print full credentials in logs or final reports.
 
 Templates must use placeholders.
 
-## 14. Tool privilege rules
+## 15. Tool privilege rules
 
-Normal employee Profiles such as `general`, `sales`, `qc`, and `marketing` must not receive unrestricted host capabilities by default.
+Normal employee Profiles must not receive unrestricted host capabilities by default.
 
 Default-deny powerful capabilities such as:
 
@@ -235,9 +245,9 @@ Default-deny powerful capabilities such as:
 - Codex / Claude Code delegation;
 - raw credential access.
 
-Grant powerful capabilities only to roles that require them, such as a restricted `engineering` Profile.
+Grant powerful capabilities only to roles whose actual work requires them, with an explicit workspace and credential boundary.
 
-## 15. Knowledge access rule
+## 16. Knowledge access rule
 
 Hermes should access WeKnora through supported MCP/API surfaces.
 
@@ -245,22 +255,23 @@ Do not couple Hermes directly to WeKnora's PostgreSQL schema.
 
 Do not make WeKnora Agent an unnecessary extra reasoning hop for every knowledge lookup. Prefer direct retrieval tools for straightforward knowledge access.
 
-## 16. User / Profile mapping rule
+## 17. User / Profile mapping rule
 
 Employee identity lives in Open WebUI or the enterprise messaging platform.
 
-Department or specialist AI roles live in Hermes Profiles.
+AI work roles live in Hermes Profiles.
 
 Typical mapping:
 
 ```text
-Sales users → Open WebUI Sales group → Sales Assistant → Hermes `sales` Profile
-QC users    → Open WebUI QC group    → QC Assistant    → Hermes `qc` Profile
+Employee group → permitted Assistant → matching Hermes Profile
 ```
+
+The baseline employee-facing Profile is `general`. Add specialist mappings only for roles the adopting company actually uses.
 
 Do not confuse UI visibility with security. Verify direct unauthorized access is blocked.
 
-## 17. Memory safety rule
+## 18. Memory safety rule
 
 Shared department Profile memory must never become an uncontrolled cross-user private-data channel.
 
@@ -268,7 +279,7 @@ Before enabling employee long-term memory, run the cross-user isolation tests in
 
 If isolation cannot be proven, disable employee long-term memory and rely on per-user conversation history until a safe mechanism is validated.
 
-## 18. Destructive operations
+## 19. Destructive operations
 
 Do not perform destructive operations based on inference alone.
 
@@ -283,23 +294,23 @@ Examples requiring explicit intent and appropriate backup:
 - `docker system prune -a` on a production host;
 - irreversible storage migration.
 
-## 19. Reboot and recovery requirement
+## 20. Reboot and recovery requirement
 
 A deployment is not considered complete until it survives a host reboot and restores required services, Profiles, knowledge access, schedules, and employee access.
 
-## 20. Documentation synchronization
+## 21. Documentation synchronization
 
 If you materially change architecture, deployment, Profile policy, RBAC, network exposure, backup, upgrade behavior, or upstream integration, update the corresponding documentation in the same change.
 
 Do not allow production reality to drift silently away from repository documentation.
 
-## 21. Completion standard
+## 22. Completion standard
 
 Never declare the system complete merely because containers started.
 
 Use `docs/ACCEPTANCE-TESTS.md`.
 
-At minimum verify:
+At minimum verify the capabilities that are enabled for that deployment, including:
 
 - knowledge ingestion and retrieval;
 - citations;
@@ -309,12 +320,14 @@ At minimum verify:
 - cross-user memory isolation or deliberate memory disablement;
 - least-privilege tools;
 - Codex / Claude Code delegation where enabled;
-- Kanban persistence;
-- Cron execution;
+- Kanban persistence where enabled;
+- Cron execution where enabled;
 - backup and restore;
 - host reboot recovery.
 
-## 22. When documentation conflicts with current upstream behavior
+Do not add optional capabilities merely to satisfy an acceptance checklist; tests follow the configured system, not the other way around.
+
+## 23. When documentation conflicts with current upstream behavior
 
 Upstream projects evolve quickly.
 
@@ -329,7 +342,7 @@ If a command, API path, configuration field, or deployment mechanism in this rep
 
 Do not reinterpret an implementation mismatch as permission to redesign the system.
 
-## 23. Final operating principle
+## 24. Final operating principle
 
 Build the smallest system that completely solves the current requirement, using mature capabilities and preserving future evolution.
 
