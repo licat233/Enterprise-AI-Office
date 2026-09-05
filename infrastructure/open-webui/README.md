@@ -1,93 +1,128 @@
 # Open WebUI Deployment Adapter
 
-Open WebUI is the default employee-facing multi-user Web client for Enterprise AI Office. The validated local demo uses the pinned image `ghcr.io/open-webui/open-webui:v0.11.3` and publishes it only on `127.0.0.1:3000`.
+Open WebUI is the default employee-facing Web client for Enterprise AI Office.
+
+For deployment execution, follow `DEPLOY.md` first. This adapter describes the validated integration pattern and the baseline employee permission model.
 
 ## Responsibilities
 
 Open WebUI owns:
 
-- human user accounts and authentication;
+- human user accounts/authentication;
 - groups;
 - employee-facing chat UX;
 - authorized assistant/resource visibility;
 - conversation history.
 
-It does **not** own Hermes Profile definitions or WeKnora company knowledge.
+It does not own Hermes Profile definitions or WeKnora company knowledge.
 
-## Local demo deployment
+## Baseline employee model
 
-The tested manifest is [docker-compose.yml](docker-compose.yml). It is a reference/demo adapter, not a permanently fixed upstream deployment. In the validated setup it was copied to `$EAIO_RUNTIME_DIR/open-webui/docker-compose.yml` and started as an independent Compose project, separate from WeKnora. It uses the persistent named volume `open-webui-data` and the Docker host alias `host.docker.internal` so the container can reach the host-native Hermes Gateway.
+Build employee groups and Assistant connections from company configuration.
 
-```text
-Open WebUI: http://127.0.0.1:3000
-Hermes employee API: http://host.docker.internal:8642/p/<profile>/v1
-```
-
-The admin account and demo-user credentials are stored in protected files under `$EAIO_RUNTIME_DIR/credentials/`; values must not be committed or printed.
-Self-signup is disabled after provisioning; the login form remains enabled for the known demo accounts.
-
-## RBAC posture
-
-Global/default user permissions are minimal. The validated demo contains these groups and model ACLs:
+The baseline is:
 
 ```text
-All-Employees → General Assistant → Hermes general Profile
-Sales         → Sales Assistant   → Hermes sales Profile
-QC            → QC Assistant      → Hermes qc Profile
+All-Employees → General Assistant → Hermes `general` Profile
+AI-Admins     → administrative access according to company policy
 ```
 
-`sales-test-a` and `sales-test-b` belong to `All-Employees` and `Sales`. `qc-test` belongs to `All-Employees` and `QC`. The employee `/api/v1/models` route was verified to expose `general,sales` to Sales users and `general,qc` to the QC user. The Hermes default/admin Profile has no Open WebUI employee connection.
+The Hermes default/admin Profile is not an employee Assistant.
 
-### Employee Settings permissions
+Specialist groups and Assistant resources are added only when the adopting company enables the matching specialist Profile.
 
-For the pinned Open WebUI `v0.11.3` demo, use the native administrator path
-`Admin Panel → Users → Groups → Default permissions` to set `Allow Chat System
-Prompt` and `Allow Chat Params` to `off` for ordinary users. Keep `Allow File
-Upload` enabled. The effective Sales and QC employee Settings pages were
-rechecked after saving: neither exposed System Prompt or Advanced Parameters,
-while normal chat, file upload, assistant visibility, and history remained
-available. Do not implement this boundary with source changes, CSS, or a
-proxy.
+## Validated local deployment pattern
+
+The tested manifest is [`docker-compose.yml`](docker-compose.yml).
+
+The first validated local demo used:
+
+- Open WebUI `v0.11.3`;
+- persistent named volume `open-webui-data`;
+- loopback-only host publication;
+- Docker host alias `host.docker.internal` so the container could reach host-native Hermes;
+- server-side Hermes Profile connections, keeping Profile API keys out of the browser.
+
+The exact demo runtime evidence, users, specialist Profiles, URLs, and ACL results are recorded in `state/DEPLOYMENT-STATE.md` rather than treated as generic provisioning defaults.
+
+## Authentication posture
+
+For the baseline:
+
+1. provision the first administrator;
+2. create ordinary employee identities according to company policy;
+3. disable open self-signup after provisioning unless the company explicitly wants it;
+4. keep provider/API credentials server-side;
+5. restrict administration to authorized administrators.
+
+## Ordinary employee permissions
+
+The validated Open WebUI baseline uses native permissions rather than source changes, CSS hiding, or a proxy.
+
+```text
+Normal chat              enabled
+Conversation history     enabled
+File upload              enabled unless company policy disables it
+Chat System Prompt       disabled
+Advanced Chat Parameters disabled
+```
+
+Use the current upstream-supported administrator permission controls for the installed version.
 
 ## Hermes connections
 
-Create server-side OpenAI-compatible connections/resources for employee-facing Hermes Profiles using the supported profile routes. Use a distinct Profile API key for each connection:
+Create one server-side OpenAI-compatible resource/connection for each employee-facing Hermes Profile that is actually enabled.
+
+Baseline:
 
 ```text
-General Assistant → http://host.docker.internal:8642/p/general/v1
-Sales Assistant   → http://host.docker.internal:8642/p/sales/v1
-QC Assistant      → http://host.docker.internal:8642/p/qc/v1
+General Assistant → Hermes `general` Profile
 ```
 
-The local demo restricts each employee Profile to seven read-only WeKnora retrieval tools. The unique per-Profile MCP names are intentional for Hermes v0.21.0 multiplex registration. Do not create an ordinary employee connection to the privileged Hermes default/admin Profile.
+Requirements:
+
+- use the supported Profile API route for the installed Hermes version;
+- keep API credentials server-side;
+- do not create an employee connection to the privileged default/admin Profile;
+- apply resource ACLs so only intended groups can use each Assistant;
+- test direct unauthorized access, not only UI visibility.
+
+If specialist Profiles are enabled, each gets its own connection and group mapping from company configuration.
 
 ## Memory scoping
 
-Employee long-term memory is disabled in the validated demo (`memory: false` and `user_profile: false` in each employee Profile). The current Open WebUI connection path does not provide a validated user-derived Hermes session-header mapping, so enabling shared Profile memory would not meet the isolation requirement. Conversation history remains user-scoped in Open WebUI.
+Open WebUI conversation history is separate from Hermes long-term memory.
 
-Do not enable employee long-term memory until the cross-user isolation test in `docs/ACCEPTANCE-TESTS.md` passes with the exact deployed versions and connection behavior.
+Employee Hermes long-term memory is disabled by default until a stable user-derived Open WebUI → Hermes session/memory isolation mechanism passes the cross-user test in `docs/ACCEPTANCE-TESTS.md`.
+
+Do not enable shared employee Profile memory based only on prompt instructions.
 
 ## File handling
 
-Do not assume all Open WebUI file upload features map cleanly to Hermes API input formats. Test supported file/image workflows explicitly before enabling them for employees. Official company knowledge ingestion belongs in WeKnora.
+File upload may be enabled for employee conversation context when supported and allowed by company policy.
 
-## Validation
+Do not assume every Open WebUI attachment mode maps identically to Hermes. Test the file types the company actually intends to use.
 
-The local demo passed sign-in, group/model ACL, direct unauthorized chat probes (`400 Model not found`), direct Profile API-key isolation, least-privilege terminal probes, and grounded chat through Open WebUI. Run all authentication, group/resource ACL, direct unauthorized-access, and cross-user memory tests in `docs/ACCEPTANCE-TESTS.md` before employee rollout.
+Official durable company knowledge ingestion belongs in WeKnora.
 
 ## Employee-client validation
 
-Observed on 2026-09-06 from the pinned Open WebUI employee UI:
+Core Ready requires testing from the real employee UI:
 
-- `sales-test-a` and `sales-test-b` authenticated and exposed only `General Assistant` and `Sales Assistant`; `qc-test` exposed only `General Assistant` and `Quality Control Assistant`.
-- General, Sales, and QC conversations completed grounded WeKnora queries. The UI showed source titles and knowledge-base names inline; attachment responses also exposed a human-readable `View source` entry.
-- Sales responses were customer-oriented and refused unsupported shelf-lighting and delivery claims. QC responses separated available demo workflow guidance from missing approved specifications and placed the inspection checklist on hold pending evidence.
-- A five-turn Sales conversation survived refresh and logout/login. Employee long-term memory and user profiles remained disabled.
-- A small temporary text attachment was read in the current conversation and explicitly treated as attachment context rather than durable company knowledge. Official knowledge remains a WeKnora ingestion concern.
-- Open WebUI direct unauthorized model requests returned HTTP 400 `Model not found` for cross-department and default/admin model names. The employee account menu did not expose provider credentials or administration, and the final Settings checks did not expose System Prompt or Advanced Parameters.
-- Sales/QC terminal requests returned a human-readable unavailable-capability response and no tool call. The employee Profile toolsets remained read-only WeKnora retrieval only; a specific `NO_TERMINAL_TOOL` marker is not required by the acceptance criterion.
-- The synthetic Products & Technical document was rewritten to remove local infrastructure details and reindexed. A subsequent Sales grounded answer still showed `Demo Products & Technical.md` and did not expose an endpoint or runtime detail.
+- ordinary employee login;
+- permitted Assistant visibility;
+- normal chat;
+- grounded WeKnora answer;
+- readable source evidence;
+- follow-up context;
+- history after refresh/re-login;
+- file upload when enabled;
+- default/admin non-exposure;
+- absence of employee admin/provider/API-key controls;
+- unauthorized direct access fails closed.
+
+Backend health alone is not sufficient.
 
 ## License note
 
-Open WebUI uses its own upstream license rather than this repository's Apache-2.0 license. Review `THIRD_PARTY_NOTICES.md` and the exact upstream license for the deployed version, especially before rebranding or large deployments.
+Open WebUI uses its own upstream license rather than this repository's Apache-2.0 license. Review `THIRD_PARTY_NOTICES.md` and the exact upstream license for the deployed version, especially before rebranding or larger deployments.
