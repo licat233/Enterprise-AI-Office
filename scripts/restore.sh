@@ -10,7 +10,10 @@ set -euo pipefail
 
 umask 077
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 EAIO_RUNTIME_DIR="${EAIO_RUNTIME_DIR:-/Users/Shared/enterprise-ai-office/runtime}"
+GOVERNANCE_RESTORE_HELPER="$REPO_ROOT/infrastructure/email/governance/restore_state.py"
 
 usage() {
   cat <<'USAGE'
@@ -19,8 +22,9 @@ Usage:
 
 The target directory must not already exist. The command restores the backup
 manifest, runtime configuration, Hermes/Profile material, protected credential
-archive, WeKnora/Open WebUI file volumes, and the WeKnora PostgreSQL dump into
-new Docker volumes. It does not touch the live Compose projects or live Hermes.
+archive, WeKnora/Open WebUI file volumes, the WeKnora PostgreSQL dump, and v2
+Governance SQLite state when that conditional capability exists in the backup.
+It does not touch the live Compose projects, live Hermes, or any provider send path.
 USAGE
 }
 
@@ -169,6 +173,22 @@ find "$TARGET_ROOT" -type f -exec chmod 600 {} +
 find "$TARGET_ROOT" -type d -exec chmod 700 {} +
 pass "runtime material" "$TARGET_ROOT"
 
+# v2 Email Governance is conditional. Materialize its SQLite snapshot into a
+# new isolated target and preserve unresolved send evidence; restoring must not
+# start the service or retry provider sends.
+if [ -f "$BACKUP_DIR/governance/state.sqlite3" ]; then
+  require_command python3
+  require_file "$GOVERNANCE_RESTORE_HELPER"
+  mkdir -p "$TARGET_ROOT/runtime/email-governance"
+  chmod 700 "$TARGET_ROOT/runtime/email-governance"
+  python3 "$GOVERNANCE_RESTORE_HELPER" \
+    "$BACKUP_DIR/governance/state.sqlite3" \
+    "$TARGET_ROOT/runtime/email-governance/state.sqlite3"
+  pass "Email Governance restore" "$TARGET_ROOT/runtime/email-governance/state.sqlite3"
+else
+  pass "Email Governance restore" "not enabled / state absent in backup"
+fi
+
 slug="$(basename -- "$TARGET_ROOT" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-*//; s/-*$//')"
 [ -n "$slug" ] || fail "target name" "target basename has no usable characters"
 prefix="eaio-restore-${slug}"
@@ -220,12 +240,16 @@ PostgreSQL container: $PG_CONTAINER
 PostgreSQL volume: $POSTGRES_VOLUME
 WeKnora file volume: $WEKNORA_DATA_VOLUME
 Open WebUI data volume: $OPENWEBUI_VOLUME
+Governance state: $TARGET_ROOT/runtime/email-governance/state.sqlite3 (only when present in backup)
 
 The live demo was not stopped or modified. To complete an isolated service
 test, create a temporary Compose project from $TARGET_ROOT/weknora/docker-compose.yml,
 remove fixed container_name entries, choose unused loopback ports, and point
-Hermes Profile MCP URLs at that temporary WeKnora API. Then run the acceptance
-checks in docs/ACCEPTANCE-TESTS.md. Do not expose the restored target externally.
+Hermes Profile MCP URLs at that temporary WeKnora API. If Governance state is
+present, start a compatible Governance runtime only after inspecting unresolved
+send/reconciliation evidence; restore itself never retries or sends email.
+Then run the acceptance checks in docs/ACCEPTANCE-TESTS.md and the applicable
+v2 acceptance contracts. Do not expose the restored target externally.
 EOF
 chmod 600 "$TARGET_ROOT/RESTORE-NEXT-STEPS.txt"
 pass "restore materialized" "$TARGET_ROOT"
