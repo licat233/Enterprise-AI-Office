@@ -3,34 +3,35 @@ kind: enterprise-ontology-example
 
 metadata:
   id: email-communication
-  version: "0.1.0"
+  version: "0.2.0"
   status: design-example
   normative: false
   runtime_enforcement: false
   source_contract: docs/ONTOLOGY.md
   source_contract_version: "0.3.0"
   purpose: >-
-    Model the first Enterprise AI Office v2 governed email workflow without
-    connecting a real mailbox or authorizing runtime execution. The fixture
-    tests mailbox/message visibility, draft ownership, exact human approval,
-    narrow sending, and ambiguous external-side-effect handling.
+    Describe the Enterprise AI Office v2 governed email workflow using the
+    completed System Design and Installation Design contracts. This fixture is
+    reviewable design evidence; it is not a live authorization or deployment.
   policy_note: >-
-    This is a design fixture. It does not authorize access to any real mailbox,
-    SMTP/IMAP credentials, employee Profile binding, or customer-facing send.
+    HumanActor identity, mailbox authorization, Draft/Approval persistence,
+    provider send binding, and reconciliation are implemented by the v2
+    installation blueprint. This YAML remains non-executable and contains only
+    synthetic/provider-agnostic identifiers.
 
 domain: email-communication
 
 systems:
   enterprise-ai-office:
-    role: ontology-owner
-    binding_status: design-only
-
+    role: governance-owner
+    binding_status: installation-designed
   email-provider:
     role: system-of-record
-    binding_status: unresolved
+    binding_status: provider-selected-reference
     note: >-
-      Provider-agnostic design namespace. ARMOR currently uses Tencent Enterprise
-      Mail, but protocol/runtime binding is deferred to implementation.
+      Tencent Enterprise Mail is the reference provider. A real provider
+      connection still requires an explicitly authorized validation/deployment
+      target and protected credentials.
 
 objects:
   Mailbox:
@@ -43,33 +44,27 @@ objects:
     visibility:
       default: deny
       read_requirements:
-        - entitlement: email.mailbox.read
+        - entitlement: email.read
     properties:
       mailbox_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       address:
         type: string
         required: true
         mutable: false
         sensitivity: business-contact
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       provider:
         type: string
         required: true
         mutable: false
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
 
   EmailMessage:
-    description: A provider-backed email message used as operational communication context.
+    description: Provider-backed inbound/outbound email context read through a mailbox-scoped governed operation.
     identity:
       primary_key: message_id
       authority:
@@ -78,86 +73,59 @@ objects:
     visibility:
       default: deny
       read_requirements:
-        - entitlement: email.message.read
+        - entitlement: email.read
     properties:
       message_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       mailbox_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       from_address:
         type: string
         required: true
         mutable: false
         sensitivity: communication-data
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       to_addresses:
         type: array
         required: true
         mutable: false
         sensitivity: communication-data
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       cc_addresses:
         type: array
         required: false
         mutable: false
         sensitivity: communication-data
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       subject:
         type: string
         required: false
         mutable: false
         sensitivity: communication-data
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       body:
         type: string
         required: false
         mutable: false
         sensitivity: communication-data
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
       sent_at:
         type: datetime
         required: false
         mutable: false
-        authority:
-          class: source-backed
-          system: email-provider
-      in_reply_to:
-        type: string
-        required: false
-        mutable: false
-        authority:
-          class: source-backed
-          system: email-provider
-      references:
-        type: array
-        required: false
-        mutable: false
-        authority:
-          class: source-backed
-          system: email-provider
+        authority: {class: source-backed, system: email-provider}
 
   DraftReply:
-    description: An EAO-owned reviewable outbound reply revision with no provider-side send effect.
+    description: >-
+      An EAO-owned reviewable outbound reply. Each material edit creates an
+      immutable revision. Runtime persistence uses (draft_id, revision) while
+      draft_id remains the logical Object identity in this design fixture.
     identity:
       primary_key: draft_id
       authority:
@@ -166,68 +134,52 @@ objects:
     visibility:
       default: deny
       read_requirements:
-        - entitlement: email.draft.read
+        - entitlement: email.draft
     properties:
       draft_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       source_message_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       sender_mailbox_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       to_addresses:
         type: array
         required: true
         mutable: false
         sensitivity: outbound-communication
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       cc_addresses:
         type: array
         required: false
         mutable: false
         sensitivity: outbound-communication
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       subject:
         type: string
         required: true
         mutable: false
         sensitivity: outbound-communication
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       body:
         type: string
         required: true
         mutable: false
         sensitivity: outbound-communication
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       revision:
         type: integer
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       content_hash:
         type: string
         required: true
@@ -242,21 +194,17 @@ objects:
             - DraftReply.body
             - DraftReply.source_message_id
             - DraftReply.revision
-          rule: stable_hash(material_outbound_fields)
-      created_by_employee_id:
+          rule: canonical_sha256(material_outbound_fields)
+      created_by_actor_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       created_at:
         type: datetime
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
 
   SendApproval:
     description: Immutable trusted-human approval bound to one exact DraftReply revision/hash.
@@ -268,50 +216,38 @@ objects:
     visibility:
       default: deny
       read_requirements:
-        - entitlement: email.approval.read
+        - entitlement: email.approve
     properties:
       approval_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       draft_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       draft_revision:
         type: integer
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       draft_content_hash:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
-      approved_by_employee_id:
+        authority: {class: ontology-owned, system: enterprise-ai-office}
+      approved_by_actor_id:
         type: string
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
       approved_at:
         type: datetime
         required: true
         mutable: false
-        authority:
-          class: ontology-owned
-          system: enterprise-ai-office
+        authority: {class: ontology-owned, system: enterprise-ai-office}
 
 relations:
   mailbox_contains_message:
@@ -319,12 +255,9 @@ relations:
     to: EmailMessage
     predicate: contains
     cardinality: one-to-many
-    authority:
-      class: source-backed
-      system: email-provider
+    authority: {class: source-backed, system: email-provider}
     read_requirements:
-      - entitlement: email.mailbox.read
-      - entitlement: email.message.read
+      - entitlement: email.read
     binding:
       source_property: Mailbox.mailbox_id
       target_property: EmailMessage.mailbox_id
@@ -334,32 +267,27 @@ relations:
     to: EmailMessage
     predicate: replies_to
     cardinality: many-to-one
-    authority:
-      class: ontology-owned
-      system: enterprise-ai-office
+    authority: {class: ontology-owned, system: enterprise-ai-office}
     read_requirements:
-      - entitlement: email.draft.read
-      - entitlement: email.message.read
+      - entitlement: email.draft
+      - entitlement: email.read
 
   approval_authorizes_draft:
     from: SendApproval
     to: DraftReply
     predicate: authorizes
     cardinality: many-to-one
-    authority:
-      class: ontology-owned
-      system: enterprise-ai-office
+    authority: {class: ontology-owned, system: enterprise-ai-office}
     read_requirements:
-      - entitlement: email.approval.read
-      - entitlement: email.draft.read
+      - entitlement: email.approve
+      - entitlement: email.draft
 
 read_operations:
   search_email:
     target: EmailMessage
     actor_requirements:
       trusted_human_identity: required
-      entitlements:
-        - email.message.read
+      entitlements: [email.read]
     filters:
       - EmailMessage.mailbox_id
       - EmailMessage.from_address
@@ -373,15 +301,14 @@ read_operations:
       - EmailMessage.sent_at
     result_visibility: object-visibility-policy
     tool_binding:
-      status: unresolved
-      operation: email-provider.search_email
+      status: installation-designed
+      operation: enterprise-ai-office.search_email
 
   get_email:
     target: EmailMessage
     actor_requirements:
       trusted_human_identity: required
-      entitlements:
-        - email.message.read
+      entitlements: [email.read]
     projections:
       - EmailMessage.message_id
       - EmailMessage.mailbox_id
@@ -391,243 +318,155 @@ read_operations:
       - EmailMessage.subject
       - EmailMessage.body
       - EmailMessage.sent_at
-      - EmailMessage.in_reply_to
-      - EmailMessage.references
     result_visibility: object-visibility-policy
     tool_binding:
-      status: unresolved
-      operation: email-provider.get_email
+      status: installation-designed
+      operation: enterprise-ai-office.get_email
 
 actions:
   prepare_reply_draft:
-    description: Create an EAO-owned draft reply from authorized message context without sending anything.
+    description: Create an immutable EAO-owned DraftReply revision without provider-side send effect.
     target: EmailMessage
     parameters:
-      source_message_id:
-        type: string
-        required: true
-      sender_mailbox_id:
-        type: string
-        required: true
-      to_addresses:
-        type: array
-        required: true
-      cc_addresses:
-        type: array
-        required: false
-      subject:
-        type: string
-        required: true
-      body:
-        type: string
-        required: true
+      source_message_id: {type: string, required: true}
+      sender_mailbox_id: {type: string, required: true}
+      to_addresses: {type: array, required: true}
+      cc_addresses: {type: array, required: false}
+      subject: {type: string, required: true}
+      body: {type: string, required: true}
     actor_requirements:
       trusted_human_identity: required
-      profile_capability: email.draft.prepare
-      entitlements:
-        - email.message.read
-        - email.draft.prepare
+      profile_capability: email.draft
+      entitlements: [email.read, email.draft]
     preconditions:
       - id: source-message-exists
         rule: EmailMessage(source_message_id) exists
-        on_fail:
-          decision: deny
-          code: SOURCE_MESSAGE_NOT_FOUND
+        on_fail: {decision: deny, code: SOURCE_MESSAGE_NOT_FOUND}
       - id: actor-resolved
-        rule: actor.employee_id is trusted and resolved
-        on_fail:
-          decision: blocked
-          code: ACTOR_UNRESOLVED
-    authority:
-      class: ontology-owned
-      system: enterprise-ai-office
+        rule: actor.actor_id is trusted and resolved
+        on_fail: {decision: blocked, code: ACTOR_UNRESOLVED}
+    authority: {class: ontology-owned, system: enterprise-ai-office}
     tool_binding:
-      status: unresolved
+      status: installation-designed
       operation: enterprise-ai-office.prepare_reply_draft
     effects:
       - type: ontology-owned-mutation
         object: DraftReply
-        description: Create an immutable reviewable draft revision with a stable content hash.
+        description: Create one immutable revision and server-computed content hash.
       - type: audit-event
-        description: Record draft creator, source message reference, and draft identity without sending email.
+        description: Record actor, source message, draft revision, and hash.
     failure_behavior:
-      idempotency_key: source_message_id + sender_mailbox_id + actor.employee_id
-      duplicate_same_request: return-existing-draft-or-create-new-explicit-revision
-    audit:
-      enabled: true
+      idempotency_key: source_message_id + sender_mailbox_id + actor.actor_id
+      duplicate_same_request: return-existing-or-create-explicit-new-revision
+    audit: {enabled: true}
 
   approve_reply_draft:
     description: Record explicit trusted-human approval for one exact DraftReply revision/hash.
     target: DraftReply
     parameters:
-      draft_id:
-        type: string
-        required: true
-      expected_revision:
-        type: integer
-        required: true
-      expected_content_hash:
-        type: string
-        required: true
+      draft_id: {type: string, required: true}
+      expected_revision: {type: integer, required: true}
+      expected_content_hash: {type: string, required: true}
     actor_requirements:
       trusted_human_identity: required
-      profile_capability: email.draft.approve
-      entitlements:
-        - email.draft.read
-        - email.draft.approve
+      profile_capability: email.approve
+      entitlements: [email.draft, email.approve]
     preconditions:
-      - id: draft-exists
-        rule: DraftReply(draft_id) exists
-        on_fail:
-          decision: deny
-          code: DRAFT_NOT_FOUND
       - id: revision-match
         rule: DraftReply.revision == expected_revision
-        on_fail:
-          decision: deny
-          code: DRAFT_REVISION_MISMATCH
+        on_fail: {decision: deny, code: DRAFT_REVISION_MISMATCH}
       - id: hash-match
         rule: DraftReply.content_hash == expected_content_hash
-        on_fail:
-          decision: deny
-          code: DRAFT_HASH_MISMATCH
+        on_fail: {decision: deny, code: DRAFT_HASH_MISMATCH}
       - id: actor-resolved
-        rule: actor.employee_id is trusted and resolved
-        on_fail:
-          decision: blocked
-          code: ACTOR_UNRESOLVED
+        rule: actor.actor_id is trusted and resolved
+        on_fail: {decision: blocked, code: ACTOR_UNRESOLVED}
     approval:
       mode: explicit-human-approval
-      requirement: >-
-        The authenticated human explicitly approves the exact outbound draft
-        revision/hash presented for review.
+      requirement: The authenticated HumanActor explicitly approves the exact persisted outbound state.
       binding:
         object_id: DraftReply.draft_id
         revision: DraftReply.revision
         content_hash: DraftReply.content_hash
-      on_missing:
-        decision: deny
-        code: MISSING_HUMAN_APPROVAL
-    authority:
-      class: ontology-owned
-      system: enterprise-ai-office
+      on_missing: {decision: deny, code: MISSING_HUMAN_APPROVAL}
+    authority: {class: ontology-owned, system: enterprise-ai-office}
     tool_binding:
-      status: unresolved
-      operation: enterprise-ai-office.record_send_approval
+      status: installation-designed
+      operation: enterprise-ai-office.approve_reply_draft
     effects:
       - type: ontology-owned-mutation
         object: SendApproval
         description: Create immutable approval evidence for the exact draft revision/hash.
       - type: audit-event
-        description: Record human approver, approved draft evidence, decision, and contract version.
+        description: Record HumanActor, approved revision/hash, and governance contract version.
     failure_behavior:
-      idempotency_key: draft_id + expected_revision + expected_content_hash + actor.employee_id
+      idempotency_key: draft_id + expected_revision + expected_content_hash + actor.actor_id
       duplicate_same_approval: return-existing-approval
-      conflicting_reapproval: require-new-explicit-approval
-    audit:
-      enabled: true
+    audit: {enabled: true}
 
   send_approved_reply:
-    description: Send only the exact DraftReply revision/hash covered by valid human approval.
+    description: Execute one governed logical send for the exact DraftReply revision/hash covered by a valid SendApproval.
     target: DraftReply
     parameters:
-      draft_id:
-        type: string
-        required: true
-      expected_revision:
-        type: integer
-        required: true
-      expected_content_hash:
-        type: string
-        required: true
+      draft_id: {type: string, required: true}
+      expected_revision: {type: integer, required: true}
+      expected_content_hash: {type: string, required: true}
     actor_requirements:
       trusted_human_identity: required
       profile_capability: email.send
-      entitlements:
-        - email.draft.read
-        - email.message.read
-        - email.approval.read
-        - email.send
+      entitlements: [email.read, email.draft, email.approve, email.send]
     preconditions:
-      - id: draft-exists
-        rule: DraftReply(draft_id) exists
-        on_fail:
-          decision: deny
-          code: DRAFT_NOT_FOUND
       - id: source-message-exists
         rule: EmailMessage(DraftReply.source_message_id) exists
-        on_fail:
-          decision: deny
-          code: SOURCE_MESSAGE_NOT_FOUND
+        on_fail: {decision: deny, code: SOURCE_MESSAGE_NOT_FOUND}
       - id: current-revision-match
         rule: DraftReply.revision == expected_revision
-        on_fail:
-          decision: deny
-          code: DRAFT_REVISION_MISMATCH
+        on_fail: {decision: deny, code: DRAFT_REVISION_MISMATCH}
       - id: current-hash-match
         rule: DraftReply.content_hash == expected_content_hash
-        on_fail:
-          decision: deny
-          code: DRAFT_HASH_MISMATCH
+        on_fail: {decision: deny, code: DRAFT_HASH_MISMATCH}
       - id: valid-bound-approval-exists
-        rule: >-
-          related SendApproval exists where
-          SendApproval.draft_revision == DraftReply.revision and
-          SendApproval.draft_content_hash == DraftReply.content_hash
-        on_fail:
-          decision: deny
-          code: VALID_APPROVAL_NOT_FOUND
+        rule: SendApproval(DraftReply.draft_id) exists and SendApproval.draft_revision == DraftReply.revision and SendApproval.draft_content_hash == DraftReply.content_hash
+        on_fail: {decision: deny, code: VALID_APPROVAL_NOT_FOUND}
       - id: actor-resolved
-        rule: actor.employee_id is trusted and resolved
-        on_fail:
-          decision: blocked
-          code: ACTOR_UNRESOLVED
+        rule: actor.actor_id is trusted and resolved
+        on_fail: {decision: blocked, code: ACTOR_UNRESOLVED}
     approval:
       mode: role-based-approval
-      requirement: >-
-        A valid SendApproval bound to the exact current DraftReply revision/hash
-        must already exist. Approval from another revision is stale.
+      requirement: A valid SendApproval for the exact current revision/hash must exist before logical-send claim.
       binding:
         relation: approval_authorizes_draft
         revision: DraftReply.revision
         content_hash: DraftReply.content_hash
-      on_missing:
-        decision: deny
-        code: VALID_APPROVAL_NOT_FOUND
-    authority:
-      class: source-backed
-      system: email-provider
+      on_missing: {decision: deny, code: VALID_APPROVAL_NOT_FOUND}
+    authority: {class: source-backed, system: email-provider}
     tool_binding:
-      status: unresolved
-      operation: email-provider.send_approved_reply
-      note: No SMTP/API/MCP runtime send binding is authorized by this design fixture.
+      status: installation-designed
+      operation: enterprise-ai-office.send_approved_reply
+      note: Governance owns authorization and provider adapter invocation; no generic SMTP primitive is exposed.
     effects:
       - type: external-source-mutation
         system: email-provider
-        description: Attempt delivery of the exact approved outbound reply through the selected provider.
+        description: Submit the immutable approved payload through the narrow provider adapter.
       - type: audit-event
-        description: Link EAO decision/approval evidence to the provider send result/reference.
+        description: Persist logical-send, provider-attempt, normalized outcome, and reconciliation evidence.
     failure_behavior:
       stale_approval: deny
       ambiguous_provider_outcome: reconciliation-required
       blind_retry_after_ambiguous_outcome: forbidden
-      retry: only-after-confirmed-not-sent-or-explicit-reconciliation
+      retry: only-inside-same-logical-send-after-confirmed-not-sent
     audit:
       enabled: true
       record:
-        - timestamp
         - human_actor_id
         - profile_actor_id
-        - action
-        - target_id
-        - approved_revision
-        - approved_content_hash
         - approval_reference
-        - contract_version
+        - draft_revision
+        - draft_content_hash
+        - logical_send_id
+        - provider_result_reference
         - decision
         - reason_code
-        - external_result_reference
-        - reconciliation_state
 
 operation_surface:
   reads:
@@ -637,93 +476,18 @@ operation_surface:
     - prepare_reply_draft
     - approve_reply_draft
     - send_approved_reply
-  intentionally_absent:
-    - generic_imap_command
-    - generic_smtp_send
-    - send_arbitrary_email
-    - mailbox_delete
-    - mailbox_move
-    - mailbox_flag_write
-    - bulk_send
-    - campaign_send
-    - execute_sql
 
-validation_scenarios:
-  - id: authorized-read
-    intent: Authorized human/Profile reads one allowed provider-backed message.
-    expected: pass-if-effective-mailbox-scope-and-provider-binding-exist
+installation_contracts:
+  identity_authorization: docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
+  governance_runtime: docs/V2-GOVERNANCE-RUNTIME.md
+  send_reconciliation: docs/V2-SEND-RECONCILIATION.md
+  recovery_clean_host: docs/V2-RECOVERY-CLEAN-HOST.md
 
-  - id: unresolved-human-read
-    intent: Mail tool exists but trusted human identity cannot be resolved.
-    expected:
-      decision: blocked
-      code: ACTOR_UNRESOLVED
-    demonstrates:
-      - tool possession is not human authorization
-
-  - id: prepare-draft-no-send
-    intent: Prepare a reply from authorized message context.
-    expected: pass-with-ontology-owned-draft-and-no-provider-send-effect
-
-  - id: approve-exact-draft
-    intent: Human approves the exact draft revision/hash presented for review.
-    expected: pass-if-human-authorized
-    demonstrates:
-      - explicit approval
-      - exact approval subject binding
-
-  - id: edit-after-approval
-    intent: Attempt to send a materially changed draft using approval from the previous revision/hash.
-    expected:
-      decision: deny
-      code: VALID_APPROVAL_NOT_FOUND
-    demonstrates:
-      - stale approval rejection
-
-  - id: approved-send
-    intent: Send the exact draft revision/hash covered by valid approval.
-    expected: pass-only-after-real-provider-binding-exists
-    demonstrates:
-      - narrow Named Action
-      - provider source-backed effect
-      - approval validation
-      - audit linkage
-
-  - id: ambiguous-send-result
-    intent: Provider outcome becomes uncertain after submission.
-    expected:
-      decision: reconciliation-required
-    demonstrates:
-      - no blind retry
-      - duplicate-send prevention over optimistic automation
-
-  - id: generic-send-attempt
-    intent: Send arbitrary text through a generic SMTP primitive.
-    expected:
-      decision: deny-by-absence
-      reason: Generic SMTP/send-anything is outside the approved operation surface.
-
-experiment_findings:
-  contract_coverage:
-    object_types: supported
-    properties: supported
-    relations: supported
-    object_visibility: supported
-    read_operations: supported
-    authority: supported
-    named_actions: supported
-    preconditions: supported
-    approval_subject_binding: supported
-    effects: supported
-    actor_requirements: supported
-    tool_binding: supported
-    audit: supported
-    versioning: supported
-  design_conclusion:
-    area: minimum-governed-email-loop
-    observation: >-
-      The v2 email workflow can be represented using provider-backed Mailbox and
-      EmailMessage objects plus EAO-owned DraftReply and SendApproval objects,
-      without introducing CRM, Calendar, a dedicated Ontology Runtime, or a
-      shadow mailbox database.
-    runtime_status: design-only
+non_goals:
+  - crm-model
+  - calendar-model
+  - email-thread-shadow-database
+  - generic-smtp-tool
+  - bulk-or-campaign-send
+  - llm-inferred-approval
+  - automatic-retry-after-ambiguous-send
