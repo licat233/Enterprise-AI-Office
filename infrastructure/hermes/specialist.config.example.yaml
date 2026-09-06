@@ -1,0 +1,44 @@
+# Generic Enterprise AI Office Hermes specialist Profile template.
+# Instantiate only when the company configuration defines a real specialist role.
+# Replace every placeholder and validate the exact Hermes version before use.
+
+model:
+  default: "<SELECT_MODEL>"
+  provider: "<SELECT_PROVIDER>"
+
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+
+# The API-facing toolset must match the role's approved capability boundary.
+# A knowledge-only business role should normally expose only its scoped WeKnora
+# MCP toolset. Privileged technical roles require an explicit separate review.
+platform_toolsets:
+  api_server:
+    - mcp-<UNIQUE_WEKNORA_MCP_SERVER_NAME>
+
+mcp_servers:
+  <UNIQUE_WEKNORA_MCP_SERVER_NAME>:
+    command: uv
+    args:
+      - --directory
+      - "<ABSOLUTE_WEKNORA_MCP_SERVER_DIRECTORY>"
+      - run
+      - run_server.py
+    env:
+      WEKNORA_API_KEY: "${WEKNORA_API_KEY}"
+      WEKNORA_BASE_URL: "${WEKNORA_BASE_URL}"
+    tools:
+      include:
+        - list_knowledge_bases
+        - get_knowledge_base
+        - hybrid_search
+        - list_knowledge
+        - get_knowledge
+        - list_chunks
+      resources: false
+      prompts: false
+
+# Add additional MCP servers or platform toolsets only from the role's declared
+# capabilities. A Profile is not a host security sandbox; powerful tools require
+# an explicit workspace and credential boundary.
