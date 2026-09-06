@@ -199,6 +199,7 @@ capabilities:
     implementation:
       - docs/CLIENT-RBAC.md
       - docs/PROFILE-STANDARD.md
+      - infrastructure/hermes/features/EMPLOYEE-MEMORY.md
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       sections:
