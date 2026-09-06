@@ -121,6 +121,19 @@ capabilities:
     allow_all_users: false
     routes: []
 
+  # Email is a governed operational integration, not part of the core baseline.
+  # A provider-specific capability closes only after the real provider is selected.
+  email:
+    enabled: false
+    provider: null # currently documented provider playbook: tencent-exmail
+    pilot_mailboxes: []
+    allowed_profiles: []
+    authorized_groups: []
+    read_folders:
+      - INBOX
+    send_requires_human_approval: true
+    attachments_enabled: false
+
   remote_access:
     enabled: false
     method: null # tailscale | cloudflare-access | vpn | approved-equivalent
@@ -186,4 +199,5 @@ secrets:
     - hermes-webui-password
     - coding-agent-authentication
     - messaging-platform-credentials
+    - email-mailbox-client-credentials
     - sso-client-credentials
