@@ -157,6 +157,37 @@ capabilities:
       - delivery policy
       - acceptance result
 
+  email_tencent_exmail:
+    kind: conditional
+    enabled_when: capabilities.email.enabled == true and capabilities.email.provider == tencent-exmail
+    implementation:
+      - docs/V2-SCOPE.md
+      - docs/ONTOLOGY.md
+      - infrastructure/email/tencent-exmail/README.md
+    required_company_values:
+      - selected pilot mailbox
+      - mailbox owner/business purpose
+      - authorized human users/groups
+      - authorized Hermes Profiles
+      - allowed mailbox folders/read scope
+      - client credential/security-login decision
+      - outbound human-approval policy
+      - controlled initial recipient/test scope
+      - attachment policy
+    acceptance:
+      document: docs/acceptance/TENCENT-EXMAIL.md
+      section: Tencent Enterprise Mail Integration Acceptance
+    records:
+      - provider
+      - selected mailbox identifiers, never credentials
+      - authorized human/Profile scope
+      - IMAP/SMTP endpoint mode
+      - secret storage class/location, never secret value
+      - read-only behavior result
+      - approval-binding result
+      - send/reconciliation result
+      - acceptance result
+
   remote_access:
     kind: conditional
     enabled_when: capabilities.remote_access.enabled == true
