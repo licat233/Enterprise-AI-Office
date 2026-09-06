@@ -2,17 +2,44 @@
 
 This is the primary execution entry point for an AI engineering agent deploying Enterprise AI Office.
 
-Read `AGENTS.md` first. Use `docs/DEPLOYMENT.md` for implementation detail and `docs/ACCEPTANCE-TESTS.md` for deeper validation.
+Read `AGENTS.md` first. Read `docs/COMPLETENESS.md` and `config/capabilities.yaml` before resolving target state. Use `docs/DEPLOYMENT.md` for implementation detail and `docs/ACCEPTANCE-TESTS.md` for validation.
 
 ## 1. Goal
 
-A single deployment request should be enough for a capable AI engineering agent to drive the deployment from host inspection to a validated employee workflow.
+A single deployment request should be enough for a capable AI engineering agent to drive the requested deployment from host inspection to its declared readiness level.
 
-The agent may stop for genuine human input such as missing credentials, an OS permission that requires human approval, an unresolved destructive conflict, or company-specific business choices that are not present in configuration.
+The agent may stop for genuine human input such as missing credentials, an OS permission that requires human approval, an unresolved destructive conflict, or a company-specific business choice that is absent from configuration.
 
-The agent should not stop merely to ask whether to perform steps that are already part of this Golden Path.
+The agent must not stop merely to ask whether to perform a phase that is already required by this Golden Path.
 
-## 2. Core Ready target
+## 2. Readiness levels
+
+The adopting company's configuration declares one target:
+
+```text
+core-ready
+configured-ready
+production-ready
+```
+
+Semantics are defined in `docs/COMPLETENESS.md`.
+
+In short:
+
+```text
+CORE READY
+= baseline employee workflow works
+
+CONFIGURED READY
+= Core Ready + every company-enabled capability deployed and accepted
+
+PRODUCTION READY
+= Configured Ready + production recovery/security/operations controls accepted
+```
+
+Do not stop at Core Ready when the requested target is higher.
+
+## 3. Core employee path
 
 The baseline employee workflow is:
 
@@ -38,16 +65,14 @@ Employee plane
 └── Hermes `general` Profile
 
 Knowledge
-└── WeKnora
+└── company-defined WeKnora Knowledge Base(s)
 ```
 
-Additional Profiles, groups, Knowledge Bases, Skills, integrations, automation, coding workers, or messaging are added only when the company configuration requires them.
+Repository templates are a capability library, not a deployment checklist.
 
-## 3. Validated reference stack
+## 4. Validated reference stack
 
-The machine-readable reproducibility baseline is [`config/validated-stack.yaml`](config/validated-stack.yaml).
-
-The first validated Golden Path is based on the successful local reference deployment recorded in `state/DEPLOYMENT-STATE.md`:
+The first validated core path is recorded in `config/validated-stack.yaml` and `state/DEPLOYMENT-STATE.md`:
 
 ```text
 Host: Apple Silicon macOS
@@ -58,32 +83,33 @@ Open WebUI: v0.11.3
 Employee Hermes long-term memory: disabled
 ```
 
-These versions are a reproducibility baseline, not permanent project requirements.
+For a deployment intended to reproduce this path, use the tested versions unless the task explicitly includes upgrade qualification. Do not silently replace a tested version with `main`, `latest`, or a newer release during the same deployment.
 
-For a deployment intended to reproduce the validated path, use the tested versions unless the task explicitly includes upgrade qualification. Do not silently replace a tested version with `main`, `latest`, or a newer release during the same deployment.
+Optional components not present in the first reference deployment require their own compatibility check and exact version/commit recording when enabled.
 
-## 4. Required inputs
+## 5. Required inputs
 
 Before mutation, resolve from the company configuration or protected operator input:
 
 - company identity and timezone;
+- `deployment.target_readiness`;
 - model/provider credentials required by the selected stack;
-- administrator identity/credential provisioning method;
-- intended employee access scope;
-- any explicitly requested specialist roles or optional integrations;
+- administrator provisioning method/credential;
+- employee access scope;
+- enabled optional capabilities and their company-specific parameters;
 - protected runtime/secrets location.
-
-Use `config/company.example.yaml` as the public schema reference and `config/.env.example` as the non-secret input inventory. Real deployment values belong in a protected company-specific layer.
 
 Generate internal service secrets when safe to do so and store them outside Git with restrictive permissions.
 
-If a required external credential is missing, report exactly what is missing and stop with `BLOCKED — REQUIRED INPUT` rather than guessing.
+If a required external credential, identity-provider registration, platform token, workspace choice, or other real authority is missing, report exactly what is missing and stop with:
 
-## 5. Execution contract
+```text
+BLOCKED — REQUIRED INPUT: <specific input>
+```
 
-Execute the following phases in order. Do not declare completion after installation alone.
+Do not guess.
 
-### Phase A — Inspect
+## 6. Phase A — Inspect
 
 1. Read the required repository documents from `AGENTS.md`.
 2. Run `scripts/preflight.sh` and inspect any existing installation before changing it.
@@ -92,131 +118,179 @@ Execute the following phases in order. Do not declare completion after installat
 
 Exit condition: the target host and existing state are understood.
 
-### Phase B — Resolve target state
+## 7. Phase B — Resolve target and capability closure
 
 1. Read the company configuration.
-2. Read `config/validated-stack.yaml` for the tested reference versions and baseline feature posture.
-3. Start from the baseline `default/admin + general` Profile model.
-4. Build only the groups, Knowledge Bases, Profiles, Skills, tools, and integrations required by that configuration.
-5. Resolve runtime paths and protected secret locations.
-6. Identify all required secrets without printing them.
+2. Read `config/capabilities.yaml`.
+3. Resolve the requested readiness level.
+4. Start from `default/admin + general` as the Profile baseline.
+5. Build the exact enabled capability set from company configuration.
+6. For every enabled capability, resolve its implementation path, required protected inputs, acceptance test, and state fields.
+7. Resolve exact component versions/runtime paths.
+8. Produce an internal capability closure table before mutation.
 
-Exit condition: there is one unambiguous target state and no unresolved required input.
+Do not infer organization structure or optional features from repository templates.
 
-### Phase C — Deploy WeKnora
+Exit condition: there is one unambiguous target state; every enabled capability has an implementation/acceptance path; required human inputs are resolved.
 
-1. Deploy the pinned WeKnora release using the supported upstream deployment plus `infrastructure/weknora/` guidance.
-2. Keep database/cache services internal.
+## 8. Phase C — Deploy WeKnora
+
+1. Deploy the pinned WeKnora release using the supported upstream deployment plus the repository adapter.
+2. Keep database/cache/parser internals private.
 3. Persist database and uploaded documents.
 4. Configure the required embedding/chat model roles.
-5. Create only the Knowledge Bases declared by company configuration.
-6. Validate document ingestion and retrieval with a small non-sensitive seed document before continuing.
+5. Create only Knowledge Bases declared by company configuration.
+6. Validate ingestion/retrieval with a small non-sensitive seed document before continuing.
 
 Exit condition: WeKnora is healthy and retrieval returns the seeded source.
 
-### Phase D — Deploy Hermes
+## 9. Phase D — Deploy Hermes
 
-1. Install/configure the pinned Hermes release host-native for the validated macOS path.
-2. Use the baseline artifacts in `infrastructure/hermes/` as the starting configuration:
-   - `default.config.example.yaml`;
-   - `default.env.example`;
-   - `general.config.example.yaml`;
-   - `general.env.example`.
-3. Preserve the privileged default/admin Profile as control-plane only.
-4. Create the `general` employee Profile from `profiles/general/SOUL.md`.
-5. Fill the WeKnora MCP path/URL/key placeholders with protected deployment values.
-6. Add specialist Profiles only when requested by company configuration.
-7. Keep normal employee API toolsets least-privilege; the baseline General template exposes only the approved read-only WeKnora MCP surface.
-8. Use a distinct API credential for every employee-facing Profile.
-9. Keep employee long-term memory disabled until the documented cross-user isolation gate passes.
+1. Install/configure the pinned Hermes release using its supported upstream method.
+2. Preserve privileged default/admin as control-plane only.
+3. Create `general` from the repository SOUL/config templates.
+4. Create specialist Profiles only when selected by company configuration, using the generic specialist template plus the selected role SOUL.
+5. Register WeKnora through supported MCP/API integration.
+6. Give normal employee Profiles least-privilege retrieval tools unless their declared work requires more.
+7. Use a distinct API credential for every employee-facing Profile.
+8. Keep employee long-term memory disabled unless the configured memory capability passes its isolation gate.
+9. Configure explicit served-Profile allowlisting when supported by the selected release.
 
-Exit condition: the `general` Profile answers a grounded company query through its supported API and exposes source evidence.
+Exit condition: every enabled employee Profile responds through its supported API with its intended capability boundary; `general` answers a grounded company query with source evidence.
 
-### Phase E — Deploy Open WebUI
+## 10. Phase E — Deploy Open WebUI and baseline RBAC
 
-1. Deploy the pinned Open WebUI release using `infrastructure/open-webui/docker-compose.yml` as the validated reference adapter, reviewing it against the selected pinned release before reuse.
-2. Persist Open WebUI state.
-3. Provision the administrator, then disable open self-signup unless company policy says otherwise.
+1. Deploy the pinned Open WebUI release with persistent state.
+2. Provision the administrator using the validated bootstrap mechanism.
+3. Keep open self-signup disabled unless company policy explicitly enables it.
 4. Create baseline groups `All-Employees` and `AI-Admins`.
-5. Create a server-side General Assistant connection to the Hermes `general` Profile.
-6. Do not expose the Hermes default/admin Profile as an employee assistant.
-7. Set ordinary employee permissions to the validated baseline:
+5. Create server-side employee Assistant connections to the matching Hermes employee Profiles.
+6. Never expose Hermes default/admin as an ordinary employee Assistant.
+7. Apply the configured ordinary employee permissions. The validated baseline is:
    - normal chat: enabled;
    - history: enabled;
    - file upload: enabled unless company policy disables it;
    - user System Prompt editing: disabled;
    - Advanced Parameters editing: disabled.
-8. Add specialist groups and assistant connections only from company configuration.
+8. Create specialist groups/resources only from company configuration.
 
-Exit condition: a normal employee account sees only permitted assistants and can use General Assistant successfully.
+Exit condition: ordinary employee accounts see only permitted Assistants and can use General Assistant successfully.
 
-### Phase F — Employee workflow acceptance
+## 11. Phase F — Core employee acceptance
 
-From the real employee client, verify:
+Run Part A of `docs/ACCEPTANCE-TESTS.md` from the actual employee-facing UI as well as the required backend boundaries.
 
-1. employee login;
-2. General Assistant visibility;
-3. normal chat;
-4. grounded WeKnora answer;
-5. readable source evidence;
-6. follow-up context;
-7. conversation history after refresh/re-login;
-8. file upload when enabled;
-9. default/admin is not exposed;
-10. employee Profile has no unapproved terminal/system tools;
-11. unauthorized direct resource access fails closed.
+Do not substitute service health checks for employee-client validation.
 
-Do not substitute backend health checks for the employee-client test.
+Exit condition: `CORE READY` is PASS.
 
-Exit condition: all enabled Core Ready checks pass.
+If the requested target is `core-ready`, continue to state recording/reporting. Otherwise continue.
 
-### Phase G — Record and report
+## 12. Phase G — Close every enabled capability
 
-1. Update `state/DEPLOYMENT-STATE.md` with the actual deployed versions, paths, enabled Profiles, access model, memory state, and acceptance results.
-2. Record material deployment changes in `state/CHANGELOG.md` when operating an existing deployment.
-3. Report one of:
+For each company-enabled conditional capability in `config/capabilities.yaml`:
+
+1. open its referenced implementation playbook/adapter;
+2. resolve version-specific upstream behavior against the selected pinned release;
+3. deploy/configure only that requested capability;
+4. enforce the documented security boundary;
+5. run the matching conditional acceptance test;
+6. record actual state/evidence.
+
+Typical capability paths include:
+
+```text
+specialist Profiles → Profile standard + generic Profile templates
+hermes-webui         → infrastructure/hermes-webui/
+coding delegation    → infrastructure/coding-agents/
+Kanban / Cron        → infrastructure/hermes/features/
+messaging            → infrastructure/hermes/features/
+remote access / SSO  → infrastructure/access/
+long-term memory     → Profile/RBAC memory isolation rules
+```
+
+An enabled capability may not be silently skipped, disabled, or deferred to obtain a green result.
+
+Exit condition: all enabled conditional capabilities PASS or execution stops at a specific blocker/failure.
+
+When Core Ready and all enabled conditional capabilities pass, record `CONFIGURED READY`.
+
+If the requested target is `configured-ready`, continue to state recording/reporting. Otherwise continue.
+
+## 13. Phase H — Production readiness closure
+
+For `production-ready`, implement and validate the production controls selected by the capability registry and company configuration:
+
+- production knowledge/data boundary review;
+- backup plus protected/off-primary-disk recovery strategy;
+- isolated restore validation;
+- startup/recovery policy;
+- secrets protection/recovery;
+- network and admin access review;
+- operational health/ownership;
+- representative production parsing/Golden Questions/security tests.
+
+Use:
+
+- `docs/BACKUP-RESTORE.md`;
+- `docs/SECURITY.md`;
+- `docs/OPERATIONS.md`;
+- `scripts/backup.sh`;
+- `scripts/restore.sh`;
+- `scripts/health-check.sh`;
+- Part C of `docs/ACCEPTANCE-TESTS.md`.
+
+Exit condition: all applicable production controls PASS and `PRODUCTION READY` can be supported by evidence.
+
+## 14. Phase I — Record and report
+
+Update `state/DEPLOYMENT-STATE.md` with actual runtime truth:
+
+- requested and achieved readiness;
+- component versions/commits;
+- paths/storage;
+- enabled Knowledge Bases;
+- enabled Profiles;
+- groups/Assistant mappings;
+- model/provider roles;
+- capability enablement table;
+- memory state;
+- network/access boundary;
+- backup/recovery state when applicable;
+- acceptance results;
+- known limitations.
+
+Record material changes in `state/CHANGELOG.md` when operating an existing deployment.
+
+Report one of:
 
 ```text
 CORE READY
-BLOCKED — REQUIRED INPUT
+CONFIGURED READY
+PRODUCTION READY
+BLOCKED — REQUIRED INPUT: <specific missing authority/input>
 FAIL — <specific failed boundary>
 ```
 
-Do not report `CORE READY` while an enabled core acceptance check is unresolved.
+Never report a higher readiness level while a required lower level or enabled capability remains unresolved.
 
-## 6. Core Ready vs Production Ready
-
-`CORE READY` proves the basic enterprise AI office workflow works for employees.
-
-`PRODUCTION READY` is a separate higher bar. Depending on the deployment it may additionally require:
-
-- production knowledge and access review;
-- protected/off-host backup and restore validation;
-- startup/reboot recovery policy;
-- remote/private access controls;
-- enterprise identity/SSO if required;
-- monitoring/operational ownership;
-- production secrets handling;
-- optional integrations actually used by the company.
-
-Do not add optional systems merely to make the deployment look more complete.
-
-## 7. Dry-run mode
+## 15. Dry-run mode
 
 When asked to validate deployability without installing anything:
 
 1. run read-only preflight;
-2. read company configuration and `config/validated-stack.yaml`;
-3. resolve the exact target state, versions, runtime paths, and protected inputs;
-4. map every Golden Path phase to the repository artifact or pinned upstream mechanism that implements it;
-5. produce the phase-by-phase actions and expected exit evidence;
-6. identify only genuine required human inputs;
-7. do not mutate the host.
+2. read company configuration and capability registry;
+3. resolve exact target state and requested readiness;
+4. build the capability closure table;
+5. resolve versions and implementation paths;
+6. produce phase-by-phase actions and expected evidence;
+7. identify only genuine required human inputs;
+8. do not mutate the host.
 
-A dry run is successful only if the agent can reach an unambiguous execution plan without inventing company requirements.
+A dry run is successful only when the agent can reach an unambiguous execution plan for every enabled capability without inventing company requirements.
 
-## 8. Final rule
+## 16. Final rule
 
-The repository should make routine deployment decisions for the agent.
+The repository should make routine integration decisions for the deployment agent.
 
-Human intervention is for missing authority, secrets, permissions, or real business choices — not for reminding the agent to connect the components, configure baseline RBAC, test the employee client, or record deployment state.
+Human intervention is for missing authority, secrets, permissions, or real business choices — not for reminding the agent to connect components, configure baseline RBAC, implement an already-enabled capability, run acceptance, or record deployment state.
