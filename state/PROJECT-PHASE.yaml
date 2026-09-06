@@ -1,16 +1,64 @@
-schema_version: 1
+schema_version: 2
 project: Enterprise AI Office
+repository_role: blueprint_repository
 release_track: v2
 
-# This file is the sole repository authority for the current work phase.
-# Agents must not infer phase from the presence of prototypes, adapters, tests,
-# implementation plans, deployment documents, acceptance contracts, or prior chat wording.
-phase: design
+# This repository designs two things:
+# 1. what the Enterprise AI Office should be;
+# 2. how a capable AI engineering agent should install and validate it.
+#
+# Developing the installation blueprint is still repository design work.
+# It is NOT the same thing as deploying a real company instance.
 
-phase_authority:
-  transition_requires_explicit_human_authorization: true
+blueprint_lifecycle:
+  current_phase: system_design
+  phases:
+    - system_design
+    - installation_design
+    - blueprint_validation
+    - release_ready
+  transition_requires_explicit_human_direction: true
   implicit_transition_allowed: false
-  continuation_words_do_not_change_phase:
+
+  system_design:
+    purpose: define what the Enterprise AI Office is and how its capabilities, authorities, workflows, security boundaries, and user experience should work
+    allowed:
+      - architecture and product design
+      - capability scope and non-goals
+      - threat modeling and authorization design
+      - Ontology/schema design
+      - provider and upstream research
+      - sanitized examples and synthetic fixtures
+      - design-support prototypes
+      - offline tests and structural validation
+      - acceptance criteria design
+      - identify installation requirements that the later installation blueprint must satisfy
+
+  installation_design:
+    purpose: turn the approved system design into an agent-readable and agent-executable installation and acceptance blueprint
+    allowed:
+      - deployment architecture design
+      - installation sequencing
+      - configuration schemas and templates
+      - install/provision scripts and adapters
+      - secret-input contracts without real secret values
+      - idempotency and reconciliation design
+      - rollback and recovery design
+      - clean-host setup instructions
+      - machine-readable capability closure
+      - installation-time acceptance contracts
+      - synthetic or isolated installation rehearsals
+    note: installation_design does not authorize installation onto any real company system
+
+  blueprint_validation:
+    purpose: prove that a fresh capable AI agent can understand the repository and reproduce the designed system on an explicitly approved clean validation target
+    note: validation targets must be explicitly authorized and may be synthetic, isolated, or a designated test host; this phase does not imply production deployment
+
+  release_ready:
+    purpose: declare that the repository sufficiently explains both the system design and installation path for adoption
+
+continuation_language:
+  does_not_change_blueprint_phase:
     - continue
     - keep going
     - start
@@ -22,66 +70,40 @@ phase_authority:
     - 开始吧
     - 下一步
     - 好的
-  required_transition_intent_examples:
-    - close the design phase and begin implementation
-    - implementation is now authorized
-    - begin real deployment
-    - 结束设计阶段，开始真实实施
-    - 现在开始真实搭建
+  interpretation: continue valid work inside the current blueprint phase unless the human explicitly changes the blueprint phase
 
-current_authorization:
-  design_and_research: true
-  documentation_changes: true
-  architecture_and_security_review: true
-  offline_prototypes: true
-  offline_tests_and_static_validation: true
+# A real deployment is a separate consumer activity, not the automatic next
+# phase of repository development.
+real_deployment_task:
+  active: false
+  activation_requires_explicit_human_request: true
+  requires_explicit_target: true
+  must_not_be_inferred_from:
+    - blueprint phase
+    - installation plan existence
+    - install scripts existence
+    - provider selection
+    - prototype completion
+    - offline test pass
+    - acceptance plan existence
+    - continuation language
+  examples_of_explicit_activation_intent:
+    - deploy this blueprint to the designated Mac Studio
+    - begin the real ARMOR deployment on the approved host
+    - 在指定的 Mac Studio 上开始真实部署
+    - 现在开始在真实环境安装
 
-  real_credentials: false
-  real_personal_or_employee_identifiers_in_public_repo: false
-  real_provider_account_access: false
-  real_mailbox_access: false
-  real_profile_binding: false
-  real_imap_or_smtp_runtime: false
-  production_or_live_runtime_mutation: false
-  customer_facing_actions: false
-
-phase_rules:
-  design:
-    allowed:
-      - architecture and product design
-      - scope and non-goal decisions
-      - threat modeling and authorization design
-      - Ontology/schema design
-      - provider and upstream research
-      - sanitized examples and synthetic fixtures
-      - offline prototypes
-      - offline unit tests and structural validation
-      - future implementation planning
-      - acceptance-test design
-    prohibited:
-      - request or use real provider credentials merely to continue design
-      - connect to a real mailbox or external business system
-      - bind real employees, Profiles, accounts, or provider identities
-      - mutate a live or production runtime
-      - treat a prototype or passing offline test as deployed capability
-      - start a future implementation stage because its plan already exists
-
-  implementation:
-    entry_condition: explicit human authorization that implementation may begin
-    allowed_after_entry:
-      - resolve implementation-time protected inputs as genuinely required
-      - perform bounded runtime integration work
-      - run real acceptance tests within the authorized scope
-    still_prohibited_without_separate_authority:
-      - destructive production changes
-      - customer-facing sends or publications outside the approved action gate
+public_repository_data_policy:
+  real_credentials: prohibited
+  real_personal_or_employee_identifiers: prohibited
+  use_synthetic_identifiers_in_examples_and_tests: true
 
 interpretation_rules:
-  - The current phase outranks task momentum and prior assistant assumptions.
-  - A request to continue means continue the current phase unless the human explicitly changes phase.
-  - A future implementation plan is descriptive, not executable authority.
-  - Repository code may exist as a design-support prototype while phase remains design.
-  - Missing real credentials are not blockers during design because real credentials are out of scope.
-  - If a requested action would cross the phase boundary, do not perform it; explain the boundary and continue with the closest valid work inside the current phase.
+  - The repository is a system-design and installation-blueprint product, not a live deployment record.
+  - System design comes before installation design for a new release track unless the human explicitly changes that order.
+  - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
+  - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
+  - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
+  - Missing real credentials are never blockers for blueprint development because real credentials belong only to an explicitly activated deployment task.
 
 last_reviewed: 2026-09-06
