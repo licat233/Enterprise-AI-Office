@@ -90,9 +90,16 @@ blueprint_lifecycle:
         approval_action: infrastructure/open-webui/v2_approve_draft_action.py
         evidence: GOVERNANCE RUNTIME CONTRACT FROZEN
       id_6_send_reconciliation:
-        status: next
+        status: complete
+        completed_on: 2026-09-07
+        contract: docs/V2-SEND-RECONCILIATION.md
+        schema_migration: infrastructure/email/governance/migrations/002_send_reconciliation.sql
+        offline_schema_test: infrastructure/email/governance/test_send_reconciliation.py
+        provider_adapter: infrastructure/email/tencent-exmail/smtp_send_adapter.py
+        provider_adapter_test: infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
+        evidence: SEND / RECONCILIATION INSTALLATION CONTRACT FROZEN
       id_7_recovery_acceptance:
-        status: not_started
+        status: next
     note: installation_design does not authorize installation onto any real company system
 
   blueprint_validation:
@@ -151,10 +158,10 @@ interpretation_rules:
   - The repository is a system-design and installation-blueprint product, not a live deployment record.
   - The v2 baseline System Design milestone is complete and frozen.
   - The current blueprint phase is installation_design following explicit human direction on 2026-09-06.
-  - ID-1 through ID-5 are complete; ID-6 governed provider send and reconciliation is the next Installation Design work package.
+  - ID-1 through ID-6 are complete; ID-7 rollback/recovery/clean-host acceptance is the next Installation Design work package.
   - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
   - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
   - Missing real credentials are never blockers for blueprint development because credentials belong to a real deployment or explicitly approved validation task.
 
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
