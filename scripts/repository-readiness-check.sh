@@ -129,8 +129,9 @@ done
 
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
 require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'
-require_text state/PROJECT-PHASE.yaml 'current_phase: system_design' 'Current blueprint phase is system design'
-require_text state/PROJECT-PHASE.yaml 'installation_design' 'Blueprint lifecycle includes installation design'
+require_text state/PROJECT-PHASE.yaml 'current_phase: installation_design' 'Current blueprint phase is installation design'
+require_text state/PROJECT-PHASE.yaml 'status: complete' 'System design remains complete'
+require_text state/PROJECT-PHASE.yaml 'status: active' 'Installation design is active'
 require_text state/PROJECT-PHASE.yaml 'blueprint_validation' 'Blueprint lifecycle includes validation'
 require_text state/PROJECT-PHASE.yaml 'implicit_transition_allowed: false' 'Implicit blueprint transition is disabled'
 require_text state/PROJECT-PHASE.yaml 'real_deployment_task:' 'Real deployment has a separate gate'
@@ -142,7 +143,8 @@ require_text AGENTS.md 'A real company deployment is a separate consumer activit
 require_text AGENTS.md 'Installation blueprint is not a live installation' 'Agent contract prevents installation-design drift'
 require_text AGENTS.md 'Blueprint milestones' 'Agent contract separates blueprint maturity'
 require_text AGENTS.md 'Deployed-system readiness' 'Agent contract separates deployment readiness'
-require_text docs/V2-PHASE-STATUS.md 'BLUEPRINT PHASE: SYSTEM DESIGN' 'v2 status matches system-design phase'
+require_text docs/V2-PHASE-STATUS.md 'BLUEPRINT PHASE: INSTALLATION DESIGN' 'v2 status matches installation-design phase'
+require_text docs/V2-PHASE-STATUS.md 'SYSTEM DESIGN: COMPLETE' 'v2 status preserves completed system design'
 require_text docs/V2-PHASE-STATUS.md 'REAL DEPLOYMENT TASK: INACTIVE' 'v2 status says real deployment inactive'
 
 # Guard against high-impact deployment/capability contract drift.
