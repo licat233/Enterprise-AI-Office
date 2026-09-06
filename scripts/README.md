@@ -1,23 +1,49 @@
 # Operations Scripts
 
-This directory contains small, reviewable helper scripts for Enterprise AI Office.
+This directory contains small, reviewable helpers for Enterprise AI Office.
 
-The scripts are not a replacement for understanding the deployed upstream versions.
+Scripts support the deployment contract; they do not replace understanding the selected upstream versions or the AI agent execution flow in `DEPLOY.md`.
 
 ## Principles
 
-- Read-only health/preflight checks are preferred where possible.
-- Restore actions require an explicit new target and confirmation; they do not stop,
-  overwrite, or clean the live demo.
-- Production secrets must not be embedded in scripts.
-- Version-specific commands should be introduced only after validation against the pinned upstream release.
-- A generic script should fail clearly rather than guess service names/paths.
+- Prefer read-only inspection/checks where possible.
+- Fail clearly rather than guess service names, paths, capabilities, or secrets.
+- Production secrets never belong in scripts.
+- Version-specific commands belong here only after validation against the selected runtime.
+- Restore actions must target an isolated/new location unless an explicitly reviewed recovery procedure says otherwise.
 
-## Current scripts
+## `repository-readiness-check.sh`
 
-### `health-check.sh`
+Static, non-installing repository self-check.
 
-Read-only high-level health check for:
+Run:
+
+```sh
+sh scripts/repository-readiness-check.sh
+```
+
+It verifies that the repository still contains the execution contracts, machine-readable configuration, core adapters, conditional capability playbooks, acceptance gates, state template, and production-control helpers needed to resolve a deployment.
+
+It also checks a few critical cross-references such as:
+
+```text
+DEPLOY.md → config/capabilities.yaml
+AGENTS.md → CONFIGURED READY
+ACCEPTANCE-TESTS → Configured Ready gate
+company config → target_readiness
+```
+
+A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
+
+## `preflight.sh`
+
+Read-only host inventory before installation/change. It inspects OS/architecture, resources, common tools, Docker availability, existing Hermes state/runtime directories, and repository status.
+
+Warnings are expected for optional components and should be interpreted against active company configuration.
+
+## `health-check.sh`
+
+Read-only high-level deployed-system health check for:
 
 - disk usage;
 - Docker availability;
@@ -25,34 +51,23 @@ Read-only high-level health check for:
 - Hermes CLI/status when available;
 - optional backup freshness marker.
 
-Configure URLs/thresholds through environment variables; see `config/.env.example`.
+Configure URLs/thresholds through the protected deployment environment; see `config/.env.example` for placeholders.
 
-### `backup.sh`
+## `backup.sh`
 
-Backup helper for the validated MacBook/OrbStack demo. It discovers the running
-WeKnora PostgreSQL, WeKnora file, and Open WebUI Docker volumes, then creates:
+Backup helper derived from the validated MacBook/OrbStack reference runtime. It discovers the inspected WeKnora/Open WebUI/Hermes state and creates the tested classes of backup material, including PostgreSQL dump, persistent-data archives, runtime configuration, Hermes state, protected credential recovery material, manifest, and checksums.
 
-- a custom-format WeKnora PostgreSQL dump and `pg_restore --list` validation;
-- WeKnora document storage and Open WebUI data-volume archives;
-- WeKnora/Open WebUI runtime configuration;
-- Hermes Profiles, state, Skills/MCP configuration, and LaunchAgent definition;
-- a restricted runtime-credentials archive;
-- a non-secret `MANIFEST.txt` and `SHA256SUMS`.
-
-Run it only against the inspected deployment:
+Use only after reconciling it with the actual selected component/storage layout:
 
 ```sh
 ./scripts/backup.sh "$EAIO_RUNTIME_DIR/backups/$(date -u +%Y%m%dT%H%M%SZ)"
 ```
 
-The destination must not already exist. The generated archive is protected by
-`umask 077`; move it to encrypted storage independent of the primary Mac before
-treating it as a production backup.
+The generated local archive is not automatically an off-device production backup. Move/protect it according to the active production backup policy.
 
-### `restore.sh`
+## `restore.sh`
 
-Guarded restore-materialization helper for a tested backup. It requires a new
-target and an explicit `--confirm-isolated` flag:
+Guarded isolated restore-materialization helper:
 
 ```sh
 ./scripts/restore.sh \
@@ -61,17 +76,10 @@ target and an explicit `--confirm-isolated` flag:
   --confirm-isolated
 ```
 
-It verifies checksums, extracts the protected runtime material, restores the
-WeKnora PostgreSQL dump into a new temporary PostgreSQL container, and restores
-the WeKnora/Open WebUI data archives into new Docker volumes. It intentionally
-leaves those exact temporary resources for service-level inspection; it never
-touches the live Compose projects or live Hermes installation. Complete the
-isolated service bring-up and acceptance checks documented in
-`docs/BACKUP-RESTORE.md`.
+It verifies backup checksums and restores material into new temporary resources rather than overwriting the live deployment. Complete service-level bring-up and acceptance according to `docs/BACKUP-RESTORE.md`.
 
 ## Scope boundary
 
-These scripts are tied to the current tested runtime and must be reviewed after
-an upstream upgrade, storage migration, container rename, or Hermes layout
-change. They are not a generic disaster-recovery product and must never create
-false confidence about off-device retention, encryption, or host-reboot recovery.
+Backup/restore helpers are tied to the validated runtime family and must be reviewed after upstream upgrades, storage migrations, container/volume naming changes, or Hermes layout changes.
+
+They are not a generic disaster-recovery product and must not create false confidence about encryption, off-primary retention, startup recovery, or external service credentials.
