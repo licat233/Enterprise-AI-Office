@@ -1,0 +1,118 @@
+#!/bin/sh
+set -eu
+
+# Static Enterprise AI Office repository deployability check.
+# This does not install software or prove a runtime deployment works. It verifies
+# that the repository still contains the contracts/adapters/playbooks required
+# for an AI agent to resolve Core/Configured/Production deployment paths.
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+PASS=0
+FAIL=0
+
+pass() {
+  PASS=$((PASS + 1))
+  printf '%-42s PASS\n' "$1"
+}
+
+fail() {
+  FAIL=$((FAIL + 1))
+  printf '%-42s FAIL - %s\n' "$1" "$2"
+}
+
+require_file() {
+  rel="$1"
+  if [ -f "$ROOT/$rel" ]; then
+    pass "$rel"
+  else
+    fail "$rel" "missing"
+  fi
+}
+
+require_text() {
+  rel="$1"
+  text="$2"
+  label="$3"
+  if [ ! -f "$ROOT/$rel" ]; then
+    fail "$label" "$rel missing"
+  elif grep -F "$text" "$ROOT/$rel" >/dev/null 2>&1; then
+    pass "$label"
+  else
+    fail "$label" "expected reference not found in $rel"
+  fi
+}
+
+printf '%s\n' 'Enterprise AI Office Repository Readiness'
+printf '%s\n' '----------------------------------------'
+
+# Agent execution contract and declarative inputs.
+for path in \
+  README.md \
+  AGENTS.md \
+  DEPLOY.md \
+  docs/COMPLETENESS.md \
+  docs/DEPLOYMENT.md \
+  docs/ACCEPTANCE-TESTS.md \
+  docs/SECURITY.md \
+  docs/BACKUP-RESTORE.md \
+  docs/OPERATIONS.md \
+  config/company.example.yaml \
+  config/capabilities.yaml \
+  config/validated-stack.yaml \
+  state/DEPLOYMENT-STATE.template.md
+do
+  require_file "$path"
+done
+
+# Core implementation assets.
+for path in \
+  infrastructure/weknora/README.md \
+  infrastructure/hermes/README.md \
+  infrastructure/hermes/default.config.example.yaml \
+  infrastructure/hermes/default.env.example \
+  infrastructure/hermes/general.config.example.yaml \
+  infrastructure/hermes/general.env.example \
+  infrastructure/open-webui/README.md \
+  infrastructure/open-webui/docker-compose.yml
+do
+  require_file "$path"
+done
+
+# Conditional capability closure assets.
+for path in \
+  infrastructure/hermes/specialist.config.example.yaml \
+  infrastructure/hermes/specialist.env.example \
+  infrastructure/hermes-webui/README.md \
+  infrastructure/coding-agents/README.md \
+  infrastructure/hermes/features/README.md \
+  infrastructure/access/README.md
+do
+  require_file "$path"
+done
+
+# Production control helpers.
+for path in \
+  scripts/preflight.sh \
+  scripts/health-check.sh \
+  scripts/backup.sh \
+  scripts/restore.sh
+do
+  require_file "$path"
+done
+
+# Guard against the most damaging documentation drift: a capability registry
+# that is no longer part of the Golden Path/readiness contract.
+require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
+require_text AGENTS.md 'CONFIGURED READY' 'Agent contract knows Configured Ready'
+require_text docs/ACCEPTANCE-TESTS.md 'Configured Ready result' 'Acceptance has Configured Ready gate'
+require_text config/company.example.yaml 'target_readiness:' 'Company config declares readiness target'
+
+printf '%s\n' '----------------------------------------'
+printf 'Summary: %s PASS, %s FAIL\n' "$PASS" "$FAIL"
+printf '%s\n' 'Static PASS means the repository execution paths are present; it does not replace a real deployment acceptance test.'
+
+if [ "$FAIL" -gt 0 ]; then
+  exit 2
+fi
+
+exit 0
