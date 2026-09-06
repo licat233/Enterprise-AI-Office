@@ -11,7 +11,7 @@ release_track: v2
 # It is NOT the same thing as deploying a real company instance.
 
 blueprint_lifecycle:
-  current_phase: system_design
+  current_phase: installation_design
   phases:
     - system_design
     - installation_design
@@ -24,7 +24,6 @@ blueprint_lifecycle:
     status: complete
     completion_milestone: SYSTEM DESIGN COMPLETE
     completed_on: 2026-09-06
-    transition_ready: true
     purpose: define what the Enterprise AI Office is and how its capabilities, authorities, workflows, security boundaries, and user experience should work
     allowed:
       - architecture and product design
@@ -38,12 +37,13 @@ blueprint_lifecycle:
       - acceptance criteria design
       - identify installation requirements that the later installation blueprint must satisfy
     closure_note: >-
-      The v2 baseline System Design final review passed. Do not keep this phase
-      open for optional optimization or hardening. Advance to installation_design
-      only after explicit human direction.
+      The v2 baseline System Design final review passed on 2026-09-06 and is frozen.
+      Reopen it only for a genuine structural contradiction or blocker discovered
+      during later blueprint work.
 
   installation_design:
-    status: not_opened
+    status: active
+    opened_on: 2026-09-06
     purpose: turn the approved system design into an agent-readable and agent-executable installation and acceptance blueprint
     allowed:
       - deployment architecture design
@@ -57,6 +57,7 @@ blueprint_lifecycle:
       - machine-readable capability closure
       - installation-time acceptance contracts
       - synthetic or isolated installation rehearsals
+    completion_milestone: INSTALLATION DESIGN COMPLETE
     note: installation_design does not authorize installation onto any real company system
 
   blueprint_validation:
@@ -92,6 +93,7 @@ real_deployment_task:
   must_not_be_inferred_from:
     - blueprint phase
     - system design completion
+    - installation design activity
     - installation plan existence
     - install scripts existence
     - provider selection
@@ -112,8 +114,8 @@ public_repository_data_policy:
 
 interpretation_rules:
   - The repository is a system-design and installation-blueprint product, not a live deployment record.
-  - The v2 baseline System Design milestone is complete while current_phase remains system_design until an explicit human transition occurs.
-  - System design comes before installation design for a new release track unless the human explicitly changes that order.
+  - The v2 baseline System Design milestone is complete and frozen.
+  - The current blueprint phase is installation_design following explicit human direction on 2026-09-06.
   - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
   - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
