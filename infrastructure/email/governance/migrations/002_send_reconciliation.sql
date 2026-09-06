@@ -53,6 +53,21 @@ BEGIN
     SELECT RAISE(ABORT, 'logical_send does not match committed approval claim');
 END;
 
+CREATE TRIGGER IF NOT EXISTS trg_logical_send_requires_exact_approval_subject
+BEFORE INSERT ON logical_sends
+FOR EACH ROW
+WHEN NOT EXISTS (
+    SELECT 1
+    FROM send_approvals AS a
+    WHERE a.approval_id = NEW.approval_id
+      AND a.draft_id = NEW.draft_id
+      AND a.draft_revision = NEW.draft_revision
+      AND a.draft_content_hash = NEW.draft_content_hash
+)
+BEGIN
+    SELECT RAISE(ABORT, 'logical_send draft subject does not match SendApproval');
+END;
+
 CREATE TABLE IF NOT EXISTS send_attempts (
     attempt_id TEXT PRIMARY KEY,
     logical_send_id TEXT NOT NULL,
@@ -70,6 +85,19 @@ CREATE TABLE IF NOT EXISTS send_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_send_attempts_logical_send
 ON send_attempts(logical_send_id, attempt_no);
+
+CREATE TRIGGER IF NOT EXISTS trg_send_attempt_requires_frozen_payload_hash
+BEFORE INSERT ON send_attempts
+FOR EACH ROW
+WHEN NOT EXISTS (
+    SELECT 1
+    FROM logical_sends AS s
+    WHERE s.logical_send_id = NEW.logical_send_id
+      AND s.transport_payload_hash = NEW.transport_payload_hash
+)
+BEGIN
+    SELECT RAISE(ABORT, 'send attempt transport hash does not match logical send');
+END;
 
 CREATE TABLE IF NOT EXISTS send_attempt_results (
     attempt_id TEXT PRIMARY KEY,
