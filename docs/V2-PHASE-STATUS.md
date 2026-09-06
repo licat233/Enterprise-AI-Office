@@ -1,123 +1,150 @@
-# Enterprise AI Office v2 — Phase Status
+# Enterprise AI Office v2 — Blueprint Status
 
-Status: design stage / implementation not authorized / runtime not activated
-Version: 1.0.0
+Status: system design active / installation design not yet opened / real deployment task inactive
+Version: 2.0.0
 Date: 2026-09-06
 
-The authoritative machine-readable phase state is:
+The authoritative machine-readable repository state is:
 
 ```text
 state/PROJECT-PHASE.yaml
 ```
 
-This document explains that state for humans. If this prose ever conflicts with `state/PROJECT-PHASE.yaml`, the phase file wins until an explicit human-authorized phase transition updates both.
+This document explains that state for humans. If this prose conflicts with `state/PROJECT-PHASE.yaml`, the machine-readable file wins until an explicit human-directed blueprint transition updates both.
 
-## 1. Current phase
+## 1. What this repository is building
 
-```text
-V2 PHASE: DESIGN
-IMPLEMENTATION: NOT AUTHORIZED
-DEPLOYMENT: NOT AUTHORIZED
-REAL PROVIDER ACCESS: NOT AUTHORIZED
-```
+Enterprise AI Office is not the deployment record of one ARMOR machine.
 
-The frozen v2 design may include documentation, provider research, Ontology fixtures, sanitized examples, offline prototypes, unit tests, structural validators, acceptance-test designs, and future implementation plans.
-
-Their presence does **not** mean the system is being implemented or deployed.
-
-## 2. Phase interpretation rule
-
-Agents must not infer a phase transition from:
+It is a reusable blueprint that must eventually explain:
 
 ```text
-prototype code existing
-adapter code existing
-tests passing
-implementation plan existing
-acceptance document existing
-previous assistant momentum
-phrases such as “continue”, “start”, “next”, “继续”, “开始吧”, or “下一步”
+what the Enterprise AI Office is
++
+how a capable AI engineering agent installs it
++
+how that agent verifies that the installed system is correct
 ```
 
-Those phrases mean **continue work inside the current phase** unless the human explicitly authorizes a new phase.
+Therefore repository development has a blueprint lifecycle separate from any real company deployment.
 
-Examples of phase-changing intent are recorded in `state/PROJECT-PHASE.yaml`.
-
-## 3. Work allowed now
-
-Current design-stage work includes:
+## 2. Current blueprint phase
 
 ```text
-architecture and product design
-scope/non-goal decisions
-security and threat modeling
-human approval / identity design
-Ontology/schema refinement
-provider/upstream research
-sanitized examples
-synthetic fixtures
-offline prototypes
-offline tests/static validation
-future implementation decomposition
-acceptance-test design
+RELEASE TRACK: v2
+BLUEPRINT PHASE: SYSTEM DESIGN
+INSTALLATION DESIGN: NOT YET OPENED
+BLUEPRINT VALIDATION: NOT YET OPENED
+REAL DEPLOYMENT TASK: INACTIVE
 ```
 
-## 4. Work not allowed now
+Current work should continue designing **what v2 should be**.
 
-During the current design phase, do not:
+This includes product behavior, architecture, capability boundaries, security, human approval, identity, Ontology, provider choices, failure semantics, and acceptance criteria.
+
+Provider research, sanitized examples, offline prototypes, and offline tests may support design decisions. Their presence does not mean installation design has started and does not mean a real company system is being deployed.
+
+## 3. Blueprint lifecycle
+
+The intended repository-development sequence is:
 
 ```text
-request or use real credentials merely to continue design
-connect a real mailbox or external business system
-bind real employees/accounts/Profiles/provider identities
-perform real IMAP/SMTP runtime work
-mutate the production/live Enterprise AI Office deployment
-perform customer-facing sends
-mark a prototype as a deployed capability
-advance into a future implementation stage because its plan exists
+System Design
+→ Installation Design
+→ Blueprint Validation
+→ Release Ready
 ```
 
-Missing runtime credentials are therefore **not blockers** in the design phase; they are deferred implementation inputs.
+### System Design
 
-## 5. v1 baseline context
-
-The existing v1 deployment and its acceptance evidence remain historical/reference context. They do not authorize v2 runtime mutation.
-
-## 6. v2 email design target
-
-Selected reference provider:
+Define the system itself:
 
 ```text
-Tencent Enterprise Mail
+product/capability scope
+architecture
+user and Agent workflows
+authority/RBAC
+security boundaries
+Ontology/action semantics
+provider/upstream choices
+failure/reconciliation behavior
+acceptance criteria
+non-goals
 ```
 
-Frozen Stage 1 conceptual read surface:
+### Installation Design
+
+After the system design is sufficiently approved, turn it into an installation blueprint that a capable AI engineering agent can execute:
 
 ```text
-search_email
-get_email
+deployment architecture
+installation sequence
+config schemas/templates
+provision/install scripts
+secret-input contracts
+idempotency/reconciliation
+rollback/recovery
+clean-host setup
+machine-readable capability closure
+installation-time acceptance
 ```
 
-Design properties:
+**Installation Design is still repository design. It does not mean installing onto ARMOR's real infrastructure.**
+
+### Blueprint Validation
+
+Use an explicitly approved clean/isolated validation target to prove that a fresh capable AI agent can:
 
 ```text
-configured mailbox only
-allowlisted folder scope
-read-only mailbox access
-non-Seen body reads where supported
-bounded result/body sizes
-no attachment download initially
-no arbitrary IMAP command
-no SMTP in Stage 1
+read the repository
+understand the intended Enterprise AI Office
+resolve required non-secret/company-private inputs
+install the designed system
+run acceptance
+report readiness correctly
 ```
 
-The repository's read-only adapter, Hermes registration example, environment template, deterministic tests, provider playbook, and acceptance contract are design-support prototypes/artifacts only.
+A validation target is not automatically a production deployment.
 
-## 7. Offline prototype evidence
+### Release Ready
 
-Offline design/prototype validation was performed without connecting a real mailbox.
+The blueprint is ready when the repository sufficiently explains both the system and the installation/acceptance path for adoption.
 
-Recorded results:
+## 4. Real deployment is a separate activity
+
+A real company deployment is a consumer of the blueprint, not the automatic next repository phase.
+
+It requires a separate explicit request with an explicit target, for example a designated Mac Studio.
+
+Without such a task, repository work must not request or use real credentials, connect real provider accounts, bind real employee identities, or mutate a live environment merely to continue blueprint development.
+
+## 5. Current v2 system-design direction
+
+The controlled v2 milestone remains:
+
+```text
+Communication & Follow-up
+```
+
+The current email design direction includes:
+
+```text
+provider reference: Tencent Enterprise Mail
+read operations: search_email, get_email
+governed DraftReply
+trusted human approval bound to exact draft state
+governed send_approved_reply
+optional simple follow-up later
+optional one messaging surface later
+```
+
+Current design-support artifacts may include provider research, read-only adapter prototypes, synthetic fixtures, Ontology examples, tests, and acceptance drafts.
+
+They validate or explore design properties only.
+
+## 6. Recorded offline design evidence
+
+Without connecting a real mailbox, previous design-support checks recorded:
 
 ```text
 email Ontology structural validation: PASS
@@ -125,13 +152,11 @@ read-only adapter safety logic: 5/5 PASS with dependency-environment caveat
 repository static closure mirror: 86 PASS / 0 FAIL at the recorded check
 ```
 
-These results validate design/prototype properties only. They are not provider runtime evidence and do not authorize implementation.
+These results do not mean a Tencent Enterprise Mail capability has been deployed.
 
-## 8. Future implementation plan
+## 7. Installation-plan artifact status
 
-`docs/V2-IMPLEMENTATION-PLAN.md` is a future blueprint only.
-
-Its sequence remains:
+`docs/V2-IMPLEMENTATION-PLAN.md` currently captures an early staged installation/deployment idea:
 
 ```text
 Stage 0  preserve/verify v1 baseline
@@ -143,22 +168,59 @@ Stage 5  optional simple follow-up
 Stage 6  optional one messaging surface
 ```
 
-The sequence becomes executable only after the human explicitly changes the project phase to implementation/deployment.
+While the blueprint phase is still `system_design`, this document is an input for identifying future installation requirements, not an executable instruction to move into provider runtime work.
 
-## 9. Transition authority
+When the human explicitly advances the blueprint lifecycle to `installation_design`, this sequence can be audited, revised, and converted into the actual agent-readable installation contract.
 
-Only an explicit human instruction may change the phase.
+## 8. Current work that remains valid
 
-When that happens:
-
-1. update `state/PROJECT-PHASE.yaml` first;
-2. update this document to match;
-3. then apply the implementation/deployment contracts relevant to the newly authorized phase.
-
-Until then:
+Examples:
 
 ```text
-DESIGN CONTINUES
-IMPLEMENTATION DOES NOT START
-REAL RUNTIME ACCESS IS OUT OF SCOPE
+Human Approval & Identity Model
+email action semantics
+failure/reconciliation design
+follow-up behavior
+messaging-entry design
+security/threat review
+scope review
+Ontology refinement driven by design needs
+upstream/provider research
+acceptance criteria
+sanitized prototypes or synthetic tests that answer design questions
 ```
+
+## 9. Current boundary
+
+```text
+SYSTEM DESIGN: ACTIVE
+INSTALLATION DESIGN: NOT YET OPENED
+REAL COMPANY DEPLOYMENT: NOT ACTIVE
+REAL PROVIDER CREDENTIALS: NOT REQUIRED
+REAL MAILBOX ACCESS: NOT REQUIRED
+```
+
+Continuation wording such as `继续`, `开始吧`, `下一步`, `continue`, or `next` means continue the current **system-design** work unless the human explicitly directs a blueprint-phase change.
+
+## 10. Completion language
+
+Keep repository maturity distinct from deployment readiness.
+
+Repository/blueprint milestones:
+
+```text
+SYSTEM DESIGN COMPLETE
+INSTALLATION DESIGN COMPLETE
+BLUEPRINT VALIDATED
+RELEASE READY
+```
+
+Deployment-target readiness:
+
+```text
+CORE READY
+CONFIGURED READY
+PRODUCTION READY
+```
+
+A blueprint can reach `INSTALLATION DESIGN COMPLETE` without touching ARMOR production. A real ARMOR deployment can later consume that blueprint and separately reach `PRODUCTION READY`.
