@@ -2,48 +2,63 @@
 
 Codex and Claude Code are optional specialist execution backends. They are not ordinary employee tools and must not be exposed merely because their CLIs exist on the host.
 
-Enable this playbook only when `capabilities.coding_delegation.enabled: true` and the company configuration names the authorized Hermes Profile(s) and workspace/repository boundaries.
+Enable this playbook only when `capabilities.coding_delegation.enabled: true` and company configuration names the authorized Hermes Profile(s) and workspace/repository boundaries.
 
 ## 1. Security model
-
-The intended path is:
 
 ```text
 Authorized employee
 → restricted technical Assistant
-→ Hermes technical Profile
+→ privileged Hermes technical Profile
 → approved repository/workspace
 → Codex and/or Claude Code
 ```
 
-Do not give `general` or other normal business Profiles terminal/coding-agent access by default.
+Do not give `general` or normal business Profiles terminal/coding-agent access by default.
 
-A Hermes Profile is not an OS sandbox. The service user's CLI credentials and filesystem access are real capabilities. Define the working directory, repository policy, and credential scope before enabling coding delegation.
+A Hermes Profile is not an OS sandbox. Terminal access is a real privileged host capability even when `terminal.cwd` points at one repository.
 
-## 2. Upstream-first implementation
+## 2. Technical Profile configuration
 
-The validated Hermes reference commit already ships bundled `codex` and `claude-code` orchestration Skills. Use those supported upstream capabilities rather than inventing a second coding-agent wrapper.
+Use [`technical-profile.config.example.yaml`](technical-profile.config.example.yaml) as the configuration starting point for an authorized coding Profile rather than extending the knowledge-only specialist template by guesswork.
 
-For the selected Hermes version, inspect the bundled Skills before deployment because CLI flags and authentication behavior can change.
+It explicitly enables the Hermes API toolsets required for coding delegation:
+
+```text
+terminal/process
+file
+skills
+read-only WeKnora MCP
+```
+
+and uses an explicit approved workspace plus Profile-scoped HOME for deliberate CLI credential isolation.
+
+The local terminal backend is still not a filesystem sandbox. If the configured risk boundary requires stronger enforcement, use a supported Docker/sandbox/OS isolation design and validate the coding CLIs inside it.
+
+## 3. Upstream-first coding integration
+
+The validated Hermes reference commit ships bundled `codex` and `claude-code` orchestration Skills. Use those supported upstream capabilities rather than creating another coding-agent wrapper.
+
+Inspect the bundled Skills for the exact selected Hermes version because CLI flags/auth behavior can evolve.
 
 ### Codex
 
-At the validated Hermes reference commit, the bundled Codex Skill expects:
+Validated-reference prerequisites:
 
 ```bash
 npm install -g @openai/codex
 codex --version
 ```
 
-Authenticate the Codex CLI for the OS/service user that Hermes will actually run as. Codex CLI OAuth state and Hermes' own `openai-codex` model-provider authentication are separate concerns; validate the CLI itself before delegation.
+Authenticate the Codex CLI under the HOME/service context actually used by the technical Profile. Standalone Codex CLI OAuth and Hermes' own `openai-codex` model-provider authentication are separate concerns.
 
-For ordinary one-shot coding delegation, prefer the bundled Skill's supported `codex exec` workflow inside an explicit Git repository/workdir, then inspect the diff and run tests.
+For ordinary one-shot work, prefer the bundled Skill's `codex exec` workflow inside an explicit Git repository/workdir, then inspect the diff and run relevant tests.
 
-Hermes 0.21.0 also provides an optional Codex app-server runtime. Use that only when the company configuration deliberately selects it and its tool/runtime trade-offs are acceptable; it is not required merely to use Codex as a specialist coding worker.
+Hermes 0.21.0 also has an optional Codex app-server runtime. Enable it only when company configuration deliberately selects that runtime and its tool trade-offs are acceptable. It is not required merely to delegate coding tasks to the Codex CLI.
 
 ### Claude Code
 
-At the validated Hermes reference commit, the bundled Claude Code Skill expects:
+Validated-reference prerequisites:
 
 ```bash
 npm install -g @anthropic-ai/claude-code
@@ -51,11 +66,13 @@ claude --version
 claude auth status
 ```
 
-Authenticate Claude Code for the actual OS/service user. For unattended one-shot work, prefer Claude Code print mode (`claude -p`) with an explicit workdir and bounded allowed tools/max turns rather than an uncontrolled interactive session.
+Authenticate Claude Code under the technical Profile's actual CLI HOME/context.
+
+For unattended one-shot work, prefer `claude -p` with an explicit workdir, bounded tools, and bounded turns rather than an uncontrolled interactive session.
 
 Do not use `--dangerously-skip-permissions` as a default Enterprise AI Office integration policy.
 
-## 3. Repository-local instructions
+## 4. Repository-local instructions
 
 Before a coding backend modifies a repository, Hermes/the coding agent must read repository-local instructions such as:
 
@@ -66,11 +83,11 @@ CLAUDE.md
 project README / contribution rules
 ```
 
-The repository's own rules outrank generic assumptions about how that codebase should be changed.
+The target repository's own rules outrank generic coding assumptions.
 
-## 4. Workspace policy
+## 5. Workspace policy
 
-Company configuration should declare allowed workspaces, for example:
+Company configuration declares allowed workspaces, for example:
 
 ```yaml
 capabilities:
@@ -85,11 +102,11 @@ capabilities:
       - /absolute/path/to/approved/repository
 ```
 
-Do not infer broad home-directory access from an empty workspace list. Treat a missing required workspace as `BLOCKED — REQUIRED INPUT`.
+Do not infer broad home-directory access from an empty workspace list. A missing required workspace is `BLOCKED — REQUIRED INPUT`.
 
-For higher-risk work, use worktrees/disposable clones or another approved sandbox boundary.
+For higher-risk work, use worktrees/disposable clones or another approved isolation boundary.
 
-## 5. Authentication and credentials
+## 6. Authentication and credentials
 
 Validate separately:
 
@@ -101,15 +118,15 @@ Git/GitHub auth
 other repository-specific credentials
 ```
 
-Do not copy all host credentials into a Profile `.env`. Use the minimum credential set required by the authorized workspace and workflow.
+Do not copy all host credentials into a Profile `.env`.
 
-If Profile-specific CLI identity is required, use Hermes' supported Profile HOME/terminal isolation mechanism and initialize the CLI credentials inside that boundary.
+With `terminal.home_mode: profile`, initialize only the required CLI identities/configuration inside that Profile-scoped HOME.
 
-## 6. Delegation completion contract
+## 7. Delegation completion contract
 
 A coding task is not successful merely because the coding CLI exits zero.
 
-The technical Profile must return enough evidence to establish:
+Required evidence:
 
 ```text
 correct repository/workdir
@@ -119,24 +136,25 @@ correct repository/workdir
 → accurate result summary
 ```
 
-Do not silently commit, push, merge, release, or deploy unless the company/repository policy explicitly authorizes those actions.
+Do not silently commit, push, merge, release, or deploy unless company/repository policy explicitly authorizes those actions.
 
-## 7. Acceptance
+## 8. Acceptance
 
-Use a disposable or harmless test repository before enabling real work.
+Use a disposable or harmless test repository before real work.
 
 For each enabled backend:
 
 ```text
-[ ] CLI is installed and version recorded
-[ ] authentication works in the Hermes service-user context
-[ ] only an authorized technical Profile can invoke the capability
-[ ] explicit allowed repository/workdir is used
-[ ] repository-local instructions are read
-[ ] backend makes a small inspectable change
+[ ] CLI installed and version recorded
+[ ] auth works in the technical Profile/service-user context
+[ ] only authorized technical Profile/users can invoke it
+[ ] effective Hermes toolsets match the privileged role design
+[ ] explicit allowed repository/workdir used
+[ ] repository-local instructions read
+[ ] small change is inspectable
 [ ] tests/verification run
 [ ] unrelated host resources are not intentionally granted
-[ ] Hermes reports the result accurately
+[ ] Hermes reports result accurately
 ```
 
-Record the enabled backend(s), version, auth boundary, Profile, and workspace scope in `state/DEPLOYMENT-STATE.md`.
+Record enabled backend(s), version, auth boundary, Profile, workspace scope, and acceptance result in deployment state.
