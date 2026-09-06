@@ -29,13 +29,17 @@ capabilities:
       - DEPLOY.md
       - docs/DEPLOYMENT.md
       - infrastructure/weknora/README.md
+      - infrastructure/weknora/PROVISIONING.md
       - infrastructure/hermes/README.md
       - infrastructure/open-webui/README.md
+      - infrastructure/open-webui/PROVISIONING.md
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       section: Part A — Core Ready
     records:
       - component versions
+      - WeKnora runtime tenant and logical-to-runtime Knowledge Base mappings
+      - WeKnora Profile retrieval-key IDs/names and scope metadata, never token values
       - knowledge bases
       - enabled profiles
       - employee groups and assistant mappings
@@ -136,6 +140,7 @@ capabilities:
     enabled_when: capabilities.messaging.enabled == true
     implementation:
       - infrastructure/hermes/features/README.md
+      - infrastructure/hermes/features/MESSAGING.md
     upstream_feature: Hermes Gateway messaging
     required_company_values:
       - selected platform
@@ -174,6 +179,7 @@ capabilities:
     enabled_when: capabilities.sso.enabled == true
     implementation:
       - infrastructure/access/README.md
+      - infrastructure/access/OPEN-WEBUI-OIDC.md
     required_company_values:
       - identity provider
       - approved domains/groups/claims
@@ -193,6 +199,7 @@ capabilities:
     implementation:
       - docs/CLIENT-RBAC.md
       - docs/PROFILE-STANDARD.md
+      - infrastructure/hermes/features/EMPLOYEE-MEMORY.md
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       sections:
