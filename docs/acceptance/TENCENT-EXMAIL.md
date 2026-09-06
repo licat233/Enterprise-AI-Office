@@ -10,11 +10,13 @@ Use with:
 - `docs/V2-STAGE-CONTRACTS.md`
 - `docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md`
 - `docs/V2-GOVERNANCE-RUNTIME.md`
+- `docs/V2-SEND-RECONCILIATION.md`
 - `docs/ONTOLOGY.md`
 - `infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md`
 - `infrastructure/open-webui/V2-APPROVAL-ACTION.md`
 - `infrastructure/email/governance/README.md`
 - `infrastructure/email/tencent-exmail/README.md`
+- `infrastructure/email/tencent-exmail/smtp_send_adapter.py`
 - `docs/SECURITY.md`
 - `docs/CLIENT-RBAC.md`
 - `config/capabilities.yaml`
@@ -192,61 +194,100 @@ Acceptance:
 [ ] Stage 3 approval Action performs no provider send
 ```
 
-## 8. Send path
+## 8. Governed send path
 
-Use controlled test recipients before real customer use.
+Before any real/authorized provider submission, run the offline ID-6 checks:
+
+```sh
+python3 infrastructure/email/governance/test_send_reconciliation.py
+python3 infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
+```
+
+Then verify with controlled test recipients only:
 
 ```text
-[ ] Only the approved mailbox identity can be used as sender
-[ ] Current email.send permission is re-checked immediately before send
-[ ] Approval is atomically claimed for one logical send before provider side effect
-[ ] Narrow send action succeeds for an approved test message
-[ ] Provider result/message evidence recorded without secrets
-[ ] Unapproved send attempt fails closed
-[ ] Stale/revoked/previously-claimed approval send fails closed
+[ ] Offline send/reconciliation SQLite contract PASS
+[ ] Offline fake-SMTP outcome classification PASS
+[ ] Only the configured approved mailbox identity can be envelope MAIL FROM and visible From
+[ ] Current email.send permission is re-checked immediately before logical-send initialization
+[ ] Exact Draft revision/hash and ACTIVE SendApproval are re-checked before claim
+[ ] ApprovalClaim + logical-send initialization commit before provider network side effect
+[ ] Logical send records one stable RFC Message-ID
+[ ] Logical send records one stable Date header
+[ ] Logical send records transport_payload_hash for exact rendered message bytes
+[ ] Out-of-scope controlled-test recipient is denied before provider submission
+[ ] Every intended envelope recipient must be SMTP-accepted before DATA is issued
+[ ] Any RCPT rejection aborts the whole baseline transaction before DATA
+[ ] Successful final SMTP DATA response maps to SENT
+[ ] Explicit pre-DATA/auth/envelope rejection maps to CONFIRMED_NOT_SENT
+[ ] Explicit negative final SMTP response maps to CONFIRMED_NOT_SENT
+[ ] Unapproved/stale/revoked/previously-claimed approval send fails closed
 [ ] Generic SMTP/send-anything primitive is not exposed to ordinary employee Agent surface
 [ ] Bulk/campaign sending unavailable in initial v2 scope
 [ ] Attachments unavailable unless separately enabled and accepted
 ```
+
+`SENT` means provider SMTP acceptance, not recipient read/permanent delivery.
 
 ## 9. Ambiguous failure / duplicate-send safety
 
 Create or simulate a harmless uncertain-result condition where practical.
 
 ```text
-[ ] Implementation does not blindly retry an ambiguous SMTP outcome
-[ ] Retry/idempotency policy documented
-[ ] Uncertain outcome becomes reconciliation-required rather than duplicate-send-by-default
-[ ] Human/operator can determine or reconcile final send state
+[ ] Send-attempt row is committed before provider network submission
+[ ] Transport timeout/disconnect after DATA begins and before trustworthy final response maps to OUTCOME_UNKNOWN
+[ ] Process crash/restart with attempt row but no result derives RECONCILIATION_REQUIRED
+[ ] OUTCOME_UNKNOWN cannot create another attempt
+[ ] RECONCILIATION_REQUIRED cannot create another attempt
+[ ] SENT cannot create another attempt
+[ ] CONFIRMED_NOT_SENT may retry only inside the same logical_send_id
+[ ] Controlled retry reuses exact Draft/Approval binding
+[ ] Controlled retry reuses same sender/envelope recipients
+[ ] Controlled retry reuses same RFC Message-ID and Date header
+[ ] Controlled retry re-renders and verifies the same transport_payload_hash
+[ ] Payload-hash mismatch fails closed rather than silently retrying
+[ ] Reconciliation appends evidence; original attempt observation remains unchanged
+[ ] Reconciliation conclusion is only SENT / CONFIRMED_NOT_SENT / REMAINS_UNKNOWN
+[ ] REMAINS_UNKNOWN remains blocked from retry
+[ ] No generic "force retry unknown" employee/LLM operation exists
 ```
 
-If the provider/integration cannot guarantee exactly-once delivery, documentation and behavior must state that limitation rather than pretending transactionality exists.
+Do not claim exactly-once delivery. The safety property is:
 
-## 10. Audit
+> ambiguous provider outcome never causes blind duplicate submission.
+
+If Sent-folder/provider-log evidence is used for reconciliation, acceptance must first prove that evidence source can reliably correlate the exact stable Message-ID for the selected Tencent deployment. Do not assume SMTP automatically saves a Sent copy.
+
+## 10. Governance / audit evidence
 
 Audit/evidence should be sufficient to answer:
 
 ```text
-who requested the send
+who requested/executed the send
 which HumanActor approved it
 which Assistant/Profile context was involved
 which mailbox was used
 which source message was targeted
-which recipient set and content hash/version were approved
-which Ontology/operation contract version applied
-what provider result was observed
+which recipient set and Draft content hash/version were approved
+which approval_id / logical_send_id applied
+which stable RFC Message-ID and transport payload hash applied
+which attempt_id / attempt number ran
+which normalized provider result was observed
+which provider reference/evidence exists
 whether reconciliation is pending
+which reconciliation conclusion was recorded
 ```
 
 Acceptance:
 
 ```text
 [ ] Draft/approval/claim governance events are append-oriented
-[ ] Applied send recorded
+[ ] ApprovalClaim/logical send recorded before SMTP side effect
+[ ] Send attempt recorded before network submission
+[ ] Terminal provider observation recorded when available
 [ ] Denied/blocked send recorded when policy requires it
-[ ] Approval reference recorded
-[ ] Provider result/reference recorded
-[ ] No mailbox/forwarder secret or unnecessary full message content stored in audit
+[ ] Reconciliation evidence is append-oriented
+[ ] No mailbox/forwarder secret or unnecessary full MIME payload stored in audit
 ```
 
 ## 11. Follow-up integration
@@ -269,8 +310,9 @@ From the actual employee client used in the target:
 [ ] Employee can request a draft
 [ ] Employee sees the exact persisted outbound content in the approval confirmation
 [ ] Approval/send result is understandable
+[ ] Ambiguous send result clearly says not to resend yet
 [ ] Unauthorized employee cannot access another mailbox by prompting
-[ ] General Assistant remains usable without Email tools
+[ ] General Assistant remains usable without Email tools and while provider/send path is unavailable
 [ ] No infrastructure credentials/config are exposed to the employee
 ```
 
@@ -285,5 +327,7 @@ PASS — TENCENT EXMAIL EMAIL INTEGRATION
 BLOCKED — REQUIRED INPUT: <specific mailbox/credential/authorization>
 FAIL — <specific security/integration boundary>
 ```
+
+Stage 4 closes only when the governed send/reconciliation assertions pass with controlled recipients on an explicitly authorized validation/deployment target.
 
 A blocked or failed Email capability must not be silently disabled if the active company configuration requires it for `CONFIGURED READY`.
