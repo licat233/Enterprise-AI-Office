@@ -75,6 +75,8 @@ for path in \
   docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md \
   docs/V2-GOVERNANCE-RUNTIME.md \
   docs/V2-SEND-RECONCILIATION.md \
+  docs/V2-RECOVERY-CLEAN-HOST.md \
+  docs/V2-INSTALLATION-DESIGN-REVIEW.md \
   config/company.example.yaml \
   config/company.private.example.yaml \
   config/capabilities.yaml \
@@ -119,8 +121,11 @@ for path in \
   infrastructure/email/governance/README.md \
   infrastructure/email/governance/schema.sql \
   infrastructure/email/governance/migrations/002_send_reconciliation.sql \
+  infrastructure/email/governance/backup_state.py \
+  infrastructure/email/governance/restore_state.py \
   infrastructure/email/governance/test_schema.py \
   infrastructure/email/governance/test_send_reconciliation.py \
+  infrastructure/email/governance/test_recovery.py \
   infrastructure/email/tencent-exmail/README.md \
   infrastructure/email/tencent-exmail/imap_readonly_mcp.py \
   infrastructure/email/tencent-exmail/imap.env.example \
@@ -146,9 +151,9 @@ done
 
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
 require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'
-require_text state/PROJECT-PHASE.yaml 'current_phase: installation_design' 'Current blueprint phase is installation design'
-require_text state/PROJECT-PHASE.yaml 'status: complete' 'System design remains complete'
-require_text state/PROJECT-PHASE.yaml 'status: active' 'Installation design is active'
+require_text state/PROJECT-PHASE.yaml 'current_phase: installation_design' 'Current blueprint phase remains installation design'
+require_text state/PROJECT-PHASE.yaml 'completion_milestone: INSTALLATION DESIGN COMPLETE' 'Installation design completion milestone exists'
+require_text state/PROJECT-PHASE.yaml 'transition_ready: true' 'Installation design is transition-ready only after explicit direction'
 require_text state/PROJECT-PHASE.yaml 'blueprint_validation' 'Blueprint lifecycle includes validation'
 require_text state/PROJECT-PHASE.yaml 'implicit_transition_allowed: false' 'Implicit blueprint transition is disabled'
 require_text state/PROJECT-PHASE.yaml 'real_deployment_task:' 'Real deployment has a separate gate'
@@ -162,6 +167,7 @@ require_text AGENTS.md 'Blueprint milestones' 'Agent contract separates blueprin
 require_text AGENTS.md 'Deployed-system readiness' 'Agent contract separates deployment readiness'
 require_text docs/V2-PHASE-STATUS.md 'BLUEPRINT PHASE: INSTALLATION DESIGN' 'v2 status matches installation-design phase'
 require_text docs/V2-PHASE-STATUS.md 'SYSTEM DESIGN: COMPLETE' 'v2 status preserves completed system design'
+require_text docs/V2-PHASE-STATUS.md 'INSTALLATION DESIGN: COMPLETE' 'v2 status records completed installation design'
 require_text docs/V2-PHASE-STATUS.md 'REAL DEPLOYMENT TASK: INACTIVE' 'v2 status says real deployment inactive'
 require_text docs/V2-INSTALLATION-ARCHITECTURE.md 'INSTALLATION ARCHITECTURE FROZEN' 'v2 ID-1 installation architecture is frozen'
 require_text docs/V2-CONFIG-PROTECTED-INPUTS.md 'CONFIG / SECRET INPUT CONTRACT FROZEN' 'v2 ID-2 protected-input contract is frozen'
@@ -169,6 +175,8 @@ require_text docs/V2-STAGE-CONTRACTS.md 'STAGE CONTRACTS FROZEN' 'v2 ID-3 stage 
 require_text docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md 'IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN' 'v2 ID-4 identity contract is frozen'
 require_text docs/V2-GOVERNANCE-RUNTIME.md 'GOVERNANCE RUNTIME CONTRACT FROZEN' 'v2 ID-5 governance runtime contract is frozen'
 require_text docs/V2-SEND-RECONCILIATION.md 'SEND / RECONCILIATION INSTALLATION CONTRACT FROZEN' 'v2 ID-6 send/reconciliation contract is frozen'
+require_text docs/V2-RECOVERY-CLEAN-HOST.md 'RECOVERY / CLEAN-HOST INSTALLATION CONTRACT FROZEN' 'v2 ID-7 recovery/clean-host contract is frozen'
+require_text docs/V2-INSTALLATION-DESIGN-REVIEW.md 'INSTALLATION DESIGN FINAL REVIEW: PASS' 'v2 installation design final review passed'
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
@@ -186,20 +194,27 @@ require_text config/company.private.example.yaml 'client_credential_ref:' 'Priva
 require_text config/company.private.example.yaml 'openwebui-governance-forwarder-token' 'Private overlay uses symbolic governance forwarder credential'
 require_text config/company.private.example.yaml 'email.send' 'Private overlay demonstrates operation-scoped mailbox grants'
 require_text config/.env.example 'EAIO_GOVERNANCE_URL' 'Runtime bindings expose private Governance URL'
+require_text config/.env.example 'EAIO_GOVERNANCE_STATE_DB' 'Runtime bindings expose Governance SQLite state path'
+require_text config/.env.example 'EAIO_GOVERNANCE_HEALTH_URL' 'Runtime bindings expose optional Governance health URL'
 require_text config/.env.example 'EAIO_TRUSTED_FORWARDER_TOKEN' 'Runtime bindings expose protected forwarder token'
 require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Email capability has protected-input contract'
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
 require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
 require_text config/capabilities.yaml 'docs/V2-GOVERNANCE-RUNTIME.md' 'Email capability has governance runtime contract'
 require_text config/capabilities.yaml 'docs/V2-SEND-RECONCILIATION.md' 'Email capability has send/reconciliation contract'
+require_text config/capabilities.yaml 'docs/V2-RECOVERY-CLEAN-HOST.md' 'Email capability has recovery/clean-host contract'
 require_text config/capabilities.yaml 'governance_runtime_contract:' 'Email capability declares governance runtime closure'
 require_text config/capabilities.yaml 'send_reconciliation_contract:' 'Email capability declares send/reconciliation closure'
+require_text config/capabilities.yaml 'recovery_clean_host_contract:' 'Email capability declares recovery/clean-host closure'
 require_text config/capabilities.yaml 'infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md' 'Email capability has Open WebUI communication provisioning path'
 require_text config/capabilities.yaml 'infrastructure/open-webui/v2_approve_draft_action.py' 'Email capability has deterministic approval Action template'
 require_text config/capabilities.yaml 'infrastructure/email/governance/schema.sql' 'Email capability has governance SQLite schema'
 require_text config/capabilities.yaml 'infrastructure/email/governance/migrations/002_send_reconciliation.sql' 'Email capability has send/reconciliation schema migration'
+require_text config/capabilities.yaml 'infrastructure/email/governance/backup_state.py' 'Email capability has Governance backup helper'
+require_text config/capabilities.yaml 'infrastructure/email/governance/restore_state.py' 'Email capability has Governance restore helper'
 require_text config/capabilities.yaml 'infrastructure/email/governance/test_schema.py' 'Email capability has governance offline test'
 require_text config/capabilities.yaml 'infrastructure/email/governance/test_send_reconciliation.py' 'Email capability has send/reconciliation offline test'
+require_text config/capabilities.yaml 'infrastructure/email/governance/test_recovery.py' 'Email capability has recovery offline test'
 require_text config/capabilities.yaml 'infrastructure/email/tencent-exmail/smtp_send_adapter.py' 'Email capability has narrow SMTP provider adapter'
 require_text config/capabilities.yaml 'infrastructure/email/tencent-exmail/test_smtp_send_adapter.py' 'Email capability has SMTP adapter offline test'
 require_text config/capabilities.yaml 'mandatory_when_enabled:' 'Email capability declares mandatory stage closure'
@@ -213,6 +228,13 @@ require_text infrastructure/email/governance/migrations/002_send_reconciliation.
 require_text infrastructure/email/governance/migrations/002_send_reconciliation.sql 'send_reconciliations' 'ID-6 migration persists reconciliation evidence'
 require_text infrastructure/email/governance/test_schema.py 'PASS — v2 governance SQLite/hash/review-binding contract' 'Governance offline test has deterministic PASS marker'
 require_text infrastructure/email/governance/test_send_reconciliation.py 'PASS — v2 send/reconciliation SQLite contract' 'Send/reconciliation offline test has deterministic PASS marker'
+require_text infrastructure/email/governance/test_recovery.py 'PASS — v2 governance backup/restore/recovery contract' 'Recovery offline test has deterministic PASS marker'
+require_text infrastructure/email/governance/backup_state.py 'src.backup(dst)' 'Governance backup uses SQLite online backup API'
+require_text infrastructure/email/governance/restore_state.py 'RECONCILIATION_REQUIRED' 'Governance restore preserves unresolved-send safety'
+require_text scripts/backup.sh 'GOVERNANCE_BACKUP_HELPER' 'Full backup conditionally includes Governance snapshot'
+require_text scripts/restore.sh 'GOVERNANCE_RESTORE_HELPER' 'Isolated restore conditionally materializes Governance state'
+require_text scripts/health-check.sh 'EAIO_GOVERNANCE_HEALTH_URL' 'Health helper supports optional Governance service'
+require_text state/DEPLOYMENT-STATE.template.md '## v2 Email Governance' 'Deployment state has v2 Email governance evidence section'
 require_text infrastructure/email/tencent-exmail/smtp_send_adapter.py 'OUTCOME_UNKNOWN' 'SMTP adapter exposes ambiguous-outcome classification'
 require_text infrastructure/email/tencent-exmail/smtp_send_adapter.py 'session.data(message_bytes)' 'SMTP adapter has explicit DATA boundary'
 require_text infrastructure/email/tencent-exmail/test_smtp_send_adapter.py 'test_timeout_after_data_begins_is_unknown' 'SMTP adapter tests ambiguous DATA timeout'
