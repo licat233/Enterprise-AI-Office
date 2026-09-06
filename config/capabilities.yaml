@@ -167,6 +167,7 @@ capabilities:
       - docs/V2-IMPLEMENTATION-PLAN.md
       - docs/V2-INSTALLATION-ARCHITECTURE.md
       - docs/V2-CONFIG-PROTECTED-INPUTS.md
+      - docs/V2-STAGE-CONTRACTS.md
       - docs/ONTOLOGY.md
       - ontology/examples/email-communication.yaml
       - config/company.private.example.yaml
@@ -175,6 +176,18 @@ capabilities:
       - infrastructure/email/tencent-exmail/imap.env.example
       - infrastructure/email/tencent-exmail/hermes.mcp.example.yaml
       - infrastructure/email/tencent-exmail/test_imap_readonly.py
+    stage_closure:
+      contract: docs/V2-STAGE-CONTRACTS.md
+      mandatory_when_enabled:
+        - stage_0_v1_baseline
+        - stage_1_read_only_email
+        - stage_2_draft_preparation
+        - stage_3_human_approval
+        - stage_4_governed_send
+      conditional:
+        stage_5_simple_followup: capabilities.cron.enabled == true and company defines communication follow-up
+        stage_6_messaging_surface: capabilities.messaging.enabled == true
+      mandatory_exit_milestone: GOVERNED EMAIL LOOP PASS
     required_company_values:
       - communication Profile ID and intended employee groups
       - selected mailbox logical ID and address
@@ -208,6 +221,8 @@ capabilities:
       - governance state location
       - secret symbolic reference/storage class/location description, never value
       - deterministic adapter test result
+      - Stage 0–4 closure results
+      - optional Stage 5/6 closure results when requested
       - read-only behavior result
       - approval-binding result
       - send/reconciliation result
