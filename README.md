@@ -6,34 +6,59 @@ Enterprise AI Office is a public architecture and implementation project for com
 
 The practical goal is:
 
-> **Give this repository to a capable AI engineering agent, provide the company deployment configuration and protected credentials/authority it genuinely needs, and let the agent drive the system to the requested readiness level without repeated human reminders about routine implementation steps.**
+> **Once implementation/deployment is explicitly authorized, give this repository to a capable AI engineering agent, provide the company deployment configuration and protected credentials/authority it genuinely needs, and let the agent drive the system to the requested readiness level without repeated human reminders about routine implementation steps.**
 
 ARMOR is the first reference implementation. The project itself remains generic.
 
+## Project phase gate
+
+Before interpreting any task as design, implementation, or deployment, read:
+
+[`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)
+
+This is the sole repository authority for the **current work phase**.
+
+Do not infer phase from the presence of prototype code, adapters, tests, implementation plans, deployment documents, acceptance contracts, previous assistant momentum, or phrases such as `continue`, `start`, `next`, `继续`, `开始吧`, or `下一步`.
+
+Those continuation phrases mean:
+
+> **Continue valid work inside the current phase.**
+
+They do not authorize a phase transition.
+
+The current v2 phase is **design**. Real credentials, real provider/mailbox access, runtime binding, production mutation, and customer-facing actions are therefore out of scope until a human explicitly authorizes implementation/deployment.
+
+Human-readable phase context: [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md).
+
 ## Deploy with an AI agent
+
+This section applies when `state/PROJECT-PHASE.yaml` explicitly authorizes implementation/deployment.
 
 For deployment or deployment planning, use this order:
 
 1. [`AGENTS.md`](AGENTS.md) — highest-priority repository-local operating contract.
-2. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
-3. [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) — readiness/completion contract.
-4. active company configuration, based on [`config/company.example.yaml`](config/company.example.yaml).
-5. [`config/capabilities.yaml`](config/capabilities.yaml) — capability closure registry.
-6. [`config/validated-stack.yaml`](config/validated-stack.yaml) — validated core reproducibility baseline.
-7. referenced infrastructure playbooks/adapters.
-8. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) — evidence gates.
+2. [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml) — current phase and authorization boundary.
+3. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
+4. [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) — readiness/completion contract.
+5. active company configuration, based on [`config/company.example.yaml`](config/company.example.yaml).
+6. [`config/capabilities.yaml`](config/capabilities.yaml) — capability closure registry.
+7. [`config/validated-stack.yaml`](config/validated-stack.yaml) — validated core reproducibility baseline.
+8. referenced infrastructure playbooks/adapters.
+9. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) — evidence gates.
 
 When the task is specifically about the current v2 milestone, also read:
 
 1. [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md)
 2. [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md)
-3. [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md)
-4. [`docs/V2-IMPLEMENTATION-STATUS.md`](docs/V2-IMPLEMENTATION-STATUS.md)
-5. the provider-specific capability artifacts referenced by `config/capabilities.yaml`
+3. [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md)
+4. [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) only as a future blueprint unless the phase gate authorizes implementation
+5. the provider-specific capability artifacts referenced by `config/capabilities.yaml` as design-support or implementation artifacts according to the current phase
 
-The intended interaction is one deployment request, not a sequence of prompts reminding the agent to connect WeKnora, create Profiles, configure RBAC, implement an already-enabled optional capability, test the employee client, or record state.
+During an authorized real deployment, the intended interaction is one deployment request, not a sequence of prompts reminding the agent to connect WeKnora, create Profiles, configure RBAC, implement an already-enabled optional capability, test the employee client, or record state.
 
 Human input remains legitimate for real deployment tasks that require authority the agent cannot invent: model/API credentials, mailbox/client credentials, OS permission approval, IdP/app registration, enterprise messaging credentials, private-access authority, destructive conflicts, and real company business choices missing from configuration.
+
+During design, those runtime credentials are deferred inputs rather than blockers and must not be requested merely to maintain task momentum.
 
 ## What does “complete” mean?
 
@@ -122,7 +147,7 @@ Optional capability playbooks are available for company-selected needs such as:
 
 [`config/capabilities.yaml`](config/capabilities.yaml) maps each enabled capability to its implementation path, required external inputs, acceptance test, and state fields.
 
-An enabled capability cannot be silently skipped to reach a green result. A disabled capability must not be instantiated merely because a template exists.
+An enabled capability cannot be silently skipped to reach a green result during an authorized implementation/deployment. A disabled capability must not be instantiated merely because a template exists.
 
 ## Current v2 milestone
 
@@ -144,11 +169,12 @@ Hermes-native follow-up automation only after the email loop is proven
 Ontology governance for the real read/write boundary
 ```
 
-The design review is PASS and frozen. **v2 is currently still in the design stage; real implementation/deployment is not authorized.** [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) is the future staged implementation blueprint, not the current execution state.
+The design review is PASS and frozen. **v2 is currently still in the design stage; real implementation/deployment is not authorized.** [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) is the future staged implementation blueprint, not current execution authority.
 
 Current design/prototype state:
 
 ```text
+phase authority: state/PROJECT-PHASE.yaml
 provider selected for ARMOR reference design: Tencent Enterprise Mail
 future Stage 1 surface: search_email + get_email
 read-only adapter/test/playbook: present as design-support prototypes
@@ -157,7 +183,7 @@ mailbox credentials: not required now
 SMTP/customer-facing send: not implemented or authorized
 ```
 
-See [`docs/V2-IMPLEMENTATION-STATUS.md`](docs/V2-IMPLEMENTATION-STATUS.md) for the current design/prototype evidence status.
+See [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md) for the current design/prototype evidence and phase explanation.
 
 The candidate Stage 1 Agent-facing surface is deliberately limited to:
 
@@ -185,7 +211,7 @@ v2 does **not** reopen the entire deferred-feature list. CRM, ERP, Calendar, emp
 | Automation | **Hermes Cron** when enabled | Scheduled Agent work |
 | Coding Execution | **Codex + Claude Code** when enabled | Specialist software engineering |
 | Messaging | **Hermes Gateway** when enabled | Enterprise messaging access/delivery |
-| Operations/Governance | **This repository** | Desired state, deployment contract, security, recovery, acceptance |
+| Operations/Governance | **This repository** | Desired state, phase authority, deployment contract, security, recovery, acceptance |
 
 ## Core design rules
 
@@ -193,6 +219,7 @@ v2 does **not** reopen the entire deferred-feature list. CRM, ERP, Calendar, emp
 
 | Information | Authority |
 | --- | --- |
+| Current project work phase | `state/PROJECT-PHASE.yaml` |
 | Company knowledge | WeKnora |
 | Agent behavior/role config | Hermes Profiles / SOUL / Skills / Tools / MCP |
 | Employee Web identity/access | Open WebUI / selected enterprise identity layer |
@@ -288,7 +315,7 @@ Without installing anything:
 sh scripts/repository-readiness-check.sh
 ```
 
-This checks that the deployment contracts, capability registry, core adapters, conditional playbooks, v2 email design-support artifacts, acceptance gates, state template, and production-control helpers are structurally present.
+This checks that the phase authority, deployment contracts, capability registry, core adapters, conditional playbooks, v2 email design-support artifacts, acceptance gates, state template, and production-control helpers are structurally present.
 
 It does **not** authorize implementation or replace deterministic adapter execution or real runtime acceptance when a future deployment begins.
 
@@ -297,14 +324,15 @@ It does **not** authorize implementation or replace deterministic adapter execut
 | Document | Purpose |
 | --- | --- |
 | [`AGENTS.md`](AGENTS.md) | AI agent operating contract |
+| [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml) | authoritative current work phase and transition gate |
 | [`DEPLOY.md`](DEPLOY.md) | deployment execution Golden Path |
 | [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | Core/Configured/Production readiness semantics |
 | [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | controlled v2 Communication & Follow-up scope |
 | [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md) | frozen governed email business/authority design |
 | [`docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md`](docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md) | employee entry and follow-up boundaries |
 | [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md) | frozen v2 architecture review |
-| [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) | future staged implementation blueprint; implementation not currently authorized |
-| [`docs/V2-IMPLEMENTATION-STATUS.md`](docs/V2-IMPLEMENTATION-STATUS.md) | current v2 design/prototype evidence and phase boundary |
+| [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md) | human-readable v2 design/prototype evidence and phase boundary |
+| [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) | future staged implementation blueprint; not execution authority while phase is design |
 | [`config/company.example.yaml`](config/company.example.yaml) | generic company desired-state schema |
 | [`config/capabilities.yaml`](config/capabilities.yaml) | capability implementation/acceptance registry |
 | [`config/validated-stack.yaml`](config/validated-stack.yaml) | validated core version baseline |
@@ -327,6 +355,7 @@ It does **not** authorize implementation or replace deterministic adapter execut
 
 The repository now contains:
 
+- an authoritative project phase gate that prevents implicit design→implementation/deployment transitions;
 - a validated core architecture and employee workflow;
 - machine-readable core version baseline;
 - agent deployment Golden Path;
@@ -348,11 +377,11 @@ Still not claimed:
 - a universal one-command installer/compiler;
 - empirical proof that a completely new AI agent has already executed the newly consolidated full path on a second clean host;
 - pre-validation of every possible vendor-specific IdP, messaging provider, model provider, host OS, private-access service, or email provider;
-- authorization to connect the ARMOR mailbox during the current design stage;
+- authorization to connect a real ARMOR mailbox during the current design stage;
 - real Tencent Enterprise Mail Stage 1 runtime acceptance;
 - completion of the v2 draft/approval/send operational loop.
 
-Those are not excuses for manual routine prompting during a real deployment. Once a deployment task is explicitly opened, the agent must follow the repository until it reaches the requested readiness level, asks only for genuine external authority/input, or reports a specific failure.
+Those are not excuses for manual routine prompting during a real deployment. Once the phase gate is explicitly changed to authorize a deployment task, the agent must follow the repository until it reaches the requested readiness level, asks only for genuine external authority/input, or reports a specific failure.
 
 The next real fresh-host deployment is the appropriate end-to-end empirical validation; there is no need to reinstall a working demo solely to produce that evidence.
 
