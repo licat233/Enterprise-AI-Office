@@ -1,8 +1,8 @@
 # Tencent Enterprise Mail Integration
 
-Status: v2 implementation playbook / Stage 1 read-only path only
+Status: v2 installation-design provider playbook / Stage 1 read-only candidate
 
-This playbook defines the smallest approved Enterprise AI Office integration path for Tencent Enterprise Mail (`腾讯企业邮箱`) under the frozen v2 design.
+This playbook defines the smallest approved Enterprise AI Office integration path for Tencent Enterprise Mail (`腾讯企业邮箱`) under the frozen v2 System Design and active Installation Design phase.
 
 Use with:
 
@@ -10,12 +10,11 @@ Use with:
 - `docs/V2-EMAIL-DESIGN.md`
 - `docs/V2-DESIGN-REVIEW.md`
 - `docs/V2-IMPLEMENTATION-PLAN.md`
-- `docs/V2-IMPLEMENTATION-STATUS.md`
 - `docs/ONTOLOGY.md`
 - `ontology/examples/email-communication.yaml`
 - `docs/acceptance/TENCENT-EXMAIL.md`
 
-This document does not itself authorize any mailbox credential, mailbox access, or outbound message.
+This document does not authorize any mailbox credential, mailbox access, or outbound message.
 
 ## 1. Provider capabilities relevant to v2
 
@@ -71,9 +70,9 @@ The protocol candidate does not override the business-operation contract.
 
 Do not introduce a generic mail automation platform, n8n, a second workflow engine, or a custom mail database merely to bridge Tencent Enterprise Mail.
 
-## 3. Stage 1 scope
+## 3. Stage 1 candidate scope
 
-Current implementation stage:
+The first installation-stage candidate is:
 
 > Read-only bounded email context.
 
@@ -101,7 +100,7 @@ campaign_send
 
 Stage 1 must not create any customer-facing side effect.
 
-## 4. Current read-only adapter
+## 4. Current read-only adapter candidate
 
 Repository candidate:
 
@@ -126,11 +125,11 @@ no arbitrary IMAP command
 
 Email content is untrusted operational data and must not override system, Profile, security, tool, or approval policy.
 
-A future implementation may replace this adapter with a more mature upstream integration if that integration can enforce the same frozen operation/security contract with less maintenance.
+Installation Design must re-check whether a mature upstream integration can enforce the same frozen operation/security contract with less maintenance before this custom candidate is frozen as the final path.
 
 ## 5. Credential boundary
 
-The first pilot uses exactly one explicitly selected mailbox.
+The first pilot design assumes exactly one explicitly selected mailbox.
 
 Preferred posture:
 
@@ -175,7 +174,7 @@ Email is operational communication context, not authoritative company knowledge.
 
 ## 7. Offline deterministic tests first
 
-Before using any real mailbox credential, run the repository-local deterministic tests:
+Before any real mailbox credential is ever used by a future deployment, run the repository-local deterministic tests:
 
 ```sh
 uv run infrastructure/email/tencent-exmail/test_imap_readonly.py
@@ -191,9 +190,9 @@ message body fetch uses BODY.PEEK
 no write-capable email function exists in the adapter surface
 ```
 
-A passing offline test does **not** prove provider authentication, employee authorization, or real non-mutating behavior against Tencent Enterprise Mail. It is only the first implementation gate.
+A passing offline test does **not** prove provider authentication, employee authorization, or real non-mutating behavior against Tencent Enterprise Mail. It is only the first installation-design candidate gate.
 
-Required progression:
+Future deployment progression:
 
 ```text
 offline deterministic tests PASS
@@ -212,7 +211,7 @@ Use:
 hermes.mcp.example.yaml
 ```
 
-only as a registration template for an authorized Profile during runtime implementation.
+only as a registration template for an authorized Profile during a future real installation.
 
 The template must expose only:
 
@@ -262,7 +261,7 @@ Do not expand the email Ontology into a shadow CRM.
 
 ## 10. Draft and approval boundary
 
-Stage 2/3 later introduce:
+Stage 2/3 introduce the installation contracts for:
 
 ```text
 prepare_reply_draft
@@ -287,7 +286,7 @@ If a material field changes after approval, the previous approval becomes stale.
 
 ## 11. Governed send boundary
 
-Stage 4 may later introduce exactly one initial external Named Action:
+Stage 4 introduces exactly one initial external Named Action:
 
 ```text
 send_approved_reply
@@ -295,16 +294,19 @@ send_approved_reply
 
 Do not expose generic SMTP/send-anything to ordinary Agents.
 
-Before Stage 4, the implementation must close:
+Before Stage 4 can be frozen as installable, Installation Design must close:
 
 ```text
-trusted human actor identity
+trusted human actor identity propagation
+mailbox-scoped send authorization
 exact approval-subject binding
+DraftReply / SendApproval persistence
 provider send binding
 approval revalidation immediately before send
+single logical send claim/idempotency
 provider result/reference capture
 ambiguous-result reconciliation
-audit evidence
+audit evidence persistence
 ```
 
 No autonomous customer-facing send is allowed in the initial v2 milestone.
@@ -350,9 +352,9 @@ provider protocol-setting inspection
 
 If enabled later, protect `CorpSecret`, review application scope, validate callback authenticity/encryption where applicable, and record the additional authority boundary.
 
-## 15. Required runtime inputs before real Stage 1 activation
+## 15. Protected inputs required by a future real Stage 1 activation
 
-A real mailbox connection requires protected company inputs/authority including:
+A real mailbox connection would require protected company inputs/authority including:
 
 ```text
 selected pilot mailbox authorization
@@ -366,7 +368,9 @@ actual runtime host access
 harmless known test message(s)
 ```
 
-Missing protected inputs must produce:
+These are input **classes** during Installation Design, not requests for real values.
+
+A future installer missing them must report:
 
 ```text
 BLOCKED — REQUIRED INPUT: Stage 1 provider/runtime authorization
@@ -395,15 +399,8 @@ credentials remain protected
 real employee-client behavior is correct when the capability is exposed
 ```
 
-Do not report `READ-ONLY EMAIL PASS` until both the repository-level deterministic tests and applicable real runtime checks have passed.
+Do not report `READ-ONLY EMAIL PASS` until both repository-level deterministic tests and applicable real runtime checks have passed in an explicitly authorized deployment or validation task.
 
 ## 17. Provider references
 
-Provider documentation reviewed for this playbook includes Tencent Enterprise Mail documentation for:
-
-- IMAP/SMTP SSL client settings and client-specific password behavior;
-- Open API access-token behavior;
-- mail-log query metadata;
-- new-mail callback/unread metadata.
-
-Re-check current provider documentation at runtime implementation because provider authentication and administration controls may change.
+Provider documentation must be re-checked before the provider binding is frozen for real installation because authentication, endpoint, administration, and Open API behavior may change.
