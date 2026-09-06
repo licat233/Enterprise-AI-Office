@@ -73,12 +73,14 @@ done
 # Core implementation assets.
 for path in \
   infrastructure/weknora/README.md \
+  infrastructure/weknora/PROVISIONING.md \
   infrastructure/hermes/README.md \
   infrastructure/hermes/default.config.example.yaml \
   infrastructure/hermes/default.env.example \
   infrastructure/hermes/general.config.example.yaml \
   infrastructure/hermes/general.env.example \
   infrastructure/open-webui/README.md \
+  infrastructure/open-webui/PROVISIONING.md \
   infrastructure/open-webui/docker-compose.yml
 do
   require_file "$path"
@@ -92,7 +94,8 @@ for path in \
   infrastructure/coding-agents/README.md \
   infrastructure/coding-agents/technical-profile.config.example.yaml \
   infrastructure/hermes/features/README.md \
-  infrastructure/access/README.md
+  infrastructure/access/README.md \
+  infrastructure/access/OPEN-WEBUI-OIDC.md
 do
   require_file "$path"
 done
@@ -116,6 +119,11 @@ require_text docs/ACCEPTANCE-TESTS.md 'Enterprise identity / SSO' 'Acceptance co
 require_text docs/ACCEPTANCE-TESTS.md 'Hermes administrative Web UI' 'Acceptance covers hermes-webui when enabled'
 require_text config/company.example.yaml 'target_readiness:' 'Company config declares readiness target'
 require_text config/company.example.yaml 'capabilities:' 'Company config declares optional capabilities'
+require_text config/capabilities.yaml 'infrastructure/weknora/PROVISIONING.md' 'Core capability has WeKnora provisioning path'
+require_text config/capabilities.yaml 'infrastructure/open-webui/PROVISIONING.md' 'Core capability has Open WebUI provisioning path'
+require_text config/capabilities.yaml 'infrastructure/access/OPEN-WEBUI-OIDC.md' 'SSO capability has pinned OIDC execution path'
+require_text infrastructure/weknora/PROVISIONING.md '"capabilities": ["retrieve"]' 'WeKnora contract scopes runtime retrieval key'
+require_text infrastructure/weknora/PROVISIONING.md 'BLOCKED — MIGRATION REQUIRED' 'WeKnora contract blocks unsafe embedding drift'
 require_text config/capabilities.yaml 'technical-profile.config.example.yaml' 'Coding capability has executable Profile template'
 require_text README.md 'CONFIGURED READY' 'README explains configured completeness'
 
