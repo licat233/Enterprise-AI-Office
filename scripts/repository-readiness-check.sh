@@ -1,11 +1,11 @@
 #!/bin/sh
 set -eu
 
-# Static Enterprise AI Office repository deployability/design-contract check.
-# This does not install software, change the current project phase, or prove a
-# runtime deployment works. It verifies that the repository still contains the
-# contracts/adapters/playbooks and the explicit phase gate required for safe
-# agent behavior.
+# Static Enterprise AI Office blueprint/deployability contract check.
+# This does not install software, advance the blueprint lifecycle, activate a
+# real deployment task, or prove a runtime deployment works. It verifies that
+# the repository still contains the contracts/adapters/playbooks and lifecycle
+# gates required for safe AI-agent behavior.
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PASS=0
@@ -46,7 +46,7 @@ require_text() {
 printf '%s\n' 'Enterprise AI Office Repository Readiness'
 printf '%s\n' '----------------------------------------'
 
-# Agent execution contract, phase authority, and declarative inputs.
+# Agent contract, blueprint lifecycle authority, and declarative inputs.
 for path in \
   README.md \
   AGENTS.md \
@@ -78,7 +78,7 @@ do
   require_file "$path"
 done
 
-# Core implementation assets.
+# Core installation-blueprint assets.
 for path in \
   infrastructure/weknora/README.md \
   infrastructure/weknora/PROVISIONING.md \
@@ -117,7 +117,7 @@ do
   require_file "$path"
 done
 
-# Production control helpers.
+# Production/deployment control helpers that the installation blueprint may use.
 for path in \
   scripts/preflight.sh \
   scripts/health-check.sh \
@@ -127,18 +127,23 @@ do
   require_file "$path"
 done
 
-# Guard against project-phase drift.
-require_text state/PROJECT-PHASE.yaml 'phase: design' 'Phase authority says current phase is design'
-require_text state/PROJECT-PHASE.yaml 'transition_requires_explicit_human_authorization: true' 'Phase transition requires explicit human authority'
-require_text state/PROJECT-PHASE.yaml 'implicit_transition_allowed: false' 'Implicit phase transition is disabled'
-require_text state/PROJECT-PHASE.yaml 'continuation_words_do_not_change_phase:' 'Continuation wording cannot change phase'
-require_text state/PROJECT-PHASE.yaml 'real_provider_account_access: false' 'Design phase blocks real provider access'
-require_text state/PROJECT-PHASE.yaml 'production_or_live_runtime_mutation: false' 'Design phase blocks live runtime mutation'
-require_text AGENTS.md 'Continuation language means:' 'Agent contract defines continuation semantics'
-require_text AGENTS.md 'This deployment momentum rule must never be used to cross a project phase boundary.' 'Deployment momentum cannot override phase gate'
-require_text AGENTS.md 'Prototype is not implementation' 'Agent contract separates prototypes from implementation'
-require_text README.md 'state/PROJECT-PHASE.yaml' 'README exposes authoritative phase gate'
-require_text docs/V2-PHASE-STATUS.md 'IMPLEMENTATION: NOT AUTHORIZED' 'Human v2 status matches design phase'
+# Guard against blueprint-lifecycle / real-deployment semantic drift.
+require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'
+require_text state/PROJECT-PHASE.yaml 'current_phase: system_design' 'Current blueprint phase is system design'
+require_text state/PROJECT-PHASE.yaml 'installation_design' 'Blueprint lifecycle includes installation design'
+require_text state/PROJECT-PHASE.yaml 'blueprint_validation' 'Blueprint lifecycle includes validation'
+require_text state/PROJECT-PHASE.yaml 'implicit_transition_allowed: false' 'Implicit blueprint transition is disabled'
+require_text state/PROJECT-PHASE.yaml 'real_deployment_task:' 'Real deployment has a separate gate'
+require_text state/PROJECT-PHASE.yaml 'active: false' 'No real deployment task is active by default'
+require_text state/PROJECT-PHASE.yaml 'requires_explicit_target: true' 'Real deployment requires an explicit target'
+require_text state/PROJECT-PHASE.yaml 'Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.' 'Installation design is not real installation'
+require_text AGENTS.md 'system blueprint + installation blueprint' 'Agent contract defines dual blueprint mission'
+require_text AGENTS.md 'A real company deployment is a separate consumer activity' 'Agent contract separates deployment from blueprint work'
+require_text AGENTS.md 'Installation blueprint is not a live installation' 'Agent contract prevents installation-design drift'
+require_text AGENTS.md 'Blueprint milestones' 'Agent contract separates blueprint maturity'
+require_text AGENTS.md 'Deployed-system readiness' 'Agent contract separates deployment readiness'
+require_text docs/V2-PHASE-STATUS.md 'BLUEPRINT PHASE: SYSTEM DESIGN' 'v2 status matches system-design phase'
+require_text docs/V2-PHASE-STATUS.md 'REAL DEPLOYMENT TASK: INACTIVE' 'v2 status says real deployment inactive'
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
@@ -163,7 +168,7 @@ require_text infrastructure/email/tencent-exmail/imap_readonly_mcp.py 'readonly=
 require_text infrastructure/email/tencent-exmail/imap_readonly_mcp.py 'BODY.PEEK[]' 'Email adapter uses non-Seen body fetch'
 require_text infrastructure/email/tencent-exmail/test_imap_readonly.py 'test_folder_scope_fails_closed' 'Email adapter has fail-closed folder test'
 require_text infrastructure/email/tencent-exmail/test_imap_readonly.py 'test_get_email_uses_body_peek' 'Email adapter has BODY.PEEK safety test'
-require_text docs/V2-DESIGN-REVIEW.md 'V2 DESIGN STATUS: FROZEN' 'v2 design remains frozen'
+require_text docs/V2-DESIGN-REVIEW.md 'V2 DESIGN STATUS: FROZEN' 'v2 core design review remains frozen'
 require_text infrastructure/weknora/PROVISIONING.md '"capabilities": ["retrieve"]' 'WeKnora contract scopes runtime retrieval key'
 require_text infrastructure/weknora/PROVISIONING.md 'BLOCKED — MIGRATION REQUIRED' 'WeKnora contract blocks unsafe embedding drift'
 require_text infrastructure/hermes/features/MESSAGING.md 'hermes gateway setup' 'Messaging contract uses native Hermes setup'
@@ -173,7 +178,7 @@ require_text README.md 'CONFIGURED READY' 'README explains configured completene
 
 printf '%s\n' '----------------------------------------'
 printf 'Summary: %s PASS, %s FAIL\n' "$PASS" "$FAIL"
-printf '%s\n' 'Static PASS means repository phase/deployment contracts are present; it does not change phase or replace runtime acceptance.'
+printf '%s\n' 'Static PASS means blueprint and deployment contracts are present; it does not advance blueprint phase, activate a real deployment, or replace target runtime acceptance.'
 
 if [ "$FAIL" -gt 0 ]; then
   exit 2
