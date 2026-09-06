@@ -26,6 +26,7 @@ def main() -> None:
     assert version == 2
 
     draft_hash = "sha256:" + "a" * 64
+    payload_hash = "sha256:" + "b" * 64
     actor_id = "open-webui:user-001"
 
     db.execute(
@@ -69,7 +70,6 @@ def main() -> None:
         ),
     )
 
-    # Logical send must match the committed ApprovalClaim pair.
     db.execute(
         """
         INSERT INTO logical_sends(
@@ -87,9 +87,51 @@ def main() -> None:
             '["customer@example.invalid"]',
             "<eao.send-001@example.invalid>",
             "Mon, 07 Sep 2026 00:02:00 +0000",
-            "sha256:" + "b" * 64,
+            payload_hash,
             actor_id,
             "2026-09-07T00:02:00Z",
+        ),
+    )
+
+    # Create a second exact approval/claim for a different Draft, then prove the
+    # logical-send row cannot substitute another Draft subject under that approval.
+    draft_hash_2 = "sha256:" + "c" * 64
+    db.execute(
+        """
+        INSERT INTO draft_replies(
+            draft_id, revision, source_message_id, sender_mailbox_id,
+            to_addresses_json, cc_addresses_json, subject, body,
+            content_hash, created_by_actor_id, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "draft-002", 1, "message-002", "mailbox-001",
+            '["customer@example.invalid"]', '[]',
+            "Re: Other", "Other body", draft_hash_2, actor_id,
+            "2026-09-07T00:02:10Z",
+        ),
+    )
+    db.execute(
+        """
+        INSERT INTO send_approvals(
+            approval_id, draft_id, draft_revision, draft_content_hash,
+            approved_by_actor_id, approved_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "approval-002", "draft-002", 1, draft_hash_2,
+            actor_id, "2026-09-07T00:02:20Z",
+        ),
+    )
+    db.execute(
+        """
+        INSERT INTO approval_claims(
+            approval_id, logical_send_id, claimed_by_actor_id, claimed_at
+        ) VALUES (?, ?, ?, ?)
+        """,
+        (
+            "approval-002", "send-002", actor_id,
+            "2026-09-07T00:02:30Z",
         ),
     )
 
@@ -105,18 +147,18 @@ def main() -> None:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "send-mismatch", "approval-001",
+                "send-002", "approval-002",
                 "draft-001", 1, draft_hash,
                 "mailbox-001", "sales@example.invalid",
                 '["customer@example.invalid"]',
-                "<eao.send-mismatch@example.invalid>",
-                "Mon, 07 Sep 2026 00:02:00 +0000",
-                "sha256:" + "b" * 64,
+                "<eao.send-002@example.invalid>",
+                "Mon, 07 Sep 2026 00:02:30 +0000",
+                payload_hash,
                 actor_id,
-                "2026-09-07T00:02:00Z",
+                "2026-09-07T00:02:30Z",
             ),
         )
-        raise AssertionError("logical send without matching claim unexpectedly accepted")
+        raise AssertionError("logical send with mismatched approval subject unexpectedly accepted")
     except sqlite3.IntegrityError:
         pass
 
@@ -130,10 +172,31 @@ def main() -> None:
         (
             "attempt-001", "send-001", 1,
             "tencent-exmail", "smtp.example.invalid:465",
-            "sha256:" + "b" * 64,
+            payload_hash,
             "2026-09-07T00:03:00Z",
         ),
     )
+
+    # The database refuses a provider attempt whose transport hash differs from
+    # the frozen logical-send transport payload.
+    try:
+        db.execute(
+            """
+            INSERT INTO send_attempts(
+                attempt_id, logical_send_id, attempt_no,
+                provider, endpoint, transport_payload_hash, started_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "attempt-wrong-hash", "send-001", 2,
+                "tencent-exmail", "smtp.example.invalid:465",
+                "sha256:" + "d" * 64,
+                "2026-09-07T00:03:01Z",
+            ),
+        )
+        raise AssertionError("attempt with wrong transport hash unexpectedly accepted")
+    except sqlite3.IntegrityError:
+        pass
 
     # Durable attempt without terminal result must be detectable and therefore
     # treated by runtime as reconciliation-required after restart.
@@ -174,7 +237,7 @@ def main() -> None:
             (
                 "attempt-duplicate-number", "send-001", 1,
                 "tencent-exmail", "smtp.example.invalid:465",
-                "sha256:" + "b" * 64,
+                payload_hash,
                 "2026-09-07T00:04:00Z",
             ),
         )
