@@ -42,8 +42,10 @@ blueprint_lifecycle:
       during later blueprint work.
 
   installation_design:
-    status: active
+    status: complete
     opened_on: 2026-09-06
+    completed_on: 2026-09-07
+    transition_ready: true
     purpose: turn the approved system design into an agent-readable and agent-executable installation and acceptance blueprint
     allowed:
       - deployment architecture design
@@ -58,6 +60,8 @@ blueprint_lifecycle:
       - installation-time acceptance contracts
       - synthetic or isolated installation rehearsals
     completion_milestone: INSTALLATION DESIGN COMPLETE
+    final_review: docs/V2-INSTALLATION-DESIGN-REVIEW.md
+    final_review_result: PASS
     work_packages:
       id_1_installation_architecture:
         status: complete
@@ -99,7 +103,19 @@ blueprint_lifecycle:
         provider_adapter_test: infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
         evidence: SEND / RECONCILIATION INSTALLATION CONTRACT FROZEN
       id_7_recovery_acceptance:
-        status: next
+        status: complete
+        completed_on: 2026-09-07
+        contract: docs/V2-RECOVERY-CLEAN-HOST.md
+        governance_backup_helper: infrastructure/email/governance/backup_state.py
+        governance_restore_helper: infrastructure/email/governance/restore_state.py
+        offline_recovery_test: infrastructure/email/governance/test_recovery.py
+        full_backup_helper: scripts/backup.sh
+        isolated_restore_helper: scripts/restore.sh
+        evidence: RECOVERY / CLEAN-HOST INSTALLATION CONTRACT FROZEN
+    closure_note: >-
+      ID-1 through ID-7 are complete and the Installation Design final review passed on 2026-09-07.
+      current_phase intentionally remains installation_design because opening blueprint_validation
+      requires explicit human direction. Installation Design completion does not authorize real deployment.
     note: installation_design does not authorize installation onto any real company system
 
   blueprint_validation:
@@ -136,6 +152,7 @@ real_deployment_task:
     - blueprint phase
     - system design completion
     - installation design activity
+    - installation design completion
     - installation plan existence
     - install scripts existence
     - provider selection
@@ -157,8 +174,9 @@ public_repository_data_policy:
 interpretation_rules:
   - The repository is a system-design and installation-blueprint product, not a live deployment record.
   - The v2 baseline System Design milestone is complete and frozen.
-  - The current blueprint phase is installation_design following explicit human direction on 2026-09-06.
-  - ID-1 through ID-6 are complete; ID-7 rollback/recovery/clean-host acceptance is the next Installation Design work package.
+  - The v2 baseline Installation Design milestone is complete and transition-ready.
+  - The current blueprint phase intentionally remains installation_design until explicit human direction opens blueprint_validation.
+  - ID-1 through ID-7 are complete; the next lifecycle phase is blueprint_validation but it is not yet opened.
   - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
   - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
