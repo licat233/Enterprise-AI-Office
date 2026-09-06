@@ -132,6 +132,57 @@ def main() -> None:
     ).fetchall()
     assert revisions == [(1, "Version one"), (2, "Version two")]
 
+    db.execute(
+        """
+        INSERT INTO draft_review_bindings(
+            human_actor_id, chat_id, message_id,
+            draft_id, draft_revision, draft_content_hash, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            actor_id,
+            "chat-001",
+            "assistant-message-001",
+            draft_id,
+            2,
+            hash_v2,
+            "2026-09-06T00:01:01Z",
+        ),
+    )
+
+    binding = db.execute(
+        """
+        SELECT draft_id, draft_revision, draft_content_hash
+        FROM draft_review_bindings
+        WHERE human_actor_id=? AND chat_id=? AND message_id=?
+        """,
+        (actor_id, "chat-001", "assistant-message-001"),
+    ).fetchone()
+    assert binding == (draft_id, 2, hash_v2)
+
+    # A review binding cannot point at a non-existent/wrong Draft hash.
+    try:
+        db.execute(
+            """
+            INSERT INTO draft_review_bindings(
+                human_actor_id, chat_id, message_id,
+                draft_id, draft_revision, draft_content_hash, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                actor_id,
+                "chat-001",
+                "assistant-message-bad",
+                draft_id,
+                2,
+                "sha256:not-the-real-hash",
+                "2026-09-06T00:01:02Z",
+            ),
+        )
+        raise AssertionError("invalid review binding unexpectedly accepted")
+    except sqlite3.IntegrityError:
+        pass
+
     approval_id = "approval-001"
     db.execute(
         """
@@ -149,6 +200,28 @@ def main() -> None:
             "2026-09-06T00:02:00Z",
         ),
     )
+
+    # Wrong Draft hash is rejected by the FK, not merely application convention.
+    try:
+        db.execute(
+            """
+            INSERT INTO send_approvals(
+                approval_id, draft_id, draft_revision, draft_content_hash,
+                approved_by_actor_id, approved_at
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "approval-wrong-hash",
+                draft_id,
+                2,
+                "sha256:not-the-real-hash",
+                "open-webui:user-002",
+                "2026-09-06T00:02:00Z",
+            ),
+        )
+        raise AssertionError("approval with wrong hash unexpectedly accepted")
+    except sqlite3.IntegrityError:
+        pass
 
     # Exact same human + exact same Draft approval is replay-safe: schema rejects
     # a second independently reusable approval row.
@@ -226,7 +299,7 @@ def main() -> None:
     assert db.execute("SELECT COUNT(*) FROM governance_audit_events").fetchone()[0] == 1
     assert db.execute("PRAGMA foreign_keys").fetchone()[0] == 1
 
-    print("PASS — v2 governance SQLite/hash contract")
+    print("PASS — v2 governance SQLite/hash/review-binding contract")
 
 
 if __name__ == "__main__":
