@@ -1,10 +1,10 @@
 # Enterprise AI Office v2 — Installation Architecture
 
-Status: installation architecture frozen / real deployment not authorized
-Version: 1.0
+Status: installation architecture frozen / ID-4 identity-path refinement applied / real deployment not authorized
+Version: 1.1
 Date: 2026-09-06
 
-This document closes `ID-1 — Installation architecture and v1 preservation boundary` for the Enterprise AI Office v2 `installation_design` phase.
+This document closes `ID-1 — Installation architecture and v1 preservation boundary` for the Enterprise AI Office v2 `installation_design` phase and incorporates the identity-safe tool-routing refinement discovered during ID-4.
 
 It defines the minimum runtime topology that a future authorized installer should reproduce. It does **not** authorize installation on any real company host, use of real employee identities, mailbox credentials, or customer-facing sends.
 
@@ -14,6 +14,7 @@ Use with:
 - `docs/ARCHITECTURE.md`
 - `docs/V2-EMAIL-DESIGN.md`
 - `docs/V2-IMPLEMENTATION-PLAN.md`
+- `docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md`
 - `config/company.example.yaml`
 - `config/capabilities.yaml`
 
@@ -23,7 +24,7 @@ Use with:
 
 v2 must add governed email capability without destabilizing or redesigning the validated v1 employee path.
 
-The reference architecture therefore follows two rules:
+The reference architecture follows two rules:
 
 ```text
 preserve the v1 General Assistant path unchanged
@@ -53,7 +54,7 @@ WeKnora
 grounded answer + source
 ```
 
-For the v2 reference topology, the following v1 responsibilities remain unchanged:
+The following remain unchanged:
 
 ```text
 Open WebUI employee identity / ordinary chat UX
@@ -66,7 +67,7 @@ existing employee conversation history
 existing v1 production backup/recovery responsibilities
 ```
 
-The v2 reference path must not add Email MCP/provider dependencies to the validated `general` Profile.
+The v2 reference path must not add Email provider/governance startup dependencies to the validated `general` Profile.
 
 If the entire v2 email capability is disabled or unhealthy, the v1 General Assistant path must remain independently usable.
 
@@ -74,40 +75,41 @@ If the entire v2 email capability is disabled or unhealthy, the v1 General Assis
 
 ## 3. Reference v2 topology
 
-The minimum v2 reference topology is:
+ID-4 upstream verification refined the original ID-1 assumption that Hermes should transitively carry HumanActor identity into the Email MCP boundary.
+
+The reference topology now uses Open WebUI's server-side external-tool execution for the identity-sensitive Email Governance path:
 
 ```text
                            ┌──────────────────────┐
 Employee ─────────────────►│      Open WebUI      │
                            └──────────┬───────────┘
                                       │
-                    ┌─────────────────┴─────────────────┐
-                    │                                   │
-                    ▼                                   ▼
-          General Assistant                  Communication Assistant
-                    │                                   │
-                    ▼                                   ▼
-          Hermes `general`                  Hermes communication Profile
-                    │                            │                 │
-                    ▼                            │                 │
-                WeKnora                         │                 ▼
-                                                 │      EAO Email Governance Service
-                                                 │                 │
-                                                 ▼                 ▼
-                                              WeKnora        Email Provider
+                    ┌─────────────────┴────────────────────────┐
+                    │                                          │
+                    ▼                                          ▼
+          General Assistant                         Communication Assistant
+                    │                                          │
+                    ▼                                          ▼
+          Hermes `general`                         Hermes communication Profile
+                    │                                          │
+                    ▼                                          ▼
+                WeKnora                                   WeKnora / reasoning
+                                                               │
+                           Open WebUI server-side tool loop ◄───┘
+                                      │
+                                      │ trusted HumanActor context
+                                      ▼
+                           EAO Email Governance Service
+                                      │
+                                      ▼
+                                Email Provider
 
-Open WebUI trusted approval Action ───────────────► EAO Email Governance Service
+Open WebUI trusted approval Action ───► EAO Email Governance Service
 ```
 
-The exact communication Profile identifier is company-configurable. Public examples may use the synthetic identifier:
+The Communication Assistant remains backed by the isolated Hermes communication Profile, but Open WebUI executes the Email Governance MCP/OpenAPI tools server-side and supplies trusted current-user context directly to governance.
 
-```text
-communication
-```
-
-The reference blueprint uses a separate employee-facing communication Profile because email introduces a materially different tool/credential/risk boundary.
-
-A company may choose a different specialist Profile name or an equivalent isolated Profile mapping, but the v1 `general` path must remain independently recoverable and testable.
+This preserves the frozen System Design responsibilities while avoiding a Hermes fork or unproven transitive header propagation.
 
 ---
 
@@ -127,9 +129,7 @@ eao-email-governance
 
 This is a narrow local service, not a new enterprise platform.
 
-It owns only the deterministic v2 email governance responsibilities that do not belong safely in prompts, Open WebUI internals, Hermes Profile state, WeKnora, or the email provider.
-
-### Responsibilities
+It owns only:
 
 ```text
 Mailbox-scoped authorization enforcement
@@ -144,14 +144,14 @@ reconciliation state
 append-oriented governance evidence
 ```
 
-### Explicit non-responsibilities
+It does not own:
 
 ```text
 LLM/model inference
-company knowledge retrieval authority
+company knowledge authority
 employee authentication
 Open WebUI group administration
-Hermes Profile configuration authority
+Hermes Profile configuration
 Cron scheduling
 Kanban task management
 mailbox mirroring
@@ -165,23 +165,13 @@ generic IMAP/SMTP/API proxy
 
 ## 5. Why a separate governance service is justified
 
-DraftReply and SendApproval are EAO-owned authoritative state.
+DraftReply and SendApproval are EAO-owned authoritative state shared across model-assisted draft/read operations, trusted human approval, provider send and reconciliation.
 
-They must be shared across:
+Keeping this state only in chat, Hermes session, SOUL/Skill, or Open WebUI message text would not provide deterministic authorization or restart-safe governance.
 
-```text
-Hermes-driven draft/read operations
-+
-trusted Open WebUI human approval interaction
-+
-provider send/reconciliation execution
-```
+Writing directly into Open WebUI or Hermes internal databases would create unsupported coupling and incorrectly turn those components into the authority for email governance state.
 
-Keeping this state only in an LLM conversation, Hermes session, SOUL/Skill, or Open WebUI message text would not provide deterministic authorization or restart-safe governance.
-
-Writing directly into Open WebUI or Hermes internal databases would also create unsupported coupling and incorrectly turn those components into the authority for email governance state.
-
-Therefore a single thin service is the minimum clean boundary.
+Therefore one thin service is the minimum clean boundary.
 
 Do not split it into separate Draft, Approval, Audit, Retry, or Workflow services.
 
@@ -202,78 +192,66 @@ OrbStack / Docker
 └── existing Open WebUI
 ```
 
-The governance service should remain host-native for the reference blueprint unless later implementation evidence proves a container is materially simpler.
+The governance service should remain host-native unless later implementation evidence proves a container materially simpler.
 
-Reasons:
+Open WebUI reaches it through an explicitly approved private host bridge/private endpoint.
 
-```text
-current narrow provider adapter is Python/uv-oriented
-no new container image/build lifecycle is required
-Hermes can reach the service locally
-Open WebUI can reach the service through an explicitly approved private host bridge
-local SQLite persistence is sufficient for the single-host baseline
-```
-
-A non-macOS deployment may use the platform-native equivalent while preserving the same process/trust boundaries.
+A non-macOS deployment may use the platform-native equivalent while preserving the same trust/process boundaries.
 
 ---
 
 ## 7. Hermes isolation boundary
 
-The reference v2 email capability uses a separate Hermes employee Profile rather than extending the validated `general` Profile.
-
-Conceptually:
+The reference v2 capability uses a separate Hermes employee Profile rather than extending `general`.
 
 ```text
 general
-→ WeKnora only
+→ WeKnora
 → existing v1 employee path
+→ no Email Governance tools by default
 
 communication
-→ WeKnora
-→ EAO Email Governance MCP/tool surface
-→ separate Profile credential/risk boundary
+→ WeKnora / communication reasoning
+→ exposed to employee through restricted Communication Assistant
 ```
 
-The communication Profile should use its own API credential and employee Assistant/resource grant.
+The Communication Assistant has stage-enabled Email Governance tools attached at the Open WebUI model/tool layer. Open WebUI executes those tools server-side; Hermes does not authenticate the employee to governance.
 
-Where the selected Hermes release supports a separate Profile API server process/port, the reference installation should prefer that isolated process for the communication Profile instead of making the v1 General Assistant startup depend on the email MCP/governance service.
+The communication Profile still uses its own API credential and isolated employee Assistant/resource grant.
 
-If a deployment intentionally uses a shared/multiplexed Hermes listener, acceptance must prove that an unavailable or malformed email governance integration does not prevent the v1 `general` Profile from serving employee requests.
+Where the selected Hermes release supports a separate Profile API process/port, prefer it so a malformed/unavailable email integration cannot become a startup dependency of v1 `general`.
 
 ---
 
 ## 8. Open WebUI boundary
 
-Open WebUI remains the employee Web surface and human identity source.
+Open WebUI remains:
+
+```text
+employee Web surface
+human authentication/identity source
+Assistant/resource RBAC surface
+server-side external-tool execution boundary for v2 Email
+trusted human approval Action surface
+```
 
 The reference v2 installation adds only:
 
 ```text
 one restricted Communication Assistant/Model resource
+one admin-managed Email Governance external-tool connection
 one server-side trusted approval Action/Function or equivalent native extension
 ```
 
-The approval UI adapter may receive authenticated Open WebUI user context and call the governance service through a protected server-side channel.
-
-It must not become the Source of Truth for:
-
-```text
-DraftReply
-SendApproval
-logical send state
-provider result
-```
+Open WebUI must not become the Source of Truth for DraftReply, SendApproval, logical send state, or provider result.
 
 Do not write v2 governance records directly into Open WebUI's internal application tables.
 
-The exact Action/Function code and trusted identity assertion mechanism are closed later under ID-4 and ID-5.
+Trusted identity propagation is defined in `docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md`.
 
 ---
 
-## 9. Hermes-facing operation surface
-
-Hermes reaches the governance boundary through a narrow supported MCP/API surface rather than direct SQLite/provider access.
+## 9. Email Governance operation surface
 
 Stage-gated surface:
 
@@ -289,12 +267,14 @@ Stage 3
   no model-inferred approval primitive
 
 Stage 4
-  send_approved_reply exists as a governed Named Action
+  send_approved_reply behind governed action gate
 ```
 
-Formal `approve_reply_draft` must originate from a deterministic trusted-human path, not from an ordinary model tool call inferred from chat text.
+The Communication Assistant/model may decide to invoke read/draft tools, but Open WebUI performs the server-side tool request to governance with current HumanActor context.
 
-`send_approved_reply` is a governed runtime operation. It does not have to be exposed as an ordinary free-choice LLM tool when the trusted Open WebUI `Approve & Send` server-side action can invoke it directly after approval.
+Formal `approve_reply_draft` originates only from a deterministic trusted-human path.
+
+`send_approved_reply` does not need to be a free-choice ordinary LLM tool when the trusted `Approve & Send` action can invoke it directly after approval.
 
 No generic provider mutation primitive is exposed.
 
@@ -302,24 +282,22 @@ No generic provider mutation primitive is exposed.
 
 ## 10. Provider boundary
 
-The governance service owns the narrow email-provider binding for configured pilot mailboxes.
-
-Conceptually:
+The governance service owns the narrow provider binding for configured mailboxes.
 
 ```text
 Governance Service
-├── read adapter  → provider-supported mailbox read surface
-└── send adapter  → provider-supported outbound surface, Stage 4 only
+├── read adapter → provider-supported mailbox read surface
+└── send adapter → provider-supported outbound surface, Stage 4 only
 ```
 
-For the current Tencent Enterprise Mail reference candidate:
+Current Tencent Enterprise Mail reference candidate:
 
 ```text
 read candidate → IMAP over TLS
 send candidate → SMTP over TLS
 ```
 
-Protocol credentials remain inside the governance/provider runtime secret boundary and are never passed into Open WebUI, model prompts, WeKnora, or ordinary Hermes tool arguments.
+Provider credentials remain inside the governance/provider runtime secret boundary and never enter Open WebUI user state, model prompts, WeKnora, or ordinary tool arguments.
 
 The provider remains authoritative for source messages and actual delivery state.
 
@@ -327,17 +305,13 @@ The provider remains authoritative for source messages and actual delivery state
 
 ## 11. Persistent state boundary
 
-The single-host reference uses one small local SQLite database owned only by the governance service.
-
-Reference persistent-state class:
+The single-host reference uses one local SQLite database owned only by governance:
 
 ```text
 <runtime_root>/runtime/email-governance/state.sqlite3
 ```
 
-The exact path may be overridden by company-private deployment configuration, but it must be outside the public repository and included in the applicable backup/restore contract.
-
-The database stores only EAO-owned governance state such as:
+It stores only EAO-owned governance state:
 
 ```text
 DraftReply
@@ -349,17 +323,11 @@ reconciliation state/provider references
 
 It must not become a mailbox cache or customer database.
 
-Normal inbound message bodies remain provider-backed operational context and are not bulk-persisted into the governance database.
-
-DraftReply bodies are persisted because the exact outbound artifact being approved is EAO-owned state.
+DraftReply bodies are persisted because the exact outbound artifact being approved is EAO-owned state; normal inbound message bodies remain provider-backed context.
 
 ---
 
 ## 12. Logs and secrets
-
-Technical logs and governance evidence remain distinct.
-
-Reference classes:
 
 ```text
 technical logs
@@ -368,17 +336,17 @@ technical logs
 governance state
 → governance SQLite database
 
-provider/model/API secrets
+provider/model/Profile/forwarder secrets
 → protected secret storage defined by ID-2
 ```
 
-No credentials, bearer tokens, mailbox passwords, or full unnecessary email bodies may be written to normal logs.
+No credentials, bearer/session tokens, mailbox passwords, or unnecessary full email bodies may be written to normal logs.
 
 ---
 
 ## 13. Network / trust paths
 
-Required logical paths are:
+Required logical paths:
 
 ```text
 Employee browser
@@ -390,14 +358,14 @@ Open WebUI
 Hermes communication Profile
 → WeKnora supported retrieval interface
 
-Hermes communication Profile
-→ EAO Email Governance private MCP/API endpoint
+Open WebUI server-side Email tool connection
+→ EAO Email Governance private endpoint
 
 Open WebUI server-side approval Action
 → EAO Email Governance trusted action endpoint
 
 EAO Email Governance
-→ Email Provider over approved encrypted provider transport
+→ Email Provider over approved encrypted transport
 ```
 
 Not allowed:
@@ -405,32 +373,29 @@ Not allowed:
 ```text
 Employee browser → governance service directly
 Employee browser → provider credential
+LLM/tool arguments → trusted actor identity
 Hermes → governance SQLite directly
 Open WebUI → governance SQLite directly
+Governance service → Open WebUI internal DB directly
 Governance service → WeKnora internal database
 public Internet → governance service inbound
 ```
 
-The exact host bind address, port, service authentication, and container-to-host route are installation details to close under ID-4/ID-5. Whatever mechanism is selected must remain on an approved private boundary and fail closed.
+The private tool channel must authenticate Open WebUI as a trusted forwarder and fail closed when trusted HumanActor context is absent.
 
 ---
 
 ## 14. Startup and failure containment
 
-The v1 path and v2 path must have independent failure containment.
-
 Required behavior:
 
 ```text
-WeKnora unavailable
-→ v1/v2 grounded knowledge capability degraded according to existing behavior
-
 communication Profile unavailable
-→ v2 communication unavailable
+→ v2 communication reasoning unavailable
 → v1 General Assistant remains available
 
 governance service unavailable
-→ email tools/actions fail closed
+→ Email tools/actions fail closed
 → v1 General Assistant remains available
 
 email provider unavailable
@@ -441,24 +406,22 @@ Open WebUI unavailable
 → employee Web entry unavailable as in v1
 ```
 
-The governance service must not become a startup prerequisite for the validated `general` Profile.
+Governance must not become a startup prerequisite for `general`.
 
-Reference service ordering for v2 capability activation:
+Reference activation order:
 
 ```text
 v1 core healthy
 → governance service healthy
 → communication Profile healthy
-→ Open WebUI Communication Assistant/action enabled
+→ Open WebUI Communication Assistant + Email tool connection/action enabled
 ```
 
-Disable/removal occurs in the reverse dependency order.
+Disable/removal occurs in reverse dependency order.
 
 ---
 
 ## 15. Stage activation model
-
-The same topology is progressively activated rather than replaced between stages.
 
 ```text
 Stage 0
@@ -466,10 +429,11 @@ Stage 0
 
 Stage 1
   communication Profile + governance service
+  Open WebUI Email read tools
   provider read binding only
 
 Stage 2
-  DraftReply persistence enabled
+  DraftReply persistence + prepare tool enabled
 
 Stage 3
   trusted approval Action + SendApproval persistence enabled
@@ -479,80 +443,76 @@ Stage 4
   governed provider send binding enabled
 
 Stage 5
-  optional Hermes Cron uses the same authorization/governance boundary
+  optional Hermes Cron reuses the same governance boundary
 
 Stage 6
-  optional messaging reuses the same Profile/governance operations
+  optional messaging reuses the same approved Profile/governance operations
 ```
 
-Do not create a temporary read architecture that must later be replaced by a different send architecture.
+Do not create a temporary read architecture that must later be replaced for send.
 
 ---
 
 ## 16. Removal / rollback boundary
 
-The v2 capability must be removable without corrupting v1.
-
-Minimum removal sequence:
+Minimum v2 removal sequence:
 
 ```text
-disable employee Communication Assistant/action
+disable employee Communication Assistant/action/tool grants
+→ remove/disable Open WebUI Email Governance tool connection
 → stop/disable communication Profile service
 → stop/disable governance service
-→ revoke/remove email provider credentials
-→ preserve or archive governance state according to company retention policy
+→ revoke/remove email provider and forwarder credentials
+→ preserve/archive governance state according to policy
 → verify General Assistant v1 path remains healthy
 ```
 
 Externally sent email cannot be rolled back.
 
-A lost or unavailable governance database must never cause the system to infer that approval existed; governed send fails closed.
+A lost/unavailable governance database must never cause the system to infer approval existed; governed send fails closed.
 
-Detailed backup/restore and recovery mechanics are completed under ID-7.
+Detailed backup/restore mechanics are completed under ID-7.
 
 ---
 
-## 17. Explicitly rejected ID-1 alternatives
+## 17. Explicitly rejected alternatives
 
-### Put all v2 email tools into `general`
+### Put all v2 Email capability into `general`
 
-Rejected for the reference baseline because it expands the validated v1 risk/credential/MCP boundary and weakens failure isolation.
+Rejected because it expands the validated v1 risk/credential boundary and weakens failure isolation.
+
+### Make Hermes relay HumanActor identity to MCP through a custom fork
+
+Rejected for the reference path because Open WebUI already has a supported server-side tool execution and user-context mechanism; a Hermes fork would add unnecessary coupling.
 
 ### Store approvals only in chat/history
 
 Rejected because conversation text is not deterministic authorization evidence.
 
-### Store governance state directly in Open WebUI database
+### Store governance state in Open WebUI/Hermes internal databases
 
-Rejected because Open WebUI is the employee client/identity surface, not the authority for EAO email governance state; direct internal DB coupling is also unsupported.
+Rejected because those systems are not the authority for EAO Email governance state and direct internal DB coupling is unsupported.
 
-### Store governance state directly in Hermes internal/profile state database
+### Add PostgreSQL/Redis, n8n, workflow engine or event bus
 
-Rejected because the state must be shared with a trusted human approval surface and must not depend on LLM/session semantics or Hermes internal schema.
-
-### Add PostgreSQL/Redis for v2 governance
-
-Rejected for the single-host baseline because the required state is small and transactional SQLite is sufficient. Revisit only if proven concurrency/HA requirements exceed it.
-
-### Add n8n / workflow engine / event bus
-
-Rejected because the frozen v2 workflow does not require them.
+Rejected because the single-host v2 baseline does not require them.
 
 ---
 
 ## 18. ID-1 acceptance contract
 
-Installation Architecture is frozen when the blueprint establishes all of the following:
+Installation Architecture remains frozen when the blueprint establishes:
 
 ```text
 [✓] validated v1 General Assistant path remains unchanged
-[✓] v2 email capability has an isolated Hermes Profile boundary
+[✓] v2 communication reasoning has an isolated Hermes Profile boundary
 [✓] one thin EAO Email Governance Service owns deterministic email governance state
+[✓] Open WebUI supplies trusted HumanActor context directly on server-side governance tool/action calls
+[✓] no Hermes fork/transitive identity relay is required
 [✓] no new broad platform/database/workflow system is introduced
-[✓] Open WebUI remains employee identity/UX surface, not governance state authority
 [✓] provider remains source of mailbox/delivery truth
 [✓] governance SQLite stores only EAO-owned state
-[✓] v2 capability failure/removal does not require v1 redesign
+[✓] v2 failure/removal does not require v1 redesign
 [✓] stage activation reuses one stable topology
 [✓] real deployment remains independently gated
 ```
