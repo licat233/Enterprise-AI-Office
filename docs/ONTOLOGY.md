@@ -1,12 +1,14 @@
 # Enterprise Ontology Contract v0
 
 Status: draft architecture contract
-Version: 0.1.0
+Version: 0.2.0
 Date: 2026-09-06
 
 This document defines the minimum Ontology contract for Enterprise AI Office.
 
 It converts the findings in `docs/ONTOLOGY-RESEARCH.md` into a reusable architecture contract while deliberately avoiding premature runtime implementation.
+
+Version 0.2.0 incorporates the first machine-readable schema experiment under `ontology/examples/sales-inquiry.yaml`, which demonstrated that write governance alone is insufficient: read visibility, cross-object traversal, and read-operation authorization must also be explicit parts of the contract.
 
 This contract does **not** authorize a new database, graph engine, reasoning service, or custom orchestration platform. It does not replace WeKnora, Hermes Agent, Open WebUI, MCP, existing RBAC, or existing Profile capability boundaries.
 
@@ -29,7 +31,7 @@ Profiles / MCP → capability boundaries
 
 The Ontology contract addresses a different problem:
 
-> How should Enterprise AI Office represent business objects, relationships, authority, business actions, constraints, tool bindings, and audit requirements so Agents can operate on enterprise systems safely and consistently?
+> How should Enterprise AI Office represent business objects, relationships, authority, visibility, governed reads, business actions, constraints, tool bindings, and audit requirements so Agents can operate on enterprise systems safely and consistently?
 
 The immediate goal is to standardize the model before selecting or building any runtime.
 
@@ -43,6 +45,9 @@ The minimum Enterprise Ontology model covers:
 Object Types
 Properties
 Relation Types
+Object Visibility
+Read Operations
+Traversal Authorization
 Authority
 Named Actions
 Preconditions
@@ -128,15 +133,33 @@ Critical mutation rules must eventually be enforced deterministically outside th
 
 ### 4.4 Authorization fails closed
 
-No applicable policy, unresolved actor identity, unresolved authority, unresolved tool binding, or unresolved required approval must not silently become allow.
+No applicable policy, unresolved actor identity, unresolved authority, unresolved visibility rule, unresolved traversal authorization, unresolved tool binding, or unresolved required approval must not silently become allow.
 
-### 4.5 AI may propose; humans govern; runtime enforces
+This applies to both reads and writes.
+
+### 4.5 Read authorization must be closed over the actual data path
+
+Authorization to read one Object Type does not automatically authorize related objects reached through a relation.
+
+If a read operation filters, projects, joins, traverses, or evaluates a precondition using another Object Type, Property, or Relation, the authorization decision must include that actual read path.
+
+For example:
+
+```text
+search Inquiry
++ filter Customer.country
++ filter Product.product_family
+```
+
+requires authorization for the relevant Inquiry, Customer, Product, and relation reads. Entry-point authorization alone is insufficient.
+
+### 4.6 AI may propose; humans govern; runtime enforces
 
 Ontology changes may be suggested from runtime evidence, user corrections, audits, or domain review.
 
 They must not automatically alter the active production contract.
 
-### 4.6 Knowledge reasoning and business mutation are separate concerns
+### 4.7 Knowledge reasoning and business mutation are separate concerns
 
 A knowledge graph or GraphRAG system does not by itself provide safe operational actions.
 
@@ -183,6 +206,7 @@ description
 properties
 relations
 authority defaults if any
+visibility/read requirements when access is not universally allowed
 ```
 
 ---
@@ -202,6 +226,7 @@ mutability
 authority
 source binding
 validation constraints
+read restrictions when more specific than the object default
 ```
 
 Example:
@@ -219,6 +244,8 @@ properties:
 ```
 
 The contract should avoid duplicating detailed validation rules until a real integration needs them.
+
+Property-level read restrictions should be added only when a real sensitivity or authorization boundary requires them; do not create field-level policy complexity for every property by default.
 
 ---
 
@@ -247,9 +274,115 @@ cardinality
 authority
 properties on the relation
 validity period
+read/traversal requirements
 ```
 
 Do not force every real-world association into the Ontology if no workflow uses it.
+
+### 7.1 Object Visibility
+
+Object Visibility defines whether an actor is allowed to discover or read instances of an Object Type.
+
+Visibility is distinct from data Authority:
+
+```text
+Authority  → who owns the fact and may change it
+Visibility → who may see the fact/object
+```
+
+A source-backed object may still be hidden from an otherwise authenticated employee.
+
+The default posture for enterprise operational objects should be fail closed unless a broader visibility rule is explicitly justified.
+
+A machine-readable object definition should be able to express, where relevant:
+
+```text
+default visibility decision
+required entitlement / role / group
+actor or tenant scope
+owner-based scope
+sensitivity-driven restrictions
+property-specific overrides
+```
+
+Illustrative shape:
+
+```yaml
+objects:
+  Inquiry:
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: sales.inquiry.read
+```
+
+Do not treat UI hiding as visibility enforcement. Direct read paths must obey the same effective policy.
+
+If a visibility decision requires trusted human identity and that identity cannot be resolved at the enforcement point, the read must fail closed.
+
+### 7.2 Read Operations
+
+A Read Operation is an explicitly modeled way to query or retrieve Ontology objects without changing authoritative business state.
+
+Examples:
+
+```text
+search_inquiries
+get_inquiry
+list_open_quotes
+get_customer
+```
+
+Read Operations are useful when a query has business semantics, cross-object filters, or authorization requirements that are broader than a generic object lookup.
+
+A Read Operation should support, where relevant:
+
+```text
+name
+target Object Type
+actor requirements
+allowed filters
+allowed projections
+allowed traversals
+result visibility policy
+tool/API/MCP binding
+structured denial behavior
+```
+
+A read-only operation does not automatically need a dedicated Ontology Runtime. Existing upstream APIs/MCP tools may enforce the contract when they can do so reliably.
+
+### 7.3 Traversal Authorization
+
+Traversal Authorization governs access when a read or Action follows a relation or evaluates data on a related object.
+
+Authorization must be closed over the actual traversal path.
+
+Example:
+
+```text
+search_inquiries
+  target: Inquiry
+  filter: Customer.country
+  filter: Product.product_family
+```
+
+The operation must not assume that `sales.inquiry.read` grants implicit access to Customer or Product data.
+
+The effective read decision must satisfy all applicable requirements for:
+
+```text
+source object
+traversed relation
+target object
+properties actually read
+operation-specific entitlements
+```
+
+The same rule applies inside Action Preconditions. If `send_follow_up` checks `Customer.email`, the Action requires authorization to read that Customer data in addition to authorization to mutate or communicate on the Inquiry.
+
+A traversal must not become an authorization bypass merely because the related object is reachable from an authorized object.
+
+Where policy for a required traversal is unresolved, the operation should return a structured deny/block result rather than silently omitting the check.
 
 ---
 
@@ -269,7 +402,7 @@ Product.base_price → ERP/PIM
 Employee.identity → IdP
 ```
 
-Enterprise AI Office may read it and may write it only through an explicitly approved write-back Action.
+Enterprise AI Office may read it only when visibility/read authorization permits and may write it only through an explicitly approved write-back Action.
 
 ### 8.2 `ontology-owned`
 
@@ -298,6 +431,8 @@ Project.risk_summary
 ```
 
 Derived data must retain enough provenance to explain its inputs or rule version when material.
+
+Derived values must not expose source data to an actor who was not authorized to read the underlying or resulting information according to the effective policy.
 
 ### 8.4 Unresolved authority
 
@@ -333,6 +468,7 @@ name
 target object type
 parameters
 actor requirements
+read/traversal requirements used by preconditions
 preconditions
 approval requirements
 effects
@@ -362,6 +498,8 @@ Required evidence has been retrieved
 Required prior step completed
 Human approval exists
 ```
+
+Precondition evaluation does not bypass read authorization. Every object/property used to decide a precondition must be readable under the effective actor/operation policy.
 
 A failed precondition should return a structured denial rather than only prose.
 
@@ -411,14 +549,16 @@ Do not treat an arbitrary tool call as proof that the intended business effect o
 
 The Ontology must not replace the existing human identity and Profile capability model.
 
-A future Action decision should combine:
+A future governed operation decision should combine:
 
 ```text
 Human identity / RBAC
 +
 Hermes Profile capability boundary
 +
-Business Action rule
+Object / Property / Relation visibility
++
+Read Operation or Business Action rule
 ```
 
 The system should be able to distinguish at least:
@@ -429,9 +569,9 @@ Profile / Agent actor
 service / automation actor
 ```
 
-A natural-language request must not grant a new role, credential, or approval level.
+A natural-language request must not grant a new role, credential, entitlement, or approval level.
 
-If trusted actor identity cannot be propagated to the Action layer where the rule requires it, the Action must fail closed.
+If trusted actor identity cannot be propagated to the operation layer where the rule requires it, the operation must fail closed.
 
 ---
 
@@ -457,7 +597,7 @@ An LLM deciding that “approval probably exists” is not approval.
 
 ## 14. Tool bindings
 
-A Tool Binding connects a Named Action or read operation to an actual supported integration.
+A Tool Binding connects a Named Action or Read Operation to an actual supported integration.
 
 Example:
 
@@ -470,9 +610,9 @@ crm.send_follow_up
 or:
 
 ```text
-publish_article
+search_inquiries
     ↓
-cms.publish_article
+crm.search_inquiries
 ```
 
 Bindings should be explicit and narrow.
@@ -498,13 +638,15 @@ Where practical, Agent-facing tools should reflect approved domain operations.
 Preferred:
 
 ```text
-search_inquiry
+search_inquiries
 get_inquiry
 assign_inquiry
 send_follow_up
 ```
 
 Avoid exposing broad mutation tools whose parameters allow the Agent to bypass business semantics.
+
+For reads, prefer an operation whose supported filters/traversals and visibility behavior are known over an unrestricted query surface when the latter would bypass domain authorization.
 
 The absence of a generic write tool is a security feature, not a limitation to work around.
 
@@ -514,13 +656,15 @@ The absence of a generic write tool is a security feature, not a limitation to w
 
 A governed business Action should be auditable whether it succeeds or is rejected.
 
+Security-sensitive or policy-relevant denied Read Operations may also need audit evidence when required by the real deployment policy.
+
 A future runtime audit record should be capable of storing:
 
 ```text
 timestamp
 actor identity
 Profile / Agent identity
-action name
+operation/action name
 target object / id
 parameters or safe parameter summary
 rule / contract version
@@ -528,7 +672,7 @@ decision
 applied / rejected / blocked
 structured reason code
 external system result reference
-reconciliation state
+reconciliation state when applicable
 ```
 
 Do not store secrets unnecessarily in audit records.
@@ -585,6 +729,9 @@ A future machine-readable contract should use explicit version identifiers.
 Changes that alter:
 
 - authority;
+- object/property/relation visibility;
+- read-operation eligibility;
+- traversal authorization;
 - business-action eligibility;
 - approval requirements;
 - actor permissions;
@@ -619,13 +766,17 @@ YAML is an acceptable starting point if it can represent the required concepts c
 Illustrative example only:
 
 ```yaml
-schema_version: 0.1.0
+schema_version: 0.2.0
 
 domain: sales
 
 objects:
   Inquiry:
     primary_key: id
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: sales.inquiry.read
     properties:
       status:
         type: string
@@ -640,6 +791,10 @@ objects:
 
   Customer:
     primary_key: id
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: sales.customer.read
 
 relations:
   inquiry_customer:
@@ -647,26 +802,60 @@ relations:
     to: Customer
     predicate: submitted_by
 
+read_operations:
+  get_inquiry:
+    target: Inquiry
+    actor_requirements:
+      entitlements:
+        - sales.inquiry.read
+    result_visibility: object-visibility-policy
+    tool_binding:
+      operation: crm.get_inquiry
+
+  search_inquiries_by_customer_country:
+    target: Inquiry
+    actor_requirements:
+      entitlements:
+        - sales.inquiry.read
+        - sales.customer.read
+    filters:
+      - Inquiry.status
+      - Customer.country
+    traversals:
+      - inquiry_customer
+    result_visibility: object-visibility-policy
+    tool_binding:
+      operation: crm.search_inquiries
+
 actions:
   send_follow_up:
     target: Inquiry
     parameters:
       inquiry_id:
         type: string
+    actor_requirements:
+      entitlements:
+        - sales.inquiry.read
+        - sales.customer.read
+        - sales.follow_up.send
     preconditions:
       - rule: inquiry.status != closed
         code: INQUIRY_CLOSED
+      - rule: related Customer.email exists
+        code: CUSTOMER_EMAIL_MISSING
     approval:
-      mode: none
+      mode: explicit-human-approval
     authority:
       system: crm
     tool_binding:
-      tool: crm.send_follow_up
+      operation: crm.send_follow_up
     audit:
       enabled: true
 ```
 
 This example is a shape demonstration, not a frozen schema and not an instruction to implement a CRM integration.
+
+The fuller design experiment is maintained separately under `ontology/examples/sales-inquiry.yaml`.
 
 ---
 
@@ -674,7 +863,7 @@ This example is a shape demonstration, not a frozen schema and not an instructio
 
 Do not model the entire company at once.
 
-The first schema experiment should use one narrow real-world flow:
+The first schema experiment uses one narrow real-world flow:
 
 ```text
 Customer
@@ -686,13 +875,16 @@ Product
 Follow-up Action
 ```
 
-The experiment should test whether the contract can express:
+The experiment tests whether the contract can express:
 
 ```text
 object identity
+object visibility
 relations
 property authority
-read scope
+read operations
+traversal authorization
+cross-object filter authorization
 named Action
 preconditions
 actor requirement
@@ -701,7 +893,13 @@ tool binding
 audit expectation
 ```
 
-No production mutation is required for the first experiment.
+The first experiment demonstrated one concrete contract correction:
+
+> authorization must be closed over the full data path, not only the entry-point Object Type.
+
+For example, an Inquiry search that filters `Customer.country` and `Product.product_family` must explicitly satisfy the relevant Customer/Product read requirements. An Action precondition that reads `Customer.email` must do the same.
+
+No production mutation is required for this experiment.
 
 ---
 
@@ -721,7 +919,7 @@ social publishing
 other operational systems
 ```
 
-A read-only integration does not automatically require a full Operational Ontology Runtime.
+A read-only integration does not automatically require a full Operational Ontology Runtime, but any read integration must still preserve the effective visibility and authorization guarantees of the source system and Enterprise AI Office policy.
 
 Before the first writable integration is enabled, perform an implementation decision using the repository's normal architecture rules.
 
@@ -759,13 +957,13 @@ Ontology does not replace user authentication, group/resource RBAC, or conversat
 
 Remain the AI-role and coarse capability boundary.
 
-Ontology may add business-action constraints inside the already-authorized Profile capability space.
+Ontology may add object/read/action constraints inside the already-authorized Profile capability space.
 
 ### SOUL and Skills
 
 Remain important behavioral and workflow guidance.
 
-They should explain business context and reasoning, but critical enforced mutation rules should not exist only as prompt text.
+They should explain business context and reasoning, but critical enforced read/write invariants should not exist only as prompt text.
 
 ### MCP / APIs
 
@@ -787,9 +985,9 @@ CONFIGURED READY
 PRODUCTION READY
 ```
 
-without an Ontology Runtime when no enabled capability requires governed business mutation.
+without an Ontology Runtime when no enabled capability requires governed operational integration.
 
-Ontology is not deployment debt when the company has no writable enterprise-system requirement.
+Ontology is not deployment debt when the company has no such requirement.
 
 When a future enabled capability depends on Ontology enforcement, that capability must then receive:
 
@@ -812,6 +1010,9 @@ Avoid:
 - calling GraphRAG an Operational Ontology;
 - duplicating ERP/CRM/PIM state into an AI-owned shadow database without clear authority;
 - exposing generic write/SQL tools to ordinary Agents;
+- exposing unrestricted read/query surfaces that bypass object or traversal authorization;
+- assuming access to a source object grants access to every related object;
+- evaluating Action preconditions with data the actor is not authorized to read;
 - encoding critical business invariants only in System Prompt or SOUL;
 - allowing user text to become authorization;
 - allowing LLM-generated Ontology changes to activate automatically;
@@ -829,27 +1030,45 @@ Before describing a future domain model as an Enterprise Ontology, confirm it ca
 [ ] What stable identity identifies each object?
 [ ] Which Properties matter?
 [ ] Which Relations matter?
+[ ] What is the default visibility of each operational Object Type?
+[ ] Which entitlements/roles/scopes are required to read each relevant Object/Property?
+[ ] What named Read Operations are exposed?
+[ ] Which filters, projections, and traversals may each Read Operation use?
+[ ] Does authorization close over every Object/Relation/Property actually read?
 [ ] Who owns each mutable Property/Relation?
 [ ] Which facts are source-backed, ontology-owned, or derived?
 [ ] What Named Actions may change state?
 [ ] What deterministic Preconditions apply?
+[ ] Are all data reads used by those Preconditions authorized?
 [ ] Who may perform the Action?
 [ ] Is human approval required?
-[ ] Which real tool/API/MCP binding performs the Action?
+[ ] Which real tool/API/MCP binding performs the operation?
 [ ] What Effects are expected?
 [ ] How are denial/failure reasons represented?
 [ ] What must be audited?
 [ ] How is the contract versioned and activated?
 ```
 
-If these questions cannot be answered, the model is not yet ready to govern operational business actions.
+If these questions cannot be answered, the model is not yet ready to govern operational business reads and actions.
 
 ---
 
 ## 27. Next implementation step
 
-The next step after this contract is **not** to build a runtime.
+The first schema experiment now exists under `ontology/examples/sales-inquiry.yaml` and has already been used to refine this contract.
 
-Create one small, machine-readable example for the `Customer → Inquiry → Product → Follow-up` flow and use it to test whether the contract is clear enough in practice.
+The next step is still **not** to build an Ontology Runtime.
 
-Only after that schema experiment should Enterprise AI Office decide whether the representation needs a formal schema language, validator, or runtime enforcement layer.
+Use the updated contract to review that example for internal consistency and then decide whether repeated schema work would benefit from a lightweight, repository-local validator for structural errors such as:
+
+```text
+unknown Object/Relation references
+missing authority on mutable properties
+missing visibility/read requirements where required
+Read Operation traversal without corresponding authorization declaration
+Action precondition reads without corresponding authorization declaration
+unknown tool bindings
+invalid contract/schema versions
+```
+
+Do not introduce a validator merely for theoretical completeness. Add one only if it materially reduces schema drift as additional real examples appear.
