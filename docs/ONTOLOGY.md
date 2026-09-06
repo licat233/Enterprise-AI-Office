@@ -1,18 +1,20 @@
 # Enterprise Ontology Contract v0
 
 Status: draft architecture contract
-Version: 0.2.0
+Version: 0.3.0
 Date: 2026-09-06
 
 This document defines the minimum Ontology contract for Enterprise AI Office.
 
 It converts the findings in `docs/ONTOLOGY-RESEARCH.md` into a reusable architecture contract while deliberately avoiding premature runtime implementation.
 
-Version 0.2.0 incorporates the first machine-readable schema experiment under `ontology/examples/sales-inquiry.yaml`, which demonstrated that write governance alone is insufficient: read visibility, cross-object traversal, and read-operation authorization must also be explicit parts of the contract.
+Version 0.2.0 incorporated the first machine-readable schema experiment under `ontology/examples/sales-inquiry.yaml`, which demonstrated that write governance alone is insufficient: read visibility, cross-object traversal, and read-operation authorization must also be explicit parts of the contract.
+
+Version 0.3.0 incorporates the second machine-readable experiment under `ontology/examples/content-publication.yaml`, which demonstrated that approval must identify the exact subject state it authorizes when that subject can change between review and execution. An approval detached from immutable subject evidence can become stale while still looking valid.
 
 This contract does **not** authorize a new database, graph engine, reasoning service, or custom orchestration platform. It does not replace WeKnora, Hermes Agent, Open WebUI, MCP, existing RBAC, or existing Profile capability boundaries.
 
-Until a writable enterprise-system integration requires runtime enforcement, this document is a **design-time contract only**.
+Until an enabled enterprise-system integration requires runtime enforcement, this document is a **design-time contract only**.
 
 If this document conflicts with `AGENTS.md`, the active company configuration, an approved architecture decision, or actual security constraints, the higher-priority contract wins.
 
@@ -31,7 +33,7 @@ Profiles / MCP → capability boundaries
 
 The Ontology contract addresses a different problem:
 
-> How should Enterprise AI Office represent business objects, relationships, authority, visibility, governed reads, business actions, constraints, tool bindings, and audit requirements so Agents can operate on enterprise systems safely and consistently?
+> How should Enterprise AI Office represent business objects, relationships, authority, visibility, governed reads, business actions, constraints, approvals, tool bindings, and audit requirements so Agents can operate on enterprise systems safely and consistently?
 
 The immediate goal is to standardize the model before selecting or building any runtime.
 
@@ -54,6 +56,7 @@ Preconditions
 Effects
 Actor / Permission Requirements
 Approval Requirements
+Approval Subject Binding
 Tool Bindings
 Audit Policy
 Versioning
@@ -129,11 +132,11 @@ The Agent-facing operation space should be no broader than the approved business
 
 SOUL and Skills may explain policy and guide reasoning.
 
-Critical mutation rules must eventually be enforced deterministically outside the LLM when the corresponding action becomes operational.
+Critical read/write/approval invariants must eventually be enforced deterministically outside the LLM when the corresponding operation becomes operational.
 
 ### 4.4 Authorization fails closed
 
-No applicable policy, unresolved actor identity, unresolved authority, unresolved visibility rule, unresolved traversal authorization, unresolved tool binding, or unresolved required approval must not silently become allow.
+No applicable policy, unresolved actor identity, unresolved authority, unresolved visibility rule, unresolved traversal authorization, unresolved tool binding, unresolved approval subject, or unresolved required approval must not silently become allow.
 
 This applies to both reads and writes.
 
@@ -153,13 +156,43 @@ search Inquiry
 
 requires authorization for the relevant Inquiry, Customer, Product, and relation reads. Entry-point authorization alone is insufficient.
 
-### 4.6 AI may propose; humans govern; runtime enforces
+### 4.6 Approval must bind to the subject state it authorizes
+
+When an approval governs a mutable artifact or object that may change before execution, approval evidence must identify the exact subject state being authorized.
+
+Depending on the domain, that may include:
+
+```text
+object id
+revision/version
+content hash
+material property snapshot
+state transition
+quote total / commercial terms
+other immutable evidence sufficient to identify the approved subject
+```
+
+A later change to any material approved input must invalidate or bypass neither the approval nor the review step.
+
+For example:
+
+```text
+Content revision 7 approved
+→ content changes to revision 8
+→ revision 7 approval MUST NOT authorize publication of revision 8
+```
+
+The same principle applies to other mutable approved subjects such as quotations, purchase orders, specifications, external messages, or destructive plans when their material content may change after review.
+
+Do not require hashes or version tokens mechanically when the subject is already immutable or approval and execution are one atomic trusted operation. Use the minimum binding evidence needed to prevent stale approval reuse.
+
+### 4.7 AI may propose; humans govern; runtime enforces
 
 Ontology changes may be suggested from runtime evidence, user corrections, audits, or domain review.
 
 They must not automatically alter the active production contract.
 
-### 4.7 Knowledge reasoning and business mutation are separate concerns
+### 4.8 Knowledge reasoning and business mutation are separate concerns
 
 A knowledge graph or GraphRAG system does not by itself provide safe operational actions.
 
@@ -169,7 +202,7 @@ An Operational Ontology does not by itself replace knowledge retrieval or deep d
 
 ## 5. Object Types
 
-An Object Type represents a stable business concept whose instances may be referenced, queried, related, or acted upon.
+An Object Type represents a stable business concept whose instances may be referenced, queried, related, reviewed, approved, or acted upon.
 
 Examples may include:
 
@@ -184,6 +217,8 @@ Order
 Content
 Campaign
 Employee
+ReviewDecision
+PublicationRecord
 ```
 
 Do not define object types merely for taxonomy completeness.
@@ -194,6 +229,7 @@ Create an Object Type only when at least one real workflow needs to:
 - read properties;
 - traverse relationships;
 - apply business rules;
+- review/approve an exact subject;
 - execute or audit actions.
 
 Each Object Type should define at minimum:
@@ -247,6 +283,8 @@ The contract should avoid duplicating detailed validation rules until a real int
 
 Property-level read restrictions should be added only when a real sensitivity or authorization boundary requires them; do not create field-level policy complexity for every property by default.
 
+Where approval validity depends on a property, the approved value or a stable version/hash that covers it should be included in the approval subject binding.
+
 ---
 
 ## 7. Relation Types
@@ -261,9 +299,11 @@ Inquiry relates_to Product
 Inquiry owned_by Employee
 Quote created_from Inquiry
 Project uses Product
+Content has_review ReviewDecision
+Content published_as PublicationRecord
 ```
 
-Relations should be explicit when business rules, traversal, permissions, or actions depend on them.
+Relations should be explicit when business rules, traversal, permissions, approvals, or actions depend on them.
 
 A relation may later require:
 
@@ -331,6 +371,8 @@ search_inquiries
 get_inquiry
 list_open_quotes
 get_customer
+get_content_for_review
+get_publication_history
 ```
 
 Read Operations are useful when a query has business semantics, cross-object filters, or authorization requirements that are broader than a generic object lookup.
@@ -378,7 +420,7 @@ properties actually read
 operation-specific entitlements
 ```
 
-The same rule applies inside Action Preconditions. If `send_follow_up` checks `Customer.email`, the Action requires authorization to read that Customer data in addition to authorization to mutate or communicate on the Inquiry.
+The same rule applies inside Action Preconditions and approval validation. If `send_follow_up` checks `Customer.email`, the Action requires authorization to read that Customer data. If `publish_content` checks a related `ReviewDecision`, the publishing operation must be authorized to read the review evidence it relies on.
 
 A traversal must not become an authorization bypass merely because the related object is reachable from an authorized object.
 
@@ -399,6 +441,7 @@ Examples:
 ```text
 Inquiry.status → CRM
 Product.base_price → ERP/PIM
+PublicationRecord.external_url → CMS
 Employee.identity → IdP
 ```
 
@@ -413,7 +456,8 @@ Examples may include:
 ```text
 Inquiry.ai_summary
 Inquiry.ai_triage_note
-Content.ai_review_state
+Content.lifecycle_state
+ReviewDecision
 ```
 
 This class should be used sparingly. It must not become a shadow copy of source-system state.
@@ -427,6 +471,7 @@ Examples:
 ```text
 Inquiry.days_open
 Customer.open_inquiry_count
+Content.content_hash
 Project.risk_summary
 ```
 
@@ -457,7 +502,8 @@ assign_inquiry
 send_follow_up
 create_quote
 approve_quote
-publish_article
+approve_content
+publish_content
 update_product_spec
 ```
 
@@ -471,6 +517,7 @@ actor requirements
 read/traversal requirements used by preconditions
 preconditions
 approval requirements
+approval subject binding when applicable
 effects
 authority/write-back target
 tool binding
@@ -497,9 +544,12 @@ Customer.email exists
 Required evidence has been retrieved
 Required prior step completed
 Human approval exists
+Approved subject version/hash == current subject version/hash
 ```
 
 Precondition evaluation does not bypass read authorization. Every object/property used to decide a precondition must be readable under the effective actor/operation policy.
+
+When an Action depends on prior approval for a mutable subject, precondition evaluation must verify that the approval still matches the current subject state.
 
 A failed precondition should return a structured denial rather than only prose.
 
@@ -508,8 +558,8 @@ Example result:
 ```json
 {
   "allowed": false,
-  "code": "MISSING_APPROVAL",
-  "message": "Manager approval is required before this quote can be submitted."
+  "code": "VALID_APPROVAL_NOT_FOUND",
+  "message": "The current object version is not covered by a valid approval."
 }
 ```
 
@@ -542,6 +592,8 @@ audit event
 Effects are part of the Action contract so the system can reason about expected outcomes and reconciliation.
 
 Do not treat an arbitrary tool call as proof that the intended business effect occurred.
+
+Where an Action is approval-gated, the resulting audit/effect linkage should preserve which approval evidence authorized that exact execution.
 
 ---
 
@@ -593,6 +645,77 @@ Approval should be required only where real business policy, financial risk, ext
 
 An LLM deciding that “approval probably exists” is not approval.
 
+### 13.1 Approval evidence
+
+Approval evidence should be explicit enough to establish at least:
+
+```text
+who approved
+what was approved
+when it was approved
+what approval role/authority applied
+which Ontology/contract rule governed the approval
+```
+
+The evidence may be represented by an immutable review/approval record, an upstream workflow record, a signed/verified approval reference, or another trustworthy mechanism appropriate to the integration.
+
+Do not treat free-form assistant text such as “approved” as authoritative approval evidence.
+
+### 13.2 Approval subject binding
+
+When the approved subject can change after review, the approval evidence must bind to the exact subject state that was reviewed.
+
+Possible binding fields include:
+
+```text
+object id
+revision/version
+content hash
+material field snapshot
+commercial total/terms
+state transition
+other stable subject fingerprint
+```
+
+Example:
+
+```yaml
+approval:
+  mode: explicit-human-approval
+  binding:
+    object_id: ContentItem.content_id
+    revision: ContentItem.revision
+    content_hash: ContentItem.content_hash
+```
+
+A later material change must make the previous approval inapplicable unless the governing business system explicitly defines a safe equivalent mechanism.
+
+A stale approval must produce a structured denial such as:
+
+```text
+VALID_APPROVAL_NOT_FOUND
+STALE_APPROVAL
+APPROVED_SUBJECT_MISMATCH
+```
+
+The exact code is domain-specific; the fail-closed behavior is not.
+
+### 13.3 Approval validation at execution time
+
+Approval should be checked at the point where the governed side effect is about to occur, not only when a review step originally completed.
+
+A publication, order submission, quote release, external send, or destructive action should therefore verify that:
+
+```text
+approval exists
+approval actor/role is valid
+approval subject matches the current target state
+approval has not been revoked/expired when such lifecycle exists
+required approval evidence is readable and trustworthy
+```
+
+Do not allow approval to become a reusable blanket capability token unrelated to the subject it originally authorized.
+
 ---
 
 ## 14. Tool bindings
@@ -613,6 +736,14 @@ or:
 search_inquiries
     ↓
 crm.search_inquiries
+```
+
+or:
+
+```text
+publish_content
+    ↓
+cms.publish_content
 ```
 
 Bindings should be explicit and narrow.
@@ -642,11 +773,16 @@ search_inquiries
 get_inquiry
 assign_inquiry
 send_follow_up
+get_content_for_review
+approve_content
+publish_content
 ```
 
 Avoid exposing broad mutation tools whose parameters allow the Agent to bypass business semantics.
 
 For reads, prefer an operation whose supported filters/traversals and visibility behavior are known over an unrestricted query surface when the latter would bypass domain authorization.
+
+For approval-gated writes, avoid tools that permit the caller to supply arbitrary “approval=true” flags without verifiable approval evidence.
 
 The absence of a generic write tool is a security feature, not a limitation to work around.
 
@@ -671,6 +807,8 @@ rule / contract version
 decision
 applied / rejected / blocked
 structured reason code
+approval reference when applicable
+approved subject version/hash/snapshot reference when applicable
 external system result reference
 reconciliation state when applicable
 ```
@@ -701,17 +839,20 @@ A simple local state update after an external write is not automatically transac
 
 Do not claim strong consistency unless the actual integration provides it.
 
+For approval-gated effects, retries must not silently substitute a different target version than the one originally approved.
+
 ---
 
 ## 18. Provenance
 
-Material derived facts and governed changes should preserve enough provenance to answer:
+Material derived facts, approvals, and governed changes should preserve enough provenance to answer:
 
 ```text
 What source or rule produced this?
 Which contract version applied?
 When did it become valid?
 What changed it?
+Which approval authorized this exact side effect when approval was required?
 ```
 
 Existing WeKnora source provenance remains the authority for document-backed knowledge.
@@ -734,6 +875,7 @@ Changes that alter:
 - traversal authorization;
 - business-action eligibility;
 - approval requirements;
+- approval subject binding semantics;
 - actor permissions;
 - destructive effects;
 - external-system bindings;
@@ -766,104 +908,73 @@ YAML is an acceptable starting point if it can represent the required concepts c
 Illustrative example only:
 
 ```yaml
-schema_version: 0.2.0
+schema_version: 0.3.0
 
-domain: sales
+domain: content
 
 objects:
-  Inquiry:
-    primary_key: id
+  ContentItem:
+    primary_key: content_id
     visibility:
       default: deny
       read_requirements:
-        - entitlement: sales.inquiry.read
+        - entitlement: marketing.content.read
     properties:
-      status:
-        type: string
-        authority:
-          class: source-backed
-          system: crm
-      ai_summary:
-        type: string
+      revision:
+        type: integer
         authority:
           class: ontology-owned
           system: enterprise-ai-office
+      content_hash:
+        type: string
+        authority:
+          class: derived
 
-  Customer:
-    primary_key: id
+  ReviewDecision:
+    primary_key: review_id
     visibility:
       default: deny
       read_requirements:
-        - entitlement: sales.customer.read
-
-relations:
-  inquiry_customer:
-    from: Inquiry
-    to: Customer
-    predicate: submitted_by
-
-read_operations:
-  get_inquiry:
-    target: Inquiry
-    actor_requirements:
-      entitlements:
-        - sales.inquiry.read
-    result_visibility: object-visibility-policy
-    tool_binding:
-      operation: crm.get_inquiry
-
-  search_inquiries_by_customer_country:
-    target: Inquiry
-    actor_requirements:
-      entitlements:
-        - sales.inquiry.read
-        - sales.customer.read
-    filters:
-      - Inquiry.status
-      - Customer.country
-    traversals:
-      - inquiry_customer
-    result_visibility: object-visibility-policy
-    tool_binding:
-      operation: crm.search_inquiries
+        - entitlement: marketing.content.review.read
 
 actions:
-  send_follow_up:
-    target: Inquiry
-    parameters:
-      inquiry_id:
-        type: string
+  publish_content:
+    target: ContentItem
     actor_requirements:
       entitlements:
-        - sales.inquiry.read
-        - sales.customer.read
-        - sales.follow_up.send
+        - marketing.content.read
+        - marketing.content.review.read
+        - marketing.publish
     preconditions:
-      - rule: inquiry.status != closed
-        code: INQUIRY_CLOSED
-      - rule: related Customer.email exists
-        code: CUSTOMER_EMAIL_MISSING
+      - rule: valid approved ReviewDecision exists for current revision/hash
+        code: VALID_APPROVAL_NOT_FOUND
     approval:
-      mode: explicit-human-approval
-    authority:
-      system: crm
+      mode: role-based-approval
+      binding:
+        revision: ContentItem.revision
+        content_hash: ContentItem.content_hash
     tool_binding:
-      operation: crm.send_follow_up
+      operation: cms.publish_content
     audit:
       enabled: true
 ```
 
-This example is a shape demonstration, not a frozen schema and not an instruction to implement a CRM integration.
+This example is a shape demonstration, not a frozen schema and not an instruction to implement a CMS integration.
 
-The fuller design experiment is maintained separately under `ontology/examples/sales-inquiry.yaml`.
+Fuller design experiments are maintained under:
+
+- `ontology/examples/sales-inquiry.yaml`
+- `ontology/examples/content-publication.yaml`
 
 ---
 
-## 21. First validation scenario
+## 21. Validation experiments
 
 Do not model the entire company at once.
 
-The first schema experiment uses one narrow real-world flow:
+### 21.1 Sales Inquiry experiment
+
+The first schema experiment uses:
 
 ```text
 Customer
@@ -875,31 +986,35 @@ Product
 Follow-up Action
 ```
 
-The experiment tests whether the contract can express:
-
-```text
-object identity
-object visibility
-relations
-property authority
-read operations
-traversal authorization
-cross-object filter authorization
-named Action
-preconditions
-actor requirement
-approval requirement
-tool binding
-audit expectation
-```
-
-The first experiment demonstrated one concrete contract correction:
+It demonstrated one concrete contract correction:
 
 > authorization must be closed over the full data path, not only the entry-point Object Type.
 
 For example, an Inquiry search that filters `Customer.country` and `Product.product_family` must explicitly satisfy the relevant Customer/Product read requirements. An Action precondition that reads `Customer.email` must do the same.
 
-No production mutation is required for this experiment.
+### 21.2 Content Publication experiment
+
+The second schema experiment uses:
+
+```text
+ContentItem
+   ↓ has_review
+ReviewDecision
+   ↓ authorizes exact revision/hash
+publish_content
+   ↓
+PublicationRecord
+```
+
+It demonstrated a second contract correction:
+
+> approval must bind to the exact mutable subject state it authorizes.
+
+A prior approval for content revision/hash A must not authorize later revision/hash B merely because both belong to the same `ContentItem`.
+
+The experiment also revealed a pure structural schema mistake during review: an idempotency key referenced an undeclared `target`. This is evidence that a lightweight structural validator may now provide practical value as examples grow.
+
+No production mutation is required for either experiment.
 
 ---
 
@@ -963,7 +1078,7 @@ Ontology may add object/read/action constraints inside the already-authorized Pr
 
 Remain important behavioral and workflow guidance.
 
-They should explain business context and reasoning, but critical enforced read/write invariants should not exist only as prompt text.
+They should explain business context and reasoning, but critical enforced read/write/approval invariants should not exist only as prompt text.
 
 ### MCP / APIs
 
@@ -1013,6 +1128,9 @@ Avoid:
 - exposing unrestricted read/query surfaces that bypass object or traversal authorization;
 - assuming access to a source object grants access to every related object;
 - evaluating Action preconditions with data the actor is not authorized to read;
+- treating “approved once” as approval for every future version of a mutable subject;
+- accepting an approval flag with no verifiable actor/subject evidence;
+- retrying an approval-gated external side effect against a different subject version;
 - encoding critical business invariants only in System Prompt or SOUL;
 - allowing user text to become authorization;
 - allowing LLM-generated Ontology changes to activate automatically;
@@ -1041,11 +1159,13 @@ Before describing a future domain model as an Enterprise Ontology, confirm it ca
 [ ] What deterministic Preconditions apply?
 [ ] Are all data reads used by those Preconditions authorized?
 [ ] Who may perform the Action?
-[ ] Is human approval required?
+[ ] Is human/role approval required?
+[ ] What exact subject/version/state does that approval authorize?
+[ ] How is stale approval detected and rejected when the subject changes?
 [ ] Which real tool/API/MCP binding performs the operation?
 [ ] What Effects are expected?
 [ ] How are denial/failure reasons represented?
-[ ] What must be audited?
+[ ] What approval/action evidence must be audited?
 [ ] How is the contract versioned and activated?
 ```
 
@@ -1055,20 +1175,41 @@ If these questions cannot be answered, the model is not yet ready to govern oper
 
 ## 27. Next implementation step
 
-The first schema experiment now exists under `ontology/examples/sales-inquiry.yaml` and has already been used to refine this contract.
-
-The next step is still **not** to build an Ontology Runtime.
-
-Use the updated contract to review that example for internal consistency and then decide whether repeated schema work would benefit from a lightweight, repository-local validator for structural errors such as:
+Two schema experiments now exist and have both produced concrete contract corrections:
 
 ```text
-unknown Object/Relation references
-missing authority on mutable properties
-missing visibility/read requirements where required
-Read Operation traversal without corresponding authorization declaration
-Action precondition reads without corresponding authorization declaration
-unknown tool bindings
-invalid contract/schema versions
+sales-inquiry.yaml       → read/traversal authorization closure
+content-publication.yaml → approval subject/version binding
 ```
 
-Do not introduce a validator merely for theoretical completeness. Add one only if it materially reduces schema drift as additional real examples appear.
+The experiments have also produced at least two manual consistency findings:
+
+```text
+cross-object read entitlement omission
+undeclared idempotency-key reference
+```
+
+This is enough evidence to justify evaluating a **lightweight repository-local structural validator**.
+
+The validator, if added, should remain deliberately narrow. It should detect mechanical schema drift rather than become an Ontology Runtime or policy engine.
+
+Candidate checks include:
+
+```text
+unknown Object references
+unknown Property references
+unknown Relation references
+unknown system references
+missing Authority on mutable properties/relations
+missing fail-closed visibility declaration on operational objects
+Read Operation traversal to unknown relations
+cross-object filters/projections without explicit read entitlements where the example declares them
+Action target/precondition/effect references to unknown objects/properties
+approval binding references to unknown subject fields
+idempotency/reference expressions using undeclared action parameters or known actor/object fields
+invalid contract/schema version values
+```
+
+Do not make the validator execute business rules, connect to CRM/CMS/ERP, generate tools, or freeze every optional YAML field.
+
+No Ontology Runtime, database, or new service should be introduced as part of this validator step.
