@@ -153,12 +153,19 @@ capabilities:
     enabled: false
     profiles: []
 
-# v2 EAO-owned email governance persistence. Null paths are derived from
-# deployment.runtime_root by the later installation contract when email is enabled.
+# v2 EAO-owned email governance persistence and trusted identity-forwarder
+# settings. Null paths are derived from deployment.runtime_root when email is enabled.
 email_governance:
   state_path: null
   technical_log_path: null
   retention_policy: company-defined
+  trusted_identity:
+    source: open-webui
+    actor_id_namespace: open-webui
+    transport: server-authenticated-forwarder
+    forwarder_credential_ref: null
+    user_id_header: X-EAO-Human-Actor-Id
+    group_ids_header: X-EAO-Human-Group-Ids
 
 production:
   backup:
@@ -205,6 +212,7 @@ secrets:
     - open-webui-admin-credentials
   conditional_classes:
     - specialist-profile-credentials
+    - open-webui-governance-forwarder-credential
     - hermes-webui-password
     - coding-agent-authentication
     - messaging-platform-credentials
