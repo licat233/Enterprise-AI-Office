@@ -7,6 +7,7 @@ Normative contracts:
 ```text
 docs/V2-GOVERNANCE-RUNTIME.md
 docs/V2-SEND-RECONCILIATION.md
+docs/V2-RECOVERY-CLEAN-HOST.md
 ```
 
 Reference persistence artifacts:
@@ -16,11 +17,19 @@ schema.sql
 migrations/002_send_reconciliation.sql
 ```
 
+Reference backup/recovery helpers:
+
+```text
+backup_state.py
+restore_state.py
+```
+
 Offline deterministic contract checks:
 
 ```sh
 python3 infrastructure/email/governance/test_schema.py
 python3 infrastructure/email/governance/test_send_reconciliation.py
+python3 infrastructure/email/governance/test_recovery.py
 ```
 
 This runtime is the single thin EAO-owned service introduced by v2. It must remain independent of the validated v1 `general` employee path.
@@ -119,7 +128,36 @@ Provider outcome classification is separately checked by:
 python3 infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
 ```
 
-Passing these offline checks is blueprint/implementation evidence only. It does not prove live HumanActor propagation, mailbox authorization, provider acceptance, or real delivery.
+## ID-7 backup / recovery contract
+
+Do not copy a live WAL database as the reference backup method.
+
+Use:
+
+```sh
+python3 infrastructure/email/governance/backup_state.py \
+  <state.sqlite3> <backup.sqlite3>
+
+python3 infrastructure/email/governance/restore_state.py \
+  <backup.sqlite3> <new-isolated-state.sqlite3>
+```
+
+The backup helper uses SQLite's online backup API and verifies integrity/foreign keys. The restore helper refuses an existing target, verifies schema/integrity, and never starts the Governance service or performs provider operations.
+
+Recovery invariant:
+
+```text
+restored SendAttempt without terminal result
+or restored OUTCOME_UNKNOWN
+→ RECONCILIATION_REQUIRED
+→ no automatic retry
+```
+
+`test_recovery.py` validates this behavior with temporary synthetic databases and also verifies corrupt/newer-schema material fails closed.
+
+The full-stack `scripts/backup.sh` / `scripts/restore.sh` include Governance state only when the conditional Email capability exists; v1-only backup/restore remains valid without it.
+
+Passing these offline checks is blueprint/implementation evidence only. It does not prove live HumanActor propagation, mailbox authorization, provider acceptance, real delivery, host reboot recovery, or real company deployment.
 
 ## ID-6 invariant
 
