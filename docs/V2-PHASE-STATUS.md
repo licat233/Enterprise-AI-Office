@@ -1,7 +1,7 @@
 # Enterprise AI Office v2 — Blueprint Status
 
-Status: system design active / installation design not yet opened / real deployment task inactive
-Version: 2.0.0
+Status: system design complete / awaiting explicit lifecycle transition / real deployment task inactive
+Version: 2.1.0
 Date: 2026-09-06
 
 The authoritative machine-readable repository state is:
@@ -28,25 +28,26 @@ how that agent verifies that the installed system is correct
 
 Therefore repository development has a blueprint lifecycle separate from any real company deployment.
 
-## 2. Current blueprint phase
+## 2. Current blueprint phase and milestone
 
 ```text
 RELEASE TRACK: v2
 BLUEPRINT PHASE: SYSTEM DESIGN
-INSTALLATION DESIGN: NOT YET OPENED
+SYSTEM DESIGN MILESTONE: COMPLETE
+NEXT BLUEPRINT PHASE: INSTALLATION DESIGN (NOT YET OPENED)
 BLUEPRINT VALIDATION: NOT YET OPENED
 REAL DEPLOYMENT TASK: INACTIVE
 ```
 
-Current work should continue designing **what v2 should be**.
+The repository remains in the `system_design` lifecycle phase because phase transitions require explicit human direction. The System Design milestone itself is complete and should not remain open merely for optional optimization or hardening.
 
-This includes product behavior, architecture, capability boundaries, security, human approval, identity, Ontology, provider choices, failure semantics, and acceptance criteria.
+No further v2 System Design scope should be added unless a real structural defect or contradiction is discovered.
 
-Provider research, sanitized examples, offline prototypes, and offline tests may support design decisions. Their presence does not mean installation design has started and does not mean a real company system is being deployed.
+---
 
 ## 3. Blueprint lifecycle
 
-The intended repository-development sequence is:
+The repository-development sequence remains:
 
 ```text
 System Design
@@ -55,26 +56,36 @@ System Design
 → Release Ready
 ```
 
-### System Design
+### System Design — COMPLETE
 
-Define the system itself:
+The v2 baseline now defines:
 
 ```text
 product/capability scope
 architecture
-user and Agent workflows
-authority/RBAC
-security boundaries
+user and Agent workflow
+HumanActor identity boundary
+Mailbox-scoped authorization
+human approval semantics
+Draft / Approval / Send lifecycle
+employee UX
+Source-of-Truth boundaries
 Ontology/action semantics
-provider/upstream choices
 failure/reconciliation behavior
-acceptance criteria
-non-goals
+audit/governance evidence
+follow-up boundary
+acceptance/non-goal boundary
 ```
 
-### Installation Design
+The final result is recorded in:
 
-After the system design is sufficiently approved, turn it into an installation blueprint that a capable AI engineering agent can execute:
+```text
+docs/V2-DESIGN-REVIEW.md
+```
+
+### Installation Design — NOT YET OPENED
+
+After an explicit human lifecycle transition, convert the approved system design into an agent-readable and agent-executable installation blueprint:
 
 ```text
 deployment architecture
@@ -82,7 +93,10 @@ installation sequence
 config schemas/templates
 provision/install scripts
 secret-input contracts
-idempotency/reconciliation
+identity propagation implementation
+provider/tool bindings
+approval persistence/enforcement
+idempotency/reconciliation implementation
 rollback/recovery
 clean-host setup
 machine-readable capability closure
@@ -91,24 +105,17 @@ installation-time acceptance
 
 **Installation Design is still repository design. It does not mean installing onto ARMOR's real infrastructure.**
 
-### Blueprint Validation
+### Blueprint Validation — NOT YET OPENED
 
-Use an explicitly approved clean/isolated validation target to prove that a fresh capable AI agent can:
-
-```text
-read the repository
-understand the intended Enterprise AI Office
-resolve required non-secret/company-private inputs
-install the designed system
-run acceptance
-report readiness correctly
-```
+Use an explicitly approved clean/isolated validation target to prove that a fresh capable AI agent can understand and reproduce the blueprint.
 
 A validation target is not automatically a production deployment.
 
 ### Release Ready
 
-The blueprint is ready when the repository sufficiently explains both the system and the installation/acceptance path for adoption.
+The blueprint is ready when the repository sufficiently explains both the approved system and the installation/acceptance path for adoption.
+
+---
 
 ## 4. Real deployment is a separate activity
 
@@ -118,7 +125,9 @@ It requires a separate explicit request with an explicit target, for example a d
 
 Without such a task, repository work must not request or use real credentials, connect real provider accounts, bind real employee identities, or mutate a live environment merely to continue blueprint development.
 
-## 5. Current v2 system-design direction
+---
+
+## 5. Completed v2 system-design baseline
 
 The controlled v2 milestone remains:
 
@@ -126,21 +135,52 @@ The controlled v2 milestone remains:
 Communication & Follow-up
 ```
 
-The current email design direction includes:
+Completed baseline operational loop:
+
+```text
+Trusted HumanActor
+↓
+Open WebUI
+↓
+Hermes Profile
+↓
+authorized Email context + WeKnora knowledge
+↓
+DraftReply
+↓
+exact human review
+↓
+SendApproval
+↓
+send_approved_reply
+↓
+provider result / reconciliation
+↓
+governance audit
+↓
+optional internal follow-up
+```
+
+The completed baseline includes:
 
 ```text
 provider reference: Tencent Enterprise Mail
+minimal Email objects: Mailbox, EmailMessage, DraftReply, SendApproval
 read operations: search_email, get_email
-governed DraftReply
-trusted human approval bound to exact draft state
-governed send_approved_reply
-optional simple follow-up later
+human permissions: email.read, email.draft, email.approve, email.send
+trusted HumanActor distinct from Hermes Profile and provider credential
+exact Draft revision/hash approval binding
+single-logical-send approval semantics
+send outcomes: SENT / FAILED_NOT_SENT / RECONCILIATION_REQUIRED
+Open WebUI employee UX baseline
+append-oriented governance evidence
+Hermes Cron for simple reminders/summaries
 optional one messaging surface later
 ```
 
-Current design-support artifacts may include provider research, read-only adapter prototypes, synthetic fixtures, Ontology examples, tests, and acceptance drafts.
+Current design-support artifacts may include provider research, read-only adapter prototypes, synthetic fixtures, Ontology examples, tests, and acceptance drafts. They remain design-support artifacts only.
 
-They validate or explore design properties only.
+---
 
 ## 6. Recorded offline design evidence
 
@@ -154,7 +194,9 @@ repository static closure mirror: 86 PASS / 0 FAIL at the recorded check
 
 These results do not mean a Tencent Enterprise Mail capability has been deployed.
 
-## 7. Installation-plan artifact status
+---
+
+## 7. Existing implementation-plan artifact
 
 `docs/V2-IMPLEMENTATION-PLAN.md` currently captures an early staged installation/deployment idea:
 
@@ -168,39 +210,52 @@ Stage 5  optional simple follow-up
 Stage 6  optional one messaging surface
 ```
 
-While the blueprint phase is still `system_design`, this document is an input for identifying future installation requirements, not an executable instruction to move into provider runtime work.
+Because Installation Design has not yet been explicitly opened, this remains an input for the next lifecycle phase rather than an executable instruction to begin real provider work.
 
-When the human explicitly advances the blueprint lifecycle to `installation_design`, this sequence can be audited, revised, and converted into the actual agent-readable installation contract.
+When the human explicitly advances the blueprint lifecycle to `installation_design`, this sequence should be audited against the completed System Design and converted into the actual agent-readable installation contract.
 
-## 8. Current work that remains valid
+---
 
-Examples:
+## 8. Deferred non-blocking decisions
+
+The following do not reopen System Design:
 
 ```text
-Human Approval & Identity Model
-email action semantics
-failure/reconciliation design
-follow-up behavior
-messaging-entry design
-security/threat review
-scope review
-Ontology refinement driven by design needs
-upstream/provider research
-acceptance criteria
-sanitized prototypes or synthetic tests that answer design questions
+exact JWT/OIDC/trusted actor propagation mechanism
+exact provider API/MCP/SMTP implementation
+exact secret store
+exact audit persistence backend
+exact approval TTL
+second-person approval policy
+retry backoff mechanics
+provider-specific delivery states
+attachments / Bcc / scheduled send
+manager approval hierarchy
+ABAC / dynamic risk policies
+SIEM / compliance analytics
 ```
+
+They belong to later Installation Design, hardening, or future-version work when required.
+
+---
 
 ## 9. Current boundary
 
 ```text
-SYSTEM DESIGN: ACTIVE
+SYSTEM DESIGN: COMPLETE
+BLUEPRINT PHASE: SYSTEM DESIGN
 INSTALLATION DESIGN: NOT YET OPENED
 REAL COMPANY DEPLOYMENT: NOT ACTIVE
+REAL DEPLOYMENT TASK: INACTIVE
 REAL PROVIDER CREDENTIALS: NOT REQUIRED
 REAL MAILBOX ACCESS: NOT REQUIRED
 ```
 
-Continuation wording such as `继续`, `开始吧`, `下一步`, `continue`, or `next` means continue the current **system-design** work unless the human explicitly directs a blueprint-phase change.
+Continuation wording such as `继续`, `开始吧`, `下一步`, `continue`, or `next` still does not change the blueprint phase.
+
+Because the current System Design milestone is complete, an explicit human direction is required to advance to `installation_design`.
+
+---
 
 ## 10. Completion language
 
@@ -209,7 +264,7 @@ Keep repository maturity distinct from deployment readiness.
 Repository/blueprint milestones:
 
 ```text
-SYSTEM DESIGN COMPLETE
+SYSTEM DESIGN COMPLETE        ← achieved for v2 baseline
 INSTALLATION DESIGN COMPLETE
 BLUEPRINT VALIDATED
 RELEASE READY
