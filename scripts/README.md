@@ -35,6 +35,37 @@ company config → target_readiness
 
 A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
 
+## `validate-ontology.py`
+
+Lightweight structural validation for design-time examples under `ontology/examples/`.
+
+Run:
+
+```sh
+uv run scripts/validate-ontology.py
+```
+
+The script uses PEP 723 inline metadata so its small YAML dependency is resolved for that script without creating a project-level Python environment.
+
+It deliberately checks only mechanical consistency, including examples such as:
+
+```text
+duplicate YAML keys
+unknown Object/Property/Relation/system references
+invalid Authority references
+fail-open Object visibility in design examples
+Read Operation traversal/filter/projection authorization closure
+Action precondition references
+approval binding references
+unknown tool-binding system namespaces
+idempotency expressions using undeclared action parameters
+operation-surface references
+```
+
+It does **not** execute business rules, connect to external systems, validate real employee authorization, generate MCP tools, or make an Ontology design example operational.
+
+A validator PASS means the current YAML is structurally self-consistent according to the implemented checks. It does not mean the business policy is correct or Production Ready.
+
 ## `preflight.sh`
 
 Read-only host inventory before installation/change. It inspects OS/architecture, resources, common tools, Docker availability, existing Hermes state/runtime directories, and repository status.
