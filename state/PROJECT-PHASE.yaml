@@ -65,9 +65,13 @@ blueprint_lifecycle:
         contract: docs/V2-INSTALLATION-ARCHITECTURE.md
         evidence: INSTALLATION ARCHITECTURE FROZEN
       id_2_config_protected_inputs:
-        status: next
+        status: complete
+        completed_on: 2026-09-06
+        contract: docs/V2-CONFIG-PROTECTED-INPUTS.md
+        example: config/company.private.example.yaml
+        evidence: CONFIG / SECRET INPUT CONTRACT FROZEN
       id_3_stage_capability_closure:
-        status: not_started
+        status: next
       id_4_identity_authorization_propagation:
         status: not_started
       id_5_governance_runtime:
@@ -134,10 +138,10 @@ interpretation_rules:
   - The repository is a system-design and installation-blueprint product, not a live deployment record.
   - The v2 baseline System Design milestone is complete and frozen.
   - The current blueprint phase is installation_design following explicit human direction on 2026-09-06.
-  - ID-1 installation architecture is complete; ID-2 company configuration and protected-input contract is the next Installation Design work package.
+  - ID-1 installation architecture and ID-2 configuration/protected-input contract are complete; ID-3 stage/capability closure is the next Installation Design work package.
   - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
   - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
-  - Missing real credentials are never blockers for blueprint development because real credentials belong only to an explicitly activated deployment task.
+  - Missing real credentials are never blockers for blueprint development because credentials belong to a real deployment or explicitly approved validation task.
 
 last_reviewed: 2026-09-06
