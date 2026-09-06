@@ -140,6 +140,7 @@ capabilities:
     enabled_when: capabilities.messaging.enabled == true
     implementation:
       - infrastructure/hermes/features/README.md
+      - infrastructure/hermes/features/MESSAGING.md
     upstream_feature: Hermes Gateway messaging
     required_company_values:
       - selected platform
