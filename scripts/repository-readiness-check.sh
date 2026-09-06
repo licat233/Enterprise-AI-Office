@@ -72,6 +72,7 @@ for path in \
   docs/V2-INSTALLATION-ARCHITECTURE.md \
   docs/V2-CONFIG-PROTECTED-INPUTS.md \
   docs/V2-STAGE-CONTRACTS.md \
+  docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md \
   config/company.example.yaml \
   config/company.private.example.yaml \
   config/capabilities.yaml \
@@ -93,6 +94,7 @@ for path in \
   infrastructure/hermes/general.env.example \
   infrastructure/open-webui/README.md \
   infrastructure/open-webui/PROVISIONING.md \
+  infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md \
   infrastructure/open-webui/docker-compose.yml
 do
   require_file "$path"
@@ -113,7 +115,6 @@ for path in \
   infrastructure/email/tencent-exmail/README.md \
   infrastructure/email/tencent-exmail/imap_readonly_mcp.py \
   infrastructure/email/tencent-exmail/imap.env.example \
-  infrastructure/email/tencent-exmail/hermes.mcp.example.yaml \
   infrastructure/email/tencent-exmail/test_imap_readonly.py \
   docs/acceptance/TENCENT-EXMAIL.md \
   ontology/examples/email-communication.yaml
@@ -153,6 +154,7 @@ require_text docs/V2-PHASE-STATUS.md 'REAL DEPLOYMENT TASK: INACTIVE' 'v2 status
 require_text docs/V2-INSTALLATION-ARCHITECTURE.md 'INSTALLATION ARCHITECTURE FROZEN' 'v2 ID-1 installation architecture is frozen'
 require_text docs/V2-CONFIG-PROTECTED-INPUTS.md 'CONFIG / SECRET INPUT CONTRACT FROZEN' 'v2 ID-2 protected-input contract is frozen'
 require_text docs/V2-STAGE-CONTRACTS.md 'STAGE CONTRACTS FROZEN' 'v2 ID-3 stage contracts are frozen'
+require_text docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md 'IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN' 'v2 ID-4 identity contract is frozen'
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
@@ -165,14 +167,22 @@ require_text config/company.example.yaml 'target_readiness:' 'Company config dec
 require_text config/company.example.yaml 'capabilities:' 'Company config declares optional capabilities'
 require_text config/company.example.yaml 'mailbox_grants:' 'Company config exposes mailbox-scoped grants'
 require_text config/company.example.yaml 'send_requires_human_approval: true' 'Email config defaults to human-approved sends'
+require_text config/company.example.yaml 'forwarder_credential_ref:' 'Company config exposes trusted-forwarder credential reference'
 require_text config/company.private.example.yaml 'client_credential_ref:' 'Private overlay uses symbolic email credential reference'
+require_text config/company.private.example.yaml 'openwebui-governance-forwarder-token' 'Private overlay uses symbolic governance forwarder credential'
 require_text config/company.private.example.yaml 'email.send' 'Private overlay demonstrates operation-scoped mailbox grants'
 require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Email capability has protected-input contract'
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
+require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
+require_text config/capabilities.yaml 'infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md' 'Email capability has Open WebUI communication provisioning path'
 require_text config/capabilities.yaml 'mandatory_when_enabled:' 'Email capability declares mandatory stage closure'
 require_text config/capabilities.yaml 'stage_4_governed_send' 'Email capability requires governed-send stage'
+require_text config/capabilities.yaml 'open-webui-governance-forwarder-credential' 'Email capability declares forwarder secret class'
 require_text config/capabilities.yaml 'required_secret_classes:' 'Email capability declares required secret classes'
 require_text docs/acceptance/TENCENT-EXMAIL.md 'Stage 1 — read-only email' 'Provider acceptance maps tests to v2 stages'
+require_text infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md '{{USER_ID}}' 'Open WebUI communication path forwards authenticated user ID'
+require_text infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md '{{USER_GROUP_IDS}}' 'Open WebUI communication path forwards current group IDs'
+require_text infrastructure/email/tencent-exmail/README.md 'previous direct Hermes MCP registration template is no longer the reference path' 'Provider playbook rejects obsolete direct Hermes registration'
 require_text config/capabilities.yaml 'infrastructure/weknora/PROVISIONING.md' 'Core capability has WeKnora provisioning path'
 require_text config/capabilities.yaml 'infrastructure/open-webui/PROVISIONING.md' 'Core capability has Open WebUI provisioning path'
 require_text config/capabilities.yaml 'infrastructure/hermes/features/MESSAGING.md' 'Messaging capability has pinned execution path'
