@@ -12,12 +12,12 @@ FAIL=0
 
 pass() {
   PASS=$((PASS + 1))
-  printf '%-42s PASS\n' "$1"
+  printf '%-48s PASS\n' "$1"
 }
 
 fail() {
   FAIL=$((FAIL + 1))
-  printf '%-42s FAIL - %s\n' "$1" "$2"
+  printf '%-48s FAIL - %s\n' "$1" "$2"
 }
 
 require_file() {
@@ -51,14 +51,20 @@ for path in \
   AGENTS.md \
   DEPLOY.md \
   docs/COMPLETENESS.md \
+  docs/ARCHITECTURE.md \
   docs/DEPLOYMENT.md \
   docs/ACCEPTANCE-TESTS.md \
   docs/SECURITY.md \
+  docs/PROFILE-STANDARD.md \
+  docs/KNOWLEDGE.md \
+  docs/CLIENT-RBAC.md \
   docs/BACKUP-RESTORE.md \
   docs/OPERATIONS.md \
+  docs/UPGRADE.md \
   config/company.example.yaml \
   config/capabilities.yaml \
   config/validated-stack.yaml \
+  config/.env.example \
   state/DEPLOYMENT-STATE.template.md
 do
   require_file "$path"
@@ -84,6 +90,7 @@ for path in \
   infrastructure/hermes/specialist.env.example \
   infrastructure/hermes-webui/README.md \
   infrastructure/coding-agents/README.md \
+  infrastructure/coding-agents/technical-profile.config.example.yaml \
   infrastructure/hermes/features/README.md \
   infrastructure/access/README.md
 do
@@ -100,16 +107,21 @@ do
   require_file "$path"
 done
 
-# Guard against the most damaging documentation drift: a capability registry
-# that is no longer part of the Golden Path/readiness contract.
+# Guard against high-impact contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
+require_text DEPLOY.md 'PRODUCTION READY' 'Golden Path reaches Production Ready'
 require_text AGENTS.md 'CONFIGURED READY' 'Agent contract knows Configured Ready'
 require_text docs/ACCEPTANCE-TESTS.md 'Configured Ready result' 'Acceptance has Configured Ready gate'
+require_text docs/ACCEPTANCE-TESTS.md 'Enterprise identity / SSO' 'Acceptance covers SSO when enabled'
+require_text docs/ACCEPTANCE-TESTS.md 'Hermes administrative Web UI' 'Acceptance covers hermes-webui when enabled'
 require_text config/company.example.yaml 'target_readiness:' 'Company config declares readiness target'
+require_text config/company.example.yaml 'capabilities:' 'Company config declares optional capabilities'
+require_text config/capabilities.yaml 'technical-profile.config.example.yaml' 'Coding capability has executable Profile template'
+require_text README.md 'CONFIGURED READY' 'README explains configured completeness'
 
 printf '%s\n' '----------------------------------------'
 printf 'Summary: %s PASS, %s FAIL\n' "$PASS" "$FAIL"
-printf '%s\n' 'Static PASS means the repository execution paths are present; it does not replace a real deployment acceptance test.'
+printf '%s\n' 'Static PASS means repository execution paths are present; it does not replace real runtime acceptance.'
 
 if [ "$FAIL" -gt 0 ]; then
   exit 2
