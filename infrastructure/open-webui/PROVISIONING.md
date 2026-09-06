@@ -52,7 +52,7 @@ Exact host/port may differ by deployment.
 
 ## 3. Use the native admin API
 
-The validated Open WebUI release exposes supported application APIs that the admin UI itself uses. Prefer these over direct database writes.
+The validated Open WebUI release exposes application APIs used by its own administrative UI. Prefer these over direct database writes.
 
 Relevant v0.11.3 routes:
 
@@ -69,11 +69,13 @@ POST /openai/config/update
 
 POST /api/v1/models/create
 GET  /api/v1/models/model?id=<model_id>
-POST /api/v1/models/model/update?id=<model_id>   # verify exact route before reuse on another version
+POST /api/v1/models/model/update
 
 GET  /api/models
 GET  /api/v1/models
 ```
+
+`/api/v1/models/model/update` identifies the Model from the `id` inside the submitted `ModelForm` body; it does not require an `id` query parameter in v0.11.3.
 
 All modifying operations below require an authenticated administrator token.
 
@@ -199,7 +201,7 @@ Never replace the whole configuration from a static example without reading it f
 - keep key and URL array indices aligned;
 - add/update the corresponding index entry in `OPENAI_API_CONFIGS`.
 
-For a Hermes employee Profile, use a narrow config such as:
+For a Hermes employee Profile, use a narrow connection config such as:
 
 ```json
 {
@@ -208,7 +210,7 @@ For a Hermes employee Profile, use a narrow config such as:
 }
 ```
 
-where `general` is the exact model name advertised by the Hermes Profile API. For a specialist Profile use its own unique model ID.
+where `general` is the exact model name advertised by that Hermes Profile API. A specialist connection uses its own unique Profile/model ID.
 
 Then submit the reconciled complete object:
 
@@ -220,13 +222,13 @@ Content-Type: application/json
 
 Each Hermes Profile connection uses its own Profile API key. Do not connect the privileged Hermes default/admin Profile to the employee client.
 
-After updating, verify the admin can see the expected upstream model IDs through `/openai/models` or `/api/models`.
+After updating, verify the administrator can see the expected upstream model IDs through `/openai/models` or `/api/models`.
 
 ## 8. Create the employee-visible Model/Assistant ACL record
 
-For the validated Open WebUI version, a raw upstream model without a corresponding Models DB entry is admin-only when model access control is enforced.
+For Open WebUI v0.11.3, a raw upstream model without a corresponding Models DB entry is admin-only when model access control is enforced.
 
-For each enabled employee Profile, create a Model record **with the same model ID advertised by Hermes**. A Model record whose `id` matches a base model and has `base_model_id: null` acts as metadata/access-control override for that base model.
+For each enabled employee Profile, create a Model record **with the same model ID advertised by Hermes**. A record whose `id` matches a base model and has `base_model_id: null` acts as metadata/access-control override for that base model.
 
 Baseline General payload:
 
@@ -262,7 +264,7 @@ For an enabled specialist Profile, use that Profile's exact upstream model ID an
 
 Do not give `anyone`/wildcard read access unless company policy explicitly requires a public resource.
 
-## 9. Idempotent update behavior
+## 9. Idempotent Model update behavior
 
 Before creating a Model record, query the existing resource:
 
@@ -271,15 +273,21 @@ GET /api/v1/models/model?id=<MODEL_ID>
 Authorization: Bearer <ADMIN_TOKEN>
 ```
 
-If it exists, reconcile name/metadata/access grants through the exact update route supported by the selected pinned release rather than creating a duplicate.
+If it exists, submit the reconciled full `ModelForm` through:
 
-For Open WebUI v0.11.3, inspect `backend/open_webui/routers/models.py` before scripting the update call; do not assume an update route from another release.
+```http
+POST /api/v1/models/model/update
+Authorization: Bearer <ADMIN_TOKEN>
+Content-Type: application/json
+```
 
-The deployment agent should preserve unrelated administrator-curated metadata unless company configuration intentionally owns it.
+The body includes the same `id`, intended display name, metadata, params, access grants, active flag, and desired `base_model_id` state.
+
+Preserve unrelated administrator-curated metadata unless company configuration intentionally owns it. Do not create a duplicate Model ID.
 
 ## 10. Why the ACL record matters
 
-With `BYPASS_MODEL_ACCESS_CONTROL=false`, Open WebUI filters ordinary-user model visibility against its Models records and access grants.
+With `BYPASS_MODEL_ACCESS_CONTROL=false`, Open WebUI filters ordinary-user model visibility against Models records and read grants. Direct model use checks the same access model and chained base-model access.
 
 Conceptually:
 
@@ -320,7 +328,7 @@ Attempt a direct chat/resource request to an unauthorized model and require fail
 
 ## 12. Verify employee UI
 
-API provisioning is not the final acceptance.
+API provisioning is not final acceptance.
 
 Use the actual browser employee UI and verify Part A / applicable Part B of `docs/ACCEPTANCE-TESTS.md`:
 
