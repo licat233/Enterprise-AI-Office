@@ -20,6 +20,8 @@ POSTGRES_CONTAINER="${WEKNORA_POSTGRES_CONTAINER:-WeKnora-postgres}"
 WEKNORA_APP_CONTAINER="${WEKNORA_APP_CONTAINER:-WeKnora-app}"
 OPENWEBUI_CONTAINER="${OPENWEBUI_CONTAINER:-eaio-open-webui}"
 LAUNCH_AGENT_PLIST="${HERMES_LAUNCH_AGENT_PLIST:-${HOME}/Library/LaunchAgents/ai.hermes.gateway.plist}"
+GOVERNANCE_STATE_DB="${EAIO_GOVERNANCE_STATE_DB:-${EAIO_RUNTIME_DIR}/email-governance/state.sqlite3}"
+GOVERNANCE_BACKUP_HELPER="$REPO_ROOT/infrastructure/email/governance/backup_state.py"
 
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 DEST="${1:-${BACKUP_ROOT}/${STAMP}}"
@@ -146,7 +148,7 @@ WEKNORA_DATA_VOLUME="$(volume_name "$WEKNORA_APP_CONTAINER" /data/files)"
 OPENWEBUI_VOLUME="$(volume_name "$OPENWEBUI_CONTAINER" /app/backend/data)"
 [ -n "$POSTGRES_VOLUME" ] || fail "volume discovery" "PostgreSQL volume not found"
 [ -n "$WEKNORA_DATA_VOLUME" ] || fail "volume discovery" "WeKnora data volume not found"
-[ -n "$OPENWEBUI_VOLUME" ] || fail "volume discovery" "Open WebUI data volume not found"
+[ -n "$OPENWEBUI_VOLUME" ] || fail "volume discovery" "Open WebUI volume not found"
 
 WEKNORA_IMAGE="$(docker inspect --format '{{.Config.Image}}' "$WEKNORA_APP_CONTAINER")"
 POSTGRES_IMAGE="$(docker inspect --format '{{.Config.Image}}' "$POSTGRES_CONTAINER")"
@@ -157,8 +159,8 @@ DOCKER_VERSION="$(docker version --format '{{.Server.Version}}')"
 COMPOSE_VERSION="$(docker compose version --short)"
 
 [ ! -e "$DEST" ] || fail "destination" "already exists: $DEST"
-mkdir -p "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets"
-chmod 700 "$DEST" "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets"
+mkdir -p "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" "$DEST/governance"
+chmod 700 "$DEST" "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" "$DEST/governance"
 pass "destination" "$DEST"
 
 # PostgreSQL is backed up logically, rather than by copying a live database
@@ -208,6 +210,21 @@ pass "Hermes state" "Profiles, gateway config, state, Skills/MCP"
 tar -czf "$DEST/secrets/runtime-credentials.tar.gz" -C "$EAIO_RUNTIME_DIR" credentials
 pass "Secret recovery" "restricted local archive; values not printed"
 
+# v2 Email Governance is conditional. When its SQLite state exists, snapshot it
+# through SQLite's online backup API rather than copying the live WAL database.
+# A v1-only deployment must continue to back up successfully when this state is absent.
+GOVERNANCE_MANIFEST_LINE="- Email Governance SQLite: not enabled / state absent"
+if [ -f "$GOVERNANCE_STATE_DB" ]; then
+  require_command python3
+  require_file "$GOVERNANCE_BACKUP_HELPER"
+  python3 "$GOVERNANCE_BACKUP_HELPER" \
+    "$GOVERNANCE_STATE_DB" "$DEST/governance/state.sqlite3"
+  GOVERNANCE_MANIFEST_LINE="- Email Governance SQLite snapshot: governance/state.sqlite3"
+  pass "Email Governance" "$GOVERNANCE_STATE_DB"
+else
+  warn "Email Governance" "not enabled / state absent: $GOVERNANCE_STATE_DB"
+fi
+
 cat > "$DEST/MANIFEST.txt" <<EOF
 Enterprise AI Office backup manifest
 Backup timestamp (UTC): $STAMP
@@ -231,6 +248,7 @@ Backup components:
 - Repository Profile templates and Skills: hermes/repository-profiles-skills.tar.gz
 - Hermes LaunchAgent definition: hermes/ai.hermes.gateway.plist
 - Protected runtime credentials: secrets/runtime-credentials.tar.gz
+$GOVERNANCE_MANIFEST_LINE
 Discovered Docker volumes:
 - PostgreSQL: $POSTGRES_VOLUME
 - WeKnora documents: $WEKNORA_DATA_VOLUME
