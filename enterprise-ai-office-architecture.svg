@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">Enterprise AI Office v2 Architecture</title>
+  <desc id="desc">High-level architecture showing General Assistant, Communication Assistant, WeKnora, Hermes, EAO Email Governance, Email Provider, Governance SQLite, and lifecycle status.</desc>
+  <defs>
+    <style><![CDATA[
+      .bg { fill: #f7fafc; }
+      .title { font: 700 34px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #334155; }
+      .section { font: 700 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #0f172a; }
+      .label { font: 600 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #0f172a; }
+      .small { font: 500 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #334155; }
+      .tiny { font: 500 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #475569; }
+      .chip { font: 700 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #0f172a; }
+      .box { stroke: #cbd5e1; stroke-width: 2; rx: 16; ry: 16; }
+      .box-dark { stroke: #94a3b8; stroke-width: 2; rx: 16; ry: 16; }
+      .shadow { filter: drop-shadow(0 6px 12px rgba(15,23,42,0.08)); }
+      .arrow { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .arrow-soft { stroke: #94a3b8; stroke-width: 2.5; fill: none; marker-end: url(#arrowheadSoft); }
+      .dashed { stroke-dasharray: 10 8; }
+    ]]></style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#475569" />
+    </marker>
+    <marker id="arrowheadSoft" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#94a3b8" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="980"/>
+
+  <text class="title" x="60" y="70">Enterprise AI Office — v2 Blueprint Architecture</text>
+  <text class="subtitle" x="60" y="105">Status: System Design Complete · Installation Design Complete · Blueprint Validation Not Yet Opened</text>
+
+  <rect x="1060" y="42" width="160" height="34" rx="17" fill="#dcfce7" stroke="#86efac"/>
+  <text class="chip" x="1080" y="64">System Design ✓</text>
+  <rect x="1235" y="42" width="190" height="34" rx="17" fill="#dcfce7" stroke="#86efac"/>
+  <text class="chip" x="1258" y="64">Installation Design ✓</text>
+  <rect x="1060" y="84" width="365" height="34" rx="17" fill="#fef3c7" stroke="#fcd34d"/>
+  <text class="chip" x="1080" y="106">Real Deployment Inactive · Validation Pending</text>
+
+  <g class="shadow">
+    <rect class="box-dark" x="60" y="180" width="200" height="100" fill="#e2e8f0"/>
+    <text class="label" x="90" y="220">Human Actor</text>
+    <text class="small" x="90" y="248">Authenticated employee</text>
+  </g>
+
+  <g class="shadow">
+    <rect class="box" x="320" y="140" width="390" height="230" fill="#ffffff"/>
+    <text class="section" x="350" y="178">Open WebUI</text>
+    <text class="small" x="350" y="205">Primary employee surface · trusted identity source</text>
+
+    <rect class="box" x="350" y="230" width="150" height="105" fill="#eff6ff"/>
+    <text class="label" x="375" y="268">General</text>
+    <text class="small" x="375" y="292">Assistant</text>
+    <text class="tiny" x="370" y="318">No email tools</text>
+
+    <rect class="box" x="525" y="230" width="155" height="105" fill="#f0fdf4"/>
+    <text class="label" x="545" y="268">Communication</text>
+    <text class="small" x="575" y="292">Assistant</text>
+    <text class="tiny" x="545" y="318">Email review + approval UI</text>
+  </g>
+
+  <g class="shadow">
+    <rect class="box" x="780" y="110" width="330" height="290" fill="#ffffff"/>
+    <text class="section" x="810" y="148">Hermes</text>
+    <text class="small" x="810" y="175">Reasoning / orchestration by profile</text>
+
+    <rect class="box" x="810" y="210" width="125" height="120" fill="#eff6ff"/>
+    <text class="label" x="836" y="248">general</text>
+    <text class="small" x="842" y="274">Profile</text>
+    <text class="tiny" x="827" y="300">retrieve only</text>
+
+    <rect class="box" x="955" y="210" width="125" height="120" fill="#f0fdf4"/>
+    <text class="label" x="969" y="248">communication</text>
+    <text class="small" x="988" y="274">Profile</text>
+    <text class="tiny" x="970" y="300">drafting guidance</text>
+  </g>
+
+  <g class="shadow">
+    <rect class="box" x="1180" y="160" width="280" height="110" fill="#ffffff"/>
+    <text class="section" x="1210" y="198">WeKnora</text>
+    <text class="small" x="1210" y="226">Company knowledge source of truth</text>
+    <text class="tiny" x="1210" y="248">retrieval · policies · product/company context</text>
+  </g>
+
+  <g class="shadow">
+    <rect class="box" x="320" y="470" width="1180" height="370" fill="#ffffff"/>
+    <text class="section" x="350" y="510">Governed Communication Path</text>
+    <text class="small" x="350" y="537">Deterministic draft / approval / send loop isolated from the v1 general path</text>
+
+    <rect class="box" x="390" y="590" width="370" height="150" fill="#f8fafc"/>
+    <text class="label" x="420" y="630">EAO Email Governance Service</text>
+    <text class="tiny" x="420" y="660">Mailbox authorization</text>
+    <text class="tiny" x="420" y="685">DraftReply revisions · SendApproval</text>
+    <text class="tiny" x="420" y="710">Approval claim · audit · reconciliation</text>
+
+    <rect class="box" x="820" y="590" width="250" height="150" fill="#f8fafc"/>
+    <text class="label" x="850" y="630">Governance SQLite</text>
+    <text class="tiny" x="850" y="660">Drafts · approvals</text>
+    <text class="tiny" x="850" y="685">logical sends · attempts</text>
+    <text class="tiny" x="850" y="710">reconciliation evidence</text>
+
+    <rect class="box" x="1130" y="590" width="300" height="150" fill="#f8fafc"/>
+    <text class="label" x="1160" y="630">Email Provider</text>
+    <text class="small" x="1160" y="656">Tencent Exmail (reference provider)</text>
+    <text class="tiny" x="1160" y="685">IMAP read-only adapter</text>
+    <text class="tiny" x="1160" y="710">SMTP send adapter</text>
+
+    <rect class="box" x="390" y="760" width="1040" height="54" fill="#fff7ed"/>
+    <text class="small" x="420" y="794">Backup / Restore / Recovery / Clean-host Validation: Governance snapshot, restore safety, rollback levels, stage acceptance, idempotent installer re-run</text>
+  </g>
+
+  <path class="arrow" d="M260 230 H320"/>
+  <path class="arrow" d="M500 282 H780"/>
+  <path class="arrow" d="M680 282 H780"/>
+  <path class="arrow" d="M1110 225 H1180"/>
+  <path class="arrow-soft dashed" d="M575 335 V430"/>
+  <path class="arrow-soft" d="M602 430 V590"/>
+  <text class="tiny" x="620" y="480">server-side email tools + approval action</text>
+  <path class="arrow" d="M760 665 H820"/>
+  <path class="arrow" d="M1070 665 H1130"/>
+  <text class="tiny" x="350" y="408">Open WebUI forwards trusted HumanActor context to governance</text>
+
+  <g class="shadow">
+    <rect class="box" x="60" y="330" width="200" height="135" fill="#ffffff"/>
+    <text class="label" x="85" y="368">Key Rules</text>
+    <text class="tiny" x="85" y="396">• Natural language ≠ approval</text>
+    <text class="tiny" x="85" y="420">• General path stays independent</text>
+    <text class="tiny" x="85" y="444">• Unknown send result ⇒ reconcile</text>
+  </g>
+
+  <g class="shadow">
+    <rect class="box" x="1180" y="300" width="280" height="120" fill="#ffffff"/>
+    <text class="label" x="1210" y="338">Current Progress</text>
+    <text class="tiny" x="1210" y="366">• ID-1 to ID-7 complete</text>
+    <text class="tiny" x="1210" y="390">• Validation target not yet opened</text>
+    <text class="tiny" x="1210" y="414">• Real deployment remains inactive</text>
+  </g>
+
+  <text class="tiny" x="60" y="925">This diagram represents the repository blueprint after System Design and Installation Design completion.</text>
+  <text class="tiny" x="60" y="947">It does not imply a live production deployment has already been performed.</text>
+</svg>
