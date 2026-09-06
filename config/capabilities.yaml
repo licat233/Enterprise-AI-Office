@@ -84,6 +84,7 @@ capabilities:
     enabled_when: capabilities.coding_delegation.enabled == true
     implementation:
       - infrastructure/coding-agents/README.md
+      - infrastructure/coding-agents/technical-profile.config.example.yaml
       - profiles/engineering/SOUL.md
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
