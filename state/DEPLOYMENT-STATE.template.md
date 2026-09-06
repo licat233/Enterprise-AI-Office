@@ -109,6 +109,37 @@ Copy the enabled capability set derived from the active company config and `conf
 
 Disabled capabilities may be recorded compactly when useful, but do not create runtime objects for them.
 
+## v2 Email Governance
+
+Complete only when the Email capability is enabled.
+
+```text
+Provider:
+Governance service version/contract:
+Governance state path:
+Governance schema version:
+Communication Assistant ID:
+Email Governance tool connection ID:
+Logical group → Open WebUI runtime group mappings:
+Mailbox grant summary:
+Provider endpoint mode:
+Provider/forwarder secret reference classes (names only, never values):
+Stage 0 result:
+Stage 1 result:
+Stage 2 result:
+Stage 3 result:
+Stage 4 result:
+Current unresolved reconciliation count/status:
+Latest Governance backup generation:
+Governance snapshot included in backup: <yes/no>
+Last isolated Governance restore result:
+Installer second-run convergence result:
+v2 rollback/degrade + v1 preservation result:
+Known Email limitations:
+```
+
+Do not record Draft bodies, mailbox passwords, forwarder tokens, provider credentials, or full provider logs here.
+
 ## Administrative surfaces
 
 Record only those actually enabled:
@@ -208,6 +239,7 @@ Open WebUI conversation history: <enabled/disabled>
 Open WebUI: <...>
 Hermes employee API: <...>
 WeKnora UI/API: <...>
+Email Governance: <disabled/private loopback-or-private-network/...>
 hermes-webui: <disabled/...>
 PostgreSQL: <internal only/...>
 Redis: <internal only/...>
@@ -226,6 +258,8 @@ Retention:
 Off-primary-disk destination/boundary:
 Last successful backup:
 Last isolated restore test:
+Governance SQLite snapshot method/result when Email enabled:
+Unresolved-send preservation after restore when applicable:
 Secrets recovery method (non-secret description):
 ```
 
@@ -235,6 +269,7 @@ Secrets recovery method (non-secret description):
 Policy:
 Supported startup/recovery procedure:
 Last validation:
+Governance restart/reconciliation result when Email enabled:
 Known manual boundary:
 ```
 
