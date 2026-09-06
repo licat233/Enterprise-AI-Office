@@ -165,23 +165,37 @@ capabilities:
       - docs/V2-EMAIL-DESIGN.md
       - docs/V2-DESIGN-REVIEW.md
       - docs/V2-IMPLEMENTATION-PLAN.md
+      - docs/V2-INSTALLATION-ARCHITECTURE.md
+      - docs/V2-CONFIG-PROTECTED-INPUTS.md
       - docs/ONTOLOGY.md
       - ontology/examples/email-communication.yaml
+      - config/company.private.example.yaml
       - infrastructure/email/tencent-exmail/README.md
       - infrastructure/email/tencent-exmail/imap_readonly_mcp.py
       - infrastructure/email/tencent-exmail/imap.env.example
       - infrastructure/email/tencent-exmail/hermes.mcp.example.yaml
       - infrastructure/email/tencent-exmail/test_imap_readonly.py
     required_company_values:
-      - selected pilot mailbox
-      - mailbox owner/business purpose
-      - authorized human users/groups
-      - authorized Hermes Profiles
+      - communication Profile ID and intended employee groups
+      - selected mailbox logical ID and address
+      - mailbox business purpose/owner context
+      - explicit principal + mailbox + operation grants
       - allowed mailbox folders/read scope
-      - client credential/security-login decision
-      - outbound human-approval policy
+      - selected provider endpoint mode when default is not accepted
+      - outbound human-approval policy must remain enabled
       - controlled initial recipient/test scope
       - attachment policy
+      - governance state/log path or accepted derived default
+      - symbolic mailbox client-credential reference
+    required_secret_classes:
+      - specialist-profile-credential
+      - email-mailbox-client-credential
+    protected_input_contract:
+      document: docs/V2-CONFIG-PROTECTED-INPUTS.md
+      private_overlay_example: config/company.private.example.yaml
+      missing_required_input: "BLOCKED — REQUIRED INPUT: <specific input>"
+      config_conflict: "BLOCKED — CONFIG CONFLICT: <specific conflict>"
+      security_violation: "FAIL — SECURITY CONTRACT VIOLATION: <invariant>"
     acceptance:
       document: docs/acceptance/TENCENT-EXMAIL.md
       section: Tencent Enterprise Mail Integration Acceptance
@@ -189,8 +203,10 @@ capabilities:
       - provider
       - selected mailbox identifiers, never credentials
       - authorized human/Profile scope
+      - mailbox grant summary
       - IMAP/SMTP endpoint mode
-      - secret storage class/location, never secret value
+      - governance state location
+      - secret symbolic reference/storage class/location description, never value
       - deterministic adapter test result
       - read-only behavior result
       - approval-binding result
