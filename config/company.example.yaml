@@ -2,9 +2,9 @@
 #
 # Copy this file into a company-private deployment layer and replace placeholders.
 # Do NOT commit production secrets here.
-# This is a declarative intent/configuration schema, not yet a guaranteed one-command installer input.
+# This is declarative deployment intent for humans and AI agents.
 
-schema_version: 1
+schema_version: 2
 
 company:
   id: example-company
@@ -15,17 +15,13 @@ company:
     - zh-CN
   timezone: Asia/Shanghai
 
-# Deployment environment describes intent. Exact runtime commands remain governed
-# by docs/DEPLOYMENT.md and the installed upstream versions.
 deployment:
-  environment: production
+  environment: production # demo | staging | production
+  target_readiness: production-ready # core-ready | configured-ready | production-ready
   host:
     type: mac-studio # examples: mac-studio, mac-mini, linux-server
     hostname: enterprise-ai-office
-  employee_access:
-    web_client: open-webui
-    remote_browser_access: disabled # disabled | tailscale | cloudflare-access | other
-  admin_client: hermes-webui
+  runtime_root: /Users/Shared/enterprise-ai-office
 
 knowledge:
   platform: weknora
@@ -57,13 +53,10 @@ agent_runtime:
   multi_profile_gateway:
     enabled: true
     explicit_allowlist: true
-  employee_long_term_memory:
-    enabled: false
-    # Keep disabled until docs/ACCEPTANCE-TESTS.md cross-user isolation passes.
 
 # The Hermes default/admin Profile belongs to the control plane. `general` is the
-# baseline employee-facing Profile. Extend this list only for roles the company
-# actually intends to operate.
+# baseline employee-facing Profile. Add another Profile only when the company
+# actually intends to operate that specialist role/capability boundary.
 profiles:
   - id: general
     display_name: General Assistant
@@ -75,10 +68,9 @@ profiles:
     capabilities:
       terminal: false
       code_execution: false
-      codex: false
-      claude_code: false
+      coding_delegation: false
       web_search: optional
-    memory_policy: safe-shared-role-only
+    memory_policy: disabled-until-isolation-validated
 
 employee_access:
   web:
@@ -88,30 +80,84 @@ employee_access:
         display_name: All Employees
       - id: ai-admins
         display_name: AI Administrators
-    default_permissions: minimal
+    default_permissions:
+      chat: true
+      history: true
+      file_upload: true
+      user_system_prompt_editing: false
+      advanced_chat_parameters: false
     assistant_resources_private_by_default: true
+
+# Optional capabilities are selected here. A disabled capability must not be
+# instantiated merely because the repository contains a template/playbook.
+# An enabled capability must be deployed and accepted before CONFIGURED READY.
+capabilities:
+  hermes_webui:
+    enabled: false
+    # exact_commit: <PIN_WHEN_ENABLED>
+    access: loopback-only
+
+  coding_delegation:
+    enabled: false
+    allowed_profiles: []
+    backends:
+      codex: false
+      claude_code: false
+    workspaces: []
+
+  kanban:
+    enabled: false
+    orchestrator_profiles: []
+    boards: []
+
+  cron:
+    enabled: false
+    owner_profiles: []
+    jobs: []
 
   messaging:
     enabled: false
-    platform: null # feishu | wecom | weixin | other
+    platform: null # feishu | wecom | weixin | another Hermes-supported platform
     authorization: allowlist-or-enterprise-identity
     allow_all_users: false
+    routes: []
 
-operations:
+  remote_access:
+    enabled: false
+    method: null # tailscale | cloudflare-access | vpn | approved-equivalent
+    employee_surfaces:
+      - open-webui
+    admin_surfaces: []
+
+  sso:
+    enabled: false
+    provider: null
+    allowed_domains: []
+    group_claim_mapping: {}
+
+  employee_long_term_memory:
+    enabled: false
+    profiles: []
+    # Enable only after the exact deployed Open WebUI → Hermes user-scoping path
+    # passes the cross-user isolation acceptance test.
+
+production:
   backup:
+    enabled: true
     schedule: daily
     daily_retention: 14
     weekly_retention: 4
     require_off_primary_disk_copy: true
     restore_test_frequency: monthly
-  upgrades:
-    automatic_core_updates: false
-    pin_tested_versions: true
+  startup_recovery:
+    policy: documented-supported-recovery # automatic | documented-supported-recovery
   health:
     weekly_review: true
+  access_security_review:
+    required: true
 
-# Model IDs intentionally remain placeholders because providers/models change rapidly.
-# Exact deployed values belong in state/DEPLOYMENT-STATE.md.
+# Model IDs intentionally remain placeholders because providers/models change.
+# Exact deployed values belong in protected deployment config and deployment state.
 models:
   hermes:
     provider: <SELECT_PROVIDER>
@@ -120,15 +166,24 @@ models:
     embedding_provider: <SELECT_PROVIDER>
     embedding_model: <SELECT_MODEL>
     embedding_dimension: <VERIFY_DIMENSION>
-    rerank_provider: <SELECT_PROVIDER>
-    rerank_model: <SELECT_MODEL>
+    rerank:
+      enabled: false
+      provider: null
+      model: null
 
 # Secrets are references only. Never put real values in this public template.
 secrets:
   policy: external-protected-storage
   required_placeholders:
-    - HERMES_PROFILE_API_KEYS
+    - HERMES_DEFAULT_API_KEY
+    - HERMES_GENERAL_API_KEY
     - MODEL_PROVIDER_KEYS
     - WEKNORA_DATABASE_SECRETS
     - REDIS_SECRETS_IF_REQUIRED
+    - OPEN_WEBUI_ADMIN_CREDENTIALS
+  conditional_placeholders:
+    - SPECIALIST_PROFILE_API_KEYS
+    - HERMES_WEBUI_PASSWORD_IF_EXPOSED
+    - CODING_AGENT_AUTH_IF_ENABLED
     - MESSAGING_CREDENTIALS_IF_ENABLED
+    - SSO_CLIENT_CREDENTIALS_IF_ENABLED
