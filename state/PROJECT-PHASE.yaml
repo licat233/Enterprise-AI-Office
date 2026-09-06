@@ -1,0 +1,87 @@
+schema_version: 1
+project: Enterprise AI Office
+release_track: v2
+
+# This file is the sole repository authority for the current work phase.
+# Agents must not infer phase from the presence of prototypes, adapters, tests,
+# implementation plans, deployment documents, acceptance contracts, or prior chat wording.
+phase: design
+
+phase_authority:
+  transition_requires_explicit_human_authorization: true
+  implicit_transition_allowed: false
+  continuation_words_do_not_change_phase:
+    - continue
+    - keep going
+    - start
+    - begin
+    - next
+    - proceed
+    - 继续
+    - 开始
+    - 开始吧
+    - 下一步
+    - 好的
+  required_transition_intent_examples:
+    - close the design phase and begin implementation
+    - implementation is now authorized
+    - begin real deployment
+    - 结束设计阶段，开始真实实施
+    - 现在开始真实搭建
+
+current_authorization:
+  design_and_research: true
+  documentation_changes: true
+  architecture_and_security_review: true
+  offline_prototypes: true
+  offline_tests_and_static_validation: true
+
+  real_credentials: false
+  real_personal_or_employee_identifiers_in_public_repo: false
+  real_provider_account_access: false
+  real_mailbox_access: false
+  real_profile_binding: false
+  real_imap_or_smtp_runtime: false
+  production_or_live_runtime_mutation: false
+  customer_facing_actions: false
+
+phase_rules:
+  design:
+    allowed:
+      - architecture and product design
+      - scope and non-goal decisions
+      - threat modeling and authorization design
+      - Ontology/schema design
+      - provider and upstream research
+      - sanitized examples and synthetic fixtures
+      - offline prototypes
+      - offline unit tests and structural validation
+      - future implementation planning
+      - acceptance-test design
+    prohibited:
+      - request or use real provider credentials merely to continue design
+      - connect to a real mailbox or external business system
+      - bind real employees, Profiles, accounts, or provider identities
+      - mutate a live or production runtime
+      - treat a prototype or passing offline test as deployed capability
+      - start a future implementation stage because its plan already exists
+
+  implementation:
+    entry_condition: explicit human authorization that implementation may begin
+    allowed_after_entry:
+      - resolve implementation-time protected inputs as genuinely required
+      - perform bounded runtime integration work
+      - run real acceptance tests within the authorized scope
+    still_prohibited_without_separate_authority:
+      - destructive production changes
+      - customer-facing sends or publications outside the approved action gate
+
+interpretation_rules:
+  - The current phase outranks task momentum and prior assistant assumptions.
+  - A request to continue means continue the current phase unless the human explicitly changes phase.
+  - A future implementation plan is descriptive, not executable authority.
+  - Repository code may exist as a design-support prototype while phase remains design.
+  - Missing real credentials are not blockers during design because real credentials are out of scope.
+  - If a requested action would cross the phase boundary, do not perform it; explain the boundary and continue with the closest valid work inside the current phase.
+
+last_reviewed: 2026-09-06
