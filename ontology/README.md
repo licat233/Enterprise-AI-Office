@@ -54,7 +54,7 @@ Main finding:
 
 > approval for a mutable subject must bind to the exact version/state it authorizes and must be revalidated before the governed side effect executes.
 
-The second experiment also exposed a dangling reference in an idempotency expression during manual review. Combined with the authorization-closure mistake found in the first experiment, this now provides concrete evidence that a lightweight structural validator may be worthwhile.
+The second experiment also exposed a dangling reference in an idempotency expression during manual review. Combined with the authorization-closure mistake found in the first experiment, this provided concrete evidence for a lightweight structural validator.
 
 ## Rules for experiments
 
@@ -73,28 +73,58 @@ The second experiment also exposed a dangling reference in an idempotency expres
 13. Keep authorization fail-closed.
 14. Do not treat an example as an active company policy.
 
+## Structural validator
+
+The repository now includes:
+
+```text
+scripts/validate-ontology.py
+```
+
+Run from the repository root:
+
+```sh
+uv run scripts/validate-ontology.py
+```
+
+The validator exists because repeated design experiments produced mechanical consistency defects that were otherwise found only during manual review.
+
+Its scope is deliberately narrow:
+
+```text
+duplicate YAML keys
+unknown Object/Property/Relation/system references
+invalid Authority references
+fail-open Object visibility in design examples
+Read Operation authorization-closure defects
+Action precondition references
+approval binding references
+unknown tool-binding system namespaces
+idempotency expressions using undeclared action parameters
+operation-surface references
+```
+
+A validator PASS means only that the YAML is structurally self-consistent according to the implemented checks.
+
+It does **not** mean:
+
+```text
+the business policy is correct
+the integration exists
+the actor is really authorized
+the Action is executable
+the deployment is Production Ready
+```
+
+Business policy correctness remains a domain/human review responsibility.
+
 ## Schema status
 
 There is intentionally no fully frozen schema language yet.
 
-YAML is being used because it is reviewable, Git-friendly, and sufficient for the current design experiments. Fields may still change while the contract is being validated.
+YAML is being used because it is reviewable, Git-friendly, and sufficient for the current design experiments. The validator is intentionally tolerant of optional fields and should grow only when another real example exposes a recurring mechanical defect.
 
-However, two experiments have now produced mechanical consistency defects that were caught only by manual review. A repository-local validator is therefore now justified **only for structural checks** that reduce schema drift.
-
-Such a validator must not become an Ontology Runtime, policy engine, database, code generator, or business-rule executor.
-
-Appropriate validator scope may include:
-
-```text
-unknown Object/Property/Relation/system references
-missing Authority on mutable state
-invalid traversal references
-approval binding references to unknown fields
-idempotency/reference expressions using undeclared parameters
-invalid schema/contract version values
-```
-
-Business policy correctness remains a domain/human review responsibility.
+Do not turn the validator into an Ontology Runtime, policy engine, database, code generator, or speculative schema framework.
 
 ## Runtime boundary
 
