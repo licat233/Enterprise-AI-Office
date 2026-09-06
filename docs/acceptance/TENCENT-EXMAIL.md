@@ -7,6 +7,7 @@ Run this acceptance only when the active company configuration enables the Tence
 Use with:
 
 - `docs/V2-SCOPE.md`
+- `docs/V2-STAGE-CONTRACTS.md`
 - `docs/ONTOLOGY.md`
 - `infrastructure/email/tencent-exmail/README.md`
 - `docs/SECURITY.md`
@@ -14,6 +15,35 @@ Use with:
 - `config/capabilities.yaml`
 
 A successful IMAP or SMTP login alone is not acceptance.
+
+## Stage mapping
+
+This provider acceptance is reused by the v2 installation Stage contracts rather than duplicated into separate provider test suites.
+
+```text
+Stage 0 — v1 baseline
+→ docs/ACCEPTANCE-TESTS.md Part A
+
+Stage 1 — read-only email
+→ Sections 1–4 and applicable employee-client checks in Section 11
+
+Stage 2 — DraftReply preparation
+→ Sections 4–5 and applicable employee-client checks in Section 11
+
+Stage 3 — trusted human approval
+→ Section 6 and applicable audit/employee-client checks in Sections 9 and 11
+
+Stage 4 — governed send
+→ Sections 7–9 and 11
+
+Stage 5 — optional simple follow-up
+→ Section 10 plus docs/ACCEPTANCE-TESTS.md Cron section
+
+Stage 6 — optional messaging surface
+→ docs/ACCEPTANCE-TESTS.md Messaging section plus the same email governance boundary
+```
+
+The detailed Stage preconditions, inputs, idempotency, evidence, and rollback contracts are authoritative in `docs/V2-STAGE-CONTRACTS.md`.
 
 ## 1. Provider and mailbox scope
 
