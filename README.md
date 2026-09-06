@@ -1,79 +1,85 @@
 # Enterprise AI Office
 
-> An agent-readable blueprint for building a self-hosted enterprise AI workspace with **WeKnora + Hermes Agent + Open WebUI + MCP**, with optional Codex, Claude Code, Kanban, Cron, messaging, and other role-specific capabilities.
+> An agent-readable and agent-executable blueprint for building a self-hosted enterprise AI workspace with **WeKnora + Hermes Agent + Open WebUI + MCP**, plus company-selected Profiles, administration, coding agents, automation, messaging, identity, and production controls.
 
-Enterprise AI Office is a public architecture and implementation project for companies that want to build an internal AI office system around their own knowledge, roles, workflows, tools, and employees.
+Enterprise AI Office is a public architecture and implementation project for companies that want an internal AI work system around their own knowledge, roles, workflows, tools, employees, and security boundaries.
 
-The long-term goal is practical:
+The practical goal is:
 
-> **A company should be able to give this repository to a capable AI engineering agent, provide the required company configuration and protected credentials, and have the agent deploy, configure, validate, operate, and safely evolve the system without repeated human reminders about routine implementation steps.**
+> **Give this repository to a capable AI engineering agent, provide the company deployment configuration and protected credentials/authority it genuinely needs, and let the agent drive the system to the requested readiness level without repeated human reminders about routine implementation steps.**
 
-ARMOR is the first reference implementation and validation environment. The project itself is intended to remain reusable by other companies.
+ARMOR is the first reference implementation. The project itself remains generic.
 
 ## Deploy with an AI agent
 
-If the task is to deploy or plan a deployment, start here:
+For deployment or deployment planning, use this order:
 
 1. [`AGENTS.md`](AGENTS.md) — highest-priority repository-local operating contract.
-2. [`DEPLOY.md`](DEPLOY.md) — agent deployment Golden Path and completion semantics.
-3. [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — detailed implementation reference.
-4. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) — deeper validation for enabled capabilities.
+2. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
+3. [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) — readiness/completion contract.
+4. active company configuration, based on [`config/company.example.yaml`](config/company.example.yaml).
+5. [`config/capabilities.yaml`](config/capabilities.yaml) — capability closure registry.
+6. [`config/validated-stack.yaml`](config/validated-stack.yaml) — validated core reproducibility baseline.
+7. referenced infrastructure playbooks/adapters.
+8. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) — evidence gates.
 
-The intended interaction is one deployment request, not a sequence of prompts reminding the agent to connect WeKnora, create the baseline Hermes Profile, configure Open WebUI RBAC, test the employee client, and record deployment state.
+The intended interaction is one deployment request, not a sequence of prompts reminding the agent to connect WeKnora, create Profiles, configure RBAC, implement an already-enabled optional capability, test the employee client, or record state.
 
-Human input is still expected when genuinely required for credentials, OS permissions, destructive conflicts, or company-specific business choices that are not present in configuration.
+Human input remains legitimate for things an agent cannot invent or authorize: model/API credentials, OS permission approval, IdP/app registration, enterprise messaging credentials, private-access authority, destructive conflicts, and real company business choices missing from configuration.
 
-## What are we building?
+## What does “complete” mean?
 
-Enterprise AI Office is an AI work layer for a company:
+Complete is **configuration-relative**, not “install every feature in the repository”.
+
+```text
+CORE READY
+= baseline employee workflow works
+
+CONFIGURED READY
+= Core Ready
+  + every capability enabled by this company is deployed and accepted
+
+PRODUCTION READY
+= Configured Ready
+  + applicable production recovery/security/access/operations controls pass
+```
+
+This avoids both failure modes:
+
+```text
+under-build
+→ stop after basic chat while configured capabilities are missing
+
+feature collection
+→ install Sales/QC/Kanban/Cron/SSO/etc. that the company never requested
+```
+
+The company chooses the target with:
+
+```yaml
+deployment:
+  target_readiness: production-ready
+```
+
+See [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md).
+
+## Core employee workflow
 
 ```text
 Employee
-   │
-   ▼
-Open WebUI / approved messaging surface
-   │
-   ▼
-Hermes Agent
-   │
-   ├── WeKnora company knowledge
-   ├── Role-specific Skills
-   ├── Approved tools / MCP
-   ├── Optional memory
-   ├── Optional Kanban / Cron
-   └── Optional specialist coding agents
+   ↓
+Open WebUI
+   ↓
+General Assistant
+   ↓
+Hermes `general` Profile
+   ↓
+WeKnora
+   ↓
+grounded company answer + source
 ```
 
-The baseline employee workflow is:
-
-```text
-Employee
-→ Open WebUI
-→ General Assistant
-→ Hermes `general` Profile
-→ WeKnora
-→ grounded answer + source
-```
-
-## Reference architecture
-
-| Layer | Technology | Responsibility |
-| --- | --- | --- |
-| Enterprise Knowledge | **WeKnora** | Document ingestion, retrieval, source evidence, enterprise knowledge |
-| Primary Agent Runtime | **Hermes Agent** | Profiles, SOUL, Skills, tools, MCP, orchestration |
-| Employee Web Client | **Open WebUI** | Users, groups, RBAC, chat interface, conversation history |
-| Hermes Admin Client | **hermes-webui** | Administrative Hermes control surface when enabled |
-| Role Architecture | **Hermes Profiles** | AI work roles with distinct behavior/capability boundaries |
-| Knowledge Bridge | **WeKnora MCP / supported API** | Hermes-to-knowledge integration |
-| Durable Agent Work | **Hermes Kanban** | Optional persistent multi-agent task coordination |
-| Automation | **Hermes Cron** | Optional scheduled agent work |
-| Coding Execution | **Codex + Claude Code** | Optional software-engineering execution |
-| Messaging | **Hermes Gateway** | Optional enterprise messaging access |
-| Operations & Governance | **This repository** | Architecture, deployment state, security, backup, upgrade, maintenance rules |
-
-## Baseline vs optional capabilities
-
-A baseline deployment starts with:
+Baseline objects are deliberately small:
 
 ```text
 Hermes control plane
@@ -83,15 +89,47 @@ Employee plane
 ├── Open WebUI
 ├── All-Employees group
 ├── General Assistant
-└── Hermes `general` Profile
+└── general Profile
 
 Knowledge
 └── company-defined WeKnora Knowledge Base(s)
 ```
 
-Specialist Profiles, department groups, additional Knowledge Bases, Skills, Codex/Claude Code delegation, Kanban, Cron, messaging, remote access, SSO, and employee Hermes long-term memory are added only when the adopting company's configuration or real operating requirements justify them.
+## Capability-driven extension
 
-Repository templates are a library, not a deployment checklist.
+Optional capability playbooks are available for company-selected needs such as:
+
+| Capability | Implementation path |
+| --- | --- |
+| Specialist Profiles | `docs/PROFILE-STANDARD.md` + generic Hermes specialist templates |
+| Hermes admin Web UI | `infrastructure/hermes-webui/` |
+| Codex / Claude Code delegation | `infrastructure/coding-agents/` |
+| Kanban | `infrastructure/hermes/features/` |
+| Cron | `infrastructure/hermes/features/` |
+| Enterprise messaging | `infrastructure/hermes/features/` |
+| Remote/private access | `infrastructure/access/` |
+| SSO / enterprise identity | `infrastructure/access/` |
+| Employee long-term memory | Profile/RBAC isolation rules and acceptance gate |
+
+[`config/capabilities.yaml`](config/capabilities.yaml) maps each enabled capability to its implementation path, required external inputs, acceptance test, and state fields.
+
+An enabled capability cannot be silently skipped to reach a green result. A disabled capability must not be instantiated merely because a template exists.
+
+## Reference architecture
+
+| Layer | Technology | Responsibility |
+| --- | --- | --- |
+| Enterprise Knowledge | **WeKnora** | Documents, retrieval, source evidence, Knowledge Bases |
+| Primary Agent Runtime | **Hermes Agent** | Profiles, SOUL, Skills, tools, MCP, orchestration |
+| Employee Web Client | **Open WebUI** | Human users, groups, RBAC, chat, history |
+| Hermes Admin Client | **hermes-webui** when enabled | Privileged Hermes administration |
+| AI Work Roles | **Hermes Profiles** | Role/capability boundaries |
+| Knowledge Bridge | **WeKnora MCP / supported API** | Hermes-to-knowledge integration |
+| Durable Agent Work | **Hermes Kanban** when enabled | Persistent multi-Agent task coordination |
+| Automation | **Hermes Cron** when enabled | Scheduled Agent work |
+| Coding Execution | **Codex + Claude Code** when enabled | Specialist software engineering |
+| Messaging | **Hermes Gateway** when enabled | Enterprise messaging access/delivery |
+| Operations/Governance | **This repository** | Desired state, deployment contract, security, recovery, acceptance |
 
 ## Core design rules
 
@@ -100,34 +138,37 @@ Repository templates are a library, not a deployment checklist.
 | Information | Authority |
 | --- | --- |
 | Company knowledge | WeKnora |
-| Agent behavior and role configuration | Hermes Profiles / SOUL / Skills / Tools / MCP |
-| Employee identity and Web access | Open WebUI |
-| Durable agent task state | Hermes Kanban when enabled |
-| Scheduled agent work | Hermes Cron when enabled |
-| Deployment and operations state | this repository + deployment state |
+| Agent behavior/role config | Hermes Profiles / SOUL / Skills / Tools / MCP |
+| Employee Web identity/access | Open WebUI / selected enterprise identity layer |
+| Durable Agent tasks | Hermes Kanban when enabled |
+| Scheduled work | Hermes Cron when enabled |
+| Desired deployment | active company configuration |
+| Actual deployment | real runtime + deployment state |
 
-### Profile is not a user account
+### Profile is not a user
 
-A Hermes Profile represents an AI work role, not an individual employee.
+A Hermes Profile represents an AI work role/capability boundary, not an employee account.
 
 ```text
 Employee A ─┐
-Employee B ─┼──→ General Assistant ─→ Hermes `general` Profile
+Employee B ─┼→ General Assistant → `general`
 Employee C ─┘
 ```
 
-Create specialist Profiles only when distinct work, knowledge, tool, credential, automation, model, memory, or risk boundaries require them.
+Create a specialist Profile only when distinct work, knowledge, tools, credentials, automation, model, memory, or risk boundaries require it.
 
-### Profile is not a security sandbox
+### Profile is not a sandbox
 
-Profile isolation separates Hermes state; it does not automatically restrict all host filesystem or operating-system access.
+Profile state isolation does not automatically restrict all host access.
 
 Security requires:
 
 ```text
 Human RBAC
 +
-Profile-level least-privilege tools and credentials
+Profile least-privilege capabilities/credentials
++
+workspace/OS/container boundaries where required
 ```
 
 ### Knowledge is not memory
@@ -136,54 +177,33 @@ Profile-level least-privilege tools and credentials
 WeKnora
 = authoritative shared company knowledge
 
-Hermes Profile memory
-= optional role/user operating continuity, subject to isolation rules
+Hermes memory
+= optional role/user continuity subject to isolation rules
 ```
 
-### Prefer mature upstream capabilities
+### Upstream first
 
 ```text
-Official capability
-→ official integration / extension
+official upstream capability
+→ official integration
 → configuration
-→ thin adapter
-→ custom infrastructure only when truly necessary
+→ thin adapter/playbook
+→ custom infrastructure only when necessary
 ```
 
-### Real usage drives evolution
+### Real use drives evolution
 
 ```text
 sound baseline
-→ usable deployment
+→ complete configured deployment
 → real employee usage
 → concrete problem
 → smallest justified improvement
 ```
 
-## Documentation map
+## First validated core stack
 
-| Document | Purpose |
-| --- | --- |
-| [`AGENTS.md`](AGENTS.md) | Highest-priority AI agent execution and maintenance contract |
-| [`DEPLOY.md`](DEPLOY.md) | Agent deployment Golden Path |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture and component responsibilities |
-| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Detailed deployment reference |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Trust boundaries, secrets, least privilege, network security |
-| [`docs/PROFILE-STANDARD.md`](docs/PROFILE-STANDARD.md) | Hermes Profile design and governance |
-| [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) | WeKnora knowledge organization and governance |
-| [`docs/CLIENT-RBAC.md`](docs/CLIENT-RBAC.md) | Open WebUI user/group/assistant mapping |
-| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Routine operation and troubleshooting |
-| [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md) | Backup and restore controls |
-| [`docs/UPGRADE.md`](docs/UPGRADE.md) | Version and upgrade discipline |
-| [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) | Validation suite for enabled capabilities |
-| [`config/company.example.yaml`](config/company.example.yaml) | Generic declarative company configuration example |
-| [`profiles/README.md`](profiles/README.md) | Reusable Profile template rules |
-| [`infrastructure/README.md`](infrastructure/README.md) | Upstream-version-pinned adapter policy |
-| [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md) | Actual deployment/runtime truth |
-
-## First validated reference path
-
-The first working reference deployment used:
+The first real reference validation used:
 
 ```text
 Host: Apple Silicon macOS
@@ -194,53 +214,94 @@ Open WebUI: v0.11.3
 Employee Hermes long-term memory: disabled
 ```
 
-This deployment proved the core employee path, grounded WeKnora access, source visibility, Open WebUI RBAC, Profile API isolation, least-privilege employee tools, conversation history, file upload, and backup/restore behavior.
+It proved the core employee path, grounded source-backed knowledge, Open WebUI RBAC, Profile API isolation, least-privilege employee tools, conversation history/file upload, and backup/restore behavior.
 
-The exact runtime record is in [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md). It is evidence from one validated deployment, not a source of universal company defaults.
+Machine-readable baseline: [`config/validated-stack.yaml`](config/validated-stack.yaml).
 
-## Current project status
+Actual reference-instance evidence: [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md).
 
-The project has moved beyond architecture-only documentation:
+A fresh deployment should use [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md) rather than copying reference-instance roles/capabilities.
 
-- the core architecture has been implemented and functionally validated once;
-- the employee client path has passed a real local demo;
-- reusable Profile/configuration/security rules exist;
-- a deployment Golden Path now consolidates the steps that previously required multiple follow-up instructions;
-- tested deployment adapters and operational scripts exist for the validated reference environment.
+## Repository self-check
+
+Without installing anything:
+
+```sh
+sh scripts/repository-readiness-check.sh
+```
+
+This checks that the deployment contracts, capability registry, core adapters, conditional playbooks, acceptance gates, state template, and production-control helpers are structurally present.
+
+It does **not** replace real runtime acceptance.
+
+## Documentation map
+
+| Document | Purpose |
+| --- | --- |
+| [`AGENTS.md`](AGENTS.md) | AI agent operating contract |
+| [`DEPLOY.md`](DEPLOY.md) | deployment execution Golden Path |
+| [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | Core/Configured/Production readiness semantics |
+| [`config/company.example.yaml`](config/company.example.yaml) | generic company desired-state schema |
+| [`config/capabilities.yaml`](config/capabilities.yaml) | capability implementation/acceptance registry |
+| [`config/validated-stack.yaml`](config/validated-stack.yaml) | validated core version baseline |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | component responsibilities/boundaries |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | detailed deployment reference |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | trust/secrets/least-privilege rules |
+| [`docs/PROFILE-STANDARD.md`](docs/PROFILE-STANDARD.md) | Hermes Profile design/governance |
+| [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) | WeKnora knowledge governance |
+| [`docs/CLIENT-RBAC.md`](docs/CLIENT-RBAC.md) | employee identity/group/Assistant mapping |
+| [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) | readiness evidence suite |
+| [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md) | production recovery controls |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | routine operations/troubleshooting |
+| [`docs/UPGRADE.md`](docs/UPGRADE.md) | version/upgrade discipline |
+| [`infrastructure/README.md`](infrastructure/README.md) | adapter/playbook policy and map |
+| [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md) | clean fresh-deployment state format |
+
+## Project status
+
+The repository now contains:
+
+- a validated core architecture and employee workflow;
+- machine-readable core version baseline;
+- agent deployment Golden Path;
+- explicit Core/Configured/Production readiness semantics;
+- machine-readable capability closure registry;
+- core WeKnora/Hermes/Open WebUI adapters;
+- generic specialist Profile templates;
+- playbooks for hermes-webui, Codex/Claude Code, Kanban, Cron, messaging, remote access, and SSO;
+- production backup/restore/health controls;
+- conditional acceptance gates;
+- a clean fresh-deployment state template;
+- static repository deployability self-check.
 
 Still not claimed:
 
-- a generic one-command installer;
-- fully autonomous fresh-host deployment validation after the Golden Path consolidation;
-- production readiness for every host/platform/provider combination;
-- automatic configuration of every optional integration.
+- a universal one-command installer/compiler;
+- empirical proof that a completely new AI agent has already executed the newly consolidated full path on a second clean host;
+- pre-validation of every possible vendor-specific IdP, messaging provider, model provider, host OS, or private-access service.
 
-The next real fresh-host deployment should be used as the next end-to-end validation opportunity rather than reinstalling solely for testing.
+Those are not excuses for manual routine prompting. During a real deployment, the agent must follow the repository until it reaches the requested readiness level, asks only for genuine external authority/input, or reports a specific failure.
 
-## Reference implementation: ARMOR
+The next real fresh-host deployment is the appropriate end-to-end empirical validation; there is no need to reinstall a working demo solely to produce that evidence.
 
-ARMOR is the first company using this architecture as a real deployment target.
+## ARMOR reference
 
-See [`reference/armor/README.md`](reference/armor/README.md).
-
-Company-specific configuration should remain in the appropriate private/protected deployment layer rather than becoming generic defaults in this public repository.
+ARMOR-specific design/lessons live under [`reference/armor/`](reference/armor/). Reference material must not override the generic deployment contract or another adopter's configuration.
 
 ## What this project is not
 
 This project is not intended to become:
 
 - a new RAG engine;
-- a new general-purpose Agent framework;
-- a replacement for WeKnora;
-- a fork of Hermes Agent;
-- a fork of Open WebUI;
-- a clone of Codex or Claude Code;
-- an architecture that adds a new service for every possible feature.
+- a new Agent framework;
+- a WeKnora/Hermes/Open WebUI fork;
+- a clone of Codex/Claude Code;
+- a component collection where every possible feature is installed.
 
-The value of this repository is the integration architecture, deployment contract, governance, reusable configuration, validated adapters, and operating standard around mature upstream projects.
+Its value is the integration architecture, capability-driven desired state, agent execution contract, thin upstream adapters/playbooks, security/recovery standards, acceptance evidence, and operating discipline around mature projects.
 
 ## License
 
 This repository is licensed under the **Apache License 2.0**. See [`LICENSE`](LICENSE).
 
-Independent upstream software keeps its own license and terms. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before distributing or rebranding a deployment.
+Independent upstream software retains its own licenses/terms. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before distribution or rebranding.
