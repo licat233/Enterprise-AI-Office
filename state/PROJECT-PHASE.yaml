@@ -21,6 +21,10 @@ blueprint_lifecycle:
   implicit_transition_allowed: false
 
   system_design:
+    status: complete
+    completion_milestone: SYSTEM DESIGN COMPLETE
+    completed_on: 2026-09-06
+    transition_ready: true
     purpose: define what the Enterprise AI Office is and how its capabilities, authorities, workflows, security boundaries, and user experience should work
     allowed:
       - architecture and product design
@@ -33,8 +37,13 @@ blueprint_lifecycle:
       - offline tests and structural validation
       - acceptance criteria design
       - identify installation requirements that the later installation blueprint must satisfy
+    closure_note: >-
+      The v2 baseline System Design final review passed. Do not keep this phase
+      open for optional optimization or hardening. Advance to installation_design
+      only after explicit human direction.
 
   installation_design:
+    status: not_opened
     purpose: turn the approved system design into an agent-readable and agent-executable installation and acceptance blueprint
     allowed:
       - deployment architecture design
@@ -51,10 +60,12 @@ blueprint_lifecycle:
     note: installation_design does not authorize installation onto any real company system
 
   blueprint_validation:
+    status: not_opened
     purpose: prove that a fresh capable AI agent can understand the repository and reproduce the designed system on an explicitly approved clean validation target
     note: validation targets must be explicitly authorized and may be synthetic, isolated, or a designated test host; this phase does not imply production deployment
 
   release_ready:
+    status: not_opened
     purpose: declare that the repository sufficiently explains both the system design and installation path for adoption
 
 continuation_language:
@@ -80,6 +91,7 @@ real_deployment_task:
   requires_explicit_target: true
   must_not_be_inferred_from:
     - blueprint phase
+    - system design completion
     - installation plan existence
     - install scripts existence
     - provider selection
@@ -100,6 +112,7 @@ public_repository_data_policy:
 
 interpretation_rules:
   - The repository is a system-design and installation-blueprint product, not a live deployment record.
+  - The v2 baseline System Design milestone is complete while current_phase remains system_design until an explicit human transition occurs.
   - System design comes before installation design for a new release track unless the human explicitly changes that order.
   - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
   - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
