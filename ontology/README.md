@@ -1,10 +1,79 @@
 # Enterprise Ontology Schema Experiments
 
-Status: design-time experiments / non-runtime
+Status: design-time experiments / research phase closed / non-runtime
 
 This directory contains small machine-readable examples used to test the architecture contract in `docs/ONTOLOGY.md`.
 
 These files are **not** production runtime configuration. They do not authorize a new Ontology service, graph database, CRM/ERP/CMS integration, write capability, or Agent tool.
+
+## Current phase status
+
+The initial Ontology research/model-validation phase is complete.
+
+Current retained outputs are:
+
+```text
+docs/ONTOLOGY-RESEARCH.md          research findings
+docs/ONTOLOGY.md                   Enterprise Ontology Contract v0.3.0
+ontology/examples/sales-inquiry.yaml
+ontology/examples/content-publication.yaml
+scripts/validate-ontology.py       structural validator
+```
+
+The two experiments already demonstrated two concrete contract corrections:
+
+1. read/traversal authorization must close over the full data path, not only the entry-point object;
+2. approval for a mutable subject must bind to the exact version/state it authorizes and must be revalidated before the governed side effect executes.
+
+The experiments also produced repeated mechanical schema-drift defects, which justified the lightweight structural validator.
+
+There is currently no demonstrated requirement for:
+
+```text
+an Ontology Runtime
+a graph database
+a reasoning engine
+a third speculative domain example
+a generic CRM/ERP/CMS adapter
+a new Agent platform
+```
+
+Do not continue expanding Ontology merely for conceptual completeness.
+
+## Reactivation trigger
+
+Resume Ontology implementation work only when a real Enterprise AI Office capability creates an operational requirement that the current stack cannot safely express or enforce by itself.
+
+The primary trigger is a real integration that allows an Agent to change external business state, for example through:
+
+```text
+CRM
+ERP
+PIM
+CMS
+email / customer communication
+social publishing
+another operational business system
+```
+
+A read-only integration does not automatically require an Ontology Runtime. It may still justify contract work when cross-system Object visibility, traversal authorization, or business semantics cannot be safely preserved by the upstream system plus existing Enterprise AI Office RBAC/Profile boundaries.
+
+When a trigger exists, do not start by selecting a graph database or building a runtime. First close the integration through the existing repository architecture process:
+
+```text
+real business requirement
+→ inspect the exact upstream system and supported API/MCP/action model
+→ declare company deployment intent
+→ register/extend the capability in config/capabilities.yaml
+→ identify Objects / Relations / Authority / Visibility / Reads / Actions actually required
+→ define trusted actor/credential/tool boundaries
+→ define acceptance tests and deployment-state evidence
+→ decide whether upstream enforcement is sufficient
+→ use a thin deterministic gate only if needed
+→ introduce a larger Ontology/runtime component only if the prior options are insufficient
+```
+
+Do not create a generic placeholder `operational_integration` capability just to reserve architecture for the future. Add a capability only when a concrete integration is actually selected.
 
 ## Purpose
 
@@ -75,7 +144,7 @@ The second experiment also exposed a dangling reference in an idempotency expres
 
 ## Structural validator
 
-The repository now includes:
+The repository includes:
 
 ```text
 scripts/validate-ontology.py
