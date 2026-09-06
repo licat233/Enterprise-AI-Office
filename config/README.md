@@ -74,6 +74,36 @@ exact target state
 
 An enabled capability must be implemented and accepted before `CONFIGURED READY` can be claimed. A disabled capability must not be instantiated merely because its playbook exists.
 
+### Adding a future operational integration
+
+Do not predeclare generic CRM, ERP, CMS, email, social-publishing, or `operational_integration` capabilities merely to reserve architecture for future work.
+
+When a company actually selects a new enterprise integration, first represent the real deployment intent in the protected company configuration and then add or extend a corresponding conditional capability in `config/capabilities.yaml`.
+
+If the integration exposes governed business objects, cross-object reads, or any operation that can change business state, its capability closure must also reference the applicable Enterprise Ontology contract in `docs/ONTOLOGY.md` and resolve the real operational boundary rather than inventing placeholders.
+
+At minimum, the new capability should close:
+
+```text
+real business purpose
+selected upstream system/version where relevant
+supported API / MCP / action surface
+System-of-Record / Authority boundary
+trusted human/service identity path
+Profile/tool/credential scope
+Object visibility and read/traversal authorization when applicable
+Named Actions and deterministic business preconditions when applicable
+approval semantics when applicable
+write-back / idempotency / reconciliation behavior when applicable
+required protected inputs
+acceptance tests
+state fields / audit evidence to record
+```
+
+A read-only integration does not automatically require an Ontology Runtime. A writable integration also does not automatically justify a graph database or separate Ontology service. Apply the normal upstream-first order and use the smallest enforcement mechanism that actually closes the real requirement.
+
+Until a concrete integration is selected, the Ontology research fixtures remain design-only and must not be treated as deployment debt or an enabled capability.
+
 ## `config/validated-stack.yaml`
 
 This records the first validated core stack and baseline feature flags in machine-readable form.
