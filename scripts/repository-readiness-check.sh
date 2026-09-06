@@ -94,6 +94,7 @@ for path in \
   infrastructure/coding-agents/README.md \
   infrastructure/coding-agents/technical-profile.config.example.yaml \
   infrastructure/hermes/features/README.md \
+  infrastructure/hermes/features/MESSAGING.md \
   infrastructure/access/README.md \
   infrastructure/access/OPEN-WEBUI-OIDC.md
 do
@@ -121,9 +122,11 @@ require_text config/company.example.yaml 'target_readiness:' 'Company config dec
 require_text config/company.example.yaml 'capabilities:' 'Company config declares optional capabilities'
 require_text config/capabilities.yaml 'infrastructure/weknora/PROVISIONING.md' 'Core capability has WeKnora provisioning path'
 require_text config/capabilities.yaml 'infrastructure/open-webui/PROVISIONING.md' 'Core capability has Open WebUI provisioning path'
+require_text config/capabilities.yaml 'infrastructure/hermes/features/MESSAGING.md' 'Messaging capability has pinned execution path'
 require_text config/capabilities.yaml 'infrastructure/access/OPEN-WEBUI-OIDC.md' 'SSO capability has pinned OIDC execution path'
 require_text infrastructure/weknora/PROVISIONING.md '"capabilities": ["retrieve"]' 'WeKnora contract scopes runtime retrieval key'
 require_text infrastructure/weknora/PROVISIONING.md 'BLOCKED — MIGRATION REQUIRED' 'WeKnora contract blocks unsafe embedding drift'
+require_text infrastructure/hermes/features/MESSAGING.md 'hermes gateway setup' 'Messaging contract uses native Hermes setup'
 require_text config/capabilities.yaml 'technical-profile.config.example.yaml' 'Coding capability has executable Profile template'
 require_text README.md 'CONFIGURED READY' 'README explains configured completeness'
 
