@@ -1,18 +1,29 @@
 # Tencent Enterprise Mail Integration
 
-Status: v2 implementation playbook / not enabled by documentation alone
+Status: v2 implementation playbook / Stage 1 read-only path only
 
-This playbook defines the smallest approved Enterprise AI Office integration path for Tencent Enterprise Mail (`腾讯企业邮箱`) under `docs/V2-SCOPE.md`.
+This playbook defines the smallest approved Enterprise AI Office integration path for Tencent Enterprise Mail (`腾讯企业邮箱`) under the frozen v2 design.
 
-It is provider-specific because the real provider is now known. It does not authorize any mailbox credential, mailbox access, or outbound message by itself.
+Use with:
+
+- `docs/V2-SCOPE.md`
+- `docs/V2-EMAIL-DESIGN.md`
+- `docs/V2-DESIGN-REVIEW.md`
+- `docs/V2-IMPLEMENTATION-PLAN.md`
+- `docs/V2-IMPLEMENTATION-STATUS.md`
+- `docs/ONTOLOGY.md`
+- `ontology/examples/email-communication.yaml`
+- `docs/acceptance/TENCENT-EXMAIL.md`
+
+This document does not itself authorize any mailbox credential, mailbox access, or outbound message.
 
 ## 1. Provider capabilities relevant to v2
 
-Current Tencent Enterprise Mail documentation exposes two different integration surfaces that must not be confused.
+Tencent Enterprise Mail exposes two integration surfaces that must not be confused.
 
 ### Mailbox protocols
 
-For actual mailbox content access and ordinary sending, Tencent Enterprise Mail documents encrypted mail-client protocols:
+For actual mailbox-content access and ordinary sending, Tencent Enterprise Mail documents encrypted mail-client protocols:
 
 ```text
 IMAP over SSL:  imap.exmail.qq.com:993
@@ -26,51 +37,108 @@ IMAP over SSL:  hwimap.exmail.qq.com:993
 SMTP over SSL:  hwsmtp.exmail.qq.com:465
 ```
 
-Do not select overseas endpoints merely because they exist. Use the endpoint appropriate to the real deployment network and verify it during acceptance.
+Do not select the overseas endpoints merely because they exist. Use the endpoint appropriate to the real deployment network and verify it during runtime acceptance.
 
-If mailbox security login is enabled, mail clients use a client-specific password rather than treating the interactive Web-login flow as an automation credential.
+If mailbox security login is enabled, use the provider-supported client-specific password/credential rather than treating the interactive Web-login flow as an automation credential.
 
 ### Enterprise Mail Open API
 
-Tencent Enterprise Mail also exposes an enterprise Open API based on `CorpID` / application `CorpSecret` / short-lived access token.
-
-The currently documented API categories are primarily:
+Tencent Enterprise Mail also exposes enterprise Open API capabilities around areas such as:
 
 ```text
-address-book management
+address book
 new-mail notification / unread count
 single sign-on
 system/mail logs
 feature settings
 ```
 
-The documented `log/mail` query returns mail-log metadata such as subject, sender, receiver, timestamp, and status. New-mail callback payloads expose metadata such as MailID, sender, title, time, and unread count.
+These interfaces may later be useful for event notification or audit correlation, but they are not the primary Stage 1 mechanism for reading message bodies and are not required for the initial read-only pilot.
 
-These interfaces are useful for optional event notification, administration, or audit correlation, but they are not a substitute for IMAP when Enterprise AI Office needs authorized access to message bodies, nor are they the primary v2 sending mechanism.
+Do not grant a company-wide Open API credential merely to read one mailbox.
 
-## 2. v2 integration decision
+## 2. Frozen v2 provider decision
 
-For the initial v2 operational loop:
+For the frozen v2 design:
 
 ```text
-mail body / thread read  → IMAP
-outbound send            → SMTP
-optional event metadata  → Tencent Enterprise Mail Open API callback/log API only if justified later
+message body/context read  → provider-supported mailbox read surface (initial candidate: IMAP)
+outbound send              → later governed provider binding (initial candidate: SMTP)
+optional event metadata    → Tencent Open API only if a concrete later requirement justifies it
 ```
+
+The protocol candidate does not override the business-operation contract.
 
 Do not introduce a generic mail automation platform, n8n, a second workflow engine, or a custom mail database merely to bridge Tencent Enterprise Mail.
 
-## 3. Credential boundary
+## 3. Stage 1 scope
 
-The first pilot must use exactly one explicitly selected mailbox.
+Current implementation stage:
 
-Preferred credential posture:
+> Read-only bounded email context.
+
+Approved Agent-facing operation surface:
+
+```text
+search_email
+get_email
+```
+
+Intentionally absent from Stage 1:
+
+```text
+send_approved_reply
+send_email
+generic_smtp_send
+generic_imap_command
+mailbox_delete
+mailbox_move
+mailbox_flag_write
+mailbox_folder_write
+bulk_send
+campaign_send
+```
+
+Stage 1 must not create any customer-facing side effect.
+
+## 4. Current read-only adapter
+
+Repository candidate:
+
+```text
+imap_readonly_mcp.py
+```
+
+It is deliberately narrow:
+
+```text
+configured mailbox only
+allowlisted folders only
+read-only mailbox selection
+UID SEARCH / FETCH
+BODY.PEEK-style message reads
+bounded result/body sizes
+attachment filenames only
+no attachment download
+no SMTP
+no arbitrary IMAP command
+```
+
+Email content is untrusted operational data and must not override system, Profile, security, tool, or approval policy.
+
+A future implementation may replace this adapter with a more mature upstream integration if that integration can enforce the same frozen operation/security contract with less maintenance.
+
+## 5. Credential boundary
+
+The first pilot uses exactly one explicitly selected mailbox.
+
+Preferred posture:
 
 ```text
 one pilot mailbox
 → mailbox-specific client credential / client-specific password when available
 → protected runtime secret storage
-→ only the authorized Hermes Profile/integration process receives it
+→ only the authorized integration/Profile boundary receives it
 ```
 
 Never commit or log:
@@ -83,175 +151,193 @@ access token
 SMTP/IMAP credential
 ```
 
-Do not grant a company-wide `CorpSecret` merely because v2 needs one mailbox's message body.
+The mailbox credential proves provider access. It does not prove which employee requested or approved an operation.
 
-A company-wide Open API credential may be introduced only if a specific API-backed requirement such as new-mail callback or mail-log correlation justifies it and its scope is separately reviewed.
+## 6. Read behavior
 
-## 4. Read path — read-only first
+Normal Agent reads must not mutate mailbox state as a side effect.
 
-The first runtime milestone is read-only mailbox access.
-
-The adapter/tool must be designed so normal Agent reads do not mutate mailbox state as a side effect.
-
-Prefer protocol behavior equivalent to:
+The current candidate implements behavior equivalent to:
 
 ```text
-select mailbox read-only (`EXAMINE` where supported)
-fetch message content without setting Seen (`BODY.PEEK` semantics)
+select mailbox read-only
+fetch content without setting Seen (`BODY.PEEK` semantics)
 no delete
 no move
 no flag mutation
 no folder creation
-no mailbox rule changes
+no mailbox-rule change
 ```
 
-Initial read operations should be narrow, for example:
+Initial folder scope should remain narrow (normally `INBOX`) until company configuration explicitly expands it.
 
-```text
-search_mail
-get_thread
-get_message
+Email is operational communication context, not authoritative company knowledge. Do not bulk-ingest the mailbox into WeKnora by default.
+
+## 7. Offline deterministic tests first
+
+Before using any real mailbox credential, run the repository-local deterministic tests:
+
+```sh
+uv run infrastructure/email/tencent-exmail/test_imap_readonly.py
 ```
 
-They must be constrained by configured mailbox/folder scope and Profile/human authorization.
-
-Email is operational communication data, not authoritative company knowledge. Do not bulk-ingest the mailbox into WeKnora by default.
-
-## 5. Draft path
-
-Draft generation does not itself require SMTP.
-
-The Agent may combine:
+These tests require no real mailbox. They verify the local Stage 1 safety contract:
 
 ```text
-authorized email/thread context
-+
-WeKnora company/product evidence
-+
-Profile/Sales Skill behavior
+folder allowlist fails closed
+mailbox selection is read-only
+search uses UID SEARCH/FETCH-only behavior
+message body fetch uses BODY.PEEK
+no write-capable email function exists in the adapter surface
 ```
 
-to prepare a proposed reply.
+A passing offline test does **not** prove provider authentication, employee authorization, or real non-mutating behavior against Tencent Enterprise Mail. It is only the first implementation gate.
 
-A proposed reply is not permission to send it.
-
-## 6. Send path — human approval required
-
-The initial v2 send operation must remain human-in-the-loop.
-
-A governed send must bind approval to the exact final outbound subject:
+Required progression:
 
 ```text
-from mailbox
+offline deterministic tests PASS
+→ protected real provider authorization available
+→ bounded runtime read-only acceptance
+→ Stage 1 PASS
+```
+
+Do not skip directly from source-code presence to real mailbox access.
+
+## 8. Hermes registration candidate
+
+Use:
+
+```text
+hermes.mcp.example.yaml
+```
+
+only as a registration template for an authorized Profile during runtime implementation.
+
+The template must expose only:
+
+```text
+search_email
+get_email
+```
+
+Do not add a generic mail protocol toolset.
+
+## 9. Frozen Ontology boundary
+
+The frozen initial v2 email model contains only:
+
+```text
+Mailbox       → source-backed by email provider
+EmailMessage  → source-backed by email provider
+DraftReply    → Enterprise AI Office owned
+SendApproval  → Enterprise AI Office owned
+```
+
+Policy-relevant relations:
+
+```text
+Mailbox contains EmailMessage
+DraftReply replies_to EmailMessage
+SendApproval authorizes DraftReply
+```
+
+The initial design deliberately does **not** create first-class:
+
+```text
+EmailThread
+Customer
+Contact
+Lead
+Opportunity
+CRM record
+Calendar event
+SendResult object
+FollowUp object
+```
+
+Provider result/reference belongs in action/audit evidence. Simple scheduled follow-up state belongs to Hermes Cron; persistent multi-step Agent work belongs to Kanban only when later justified.
+
+Do not expand the email Ontology into a shadow CRM.
+
+## 10. Draft and approval boundary
+
+Stage 2/3 later introduce:
+
+```text
+prepare_reply_draft
+approve_reply_draft
+```
+
+A proposed draft is not permission to send.
+
+Approval must bind to the exact material outbound subject:
+
+```text
+sender mailbox
 To
-Cc/Bcc if enabled
+Cc when enabled
 subject
 body
-attachments if later enabled
-reply/thread identity
+source/reply message identity
+draft revision/content hash or equivalent immutable evidence
 ```
 
-If any material outbound field changes after approval, the approval becomes stale and the send must require a new approval under `docs/ONTOLOGY.md`.
+If a material field changes after approval, the previous approval becomes stale.
 
-Initial scope should exclude bulk sending and autonomous campaign delivery.
+## 11. Governed send boundary
 
-Prefer one narrow Named Action such as:
+Stage 4 may later introduce exactly one initial external Named Action:
 
 ```text
 send_approved_reply
 ```
 
-rather than exposing a generic SMTP send primitive directly to the Agent.
+Do not expose generic SMTP/send-anything to ordinary Agents.
 
-## 7. Tool surface
-
-The preferred future Agent-facing surface is narrow:
+Before Stage 4, the implementation must close:
 
 ```text
-search_mail
-get_thread
-get_message
-send_approved_reply
-```
-
-Intentionally absent from the ordinary employee Profile surface:
-
-```text
-generic_imap_command
-generic_smtp_send
-mailbox_delete
-mailbox_move
-mailbox_flag_write
-mail_admin
-bulk_send
-```
-
-The actual implementation may use an existing supported MCP/mail component if one can enforce these boundaries. Otherwise use the smallest reviewable adapter needed for this provider.
-
-## 8. Ontology boundary
-
-This real writable integration reactivates Ontology work only for the objects/actions required by the email loop.
-
-Likely minimal concepts include:
-
-```text
-Mailbox
-EmailThread
-EmailMessage
-DraftReply
-SendApproval / approval evidence
-SendResult
-FollowUp
-```
-
-Do not expand this into CRM objects unless the real email workflow later requires CRM integration.
-
-Critical rules include:
-
-```text
-mailbox visibility
-thread/message read authorization
-exact approval-subject binding
 trusted human actor identity
-Named Action for send
-idempotency / uncertain-send handling
-audit linkage to provider result
+exact approval-subject binding
+provider send binding
+approval revalidation immediately before send
+provider result/reference capture
+ambiguous-result reconciliation
+audit evidence
 ```
 
-## 9. Failure and retry rules
+No autonomous customer-facing send is allowed in the initial v2 milestone.
 
-SMTP delivery attempts are external side effects.
+## 12. Failure and retry rule
 
-The implementation must not blindly retry after an ambiguous transport failure if doing so could send the same customer message twice.
+Email sending is an external side effect.
 
-Before production use define:
+Do not assume exactly-once delivery and do not blindly retry an ambiguous provider outcome.
+
+Frozen behavior:
 
 ```text
-idempotency strategy where technically possible
-provider message/result evidence
-ambiguous-outcome handling
-manual reconciliation path
+ambiguous send result
+→ no blind retry
+→ reconciliation required
+→ inspect provider evidence
+→ human/deterministic decision before another send attempt
 ```
 
-If delivery outcome cannot be established safely:
+Duplicate avoidance is more important than automatic retry speed.
 
-```text
-BLOCKED / RECONCILIATION REQUIRED
-```
+## 13. Attachment policy
 
-is preferable to a duplicate customer email.
+Attachments are outside the initial v2 send milestone.
 
-## 10. Initial attachment policy
+Stage 1 reports attachment filenames only; it does not download attachment content.
 
-Attachments are outside the first send milestone unless a real pilot workflow requires them.
+If attachments are later enabled, they require a separate data-exfiltration/security review and must become part of the exact approval subject.
 
-If later enabled, attachment filename/type/size/content reference must become part of the approval subject and acceptance testing.
+## 14. Optional Tencent Open API use
 
-Do not silently expand from text reply to arbitrary file exfiltration.
-
-## 11. Optional Tencent Open API use
-
-Do not require the enterprise Open API for the initial IMAP/SMTP pilot.
+Do not require Tencent Enterprise Mail Open API for Stage 1.
 
 Evaluate it later only for a concrete need such as:
 
@@ -259,43 +345,65 @@ Evaluate it later only for a concrete need such as:
 new-mail event trigger
 unread-count signal
 mail-log delivery/status correlation
-mailbox protocol-setting inspection
+provider protocol-setting inspection
 ```
 
-If enabled, protect `CorpSecret`, validate callback signatures/encryption according to Tencent's callback contract, and record the additional authority/data boundary.
+If enabled later, protect `CorpSecret`, review application scope, validate callback authenticity/encryption where applicable, and record the additional authority boundary.
 
-## 12. Required company inputs before activation
+## 15. Required runtime inputs before real Stage 1 activation
 
-Before enabling this capability, the adopting company must supply or approve:
+A real mailbox connection requires protected company inputs/authority including:
 
 ```text
-selected pilot mailbox
+selected pilot mailbox authorization
 mailbox owner/business purpose
-authorized Hermes Profile(s)
 authorized human user/group scope
+authorized Hermes Profile
 allowed mailbox folders/read scope
-whether security login is enabled
 approved client-credential mechanism
-outbound-send approval policy
-initial recipient/test scope
-whether attachments are disabled (default) or explicitly required
+protected secret location
+actual runtime host access
+harmless known test message(s)
 ```
 
-Missing credentials/authority must produce `BLOCKED — REQUIRED INPUT`; do not substitute a broader company credential.
+Missing protected inputs must produce:
 
-## 13. Acceptance
+```text
+BLOCKED — REQUIRED INPUT: Stage 1 provider/runtime authorization
+```
 
-Use the `Tencent Enterprise Mail email integration` section in `docs/ACCEPTANCE-TESTS.md`.
+Do not substitute a broader company credential.
 
-A successful IMAP login or SMTP test alone is not acceptance. The employee authorization, non-mutating read behavior, approval binding, outbound result, credential isolation, and fail-closed behavior must all be demonstrated.
+## 16. Acceptance
 
-## 14. Provider references
+Use:
 
-Provider documentation reviewed for this playbook includes:
+```text
+docs/acceptance/TENCENT-EXMAIL.md
+```
 
-- Tencent Enterprise Mail client settings/help for IMAP/SMTP SSL endpoints and client-specific password behavior;
-- Tencent Enterprise Mail Open API index and access-token contract;
-- Tencent Enterprise Mail mail-log query contract;
-- Tencent Enterprise Mail new-mail callback/unread metadata contract.
+Stage 1 is not accepted merely because IMAP authentication succeeds.
 
-Re-check current provider documentation at implementation time because authentication and administration controls may change.
+Acceptance must demonstrate applicable boundaries including:
+
+```text
+authorized read succeeds
+unauthorized human/Profile read fails
+out-of-scope folder/mailbox access fails closed
+read-only behavior is preserved
+credentials remain protected
+real employee-client behavior is correct when the capability is exposed
+```
+
+Do not report `READ-ONLY EMAIL PASS` until both the repository-level deterministic tests and applicable real runtime checks have passed.
+
+## 17. Provider references
+
+Provider documentation reviewed for this playbook includes Tencent Enterprise Mail documentation for:
+
+- IMAP/SMTP SSL client settings and client-specific password behavior;
+- Open API access-token behavior;
+- mail-log query metadata;
+- new-mail callback/unread metadata.
+
+Re-check current provider documentation at runtime implementation because provider authentication and administration controls may change.

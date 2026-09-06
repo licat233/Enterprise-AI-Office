@@ -1,10 +1,10 @@
 # Enterprise Ontology Schema Experiments
 
-Status: design-time experiments / research phase closed / non-runtime
+Status: design-time experiments / research phase closed / runtime inactive
 
-This directory contains small machine-readable examples used to test the architecture contract in `docs/ONTOLOGY.md`.
+This directory contains small machine-readable examples used to test and apply the architecture contract in `docs/ONTOLOGY.md`.
 
-These files are **not** production runtime configuration. They do not authorize a new Ontology service, graph database, CRM/ERP/CMS integration, write capability, or Agent tool.
+These files are **not** production runtime configuration. They do not authorize a new Ontology service, graph database, CRM/ERP/CMS integration, mailbox credential, write capability, or Agent tool.
 
 ## Current phase status
 
@@ -17,34 +17,35 @@ docs/ONTOLOGY-RESEARCH.md          research findings
 docs/ONTOLOGY.md                   Enterprise Ontology Contract v0.3.0
 ontology/examples/sales-inquiry.yaml
 ontology/examples/content-publication.yaml
+ontology/examples/email-communication.yaml
 scripts/validate-ontology.py       structural validator
 ```
 
-The two experiments already demonstrated two concrete contract corrections:
+The first two experiments produced two concrete contract corrections:
 
 1. read/traversal authorization must close over the full data path, not only the entry-point object;
 2. approval for a mutable subject must bind to the exact version/state it authorizes and must be revalidated before the governed side effect executes.
 
 The experiments also produced repeated mechanical schema-drift defects, which justified the lightweight structural validator.
 
-There is currently no demonstrated requirement for:
+There is still no demonstrated requirement for:
 
 ```text
 an Ontology Runtime
 a graph database
 a reasoning engine
-a third speculative domain example
 a generic CRM/ERP/CMS adapter
 a new Agent platform
+additional speculative domain examples
 ```
 
 Do not continue expanding Ontology merely for conceptual completeness.
 
-## Reactivation trigger
+## Reactivation rule
 
-Resume Ontology implementation work only when a real Enterprise AI Office capability creates an operational requirement that the current stack cannot safely express or enforce by itself.
+Ontology design work resumes only when a real Enterprise AI Office capability creates an operational requirement that benefits from the contract.
 
-The primary trigger is a real integration that allows an Agent to change external business state, for example through:
+The primary trigger is a real integration that allows an Agent to read governed operational data or change external business state, for example through:
 
 ```text
 CRM
@@ -57,6 +58,14 @@ another operational business system
 ```
 
 A read-only integration does not automatically require an Ontology Runtime. It may still justify contract work when cross-system Object visibility, traversal authorization, or business semantics cannot be safely preserved by the upstream system plus existing Enterprise AI Office RBAC/Profile boundaries.
+
+The v2 `Communication & Follow-up` design is the first real reactivation of this contract after the research phase. It uses the selected email domain to model the minimum governed workflow under:
+
+```text
+ontology/examples/email-communication.yaml
+```
+
+This is not a speculative third domain. It exists because v2 selected a real operational email workflow. Runtime remains inactive until a later implementation/deployment decision explicitly opens that gate.
 
 When a trigger exists, do not start by selecting a graph database or building a runtime. First close the integration through the existing repository architecture process:
 
@@ -77,13 +86,17 @@ Do not create a generic placeholder `operational_integration` capability just to
 
 ## Purpose
 
-The experiments answer a narrow question:
+The examples answer two kinds of narrow question:
 
-> Can the Enterprise Ontology Contract express real business workflows clearly enough before Enterprise AI Office selects or builds any runtime?
+```text
+research examples
+→ Can the Enterprise Ontology Contract express a workflow clearly enough to expose contract defects?
 
-Current experiments:
+real capability design fixtures
+→ Can the same contract describe the minimum governed object/action surface for a selected Enterprise AI Office workflow before runtime implementation?
+```
 
-### Sales Inquiry
+### Sales Inquiry — research example
 
 ```text
 Customer
@@ -103,7 +116,7 @@ Main finding:
 
 > read/traversal authorization must close over the full data path, not only the entry-point object.
 
-### Content Publication
+### Content Publication — research example
 
 ```text
 ContentItem
@@ -125,7 +138,34 @@ Main finding:
 
 The second experiment also exposed a dangling reference in an idempotency expression during manual review. Combined with the authorization-closure mistake found in the first experiment, this provided concrete evidence for a lightweight structural validator.
 
-## Rules for experiments
+### Email Communication — v2 design fixture
+
+```text
+Mailbox
+   ↓ contains
+EmailMessage
+
+EmailMessage
+   ↑ replies_to
+DraftReply
+   ↑ authorized by
+SendApproval
+   ↓
+send_approved_reply
+```
+
+See:
+
+- `examples/email-communication.yaml`
+- `docs/V2-EMAIL-DESIGN.md`
+
+Design conclusion:
+
+> the first governed email loop can be represented with provider-backed Mailbox/EmailMessage plus EAO-owned DraftReply/SendApproval without introducing CRM, Calendar, a shadow mailbox database, or a dedicated Ontology Runtime.
+
+The fixture remains `runtime_enforcement: false` until later implementation authorization.
+
+## Rules for examples
 
 1. Model only concepts required by the selected workflow.
 2. Declare stable identity for every Object Type.
@@ -140,7 +180,8 @@ The second experiment also exposed a dangling reference in an idempotency expres
 11. Bind approval to exact subject evidence when a mutable subject can change after review.
 12. Treat unresolved real-system bindings as unresolved; do not invent runtime IDs, credentials, APIs, or tools.
 13. Keep authorization fail-closed.
-14. Do not treat an example as an active company policy.
+14. Do not treat an example as an active company policy or runtime authorization.
+15. Do not add another example unless a real capability or demonstrated contract defect justifies it.
 
 ## Structural validator
 
@@ -191,13 +232,13 @@ Business policy correctness remains a domain/human review responsibility.
 
 There is intentionally no fully frozen schema language yet.
 
-YAML is being used because it is reviewable, Git-friendly, and sufficient for the current design experiments. The validator is intentionally tolerant of optional fields and should grow only when another real example exposes a recurring mechanical defect.
+YAML is used because it is reviewable, Git-friendly, and sufficient for the current design work. The validator is intentionally tolerant of optional fields and should grow only when another real example exposes a recurring mechanical defect.
 
 Do not turn the validator into an Ontology Runtime, policy engine, database, code generator, or speculative schema framework.
 
 ## Runtime boundary
 
-Every current example must remain non-executable unless a later approved implementation decision defines:
+Every current example remains non-executable unless a later approved implementation decision defines all required runtime boundaries, including:
 
 ```text
 trusted actor identity propagation

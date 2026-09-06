@@ -39,6 +39,16 @@ Host target: company-managed machine
 
 Which optional capabilities and specialist Profiles ARMOR actually enables must come from its current private deployment configuration and real operating needs.
 
+## Current controlled expansion
+
+ARMOR is the first reference deployment for the v2 `Communication & Follow-up` milestone defined in `docs/V2-SCOPE.md`.
+
+The first provider-specific operational pilot is recorded in:
+
+- [`V2-EMAIL-PILOT.md`](V2-EMAIL-PILOT.md)
+
+The public reference may identify the selected provider and sanitized design decisions, but concrete employee/personal mailbox identifiers, runtime authorization, Profile binding, and protected secrets belong only in private deployment configuration.
+
 ## Profiles
 
 ARMOR does not derive Profiles from a generic department checklist.
@@ -70,12 +80,15 @@ Do not commit:
 
 - real API keys/passwords;
 - bot/OAuth secrets;
+- real employee/personal mailbox identifiers;
 - employee personal data;
 - customer secrets;
 - private contracts;
 - unrestricted internal documents;
 - sensitive production network details;
 - production `.env` files.
+
+Public tests/examples must use synthetic identities such as reserved example domains. Real identifiers belong in private company configuration only.
 
 ## Feedback loop
 

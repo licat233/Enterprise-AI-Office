@@ -42,6 +42,17 @@ Before making a material change, read the documents relevant to the task in this
 18. `state/CHANGELOG.md` when changing an existing deployment
 19. the relevant company/reference material under `reference/` when useful
 
+When the task is part of the current v2 Communication & Follow-up milestone, also read before mutation:
+
+```text
+docs/V2-SCOPE.md
+docs/V2-DESIGN-REVIEW.md
+docs/V2-IMPLEMENTATION-PLAN.md
+docs/V2-IMPLEMENTATION-STATUS.md
+```
+
+For v2 email work, additionally read the concrete provider capability paths referenced by `config/capabilities.yaml`, including the frozen email design/Ontology contract and provider-specific acceptance contract.
+
 For deployment tasks, `DEPLOY.md` is the execution contract. `docs/COMPLETENESS.md` defines what readiness means. `config/capabilities.yaml` maps enabled capabilities to implementation and acceptance paths.
 
 The root-level ARMOR v1 design document and content under `reference/` are non-normative reference material. They must not override `AGENTS.md`, `DEPLOY.md`, current generic standards, the adopting company's active configuration, or actual runtime state.
@@ -60,6 +71,8 @@ Do not silently replace the approved architecture.
 | Hermes administrative client | hermes-webui when enabled |
 | AI work roles | Hermes Profiles |
 | Knowledge bridge | WeKnora MCP / supported API |
+| Governed external business state | Selected provider/System of Record through an enabled narrow capability |
+| EAO-owned operational governance evidence | Capability/Ontology layer only where explicitly defined |
 | Durable agent work | Hermes Kanban when enabled |
 | Scheduled automation | Hermes Cron when enabled |
 | Coding execution | Codex + Claude Code when enabled |
@@ -75,6 +88,8 @@ Do not let multiple systems become authoritative for the same information class.
 - Company knowledge: WeKnora.
 - Agent identity/behavior: Hermes Profile configuration, SOUL, Skills, Tools, MCP.
 - Human identity and employee Web access: Open WebUI or the explicitly selected enterprise identity layer.
+- External operational business state: the selected provider/System of Record.
+- Enterprise AI Office-owned approval/draft/governance evidence: only where an approved capability/Ontology contract explicitly defines it.
 - Durable agent task state: Hermes Kanban when enabled.
 - Scheduled agent work: Hermes Cron when enabled.
 - Desired deployment state: active company deployment configuration.
@@ -112,6 +127,12 @@ Durable company facts belong in WeKnora. Do not duplicate product specifications
 
 Open WebUI is the baseline employee multi-user surface. hermes-webui is an administrative surface and must not be exposed as the ordinary employee portal.
 
+### Provider credential is not human authority
+
+A mailbox, API, or service credential proves access to a provider. It does not prove which employee requested or approved an operation.
+
+Governed external actions that require human authority must preserve trusted human identity/approval evidence separately from provider credentials.
+
 ## 6. Deployment readiness rule
 
 Every new deployment must have an explicit target readiness from company configuration:
@@ -131,6 +152,7 @@ Do not stop at `CORE READY` when the configured target is `CONFIGURED READY` or 
 Stop for human input only when execution genuinely requires external authority or information, such as:
 
 - missing protected credentials;
+- mailbox/provider authorization;
 - OS permission requiring human approval;
 - unresolved destructive conflict;
 - identity-provider/application registration;
@@ -167,6 +189,26 @@ If its implementation or acceptance fails, report the specific failed boundary.
 
 Disabled capabilities are not deployment debt and must not be enabled for completeness.
 
+### v2 staged implementation gate
+
+The current v2 milestone must follow `docs/V2-IMPLEMENTATION-PLAN.md` and the live repository-level status in `docs/V2-IMPLEMENTATION-STATUS.md`.
+
+Do not skip forward merely because later-stage design documents exist.
+
+In particular:
+
+```text
+Stage 1 read-only email
+→ deterministic adapter tests
+→ bounded real runtime acceptance
+→ READ-ONLY EMAIL PASS
+→ only then Stage 2 draft implementation
+```
+
+Customer-facing send remains unavailable until the later trusted-human approval stage passes and the governed send action is accepted.
+
+Do not create SMTP/send capability as a convenience while Stage 1 is unresolved.
+
 ## 8. Default deployment posture
 
 The first validated core reference path is:
@@ -180,7 +222,7 @@ Containers
 └── Open WebUI
 ```
 
-On the validated Apple Silicon macOS path, Hermes remains host-native. Optional administrative, coding, automation, messaging, identity, and access capabilities are added only when selected by company configuration.
+On the validated Apple Silicon macOS path, Hermes remains host-native. Optional administrative, coding, automation, messaging, identity, access, and operational integration capabilities are added only when selected by company configuration.
 
 ## 9. Upstream-first rule
 
@@ -195,6 +237,8 @@ For implementation choices use this order:
 Do not fork WeKnora, Hermes Agent, Open WebUI, or hermes-webui by default.
 
 For an optional capability not present in the first validated demo, inspect the exact selected upstream release before activation and record its version/commit where practical.
+
+Prototype code is not architecture authority. Re-check upstream capability at actual implementation time and keep a local prototype only when it remains the smallest correct implementation.
 
 ## 10. No feature-collection architecture
 
@@ -273,7 +317,7 @@ inspect → change → verify → record if material
 
 ### High risk
 
-Examples: embedding-model change, database/storage migration, core major upgrade, Profile privilege expansion, sensitive RBAC change, destructive knowledge operation.
+Examples: embedding-model change, database/storage migration, core major upgrade, Profile privilege expansion, sensitive RBAC change, destructive knowledge operation, enabling a provider credential with new external data/write authority.
 
 Flow:
 
@@ -288,6 +332,7 @@ Never commit or expose:
 - production `.env` credentials;
 - API keys;
 - database/cache passwords;
+- mailbox/client-specific passwords;
 - OAuth/client secrets;
 - messaging tokens;
 - SSH private keys;
@@ -305,15 +350,18 @@ Normal employee Profiles default to no unrestricted:
 - Docker/system control;
 - GitHub administration;
 - Codex/Claude Code delegation;
-- raw credential access.
+- raw credential access;
+- generic provider/admin mutation primitives.
 
-Grant stronger capabilities only to roles whose declared work requires them, with explicit workspace and credential boundaries.
+Grant stronger capabilities only to roles whose declared work requires them, with explicit workspace, provider, data, and credential boundaries.
 
 ## 18. Knowledge access rule
 
 Hermes should access WeKnora through supported MCP/API surfaces, not direct database coupling.
 
 Prefer direct read-oriented retrieval for straightforward knowledge work. Add another reasoning layer only when it solves a measured requirement.
+
+Operational email/provider data is not automatically authoritative company knowledge and must not be bulk-copied into WeKnora merely to simplify access.
 
 ## 19. User/Profile mapping rule
 
@@ -339,11 +387,11 @@ Open WebUI conversation history is independent and may remain enabled.
 
 Do not perform destructive operations based on inference alone.
 
-Explicit intent and appropriate backup are required for operations such as deleting production Knowledge Bases, Profiles, persistent volumes/databases, backup generations, unknown Git work, or irreversible migrations.
+Explicit intent and appropriate backup are required for operations such as deleting production Knowledge Bases, Profiles, persistent volumes/databases, backup generations, unknown Git work, irreversible migrations, or destructive provider operations.
 
 ## 22. Documentation synchronization
 
-When architecture, deployment, Profile policy, RBAC, network exposure, backup, upgrade behavior, capability registry, or upstream integration changes materially, update the corresponding documentation/registry in the same change.
+When architecture, deployment, Profile policy, RBAC, network exposure, backup, upgrade behavior, capability registry, upstream integration, Ontology operation contract, or current v2 implementation stage changes materially, update the corresponding documentation/registry in the same change.
 
 Do not allow runtime reality or machine-readable capability contracts to drift silently from prose standards.
 
@@ -365,11 +413,13 @@ Never use vague `complete` without naming the achieved readiness level.
 
 ## 24. Acceptance discipline
 
-Use `docs/ACCEPTANCE-TESTS.md` according to actual enabled capabilities.
+Use `docs/ACCEPTANCE-TESTS.md` and provider-specific acceptance documents according to actual enabled capabilities.
 
 Do not instantiate an optional feature to satisfy a test section. Conversely, do not skip the test for a capability that the company configuration enabled.
 
-Evidence matters more than configuration intent: test the real employee client, actual MCP retrieval, actual authorization boundary, actual harmless Cron/Kanban/coding run when enabled, and actual restore for Production Ready.
+Evidence matters more than configuration intent: test the real employee client, actual MCP retrieval, actual authorization boundary, actual provider behavior for enabled operational integrations, actual harmless Cron/Kanban/coding run when enabled, and actual restore for Production Ready.
+
+Offline/unit tests are necessary where defined but do not replace provider/runtime authorization tests.
 
 ## 25. Upstream mismatch rule
 

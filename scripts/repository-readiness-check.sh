@@ -61,6 +61,12 @@ for path in \
   docs/BACKUP-RESTORE.md \
   docs/OPERATIONS.md \
   docs/UPGRADE.md \
+  docs/V2-SCOPE.md \
+  docs/V2-EMAIL-DESIGN.md \
+  docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md \
+  docs/V2-DESIGN-REVIEW.md \
+  docs/V2-IMPLEMENTATION-PLAN.md \
+  docs/V2-IMPLEMENTATION-STATUS.md \
   config/company.example.yaml \
   config/capabilities.yaml \
   config/validated-stack.yaml \
@@ -97,7 +103,14 @@ for path in \
   infrastructure/hermes/features/MESSAGING.md \
   infrastructure/hermes/features/EMPLOYEE-MEMORY.md \
   infrastructure/access/README.md \
-  infrastructure/access/OPEN-WEBUI-OIDC.md
+  infrastructure/access/OPEN-WEBUI-OIDC.md \
+  infrastructure/email/tencent-exmail/README.md \
+  infrastructure/email/tencent-exmail/imap_readonly_mcp.py \
+  infrastructure/email/tencent-exmail/imap.env.example \
+  infrastructure/email/tencent-exmail/hermes.mcp.example.yaml \
+  infrastructure/email/tencent-exmail/test_imap_readonly.py \
+  docs/acceptance/TENCENT-EXMAIL.md \
+  ontology/examples/email-communication.yaml
 do
   require_file "$path"
 done
@@ -121,11 +134,22 @@ require_text docs/ACCEPTANCE-TESTS.md 'Enterprise identity / SSO' 'Acceptance co
 require_text docs/ACCEPTANCE-TESTS.md 'Hermes administrative Web UI' 'Acceptance covers hermes-webui when enabled'
 require_text config/company.example.yaml 'target_readiness:' 'Company config declares readiness target'
 require_text config/company.example.yaml 'capabilities:' 'Company config declares optional capabilities'
+require_text config/company.example.yaml 'send_requires_human_approval: true' 'Email config defaults to human-approved sends'
 require_text config/capabilities.yaml 'infrastructure/weknora/PROVISIONING.md' 'Core capability has WeKnora provisioning path'
 require_text config/capabilities.yaml 'infrastructure/open-webui/PROVISIONING.md' 'Core capability has Open WebUI provisioning path'
 require_text config/capabilities.yaml 'infrastructure/hermes/features/MESSAGING.md' 'Messaging capability has pinned execution path'
 require_text config/capabilities.yaml 'infrastructure/hermes/features/EMPLOYEE-MEMORY.md' 'Employee memory capability has fail-closed gate'
 require_text config/capabilities.yaml 'infrastructure/access/OPEN-WEBUI-OIDC.md' 'SSO capability has pinned OIDC execution path'
+require_text config/capabilities.yaml 'email_tencent_exmail:' 'Capability registry contains Tencent Exmail integration'
+require_text config/capabilities.yaml 'infrastructure/email/tencent-exmail/imap_readonly_mcp.py' 'Email capability has read-only adapter path'
+require_text config/capabilities.yaml 'docs/acceptance/TENCENT-EXMAIL.md' 'Email capability has provider acceptance path'
+require_text config/capabilities.yaml 'ontology/examples/email-communication.yaml' 'Email capability has ontology design fixture'
+require_text infrastructure/email/tencent-exmail/imap_readonly_mcp.py 'readonly=True' 'Email adapter opens mailbox read-only'
+require_text infrastructure/email/tencent-exmail/imap_readonly_mcp.py 'BODY.PEEK[]' 'Email adapter uses non-Seen body fetch'
+require_text infrastructure/email/tencent-exmail/test_imap_readonly.py 'test_folder_scope_fails_closed' 'Email adapter has fail-closed folder test'
+require_text infrastructure/email/tencent-exmail/test_imap_readonly.py 'test_get_email_uses_body_peek' 'Email adapter has BODY.PEEK safety test'
+require_text docs/V2-DESIGN-REVIEW.md 'V2 DESIGN STATUS: FROZEN' 'v2 design remains frozen'
+require_text docs/V2-IMPLEMENTATION-STATUS.md 'V2 PHASE: DESIGN' 'v2 remains in design phase'
 require_text infrastructure/weknora/PROVISIONING.md '"capabilities": ["retrieve"]' 'WeKnora contract scopes runtime retrieval key'
 require_text infrastructure/weknora/PROVISIONING.md 'BLOCKED — MIGRATION REQUIRED' 'WeKnora contract blocks unsafe embedding drift'
 require_text infrastructure/hermes/features/MESSAGING.md 'hermes gateway setup' 'Messaging contract uses native Hermes setup'

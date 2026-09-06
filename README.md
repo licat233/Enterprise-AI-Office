@@ -23,11 +23,17 @@ For deployment or deployment planning, use this order:
 7. referenced infrastructure playbooks/adapters.
 8. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) — evidence gates.
 
-When the task is specifically to extend a stable v1 deployment into the current v2 milestone, also read [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) before adding capabilities or integrations.
+When the task is specifically about the current v2 milestone, also read:
+
+1. [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md)
+2. [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md)
+3. [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md)
+4. [`docs/V2-IMPLEMENTATION-STATUS.md`](docs/V2-IMPLEMENTATION-STATUS.md)
+5. the provider-specific capability artifacts referenced by `config/capabilities.yaml`
 
 The intended interaction is one deployment request, not a sequence of prompts reminding the agent to connect WeKnora, create Profiles, configure RBAC, implement an already-enabled optional capability, test the employee client, or record state.
 
-Human input remains legitimate for things an agent cannot invent or authorize: model/API credentials, OS permission approval, IdP/app registration, enterprise messaging credentials, private-access authority, destructive conflicts, and real company business choices missing from configuration.
+Human input remains legitimate for real deployment tasks that require authority the agent cannot invent: model/API credentials, mailbox/client credentials, OS permission approval, IdP/app registration, enterprise messaging credentials, private-access authority, destructive conflicts, and real company business choices missing from configuration.
 
 ## What does “complete” mean?
 
@@ -109,6 +115,7 @@ Optional capability playbooks are available for company-selected needs such as:
 | Kanban | `infrastructure/hermes/features/` |
 | Cron | `infrastructure/hermes/features/` |
 | Enterprise messaging | `infrastructure/hermes/features/` |
+| Tencent Enterprise Mail | `infrastructure/email/tencent-exmail/` when selected |
 | Remote/private access | `infrastructure/access/` |
 | SSO / enterprise identity | `infrastructure/access/` |
 | Employee long-term memory | Profile/RBAC isolation rules and acceptance gate |
@@ -119,27 +126,49 @@ An enabled capability cannot be silently skipped to reach a green result. A disa
 
 ## Current v2 milestone
 
-The current controlled expansion milestone is defined in [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md):
+The current controlled expansion milestone is:
 
 > **Communication & Follow-up**
 
-Its purpose is to prove one governed operational work loop on top of the stable v1 knowledge/agent foundation.
-
-The initial v2 scope is intentionally narrow:
+Frozen design:
 
 ```text
-one real email integration
+one governed email operational loop
 +
-at most one company-selected messaging surface
+Open WebUI remains primary employee surface
 +
-Hermes-native follow-up automation
+optional one messaging surface later
 +
-Ontology governance where the real read/write boundary requires it
+Hermes-native follow-up automation only after the email loop is proven
++
+Ontology governance for the real read/write boundary
 ```
 
-v2 does **not** reopen the entire deferred-feature list. CRM, ERP, Calendar, employee long-term memory, n8n, extra vector databases, local-LLM infrastructure, graph databases, and broad autonomous external actions remain outside the initial milestone unless a concrete blocking requirement justifies a separate decision.
+The design review is PASS and frozen. **v2 is currently still in the design stage; real implementation/deployment is not authorized.** [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) is the future staged implementation blueprint, not the current execution state.
 
-Provider-specific implementation begins only after the adopting company identifies and authorizes its real email system. Do not design against an imaginary provider merely to make progress.
+Current design/prototype state:
+
+```text
+provider selected for ARMOR reference design: Tencent Enterprise Mail
+future Stage 1 surface: search_email + get_email
+read-only adapter/test/playbook: present as design-support prototypes
+real provider runtime: not activated
+mailbox credentials: not required now
+SMTP/customer-facing send: not implemented or authorized
+```
+
+See [`docs/V2-IMPLEMENTATION-STATUS.md`](docs/V2-IMPLEMENTATION-STATUS.md) for the current design/prototype evidence status.
+
+The candidate Stage 1 Agent-facing surface is deliberately limited to:
+
+```text
+search_email
+get_email
+```
+
+Offline deterministic tests may be used during design to prove that the proposed adapter can remain read-only. They do not create a requirement to connect a mailbox. Real mailbox credentials, Profile binding, IMAP runtime acceptance, and SMTP are deferred until ARMOR explicitly opens a future implementation/deployment gate.
+
+v2 does **not** reopen the entire deferred-feature list. CRM, ERP, Calendar, employee long-term memory, n8n, extra vector databases, local-LLM infrastructure, graph databases, broad autonomous external actions, and multiple messaging platforms remain outside the initial milestone unless a concrete blocking requirement justifies a separate decision.
 
 ## Reference architecture
 
@@ -151,6 +180,7 @@ Provider-specific implementation begins only after the adopting company identifi
 | Hermes Admin Client | **hermes-webui** when enabled | Privileged Hermes administration |
 | AI Work Roles | **Hermes Profiles** | Role/capability boundaries |
 | Knowledge Bridge | **WeKnora MCP / supported API** | Hermes-to-knowledge integration |
+| Governed Operational Integrations | provider-specific capability when enabled | Narrow business reads/actions under capability/Ontology/security contract |
 | Durable Agent Work | **Hermes Kanban** when enabled | Persistent multi-Agent task coordination |
 | Automation | **Hermes Cron** when enabled | Scheduled Agent work |
 | Coding Execution | **Codex + Claude Code** when enabled | Specialist software engineering |
@@ -166,6 +196,8 @@ Provider-specific implementation begins only after the adopting company identifi
 | Company knowledge | WeKnora |
 | Agent behavior/role config | Hermes Profiles / SOUL / Skills / Tools / MCP |
 | Employee Web identity/access | Open WebUI / selected enterprise identity layer |
+| External business-system state | selected provider/System of Record |
+| EAO-owned operational governance evidence | Enterprise AI Office capability/Ontology layer where explicitly defined |
 | Durable Agent tasks | Hermes Kanban when enabled |
 | Scheduled work | Hermes Cron when enabled |
 | Desired deployment | active company configuration |
@@ -256,9 +288,9 @@ Without installing anything:
 sh scripts/repository-readiness-check.sh
 ```
 
-This checks that the deployment contracts, capability registry, core adapters, conditional playbooks, acceptance gates, state template, and production-control helpers are structurally present.
+This checks that the deployment contracts, capability registry, core adapters, conditional playbooks, v2 email design-support artifacts, acceptance gates, state template, and production-control helpers are structurally present.
 
-It does **not** replace real runtime acceptance.
+It does **not** authorize implementation or replace deterministic adapter execution or real runtime acceptance when a future deployment begins.
 
 ## Documentation map
 
@@ -267,7 +299,12 @@ It does **not** replace real runtime acceptance.
 | [`AGENTS.md`](AGENTS.md) | AI agent operating contract |
 | [`DEPLOY.md`](DEPLOY.md) | deployment execution Golden Path |
 | [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | Core/Configured/Production readiness semantics |
-| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | current controlled v2 Communication & Follow-up milestone |
+| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | controlled v2 Communication & Follow-up scope |
+| [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md) | frozen governed email business/authority design |
+| [`docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md`](docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md) | employee entry and follow-up boundaries |
+| [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md) | frozen v2 architecture review |
+| [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) | future staged implementation blueprint; implementation not currently authorized |
+| [`docs/V2-IMPLEMENTATION-STATUS.md`](docs/V2-IMPLEMENTATION-STATUS.md) | current v2 design/prototype evidence and phase boundary |
 | [`config/company.example.yaml`](config/company.example.yaml) | generic company desired-state schema |
 | [`config/capabilities.yaml`](config/capabilities.yaml) | capability implementation/acceptance registry |
 | [`config/validated-stack.yaml`](config/validated-stack.yaml) | validated core version baseline |
@@ -279,6 +316,7 @@ It does **not** replace real runtime acceptance.
 | [`docs/CLIENT-RBAC.md`](docs/CLIENT-RBAC.md) | employee identity/group/Assistant mapping |
 | [`docs/ONTOLOGY.md`](docs/ONTOLOGY.md) | operational object/read/action governance contract |
 | [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) | readiness evidence suite |
+| [`docs/acceptance/TENCENT-EXMAIL.md`](docs/acceptance/TENCENT-EXMAIL.md) | provider-specific governed email acceptance design |
 | [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md) | production recovery controls |
 | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | routine operations/troubleshooting |
 | [`docs/UPGRADE.md`](docs/UPGRADE.md) | version/upgrade discipline |
@@ -302,16 +340,19 @@ The repository now contains:
 - a clean fresh-deployment state template;
 - static repository deployability self-check;
 - an Enterprise Ontology design/governance contract plus structural validator;
-- a scope-frozen v2 Communication & Follow-up milestone awaiting selection/authorization of the real email provider before provider-specific implementation begins.
+- a frozen v2 Communication & Follow-up design;
+- Tencent Enterprise Mail provider research plus read-only prototype/test artifacts retained to reduce future implementation uncertainty.
 
 Still not claimed:
 
 - a universal one-command installer/compiler;
 - empirical proof that a completely new AI agent has already executed the newly consolidated full path on a second clean host;
 - pre-validation of every possible vendor-specific IdP, messaging provider, model provider, host OS, private-access service, or email provider;
-- completion of the v2 operational communication loop before a real email system is selected and accepted.
+- authorization to connect the ARMOR mailbox during the current design stage;
+- real Tencent Enterprise Mail Stage 1 runtime acceptance;
+- completion of the v2 draft/approval/send operational loop.
 
-Those are not excuses for manual routine prompting. During a real deployment, the agent must follow the repository until it reaches the requested readiness level, asks only for genuine external authority/input, or reports a specific failure.
+Those are not excuses for manual routine prompting during a real deployment. Once a deployment task is explicitly opened, the agent must follow the repository until it reaches the requested readiness level, asks only for genuine external authority/input, or reports a specific failure.
 
 The next real fresh-host deployment is the appropriate end-to-end empirical validation; there is no need to reinstall a working demo solely to produce that evidence.
 
