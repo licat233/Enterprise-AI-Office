@@ -222,6 +222,8 @@ read_operations:
       trusted_human_identity: required
       entitlements:
         - sales.inquiry.read
+        - sales.customer.read
+        - sales.product.read
     filters:
       - Inquiry.status
       - Inquiry.created_at
@@ -266,6 +268,7 @@ actions:
       profile_capability: sales.follow_up
       entitlements:
         - sales.inquiry.read
+        - sales.customer.read
         - sales.follow_up.send
     preconditions:
       - id: inquiry-exists
@@ -417,6 +420,8 @@ experiment_findings:
       The contract requires fail-closed authorization and mentions read scope in
       the first validation scenario, but it does not yet define a dedicated,
       machine-readable visibility/read-operation contract comparable to Named Actions.
+      The experiment also showed that a read operation must close over the visibility
+      requirements of every object it filters or traverses, not only its primary target.
     proposed_next_step: >-
       Review whether docs/ONTOLOGY.md should formally add Object Visibility and
       Read Operation requirements before freezing any schema.
