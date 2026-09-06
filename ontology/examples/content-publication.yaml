@@ -1,0 +1,562 @@
+schema_version: "0.2.0"
+kind: enterprise-ontology-example
+
+metadata:
+  id: content-publication
+  version: "0.1.0"
+  status: design-example
+  normative: false
+  runtime_enforcement: false
+  source_contract: docs/ONTOLOGY.md
+  purpose: >-
+    Test whether the Enterprise Ontology Contract can express a narrow
+    draft -> review -> publish workflow, especially approval/version binding,
+    external publication effects, and stale-approval rejection, without
+    selecting or implementing an Ontology runtime.
+  policy_note: >-
+    Approval rules in this example are test fixtures for schema validation.
+    They are not an active company publishing policy.
+
+domain: content
+
+systems:
+  enterprise-ai-office:
+    role: ontology-owner
+    binding_status: design-only
+
+  cms:
+    role: system-of-record
+    binding_status: unresolved
+    note: Conceptual external publishing system only; no real integration is authorized by this file.
+
+objects:
+  ContentItem:
+    description: A draftable content artifact prepared for possible external publication.
+    identity:
+      primary_key: content_id
+      authority:
+        class: ontology-owned
+        system: enterprise-ai-office
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: marketing.content.read
+    properties:
+      content_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      title:
+        type: string
+        required: true
+        mutable: true
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      body:
+        type: string
+        required: true
+        mutable: true
+        sensitivity: prepublication-content
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      revision:
+        type: integer
+        required: true
+        mutable: true
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      content_hash:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: derived
+          inputs:
+            - ContentItem.title
+            - ContentItem.body
+            - ContentItem.revision
+          rule: stable_hash(title, body, revision)
+      lifecycle_state:
+        type: string
+        required: true
+        mutable: true
+        allowed_values:
+          - draft
+          - review_pending
+          - approved
+          - published
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      created_by_employee_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+
+  ReviewDecision:
+    description: An immutable human review decision bound to one exact content revision/hash.
+    identity:
+      primary_key: review_id
+      authority:
+        class: ontology-owned
+        system: enterprise-ai-office
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: marketing.content.review.read
+    properties:
+      review_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      content_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      content_revision:
+        type: integer
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      content_hash:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      decision:
+        type: string
+        required: true
+        mutable: false
+        allowed_values:
+          - approved
+          - rejected
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      reviewer_employee_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      decided_at:
+        type: datetime
+        required: true
+        mutable: false
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+
+  PublicationRecord:
+    description: The authoritative external publication result returned by the publishing system.
+    identity:
+      primary_key: publication_id
+      authority:
+        class: source-backed
+        system: cms
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: marketing.publication.read
+    properties:
+      publication_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: cms
+      content_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: cms
+      published_content_hash:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: cms
+      external_url:
+        type: string
+        required: false
+        mutable: false
+        authority:
+          class: source-backed
+          system: cms
+      published_at:
+        type: datetime
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: cms
+
+relations:
+  content_has_review:
+    from: ContentItem
+    to: ReviewDecision
+    predicate: has_review
+    cardinality: one-to-many
+    authority:
+      class: ontology-owned
+      system: enterprise-ai-office
+    read_requirements:
+      - entitlement: marketing.content.read
+      - entitlement: marketing.content.review.read
+
+  content_published_as:
+    from: ContentItem
+    to: PublicationRecord
+    predicate: published_as
+    cardinality: one-to-many
+    authority:
+      class: source-backed
+      system: cms
+    read_requirements:
+      - entitlement: marketing.content.read
+      - entitlement: marketing.publication.read
+
+read_operations:
+  get_content_for_review:
+    target: ContentItem
+    actor_requirements:
+      trusted_human_identity: required
+      entitlements:
+        - marketing.content.read
+        - marketing.content.review.read
+    projections:
+      - ContentItem.content_id
+      - ContentItem.title
+      - ContentItem.body
+      - ContentItem.revision
+      - ContentItem.content_hash
+      - ContentItem.lifecycle_state
+    traversals:
+      - content_has_review
+    result_visibility: object-visibility-policy
+    tool_binding:
+      status: unresolved
+      operation: enterprise-ai-office.get_content_for_review
+
+  get_publication_history:
+    target: ContentItem
+    actor_requirements:
+      trusted_human_identity: required
+      entitlements:
+        - marketing.content.read
+        - marketing.publication.read
+    traversals:
+      - content_published_as
+    result_visibility: object-visibility-policy
+    tool_binding:
+      status: unresolved
+      operation: cms.get_publication_history
+
+actions:
+  approve_content:
+    description: Record a human approval for one exact content revision and hash.
+    target: ContentItem
+    parameters:
+      content_id:
+        type: string
+        required: true
+      expected_revision:
+        type: integer
+        required: true
+      expected_content_hash:
+        type: string
+        required: true
+    actor_requirements:
+      trusted_human_identity: required
+      profile_capability: marketing.content.review
+      entitlements:
+        - marketing.content.read
+        - marketing.content.review
+    preconditions:
+      - id: content-exists
+        rule: ContentItem(content_id) exists
+        on_fail:
+          decision: deny
+          code: CONTENT_NOT_FOUND
+      - id: reviewable-state
+        rule: ContentItem.lifecycle_state == review_pending
+        on_fail:
+          decision: deny
+          code: CONTENT_NOT_REVIEW_PENDING
+      - id: exact-revision-match
+        rule: ContentItem.revision == expected_revision
+        on_fail:
+          decision: deny
+          code: CONTENT_REVISION_MISMATCH
+      - id: exact-hash-match
+        rule: ContentItem.content_hash == expected_content_hash
+        on_fail:
+          decision: deny
+          code: CONTENT_HASH_MISMATCH
+      - id: trusted-reviewer-resolved
+        rule: actor.employee_id is trusted and resolved
+        on_fail:
+          decision: blocked
+          code: ACTOR_UNRESOLVED
+    approval:
+      mode: explicit-human-approval
+      requirement: >-
+        The authenticated human reviewer explicitly approves the exact
+        revision/hash presented for review.
+      binding:
+        object_id: ContentItem.content_id
+        revision: ContentItem.revision
+        content_hash: ContentItem.content_hash
+      on_missing:
+        decision: deny
+        code: MISSING_HUMAN_APPROVAL
+    authority:
+      class: ontology-owned
+      system: enterprise-ai-office
+    tool_binding:
+      status: unresolved
+      operation: enterprise-ai-office.record_content_approval
+    effects:
+      - type: ontology-owned-mutation
+        object: ReviewDecision
+        description: Create an immutable approved ReviewDecision bound to the exact content revision/hash.
+      - type: ontology-owned-mutation
+        property: ContentItem.lifecycle_state
+        value: approved
+      - type: audit-event
+        description: Record actor, exact approved revision/hash, decision, and contract version.
+    failure_behavior:
+      idempotency_key: content_id + expected_revision + expected_content_hash + actor.employee_id
+      duplicate_same_approval: return-existing-decision
+      conflicting_reapproval: deny-or-require-new-review
+    audit:
+      enabled: true
+      record:
+        - timestamp
+        - human_actor_id
+        - profile_actor_id
+        - action
+        - target_id
+        - approved_revision
+        - approved_content_hash
+        - decision
+        - reason_code
+        - contract_version
+
+  publish_content:
+    description: Publish only content whose current revision/hash exactly matches a valid human approval.
+    target: ContentItem
+    parameters:
+      content_id:
+        type: string
+        required: true
+      expected_revision:
+        type: integer
+        required: true
+      expected_content_hash:
+        type: string
+        required: true
+    actor_requirements:
+      trusted_human_identity: required
+      profile_capability: marketing.publish
+      entitlements:
+        - marketing.content.read
+        - marketing.content.review.read
+        - marketing.publish
+    preconditions:
+      - id: content-exists
+        rule: ContentItem(content_id) exists
+        on_fail:
+          decision: deny
+          code: CONTENT_NOT_FOUND
+      - id: content-approved-state
+        rule: ContentItem.lifecycle_state == approved
+        on_fail:
+          decision: deny
+          code: CONTENT_NOT_APPROVED
+      - id: current-revision-match
+        rule: ContentItem.revision == expected_revision
+        on_fail:
+          decision: deny
+          code: CONTENT_REVISION_MISMATCH
+      - id: current-hash-match
+        rule: ContentItem.content_hash == expected_content_hash
+        on_fail:
+          decision: deny
+          code: CONTENT_HASH_MISMATCH
+      - id: valid-bound-approval-exists
+        rule: >-
+          related ReviewDecision exists where decision == approved and
+          ReviewDecision.content_revision == ContentItem.revision and
+          ReviewDecision.content_hash == ContentItem.content_hash
+        on_fail:
+          decision: deny
+          code: VALID_APPROVAL_NOT_FOUND
+      - id: trusted-publisher-resolved
+        rule: actor.employee_id is trusted and resolved
+        on_fail:
+          decision: blocked
+          code: ACTOR_UNRESOLVED
+    approval:
+      mode: role-based-approval
+      requirement: >-
+        A valid approved ReviewDecision bound to the exact current content
+        revision/hash must already exist. Publication must not reuse approval
+        from an older revision.
+      binding:
+        relation: content_has_review
+        required_decision: approved
+        revision: ContentItem.revision
+        content_hash: ContentItem.content_hash
+      on_missing:
+        decision: deny
+        code: VALID_APPROVAL_NOT_FOUND
+    authority:
+      class: source-backed
+      system: cms
+    tool_binding:
+      status: unresolved
+      operation: cms.publish_content
+      note: No runtime CMS/API/MCP binding is authorized by this example.
+    effects:
+      - type: external-source-mutation
+        system: cms
+        description: Publish the exact approved content revision/hash to the configured external destination.
+      - type: external-source-mutation
+        system: cms
+        object: PublicationRecord
+        description: Persist or return the authoritative publication result.
+      - type: ontology-owned-mutation
+        property: ContentItem.lifecycle_state
+        value: published
+      - type: audit-event
+        description: Link the Ontology publication decision to the external publication result.
+    failure_behavior:
+      idempotency_required: true
+      idempotency_key: content_id + expected_revision + expected_content_hash + target
+      stale_approval: deny
+      external_success_local_failure: reconciliation-required
+      local_success_external_failure: action-not-applied
+      retry: only-with-idempotency-or-confirmed-not-published
+    audit:
+      enabled: true
+      record:
+        - timestamp
+        - human_actor_id
+        - profile_actor_id
+        - action
+        - target_id
+        - published_revision
+        - published_content_hash
+        - approval_reference
+        - contract_version
+        - decision
+        - reason_code
+        - external_result_reference
+        - reconciliation_state
+
+operation_surface:
+  reads:
+    - get_content_for_review
+    - get_publication_history
+  actions:
+    - approve_content
+    - publish_content
+  intentionally_absent:
+    - publish_arbitrary_text
+    - generic_cms_write
+    - generic_update
+    - execute_sql
+
+validation_scenarios:
+  - id: approve-exact-current-revision
+    intent: Approve the exact revision/hash currently presented to the reviewer.
+    expected: pass-if-actor-authorized-and-binding-exists
+    demonstrates:
+      - explicit human approval
+      - approval binding to immutable revision/hash evidence
+      - ontology-owned review decision
+
+  - id: edit-after-approval
+    intent: Publish content after title/body/revision changed following approval.
+    expected:
+      decision: deny
+      code: VALID_APPROVAL_NOT_FOUND
+    demonstrates:
+      - stale approval rejection
+      - approval must bind to exact current content
+
+  - id: publish-approved-current-revision
+    intent: Publish the exact content revision/hash covered by a valid approval.
+    expected: pass-if-real-binding-and-all-preconditions-exist
+    demonstrates:
+      - role-based approval dependency
+      - external source-backed publication effect
+      - idempotency
+      - audit linkage
+
+  - id: direct-unapproved-publish
+    intent: Publish draft or review-pending content without a valid approval.
+    expected:
+      decision: deny
+      code: CONTENT_NOT_APPROVED
+
+  - id: generic-publish-attempt
+    intent: Publish arbitrary text through a generic CMS write primitive.
+    expected:
+      decision: deny-by-absence
+      reason: No generic publication primitive exists in the approved operation surface.
+
+experiment_findings:
+  contract_coverage:
+    object_types: supported
+    properties: supported
+    relations: supported
+    object_visibility: supported
+    read_operations: supported
+    traversal_authorization: supported
+    authority: supported
+    named_actions: supported
+    preconditions: supported
+    effects: supported
+    actor_requirements: supported
+    approval_modes: supported
+    tool_binding: supported
+    audit: supported
+    versioning: supported
+  candidate_contract_gap:
+    area: approval-subject-version-binding
+    observation: >-
+      The contract defines approval modes and states that an LLM cannot infer
+      approval, but it does not yet explicitly require an approval to bind to
+      the exact object version/revision/hash whose side effect is being authorized.
+      The publication experiment shows that approval detached from immutable
+      subject evidence can become stale after content changes while still looking valid.
+    proposed_next_step: >-
+      Review whether docs/ONTOLOGY.md should formally require approval evidence
+      to identify the exact subject/version/state it authorizes when the approved
+      artifact is mutable between review and execution.
