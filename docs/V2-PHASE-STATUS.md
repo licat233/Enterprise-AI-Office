@@ -1,7 +1,7 @@
 # Enterprise AI Office v2 — Blueprint Status
 
-Status: installation design active / ID-1 and ID-2 complete / real deployment task inactive
-Version: 3.1.0
+Status: installation design active / ID-1 through ID-3 complete / real deployment task inactive
+Version: 3.2.0
 Date: 2026-09-06
 
 The authoritative machine-readable repository state is:
@@ -21,7 +21,8 @@ SYSTEM DESIGN: COMPLETE
 INSTALLATION DESIGN: ACTIVE
 ID-1 INSTALLATION ARCHITECTURE: COMPLETE
 ID-2 CONFIG / PROTECTED INPUTS: COMPLETE
-NEXT WORK PACKAGE: ID-3 STAGE / CAPABILITY CLOSURE
+ID-3 STAGE / CAPABILITY CLOSURE: COMPLETE
+NEXT WORK PACKAGE: ID-4 TRUSTED IDENTITY / MAILBOX AUTHORIZATION
 BLUEPRINT VALIDATION: NOT YET OPENED
 REAL DEPLOYMENT TASK: INACTIVE
 ```
@@ -106,8 +107,8 @@ What evidence closes each capability and the whole installation?
 ```text
 ID-1  Installation architecture + v1 preservation     COMPLETE
 ID-2  Company configuration + protected inputs        COMPLETE
-ID-3  Stage sequencing + capability closure           NEXT
-ID-4  Trusted identity + mailbox authorization        NOT STARTED
+ID-3  Stage sequencing + capability closure           COMPLETE
+ID-4  Trusted identity + mailbox authorization        NEXT
 ID-5  Draft / Approval governance runtime             NOT STARTED
 ID-6  Governed send + reconciliation                  NOT STARTED
 ID-7  Rollback / recovery / clean-host acceptance     NOT STARTED
@@ -122,13 +123,16 @@ ID-1 → docs/V2-INSTALLATION-ARCHITECTURE.md
 ID-2 → docs/V2-CONFIG-PROTECTED-INPUTS.md
        config/company.private.example.yaml
        CONFIG / SECRET INPUT CONTRACT FROZEN
+
+ID-3 → docs/V2-STAGE-CONTRACTS.md
+       STAGE CONTRACTS FROZEN
 ```
 
 Do not parallelize optional capabilities merely to make the blueprint appear comprehensive.
 
 ---
 
-## 5. Configuration model now frozen by ID-2
+## 5. Configuration model frozen by ID-2
 
 Installation inputs are separated into:
 
@@ -148,7 +152,7 @@ Observed runtime state
 
 Environment files are runtime binding templates, not a second desired-state authority.
 
-For v2 Email, the private desired-state model now uses:
+For v2 Email, the private desired-state model uses:
 
 ```text
 communication_profile
@@ -163,38 +167,79 @@ No matching mailbox grant means deny, and `send_requires_human_approval: true` i
 
 ---
 
-## 6. Existing staged plan
+## 6. Stage / capability closure frozen by ID-3
 
-`docs/V2-IMPLEMENTATION-PLAN.md` remains the active Installation Design working blueprint.
+`docs/V2-STAGE-CONTRACTS.md` is the detailed Stage 0–6 installation contract.
 
-Its Stage 0–6 sequence remains:
+Core dependency chain:
 
 ```text
-Stage 0  preserve/verify v1 baseline
-Stage 1  bounded read-only email
-Stage 2  DraftReply preparation
-Stage 3  trusted human approval evidence
-Stage 4  governed send_approved_reply
-Stage 5  optional simple follow-up
-Stage 6  optional one messaging surface
+Stage 0  V1 BASELINE VERIFIED
+↓
+Stage 1  READ-ONLY EMAIL PASS
+↓
+Stage 2  DRAFT PREPARATION PASS
+↓
+Stage 3  APPROVAL GATE PASS
+↓
+Stage 4  GOVERNED EMAIL LOOP PASS
 ```
 
-ID-3 now needs to turn these stages into explicit installation capability contracts covering:
+Stages 0–4 are mandatory when the v2 Email capability is enabled.
+
+Optional extensions:
+
+```text
+Stage 5  SIMPLE FOLLOW-UP PASS
+→ only when communication follow-up/Cron is configured
+
+Stage 6  ONE MESSAGING SURFACE PASS
+→ only when Messaging is configured
+```
+
+Every applicable Stage now defines:
 
 ```text
 preconditions
 required inputs
-provisioning/reconciliation steps
-idempotency expectations
-acceptance evidence
-state records
-rollback/removal path
-stage gate to the next capability
+provisioning / activation
+idempotency boundary
+acceptance
+required evidence
+rollback / removal
+result
 ```
+
+Common result vocabulary:
+
+```text
+PASS — <stage milestone>
+BLOCKED — REQUIRED INPUT: <specific input or authority>
+FAIL — <specific implementation/security/acceptance boundary>
+NOT REQUESTED — capability disabled by company configuration
+```
+
+A Stage is an installation/capability closure gate, not a new runtime workflow object or service.
 
 ---
 
-## 7. Explicit boundary: not a real deployment
+## 7. Next work package — ID-4
+
+ID-4 must freeze how trusted HumanActor identity and mailbox-scoped authorization travel through the installed system:
+
+```text
+Open WebUI authenticated user
+→ trusted identity assertion
+→ Communication Assistant / Hermes Profile request
+→ eao-email-governance
+→ mailbox-scoped read/draft/approve/send decision
+```
+
+It must select the supported Open WebUI/Hermes mechanism, prevent spoofable client identity headers, distinguish HumanActor from Profile/service credential, and define fail-closed behavior when identity/group/grant resolution is unavailable.
+
+---
+
+## 8. Explicit boundary: not a real deployment
 
 During Installation Design:
 
@@ -220,7 +265,7 @@ explicit target
 
 ---
 
-## 8. Scope discipline
+## 9. Scope discipline
 
 Installation friction does not automatically justify changing System Design.
 
@@ -239,7 +284,7 @@ If an actual structural contradiction in System Design is discovered, record it 
 
 ---
 
-## 9. Completion language
+## 10. Completion language
 
 Repository/blueprint milestones:
 
