@@ -74,6 +74,7 @@ for path in \
   docs/V2-STAGE-CONTRACTS.md \
   docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md \
   docs/V2-GOVERNANCE-RUNTIME.md \
+  docs/V2-SEND-RECONCILIATION.md \
   config/company.example.yaml \
   config/company.private.example.yaml \
   config/capabilities.yaml \
@@ -117,11 +118,16 @@ for path in \
   infrastructure/access/OPEN-WEBUI-OIDC.md \
   infrastructure/email/governance/README.md \
   infrastructure/email/governance/schema.sql \
+  infrastructure/email/governance/migrations/002_send_reconciliation.sql \
   infrastructure/email/governance/test_schema.py \
+  infrastructure/email/governance/test_send_reconciliation.py \
   infrastructure/email/tencent-exmail/README.md \
   infrastructure/email/tencent-exmail/imap_readonly_mcp.py \
   infrastructure/email/tencent-exmail/imap.env.example \
   infrastructure/email/tencent-exmail/test_imap_readonly.py \
+  infrastructure/email/tencent-exmail/smtp_send_adapter.py \
+  infrastructure/email/tencent-exmail/smtp.env.example \
+  infrastructure/email/tencent-exmail/test_smtp_send_adapter.py \
   docs/acceptance/TENCENT-EXMAIL.md \
   ontology/examples/email-communication.yaml
 do
@@ -162,6 +168,7 @@ require_text docs/V2-CONFIG-PROTECTED-INPUTS.md 'CONFIG / SECRET INPUT CONTRACT 
 require_text docs/V2-STAGE-CONTRACTS.md 'STAGE CONTRACTS FROZEN' 'v2 ID-3 stage contracts are frozen'
 require_text docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md 'IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN' 'v2 ID-4 identity contract is frozen'
 require_text docs/V2-GOVERNANCE-RUNTIME.md 'GOVERNANCE RUNTIME CONTRACT FROZEN' 'v2 ID-5 governance runtime contract is frozen'
+require_text docs/V2-SEND-RECONCILIATION.md 'SEND / RECONCILIATION INSTALLATION CONTRACT FROZEN' 'v2 ID-6 send/reconciliation contract is frozen'
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
@@ -184,22 +191,37 @@ require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Emai
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
 require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
 require_text config/capabilities.yaml 'docs/V2-GOVERNANCE-RUNTIME.md' 'Email capability has governance runtime contract'
+require_text config/capabilities.yaml 'docs/V2-SEND-RECONCILIATION.md' 'Email capability has send/reconciliation contract'
 require_text config/capabilities.yaml 'governance_runtime_contract:' 'Email capability declares governance runtime closure'
+require_text config/capabilities.yaml 'send_reconciliation_contract:' 'Email capability declares send/reconciliation closure'
 require_text config/capabilities.yaml 'infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md' 'Email capability has Open WebUI communication provisioning path'
 require_text config/capabilities.yaml 'infrastructure/open-webui/v2_approve_draft_action.py' 'Email capability has deterministic approval Action template'
 require_text config/capabilities.yaml 'infrastructure/email/governance/schema.sql' 'Email capability has governance SQLite schema'
+require_text config/capabilities.yaml 'infrastructure/email/governance/migrations/002_send_reconciliation.sql' 'Email capability has send/reconciliation schema migration'
 require_text config/capabilities.yaml 'infrastructure/email/governance/test_schema.py' 'Email capability has governance offline test'
+require_text config/capabilities.yaml 'infrastructure/email/governance/test_send_reconciliation.py' 'Email capability has send/reconciliation offline test'
+require_text config/capabilities.yaml 'infrastructure/email/tencent-exmail/smtp_send_adapter.py' 'Email capability has narrow SMTP provider adapter'
+require_text config/capabilities.yaml 'infrastructure/email/tencent-exmail/test_smtp_send_adapter.py' 'Email capability has SMTP adapter offline test'
 require_text config/capabilities.yaml 'mandatory_when_enabled:' 'Email capability declares mandatory stage closure'
 require_text config/capabilities.yaml 'stage_4_governed_send' 'Email capability requires governed-send stage'
 require_text config/capabilities.yaml 'open-webui-governance-forwarder-credential' 'Email capability declares forwarder secret class'
 require_text config/capabilities.yaml 'required_secret_classes:' 'Email capability declares required secret classes'
 require_text infrastructure/email/governance/schema.sql 'draft_review_bindings' 'Governance schema binds review message to exact Draft'
 require_text infrastructure/email/governance/schema.sql 'approval_claims' 'Governance schema enforces approval claim record'
+require_text infrastructure/email/governance/migrations/002_send_reconciliation.sql 'logical_sends' 'ID-6 migration persists logical sends'
+require_text infrastructure/email/governance/migrations/002_send_reconciliation.sql 'send_attempts' 'ID-6 migration persists provider attempts'
+require_text infrastructure/email/governance/migrations/002_send_reconciliation.sql 'send_reconciliations' 'ID-6 migration persists reconciliation evidence'
 require_text infrastructure/email/governance/test_schema.py 'PASS — v2 governance SQLite/hash/review-binding contract' 'Governance offline test has deterministic PASS marker'
+require_text infrastructure/email/governance/test_send_reconciliation.py 'PASS — v2 send/reconciliation SQLite contract' 'Send/reconciliation offline test has deterministic PASS marker'
+require_text infrastructure/email/tencent-exmail/smtp_send_adapter.py 'OUTCOME_UNKNOWN' 'SMTP adapter exposes ambiguous-outcome classification'
+require_text infrastructure/email/tencent-exmail/smtp_send_adapter.py 'session.data(message_bytes)' 'SMTP adapter has explicit DATA boundary'
+require_text infrastructure/email/tencent-exmail/test_smtp_send_adapter.py 'test_timeout_after_data_begins_is_unknown' 'SMTP adapter tests ambiguous DATA timeout'
+require_text infrastructure/email/tencent-exmail/test_smtp_send_adapter.py 'test_any_recipient_rejection_aborts_before_data' 'SMTP adapter tests all-recipient-before-DATA rule'
 require_text infrastructure/open-webui/v2_approve_draft_action.py '"type": "confirmation"' 'Approval Action uses native Open WebUI confirmation dialog'
 require_text infrastructure/open-webui/v2_approve_draft_action.py '/v1/actions/resolve-current-review' 'Approval Action resolves server-owned review subject'
 require_text infrastructure/open-webui/v2_approve_draft_action.py '/v1/actions/approve-current-review' 'Approval Action commits exact reviewed subject'
 require_text docs/acceptance/TENCENT-EXMAIL.md 'Stage 1 — read-only email' 'Provider acceptance maps tests to v2 stages'
+require_text docs/acceptance/TENCENT-EXMAIL.md 'OUTCOME_UNKNOWN cannot create another attempt' 'Provider acceptance blocks blind retry after ambiguous send'
 require_text infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md '{{USER_ID}}' 'Open WebUI communication path forwards authenticated user ID'
 require_text infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md '{{USER_GROUP_IDS}}' 'Open WebUI communication path forwards current group IDs'
 require_text infrastructure/email/tencent-exmail/README.md 'previous direct Hermes MCP registration template is no longer the reference path' 'Provider playbook rejects obsolete direct Hermes registration'
