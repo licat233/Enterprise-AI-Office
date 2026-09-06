@@ -1,0 +1,35 @@
+# Merge this fragment into one explicitly authorized Hermes specialist Profile.
+# Do not replace that Profile's existing WeKnora MCP/tool configuration.
+# Validate the exact selected Hermes version before activation.
+
+platform_toolsets:
+  api_server:
+    - mcp-<UNIQUE_EMAIL_MCP_SERVER_NAME>
+
+mcp_servers:
+  <UNIQUE_EMAIL_MCP_SERVER_NAME>:
+    command: uv
+    args:
+      - run
+      - "<ABSOLUTE_EAIO_REPO>/infrastructure/email/tencent-exmail/imap_readonly_mcp.py"
+    env:
+      EAIO_EMAIL_IMAP_HOST: "${EAIO_EMAIL_IMAP_HOST}"
+      EAIO_EMAIL_IMAP_PORT: "${EAIO_EMAIL_IMAP_PORT}"
+      EAIO_EMAIL_USERNAME: "${EAIO_EMAIL_USERNAME}"
+      EAIO_EMAIL_CLIENT_PASSWORD: "${EAIO_EMAIL_CLIENT_PASSWORD}"
+      EAIO_EMAIL_ALLOWED_FOLDERS: "${EAIO_EMAIL_ALLOWED_FOLDERS}"
+      EAIO_EMAIL_MAX_BODY_BYTES: "${EAIO_EMAIL_MAX_BODY_BYTES}"
+      EAIO_EMAIL_SEARCH_SCAN_LIMIT: "${EAIO_EMAIL_SEARCH_SCAN_LIMIT}"
+    tools:
+      include:
+        - search_email
+        - get_email
+      resources: false
+      prompts: false
+
+# Security intent:
+# - only the authorized Profile receives this MCP server/credential;
+# - ordinary Profiles do not inherit it;
+# - the adapter itself contains no SMTP/write primitive;
+# - email tool annotations are hints only; actual read-only behavior is enforced
+#   by the adapter's allowlist + IMAP read-only mailbox selection + BODY.PEEK.
