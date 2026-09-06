@@ -1,0 +1,238 @@
+schema_version: 1
+
+# This registry tells a deployment agent what must be implemented and validated
+# when a company enables a capability. It is a capability library, not a list of
+# things every company should install.
+
+readiness_levels:
+  core-ready:
+    requires:
+      - core.employee_path
+  configured-ready:
+    requires:
+      - core.employee_path
+      - all_company_enabled_capabilities
+  production-ready:
+    requires:
+      - core.employee_path
+      - all_company_enabled_capabilities
+      - production.backup_restore
+      - production.startup_recovery
+      - production.security_access_review
+      - production.operations_health
+
+capabilities:
+  core.employee_path:
+    kind: core
+    always_enabled: true
+    implementation:
+      - DEPLOY.md
+      - docs/DEPLOYMENT.md
+      - infrastructure/weknora/README.md
+      - infrastructure/hermes/README.md
+      - infrastructure/open-webui/README.md
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Part A — Core Ready
+    records:
+      - component versions
+      - knowledge bases
+      - enabled profiles
+      - employee groups and assistant mappings
+      - network exposure
+      - memory state
+      - core acceptance result
+
+  specialist_profiles:
+    kind: conditional
+    enabled_when: profiles contains any employee-facing Profile beyond general
+    implementation:
+      - docs/PROFILE-STANDARD.md
+      - profiles/README.md
+      - infrastructure/hermes/specialist.config.example.yaml
+      - infrastructure/hermes/specialist.env.example
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Specialist Profile RBAC
+    records:
+      - purpose
+      - employee groups
+      - knowledge scope
+      - tool scope
+      - model policy
+      - memory policy
+      - API credential boundary
+
+  hermes_webui:
+    kind: conditional
+    enabled_when: capabilities.hermes_webui.enabled == true
+    implementation:
+      - infrastructure/hermes-webui/README.md
+    upstream: nesquena/hermes-webui
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Hermes administrative Web UI
+    records:
+      - exact upstream commit/version
+      - bind/access method
+      - authentication method
+      - HERMES_HOME/state path
+      - health result
+
+  coding_delegation:
+    kind: conditional
+    enabled_when: capabilities.coding_delegation.enabled == true
+    implementation:
+      - infrastructure/coding-agents/README.md
+      - profiles/engineering/SOUL.md
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      sections:
+        - Engineering / privileged technical Profile
+        - Codex delegation
+        - Claude Code delegation
+    records:
+      - allowed Profiles
+      - allowed repositories/workspaces
+      - enabled coding backends
+      - CLI authentication boundary
+      - delegation test results
+
+  kanban:
+    kind: conditional
+    enabled_when: capabilities.kanban.enabled == true
+    implementation:
+      - infrastructure/hermes/features/README.md
+    upstream_feature: Hermes Kanban
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Kanban
+    records:
+      - enabled boards
+      - owner/orchestrator Profiles
+      - workspace policy
+      - dispatcher state
+      - acceptance result
+
+  cron:
+    kind: conditional
+    enabled_when: capabilities.cron.enabled == true
+    implementation:
+      - infrastructure/hermes/features/README.md
+    upstream_feature: Hermes Cron
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Cron
+    records:
+      - owner Profiles
+      - model/provider policy
+      - delivery targets
+      - business-critical jobs
+      - acceptance result
+
+  messaging:
+    kind: conditional
+    enabled_when: capabilities.messaging.enabled == true
+    implementation:
+      - infrastructure/hermes/features/README.md
+    upstream_feature: Hermes Gateway messaging
+    required_company_values:
+      - selected platform
+      - enterprise/bot credentials
+      - authorized users/chats or identity policy
+      - Profile routing
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Messaging
+    records:
+      - platform
+      - authorization method
+      - Profile routing
+      - delivery policy
+      - acceptance result
+
+  remote_access:
+    kind: conditional
+    enabled_when: capabilities.remote_access.enabled == true
+    implementation:
+      - infrastructure/access/README.md
+    required_company_values:
+      - access method
+      - intended employee/admin surfaces
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Remote browser/private access
+    records:
+      - access method
+      - exposed surfaces
+      - admin restriction
+      - TLS/identity boundary
+
+  sso:
+    kind: conditional
+    enabled_when: capabilities.sso.enabled == true
+    implementation:
+      - infrastructure/access/README.md
+    required_company_values:
+      - identity provider
+      - approved domains/groups/claims
+      - client credentials or metadata
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Enterprise identity / SSO
+    records:
+      - identity provider
+      - claim/group mapping
+      - fallback/admin access policy
+      - acceptance result
+
+  employee_long_term_memory:
+    kind: conditional
+    enabled_when: capabilities.employee_long_term_memory.enabled == true
+    implementation:
+      - docs/CLIENT-RBAC.md
+      - docs/PROFILE-STANDARD.md
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      sections:
+        - Employee long-term memory
+        - Cross-Profile memory
+    records:
+      - session/user scoping mechanism
+      - enabled Profiles
+      - cross-user isolation result
+      - cross-Profile isolation result
+
+production_controls:
+  production.backup_restore:
+    implementation:
+      - docs/BACKUP-RESTORE.md
+      - scripts/backup.sh
+      - scripts/restore.sh
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Backup and restore
+
+  production.startup_recovery:
+    implementation:
+      - docs/OPERATIONS.md
+      - docs/DEPLOYMENT.md
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Startup/recovery
+
+  production.security_access_review:
+    implementation:
+      - docs/SECURITY.md
+      - docs/CLIENT-RBAC.md
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Production access/security review
+
+  production.operations_health:
+    implementation:
+      - docs/OPERATIONS.md
+      - scripts/health-check.sh
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Production Ready result
