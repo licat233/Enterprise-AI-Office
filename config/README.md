@@ -1,116 +1,144 @@
 # Company Configuration
 
-This directory defines the public, reusable configuration boundary for an Enterprise AI Office deployment.
+This directory defines the reusable declarative boundary for an Enterprise AI Office deployment.
 
-For deployment execution, follow root [`DEPLOY.md`](../DEPLOY.md).
+## Configuration files
+
+```text
+config/
+├── company.example.yaml   # what the adopting company wants built
+├── capabilities.yaml      # how enabled capabilities close implementation + acceptance
+├── validated-stack.yaml   # first validated core reproducibility baseline
+└── .env.example           # non-secret deployment environment placeholders
+```
 
 ## `company.example.yaml`
 
-`company.example.yaml` describes deployment **intent**:
+Schema v2 describes deployment intent, including:
 
 - company identity/language/timezone;
+- target readiness (`core-ready`, `configured-ready`, or `production-ready`);
 - Knowledge Base structure;
 - Hermes Profiles;
-- employee groups;
-- role capabilities;
-- messaging intent;
-- backup/update policy;
-- model roles.
+- employee groups/permissions;
+- model roles;
+- enabled/disabled optional capabilities;
+- production control intent;
+- secret references/placeholders.
 
-It is deliberately free of production secrets.
+It contains no production secrets.
 
-### Configuration baseline
+### Baseline
 
-The example starts from a small reusable baseline:
-
-- Hermes `default` / admin belongs to the control plane;
-- `general` is the baseline employee-facing Profile;
-- `all-employees` is the baseline employee group;
-- `ai-admins` is the administrative group;
-- a shared `Company Knowledge` Knowledge Base provides the initial employee knowledge boundary.
-
-Extend Profiles, groups, Knowledge Bases, Skills, integrations, automation, and privileged capabilities only when the adopting company's actual requirements justify them. Repository examples and templates are reusable options rather than a deployment checklist.
-
-## `validated-stack.yaml`
-
-`validated-stack.yaml` is the machine-readable reproducibility baseline for the first successfully validated reference stack.
-
-It records:
-
-- supported reference host/runtime;
-- exact tested component versions/commits;
-- baseline Profile/group posture;
-- baseline employee-memory and Open WebUI permission posture;
-- which capabilities are optional unless company configuration enables them.
-
-It is not a permanent version policy and does not contain company secrets.
-
-For an ordinary Golden Path deployment, prefer this tested stack unless the task explicitly includes upgrade qualification. Upgrade work follows `docs/UPGRADE.md`.
-
-## Important: schema vs installer
-
-The current company YAML is a declarative configuration schema for humans and AI agents. It is not a generic one-command installer input.
-
-An implementation agent should combine:
+The reusable baseline is deliberately small:
 
 ```text
-DEPLOY.md execution contract
-+
-company configuration intent
-+
-validated-stack.yaml tested baseline
-+
-infrastructure adapters/templates
-+
-protected deployment secrets
+Hermes control plane
+└── default/admin
+
+Employee plane
+├── general
+├── all-employees
+└── ai-admins
+
+Knowledge
+└── company-defined shared Knowledge Base(s)
 ```
 
-to reach the target state.
+Specialist Profiles, department groups, extra Knowledge Bases, hermes-webui, coding delegation, Kanban, Cron, messaging, remote access, SSO, and employee long-term memory are opt-in.
 
-Do not invent a parser/installer that the repository does not contain, and do not stop merely because no monolithic installer exists.
+Templates/playbooks are a capability library, not a deployment checklist.
 
-## Private company overlay
+## `config/capabilities.yaml`
 
-A production adopter should keep real company-specific deployment configuration in a private repository or protected deployment location.
+This is the machine-readable capability closure registry.
 
-Do not commit to this public repository:
+For each optional capability it points a deployment agent to the relevant:
+
+```text
+implementation playbook/adapter
+required company/external inputs
+acceptance test
+state fields to record
+```
+
+The deployment agent combines:
+
+```text
+active company configuration
++
+capability registry
+        ↓
+exact target state
+```
+
+An enabled capability must be implemented and accepted before `CONFIGURED READY` can be claimed. A disabled capability must not be instantiated merely because its playbook exists.
+
+## `config/validated-stack.yaml`
+
+This records the first validated core stack and baseline feature flags in machine-readable form.
+
+It is a reproducibility baseline, not a permanent version policy. Use `docs/UPGRADE.md` when qualifying newer versions.
+
+Optional components not present in the first validated core demo must resolve and record their own exact compatible version/commit when enabled.
+
+## Schema vs installer
+
+The company YAML is declarative intent for humans and capable AI engineering agents. It is not a claim that a single universal installer/compiler exists.
+
+The repository's deployment mechanism is the agent execution contract:
+
+```text
+AGENTS.md
+→ DEPLOY.md
+→ company config + capabilities registry
+→ upstream-native adapters/playbooks
+→ acceptance
+→ deployment state
+```
+
+Do not pretend a parser/compiler exists when it does not. A capable deployment agent is expected to read the declarative target and execute the referenced implementation paths.
+
+## Protected company overlay
+
+A real adopter should keep company-private deployment values in a private repository or protected deployment location.
+
+Do not commit publicly:
 
 - real employee lists;
 - private network details that create risk;
-- API keys;
-- bot secrets;
+- API/model keys;
+- bot/OAuth secrets;
 - database passwords;
-- private documents;
-- customer data.
+- private documents/customer data;
+- production `.env` values.
 
 ## `config/.env.example`
 
-This is a non-secret input inventory/template for deployment adaptation.
+This contains non-secret placeholders used by local adapters/scripts. Copy/adapt it only to a protected untracked location.
 
-Copy/adapt it only in a protected deployment-specific location. Add specialist credentials only for Profiles/integrations actually enabled.
+Conditional secrets should exist only when their capability is enabled.
 
 ## Configuration precedence
 
 Conceptually:
 
 ```text
-Generic architecture / Golden Path
-        ↓
-Validated stack baseline
+Generic architecture / standards / capability registry
         ↓
 Company configuration
         ↓
-Environment-specific deployment configuration
+Environment-specific protected configuration
         ↓
-Protected secrets
+Protected secrets / external authority
         ↓
 Actual runtime state
 ```
 
-Runtime reality must be recorded in `state/DEPLOYMENT-STATE.md`.
+Desired state comes from active company configuration. Actual state is recorded in `state/DEPLOYMENT-STATE.md` and must match runtime reality.
 
-## Company values do not fork the architecture
+## Architecture boundary
 
-Differences in specialist roles, Knowledge Bases, groups, and optional integrations belong in company configuration rather than separate generic architectures.
+Company differences belong primarily in configuration rather than generic architecture forks.
 
-Generic architecture should change only when the reusable system model changes.
+Change the reusable architecture only when the underlying reusable system model or security boundary genuinely changes.
