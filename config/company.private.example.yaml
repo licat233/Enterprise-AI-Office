@@ -80,6 +80,15 @@ email_governance:
   state_path: /Users/Shared/enterprise-ai-office/runtime/email-governance/state.sqlite3
   technical_log_path: /Users/Shared/enterprise-ai-office/logs/email-governance
   retention_policy: company-defined
+  trusted_identity:
+    source: open-webui
+    actor_id_namespace: open-webui
+    transport: server-authenticated-forwarder
+    forwarder_credential_ref: openwebui-governance-forwarder-token
+    user_id_header: X-EAO-Human-Actor-Id
+    group_ids_header: X-EAO-Human-Group-Ids
+    chat_id_header: X-EAO-Chat-Id
+    message_id_header: X-EAO-Message-Id
 
 # Symbolic references only. The values themselves belong in protected storage.
 # No universal secret backend is assumed by this blueprint.
@@ -93,6 +102,11 @@ secret_refs:
     class: specialist-profile-credential
     consumer: hermes-communication-profile
     native_binding: API_SERVER_KEY
+
+  openwebui-governance-forwarder-token:
+    class: open-webui-governance-forwarder-credential
+    consumer: open-webui-tool-connection+eao-email-governance
+    native_binding: EAIO_TRUSTED_FORWARDER_TOKEN
 
 # A real private overlay may also select non-secret model IDs, private network
 # routes, real employee/group identifiers, backup destinations, and similar
