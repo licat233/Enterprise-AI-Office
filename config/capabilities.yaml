@@ -235,4 +235,4 @@ production_controls:
       - scripts/health-check.sh
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
-      section: Production Ready result
+      section: Operations/health ownership
