@@ -73,6 +73,7 @@ for path in \
   docs/V2-CONFIG-PROTECTED-INPUTS.md \
   docs/V2-STAGE-CONTRACTS.md \
   docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md \
+  docs/V2-GOVERNANCE-RUNTIME.md \
   config/company.example.yaml \
   config/company.private.example.yaml \
   config/capabilities.yaml \
@@ -95,6 +96,8 @@ for path in \
   infrastructure/open-webui/README.md \
   infrastructure/open-webui/PROVISIONING.md \
   infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md \
+  infrastructure/open-webui/V2-APPROVAL-ACTION.md \
+  infrastructure/open-webui/v2_approve_draft_action.py \
   infrastructure/open-webui/docker-compose.yml
 do
   require_file "$path"
@@ -112,6 +115,9 @@ for path in \
   infrastructure/hermes/features/EMPLOYEE-MEMORY.md \
   infrastructure/access/README.md \
   infrastructure/access/OPEN-WEBUI-OIDC.md \
+  infrastructure/email/governance/README.md \
+  infrastructure/email/governance/schema.sql \
+  infrastructure/email/governance/test_schema.py \
   infrastructure/email/tencent-exmail/README.md \
   infrastructure/email/tencent-exmail/imap_readonly_mcp.py \
   infrastructure/email/tencent-exmail/imap.env.example \
@@ -155,6 +161,7 @@ require_text docs/V2-INSTALLATION-ARCHITECTURE.md 'INSTALLATION ARCHITECTURE FRO
 require_text docs/V2-CONFIG-PROTECTED-INPUTS.md 'CONFIG / SECRET INPUT CONTRACT FROZEN' 'v2 ID-2 protected-input contract is frozen'
 require_text docs/V2-STAGE-CONTRACTS.md 'STAGE CONTRACTS FROZEN' 'v2 ID-3 stage contracts are frozen'
 require_text docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md 'IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN' 'v2 ID-4 identity contract is frozen'
+require_text docs/V2-GOVERNANCE-RUNTIME.md 'GOVERNANCE RUNTIME CONTRACT FROZEN' 'v2 ID-5 governance runtime contract is frozen'
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
@@ -171,14 +178,27 @@ require_text config/company.example.yaml 'forwarder_credential_ref:' 'Company co
 require_text config/company.private.example.yaml 'client_credential_ref:' 'Private overlay uses symbolic email credential reference'
 require_text config/company.private.example.yaml 'openwebui-governance-forwarder-token' 'Private overlay uses symbolic governance forwarder credential'
 require_text config/company.private.example.yaml 'email.send' 'Private overlay demonstrates operation-scoped mailbox grants'
+require_text config/.env.example 'EAIO_GOVERNANCE_URL' 'Runtime bindings expose private Governance URL'
+require_text config/.env.example 'EAIO_TRUSTED_FORWARDER_TOKEN' 'Runtime bindings expose protected forwarder token'
 require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Email capability has protected-input contract'
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
 require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
+require_text config/capabilities.yaml 'docs/V2-GOVERNANCE-RUNTIME.md' 'Email capability has governance runtime contract'
+require_text config/capabilities.yaml 'governance_runtime_contract:' 'Email capability declares governance runtime closure'
 require_text config/capabilities.yaml 'infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md' 'Email capability has Open WebUI communication provisioning path'
+require_text config/capabilities.yaml 'infrastructure/open-webui/v2_approve_draft_action.py' 'Email capability has deterministic approval Action template'
+require_text config/capabilities.yaml 'infrastructure/email/governance/schema.sql' 'Email capability has governance SQLite schema'
+require_text config/capabilities.yaml 'infrastructure/email/governance/test_schema.py' 'Email capability has governance offline test'
 require_text config/capabilities.yaml 'mandatory_when_enabled:' 'Email capability declares mandatory stage closure'
 require_text config/capabilities.yaml 'stage_4_governed_send' 'Email capability requires governed-send stage'
 require_text config/capabilities.yaml 'open-webui-governance-forwarder-credential' 'Email capability declares forwarder secret class'
 require_text config/capabilities.yaml 'required_secret_classes:' 'Email capability declares required secret classes'
+require_text infrastructure/email/governance/schema.sql 'draft_review_bindings' 'Governance schema binds review message to exact Draft'
+require_text infrastructure/email/governance/schema.sql 'approval_claims' 'Governance schema enforces approval claim record'
+require_text infrastructure/email/governance/test_schema.py 'PASS — v2 governance SQLite/hash/review-binding contract' 'Governance offline test has deterministic PASS marker'
+require_text infrastructure/open-webui/v2_approve_draft_action.py '"type": "confirmation"' 'Approval Action uses native Open WebUI confirmation dialog'
+require_text infrastructure/open-webui/v2_approve_draft_action.py '/v1/actions/resolve-current-review' 'Approval Action resolves server-owned review subject'
+require_text infrastructure/open-webui/v2_approve_draft_action.py '/v1/actions/approve-current-review' 'Approval Action commits exact reviewed subject'
 require_text docs/acceptance/TENCENT-EXMAIL.md 'Stage 1 — read-only email' 'Provider acceptance maps tests to v2 stages'
 require_text infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md '{{USER_ID}}' 'Open WebUI communication path forwards authenticated user ID'
 require_text infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md '{{USER_GROUP_IDS}}' 'Open WebUI communication path forwards current group IDs'
