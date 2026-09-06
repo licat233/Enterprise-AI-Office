@@ -24,40 +24,96 @@ Before making a material change, read the documents relevant to the task in this
 
 1. `README.md`
 2. `AGENTS.md`
-3. `DEPLOY.md` for deployment or deployment planning
-4. `docs/COMPLETENESS.md` for readiness/completion semantics
-5. `config/company.example.yaml` or the real company-private configuration
-6. `config/capabilities.yaml` for capability closure
-7. `config/validated-stack.yaml` for the reproducibility baseline
-8. `docs/ARCHITECTURE.md`
-9. `docs/DEPLOYMENT.md`
-10. `docs/SECURITY.md`
-11. `docs/PROFILE-STANDARD.md`
-12. `docs/KNOWLEDGE.md`
-13. `docs/CLIENT-RBAC.md`
-14. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
-15. `docs/UPGRADE.md` when versions change
-16. `docs/ACCEPTANCE-TESTS.md`
-17. `state/DEPLOYMENT-STATE.md` when operating an existing deployment
-18. `state/CHANGELOG.md` when changing an existing deployment
-19. the relevant company/reference material under `reference/` when useful
+3. `state/PROJECT-PHASE.yaml`
+4. `DEPLOY.md` only for deployment or deployment planning that the phase gate permits
+5. `docs/COMPLETENESS.md` for readiness/completion semantics
+6. `config/company.example.yaml` or the real company-private configuration
+7. `config/capabilities.yaml` for capability closure
+8. `config/validated-stack.yaml` for the reproducibility baseline
+9. `docs/ARCHITECTURE.md`
+10. `docs/DEPLOYMENT.md`
+11. `docs/SECURITY.md`
+12. `docs/PROFILE-STANDARD.md`
+13. `docs/KNOWLEDGE.md`
+14. `docs/CLIENT-RBAC.md`
+15. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
+16. `docs/UPGRADE.md` when versions change
+17. `docs/ACCEPTANCE-TESTS.md`
+18. `state/DEPLOYMENT-STATE.md` when operating an existing deployment
+19. `state/CHANGELOG.md` when changing an existing deployment
+20. the relevant company/reference material under `reference/` when useful
+
+### Project phase gate — interpret before acting
+
+`state/PROJECT-PHASE.yaml` is the sole repository authority for the current **work phase** and its authorization boundary.
+
+Do not infer phase from:
+
+- repository momentum;
+- previous assistant assumptions;
+- prototype/adaptor code existing;
+- tests passing;
+- an implementation plan existing;
+- deployment documents existing;
+- acceptance contracts existing;
+- a provider having been selected;
+- phrases such as `continue`, `keep going`, `start`, `begin`, `next`, `proceed`, `继续`, `开始`, `开始吧`, `下一步`, or `好的`.
+
+Continuation language means:
+
+> **Continue valid work inside the current phase.**
+
+It does not authorize a phase transition.
+
+A transition from design to implementation/deployment requires explicit human intent that the phase itself is changing. The examples in `state/PROJECT-PHASE.yaml` are illustrative; the decisive property is explicit phase-changing intent, not any exact magic phrase.
+
+When the phase is `design`:
+
+```text
+allowed
+→ research
+→ architecture/product design
+→ documentation
+→ threat/authorization modeling
+→ Ontology/schema work
+→ sanitized examples / synthetic fixtures
+→ offline prototypes
+→ offline tests/static validation
+→ future implementation planning
+→ acceptance-test design
+
+not authorized
+→ real credentials
+→ real personal/employee identifiers in the public repository
+→ real provider/mailbox/business-system access
+→ real employee/Profile/provider binding
+→ real IMAP/SMTP runtime
+→ production/live runtime mutation
+→ customer-facing actions
+```
+
+Missing runtime credentials are not blockers during design because runtime access is outside the current phase.
+
+If the next apparent step would cross the phase boundary, do not perform it and do not ask for credentials merely to maintain momentum. Continue with the closest valid work inside the current phase or explain that the remaining step belongs to a future phase.
 
 When the task is part of the current v2 Communication & Follow-up milestone, also read before mutation:
 
 ```text
 docs/V2-SCOPE.md
 docs/V2-DESIGN-REVIEW.md
+docs/V2-PHASE-STATUS.md
 docs/V2-IMPLEMENTATION-PLAN.md
-docs/V2-IMPLEMENTATION-STATUS.md
 ```
 
-For v2 email work, additionally read the concrete provider capability paths referenced by `config/capabilities.yaml`, including the frozen email design/Ontology contract and provider-specific acceptance contract.
+Read the phase status before treating the implementation plan as executable. The implementation plan is future architecture while `state/PROJECT-PHASE.yaml` remains `phase: design`.
 
-For deployment tasks, `DEPLOY.md` is the execution contract. `docs/COMPLETENESS.md` defines what readiness means. `config/capabilities.yaml` maps enabled capabilities to implementation and acceptance paths.
+For v2 email work, additionally read the concrete provider capability paths referenced by `config/capabilities.yaml`, treating them as design-support prototypes or implementation artifacts according to the current phase.
 
-The root-level ARMOR v1 design document and content under `reference/` are non-normative reference material. They must not override `AGENTS.md`, `DEPLOY.md`, current generic standards, the adopting company's active configuration, or actual runtime state.
+For an authorized deployment task, `DEPLOY.md` is the execution contract. `docs/COMPLETENESS.md` defines what readiness means. `config/capabilities.yaml` maps enabled capabilities to implementation and acceptance paths.
 
-If a referenced implementation artifact is missing for an enabled capability, treat that as a repository deployability defect. Do not silently invent a different architecture.
+The root-level ARMOR v1 design document and content under `reference/` are non-normative reference material. They must not override `AGENTS.md`, `state/PROJECT-PHASE.yaml`, `DEPLOY.md`, current generic standards, the adopting company's active configuration, or actual runtime state.
+
+If a referenced implementation artifact is missing for an enabled capability during an authorized implementation/deployment phase, treat that as a repository deployability defect. Do not silently invent a different architecture.
 
 ## 3. Frozen architecture intent
 
@@ -65,6 +121,7 @@ Do not silently replace the approved architecture.
 
 | Responsibility | Default component |
 | --- | --- |
+| Current work phase | `state/PROJECT-PHASE.yaml` |
 | Enterprise knowledge | WeKnora |
 | Primary agent runtime | Hermes Agent |
 | Employee Web client | Open WebUI |
@@ -85,6 +142,7 @@ Implementation details may change to match selected upstream releases. Component
 
 Do not let multiple systems become authoritative for the same information class.
 
+- Current project work phase: `state/PROJECT-PHASE.yaml`.
 - Company knowledge: WeKnora.
 - Agent identity/behavior: Hermes Profile configuration, SOUL, Skills, Tools, MCP.
 - Human identity and employee Web access: Open WebUI or the explicitly selected enterprise identity layer.
@@ -133,7 +191,15 @@ A mailbox, API, or service credential proves access to a provider. It does not p
 
 Governed external actions that require human authority must preserve trusted human identity/approval evidence separately from provider credentials.
 
+### Prototype is not implementation
+
+A repository prototype can be useful design evidence without being deployed, enabled, authorized, or even selected for final implementation.
+
+Passing offline tests proves only the tested design/prototype property. It does not change the project phase and does not authorize runtime acceptance.
+
 ## 6. Deployment readiness rule
+
+This section applies only after `state/PROJECT-PHASE.yaml` authorizes implementation/deployment.
 
 Every new deployment must have an explicit target readiness from company configuration:
 
@@ -145,11 +211,11 @@ production-ready
 
 Use `docs/COMPLETENESS.md` for semantics.
 
-A single deployment request should drive the system to the requested readiness level without repeated human reminders about routine phases.
+An explicitly authorized deployment request should drive the system to the requested readiness level without repeated human reminders about routine phases.
 
 Do not stop at `CORE READY` when the configured target is `CONFIGURED READY` or `PRODUCTION READY`.
 
-Stop for human input only when execution genuinely requires external authority or information, such as:
+During an authorized deployment, stop for human input only when execution genuinely requires external authority or information, such as:
 
 - missing protected credentials;
 - mailbox/provider authorization;
@@ -159,9 +225,13 @@ Stop for human input only when execution genuinely requires external authority o
 - messaging-platform application credentials;
 - an actual company business choice absent from configuration.
 
-Do not pause merely to ask whether to perform a defined phase, configure baseline RBAC, connect components, implement an already-enabled capability, run acceptance, or record state.
+Do not pause merely to ask whether to perform a defined deployment phase, configure baseline RBAC, connect components, implement an already-enabled capability, run acceptance, or record state.
+
+This deployment momentum rule must never be used to cross a project phase boundary. During design, it does not authorize implementation or credential requests.
 
 ## 7. Capability closure rule
+
+This section becomes executable for real runtime capability closure only when the phase gate authorizes implementation/deployment.
 
 Before mutation, derive the exact enabled capability set from the active company configuration and `config/capabilities.yaml`.
 
@@ -177,7 +247,7 @@ requested state
 → deployment-state fields
 ```
 
-An enabled capability must not be silently omitted, disabled, replaced, or deferred merely to reach a green result.
+An enabled capability must not be silently omitted, disabled, replaced, or deferred merely to reach a green result during an authorized implementation/deployment.
 
 If it cannot be completed safely because genuine external input/authority is unavailable, report:
 
@@ -189,13 +259,11 @@ If its implementation or acceptance fails, report the specific failed boundary.
 
 Disabled capabilities are not deployment debt and must not be enabled for completeness.
 
-### v2 staged implementation gate
+### v2 future staged implementation gate
 
-The current v2 milestone must follow `docs/V2-IMPLEMENTATION-PLAN.md` and the live repository-level status in `docs/V2-IMPLEMENTATION-STATUS.md`.
+`docs/V2-IMPLEMENTATION-PLAN.md` defines the future order **after** implementation is explicitly authorized.
 
-Do not skip forward merely because later-stage design documents exist.
-
-In particular:
+While `state/PROJECT-PHASE.yaml` remains `phase: design`, the sequence below is planning information only and must not be executed against a real provider:
 
 ```text
 Stage 1 read-only email
@@ -205,9 +273,11 @@ Stage 1 read-only email
 → only then Stage 2 draft implementation
 ```
 
-Customer-facing send remains unavailable until the later trusted-human approval stage passes and the governed send action is accepted.
+The existence of Stage 1 prototype code or passing offline tests does not move the project into Stage 1 runtime work.
 
-Do not create SMTP/send capability as a convenience while Stage 1 is unresolved.
+Customer-facing send remains unavailable until the future trusted-human approval stage passes and the governed send action is accepted.
+
+Do not create SMTP/send capability as a convenience while the phase gate does not authorize implementation or while the future Stage 1 runtime boundary remains unresolved.
 
 ## 8. Default deployment posture
 
@@ -222,7 +292,7 @@ Containers
 └── Open WebUI
 ```
 
-On the validated Apple Silicon macOS path, Hermes remains host-native. Optional administrative, coding, automation, messaging, identity, access, and operational integration capabilities are added only when selected by company configuration.
+On the validated Apple Silicon macOS path, Hermes remains host-native. Optional administrative, coding, automation, messaging, identity, access, and operational integration capabilities are added only when selected by company configuration during an authorized implementation/deployment.
 
 ## 9. Upstream-first rule
 
@@ -269,9 +339,9 @@ Prefer one positive general rule over a growing list of prohibitions against ind
 
 ## 12. Do not under-engineer
 
-Minimality does not mean omitting a company-enabled capability, security boundary, acceptance test, or production control required by the requested readiness level.
+Minimality does not mean omitting a company-enabled capability, security boundary, acceptance test, or production control required by the requested readiness level once implementation/deployment is authorized.
 
-Build the smallest system that completely satisfies the configured target.
+Build the smallest system that completely satisfies the configured target inside the current authorized phase.
 
 ## 13. Version discipline
 
@@ -285,13 +355,13 @@ When changing/selecting versions:
 - review breaking changes;
 - verify compatibility with the requested capability;
 - pin the tested version/commit where practical;
-- record deployed reality in `state/DEPLOYMENT-STATE.md`.
+- record deployed reality in `state/DEPLOYMENT-STATE.md` when runtime deployment exists.
 
 Do not silently combine ordinary deployment with an unrequested major upgrade.
 
 ## 14. Pre-change inspection
 
-Before modifying an existing deployment:
+Before modifying an existing deployment in an authorized implementation/deployment phase:
 
 1. inspect repository status;
 2. read actual deployment state;
@@ -301,13 +371,13 @@ Before modifying an existing deployment:
 6. check backup freshness before risky changes;
 7. reconcile documentation with runtime reality.
 
-Actual runtime is evidence of what exists; desired company config defines what should exist.
+Actual runtime is evidence of what exists; desired company config defines what should exist. During design, do not inspect or mutate live runtime merely because this checklist exists.
 
 ## 15. Change risk classes
 
 ### Low risk
 
-Examples: documentation corrections, non-security SOUL wording, non-privileged Skill additions, normal employee account changes.
+Examples: documentation corrections, non-security SOUL wording, non-privileged Skill additions, normal employee account changes during an authorized runtime phase.
 
 Flow:
 
@@ -325,7 +395,9 @@ Flow:
 inspect → backup → plan → change → verify → rollback if needed → record
 ```
 
-## 16. Secrets rules
+The phase gate precedes both risk classes. A low-risk runtime change is still not authorized during a design-only phase.
+
+## 16. Secrets and public-repository privacy rules
 
 Never commit or expose:
 
@@ -337,9 +409,16 @@ Never commit or expose:
 - messaging tokens;
 - SSH private keys;
 - cloud credentials;
-- model-provider credentials.
+- model-provider credentials;
+- real employee or personal email addresses used as deployment identifiers;
+- real employee phone numbers or private account identifiers;
+- customer-private identities or contact details used merely as examples/test fixtures.
 
-Templates use placeholders. Protected values belong in approved secret storage/runtime locations with restrictive permissions.
+Public documentation, examples, fixtures, and tests must use synthetic identifiers such as `example.invalid` unless an identifier is intentionally public organizational contact information and its inclusion is explicitly approved.
+
+Real deployment identifiers belong in private company configuration/runtime state, not this public repository.
+
+Protected values belong in approved secret storage/runtime locations with restrictive permissions.
 
 ## 17. Tool privilege rules
 
@@ -373,7 +452,7 @@ Employee group → permitted Assistant → matching Hermes Profile
 
 Baseline employee Profile is `general`. Add specialist mappings only for configured real roles.
 
-UI visibility is not a security boundary by itself; verify direct unauthorized access fails.
+UI visibility is not a security boundary by itself; verify direct unauthorized access fails during the authorized runtime acceptance phase.
 
 ## 20. Memory safety rule
 
@@ -389,13 +468,19 @@ Do not perform destructive operations based on inference alone.
 
 Explicit intent and appropriate backup are required for operations such as deleting production Knowledge Bases, Profiles, persistent volumes/databases, backup generations, unknown Git work, irreversible migrations, or destructive provider operations.
 
+A generic continuation instruction never constitutes destructive or phase-transition authority.
+
 ## 22. Documentation synchronization
 
-When architecture, deployment, Profile policy, RBAC, network exposure, backup, upgrade behavior, capability registry, upstream integration, Ontology operation contract, or current v2 implementation stage changes materially, update the corresponding documentation/registry in the same change.
+When architecture, project phase, deployment, Profile policy, RBAC, network exposure, backup, upgrade behavior, capability registry, upstream integration, Ontology operation contract, or current v2 phase changes materially, update the corresponding documentation/registry in the same change.
 
-Do not allow runtime reality or machine-readable capability contracts to drift silently from prose standards.
+For a phase transition, update `state/PROJECT-PHASE.yaml` first and then synchronize `docs/V2-PHASE-STATUS.md` and any phase-dependent wording.
+
+Do not allow runtime reality, phase authority, or machine-readable capability contracts to drift silently from prose standards.
 
 ## 23. Completion semantics
+
+These readiness semantics describe deployed systems and become actionable only when implementation/deployment is authorized.
 
 ### Core Ready
 
@@ -411,15 +496,19 @@ Configured Ready remains PASS and applicable production recovery, security, acce
 
 Never use vague `complete` without naming the achieved readiness level.
 
+Do not confuse `DESIGN COMPLETE` or a frozen design with `CORE READY`, `CONFIGURED READY`, or `PRODUCTION READY`.
+
 ## 24. Acceptance discipline
 
-Use `docs/ACCEPTANCE-TESTS.md` and provider-specific acceptance documents according to actual enabled capabilities.
+During design, acceptance documents may be authored and offline/static tests may be executed without activating providers.
 
-Do not instantiate an optional feature to satisfy a test section. Conversely, do not skip the test for a capability that the company configuration enabled.
+During an authorized implementation/deployment, use `docs/ACCEPTANCE-TESTS.md` and provider-specific acceptance documents according to actual enabled capabilities.
 
-Evidence matters more than configuration intent: test the real employee client, actual MCP retrieval, actual authorization boundary, actual provider behavior for enabled operational integrations, actual harmless Cron/Kanban/coding run when enabled, and actual restore for Production Ready.
+Do not instantiate an optional feature to satisfy a test section. Conversely, do not skip the test for a capability that the company configuration enabled during an authorized implementation.
 
-Offline/unit tests are necessary where defined but do not replace provider/runtime authorization tests.
+Runtime evidence matters more than configuration intent once runtime work is authorized: test the real employee client, actual MCP retrieval, actual authorization boundary, actual provider behavior for enabled operational integrations, actual harmless Cron/Kanban/coding run when enabled, and actual restore for Production Ready.
+
+Offline/unit tests are necessary where defined but do not replace provider/runtime authorization tests, and they do not authorize those runtime tests.
 
 ## 25. Upstream mismatch rule
 
@@ -430,16 +519,17 @@ If a repository command/config field no longer matches the selected upstream rel
 3. preserve this repository's architecture/security intent;
 4. make the smallest compatible adjustment;
 5. update the relevant adapter/playbook;
-6. record deployed reality.
+6. record deployed reality when applicable.
 
-Do not reinterpret implementation drift as permission to redesign the system.
+Do not reinterpret implementation drift as permission to redesign the system or cross the current phase boundary.
 
 ## 26. Final operating principle
 
-Build the smallest system that completely satisfies the configured company requirement and requested readiness level using mature upstream capabilities.
+Build the smallest system that completely satisfies the configured company requirement and requested readiness level using mature upstream capabilities **inside the phase explicitly authorized by the human**.
 
 Do not over-engineer.
 Do not under-engineer.
 Do not silently redesign.
 Do not silently downgrade enabled capabilities.
+Do not infer a phase transition from momentum or continuation wording.
 Verify before declaring success.
