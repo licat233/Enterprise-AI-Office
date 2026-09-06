@@ -165,7 +165,6 @@ capabilities:
       - docs/V2-EMAIL-DESIGN.md
       - docs/V2-DESIGN-REVIEW.md
       - docs/V2-IMPLEMENTATION-PLAN.md
-      - docs/V2-IMPLEMENTATION-STATUS.md
       - docs/ONTOLOGY.md
       - ontology/examples/email-communication.yaml
       - infrastructure/email/tencent-exmail/README.md
