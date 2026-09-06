@@ -71,6 +71,7 @@ for path in \
   docs/V2-IMPLEMENTATION-PLAN.md \
   docs/V2-INSTALLATION-ARCHITECTURE.md \
   docs/V2-CONFIG-PROTECTED-INPUTS.md \
+  docs/V2-STAGE-CONTRACTS.md \
   config/company.example.yaml \
   config/company.private.example.yaml \
   config/capabilities.yaml \
@@ -151,6 +152,7 @@ require_text docs/V2-PHASE-STATUS.md 'SYSTEM DESIGN: COMPLETE' 'v2 status preser
 require_text docs/V2-PHASE-STATUS.md 'REAL DEPLOYMENT TASK: INACTIVE' 'v2 status says real deployment inactive'
 require_text docs/V2-INSTALLATION-ARCHITECTURE.md 'INSTALLATION ARCHITECTURE FROZEN' 'v2 ID-1 installation architecture is frozen'
 require_text docs/V2-CONFIG-PROTECTED-INPUTS.md 'CONFIG / SECRET INPUT CONTRACT FROZEN' 'v2 ID-2 protected-input contract is frozen'
+require_text docs/V2-STAGE-CONTRACTS.md 'STAGE CONTRACTS FROZEN' 'v2 ID-3 stage contracts are frozen'
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
@@ -166,7 +168,11 @@ require_text config/company.example.yaml 'send_requires_human_approval: true' 'E
 require_text config/company.private.example.yaml 'client_credential_ref:' 'Private overlay uses symbolic email credential reference'
 require_text config/company.private.example.yaml 'email.send' 'Private overlay demonstrates operation-scoped mailbox grants'
 require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Email capability has protected-input contract'
+require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
+require_text config/capabilities.yaml 'mandatory_when_enabled:' 'Email capability declares mandatory stage closure'
+require_text config/capabilities.yaml 'stage_4_governed_send' 'Email capability requires governed-send stage'
 require_text config/capabilities.yaml 'required_secret_classes:' 'Email capability declares required secret classes'
+require_text docs/acceptance/TENCENT-EXMAIL.md 'Stage 1 — read-only email' 'Provider acceptance maps tests to v2 stages'
 require_text config/capabilities.yaml 'infrastructure/weknora/PROVISIONING.md' 'Core capability has WeKnora provisioning path'
 require_text config/capabilities.yaml 'infrastructure/open-webui/PROVISIONING.md' 'Core capability has Open WebUI provisioning path'
 require_text config/capabilities.yaml 'infrastructure/hermes/features/MESSAGING.md' 'Messaging capability has pinned execution path'
