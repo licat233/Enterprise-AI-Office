@@ -171,6 +171,7 @@ capabilities:
       - docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
       - docs/V2-GOVERNANCE-RUNTIME.md
       - docs/V2-SEND-RECONCILIATION.md
+      - docs/V2-RECOVERY-CLEAN-HOST.md
       - docs/ONTOLOGY.md
       - ontology/examples/email-communication.yaml
       - config/company.private.example.yaml
@@ -180,8 +181,11 @@ capabilities:
       - infrastructure/email/governance/README.md
       - infrastructure/email/governance/schema.sql
       - infrastructure/email/governance/migrations/002_send_reconciliation.sql
+      - infrastructure/email/governance/backup_state.py
+      - infrastructure/email/governance/restore_state.py
       - infrastructure/email/governance/test_schema.py
       - infrastructure/email/governance/test_send_reconciliation.py
+      - infrastructure/email/governance/test_recovery.py
       - infrastructure/email/tencent-exmail/README.md
       - infrastructure/email/tencent-exmail/imap_readonly_mcp.py
       - infrastructure/email/tencent-exmail/imap.env.example
@@ -189,6 +193,8 @@ capabilities:
       - infrastructure/email/tencent-exmail/smtp_send_adapter.py
       - infrastructure/email/tencent-exmail/smtp.env.example
       - infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
+      - scripts/backup.sh
+      - scripts/restore.sh
     stage_closure:
       contract: docs/V2-STAGE-CONTRACTS.md
       mandatory_when_enabled:
@@ -218,6 +224,7 @@ capabilities:
       - governance state/log path or accepted derived default
       - symbolic mailbox client-credential reference
       - protected operator/evidence path for reconciliation
+      - Governance backup/retention policy or accepted company default when production-ready is requested
     required_secret_classes:
       - specialist-profile-credential
       - open-webui-governance-forwarder-credential
@@ -256,6 +263,16 @@ capabilities:
       ambiguous_outcome_behavior: RECONCILIATION_REQUIRED
       blind_retry_after_unknown: forbidden
       retry_identity: same logical_send_id + Message-ID + Date + transport_payload_hash
+    recovery_clean_host_contract:
+      document: docs/V2-RECOVERY-CLEAN-HOST.md
+      governance_backup_helper: infrastructure/email/governance/backup_state.py
+      governance_restore_helper: infrastructure/email/governance/restore_state.py
+      offline_recovery_test: infrastructure/email/governance/test_recovery.py
+      full_backup_helper: scripts/backup.sh
+      isolated_restore_helper: scripts/restore.sh
+      unresolved_attempt_after_restore: RECONCILIATION_REQUIRED
+      installer_business_side_effects_on_rerun: forbidden
+      v1_preservation_required: true
     acceptance:
       document: docs/acceptance/TENCENT-EXMAIL.md
       section: Tencent Enterprise Mail Integration Acceptance
@@ -273,6 +290,7 @@ capabilities:
       - deterministic provider adapter test result
       - deterministic governance schema/hash test result
       - deterministic send/reconciliation schema test result
+      - deterministic Governance backup/restore/recovery test result
       - Stage 0–4 closure results
       - optional Stage 5/6 closure results when requested
       - positive and negative identity/mailbox authorization result
@@ -282,6 +300,9 @@ capabilities:
       - stable logical send Message-ID and transport payload hash evidence
       - send attempt / normalized outcome evidence
       - reconciliation evidence/reference when applicable
+      - Governance backup generation / isolated restore result when required
+      - installer second-run convergence result
+      - v2 rollback/degrade + v1 preservation result
       - read-only behavior result
       - approval-binding result
       - send/reconciliation result
@@ -345,8 +366,11 @@ production_controls:
   production.backup_restore:
     implementation:
       - docs/BACKUP-RESTORE.md
+      - docs/V2-RECOVERY-CLEAN-HOST.md
       - scripts/backup.sh
       - scripts/restore.sh
+      - infrastructure/email/governance/backup_state.py
+      - infrastructure/email/governance/restore_state.py
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       section: Backup and restore
@@ -355,6 +379,7 @@ production_controls:
     implementation:
       - docs/OPERATIONS.md
       - docs/DEPLOYMENT.md
+      - docs/V2-RECOVERY-CLEAN-HOST.md
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       section: Startup/recovery
