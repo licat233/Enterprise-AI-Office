@@ -1,7 +1,7 @@
 # Enterprise AI Office v2 — Communication & Follow-up Scope
 
-Status: approved scope / implementation not yet complete
-Version: 0.1.0
+Status: approved scope / system design complete / runtime not authorized
+Version: 0.2.0
 Date: 2026-09-06
 
 This document defines the deliberately narrow scope for Enterprise AI Office v2.
@@ -79,19 +79,28 @@ v2 may add only the following capability classes.
 
 Email is the only new external business-system type approved for the initial v2 implementation.
 
-The selected integration should support the minimum useful operation surface:
+The minimum useful operation surface is:
 
 ```text
-search/read relevant messages or threads
-get one thread/message
-prepare a draft reply
-send only through an approved Named Action
-return the authoritative provider result/reference
+search_email
+get_email
+prepare_reply_draft
+approve_reply_draft
+send_approved_reply
 ```
 
-The exact provider is not selected by this document.
+The minimum operational object model is:
 
-Before implementation, the adopting company must identify the real email system and authorize the required account/application access. Do not invent Gmail, Microsoft 365, IMAP/SMTP, or another provider merely to continue implementation.
+```text
+Mailbox
+EmailMessage
+DraftReply
+SendApproval
+```
+
+A first-class `EmailThread` or `FollowUp` object is not required in the initial v2 model. Thread context may be reconstructed from provider identifiers/headers, and simple follow-up schedule state belongs to Hermes Cron.
+
+For the ARMOR reference design, Tencent Enterprise Mail is the selected reference provider. This is a blueprint reference choice, not evidence that a real mailbox is connected. An adopting company must identify and authorize its real email provider/system before real deployment.
 
 ### 3.2 One enterprise messaging surface — optional v2 employee entry point
 
@@ -114,28 +123,11 @@ track a persistent multi-step work item when Kanban is genuinely useful
 
 Do not introduce n8n, another workflow engine, or a second scheduler for v2.
 
-### 3.4 Ontology governance for the real operational loop
+### 3.4 Ontology governance for the operational loop
 
-The Enterprise Ontology Contract in `docs/ONTOLOGY.md` becomes applicable when the selected email integration exposes governed reads or writes.
+The Enterprise Ontology Contract in `docs/ONTOLOGY.md` governs the selected email workflow at design level.
 
-Use it to model only the objects and operations required by the real v2 workflow, for example:
-
-```text
-EmailThread
-EmailMessage
-DraftReply
-FollowUp
-```
-
-and operations such as:
-
-```text
-search_email
-read_thread
-draft_reply
-send_reply
-schedule_follow_up
-```
+Use it only for the objects, reads, approvals, actions, authority, and audit evidence required by the real v2 workflow.
 
 Do not create a general-purpose Ontology Runtime merely because v2 uses the contract.
 
@@ -161,6 +153,7 @@ custom Agent framework
 graph database / generic Ontology Runtime
 multiple new messaging platforms
 multiple new external business systems
+autonomous customer-facing send
 ```
 
 A real blocking requirement may justify a separate architecture decision, but these items must not be absorbed into v2 merely because implementation work has started.
@@ -174,18 +167,20 @@ v2 follows these hard scope limits.
 1. **One new external business-system type:** email.
 2. **At most one new employee messaging surface** in the milestone.
 3. **No new workflow engine:** use Hermes Cron/Kanban where sufficient.
-4. **Human-in-the-loop by default for externally visible writes.**
+4. **Human-in-the-loop for externally visible email sends.**
 5. **No autonomous customer-facing send in the initial v2 milestone.**
 6. **No generic write primitive exposed to ordinary Agents.**
-7. **No provider assumption before the real company system is selected.**
+7. **Reference-provider selection does not authorize a real provider connection.**
 8. **No attempt to model every department or business object.**
 9. **A requirement that materially expands infrastructure or trust boundaries moves to a later milestone unless it is necessary to complete the single v2 operational loop.**
 
 ---
 
-## 6. v2 implementation sequence
+## 6. Later installation sequence
 
-### Stage A — Select the real email system and authority boundary
+When the blueprint lifecycle is explicitly advanced to `installation_design`, the approved system design should be translated into an installation plan in this order.
+
+### Stage A — Resolve the real email system and authority boundary
 
 Resolve:
 
@@ -200,22 +195,18 @@ credential model
 provider-native audit/history
 ```
 
-If these are unknown, report:
-
-```text
-BLOCKED — REQUIRED INPUT: email system / authorization
-```
-
-Do not design against an imaginary provider.
+Do not infer that the ARMOR reference provider or any prototype automatically applies to another adopting company.
 
 ### Stage B — Read-only communication path
 
 First prove the least-risk path:
 
 ```text
+trusted HumanActor
++
 Hermes authorized Profile
 → provider-supported read interface
-→ search/read a bounded mailbox/thread scope
+→ search/read a bounded mailbox/message scope
 → return communication context without mutation
 ```
 
@@ -223,38 +214,28 @@ Acceptance must verify real authorization boundaries, not only successful API ca
 
 ### Stage C — Draft preparation
 
-Allow the Agent to prepare a response while keeping the draft non-sent.
+Allow the Agent to prepare an EAO-owned reviewable DraftReply revision while keeping the operation non-sent.
 
-A draft may be represented in provider-native draft state or another explicitly approved state model. The source of truth must be clear.
-
-### Stage D — Governed send Action
+### Stage D — Governed approval/send
 
 Before the first real send capability is enabled:
 
-- define the relevant Ontology objects/reads/actions;
-- define trusted actor propagation;
-- define the final-content approval binding;
-- define provider/tool binding;
-- define idempotency/failure behavior;
+- resolve trusted HumanActor propagation;
+- enforce Mailbox-scoped read/draft/approve/send permission;
+- persist exact DraftReply revision/hash evidence;
+- create deterministic SendApproval evidence;
+- bind `send_approved_reply` to the exact approved draft;
+- define idempotency/failure/reconciliation behavior;
 - define audit evidence;
 - add acceptance tests.
 
 The minimum rule is:
 
-> the exact final message content being sent must be known to and explicitly approved by the authorized human actor.
+> the exact final message content being sent must be known to and explicitly approved by an authorized human actor.
 
 ### Stage E — One messaging entry point
 
-If the company has selected a Hermes-supported messaging platform, enable only that platform and validate:
-
-```text
-identity/allowlist
-Profile routing
-message delivery
-no privilege expansion
-```
-
-This stage may proceed after the email operational boundary is understood; it must not delay the core email loop if the messaging credentials are unavailable.
+If the company has selected a Hermes-supported messaging platform, enable only that platform and validate identity/routing without creating a second email-authorization path.
 
 ### Stage F — Narrow follow-up automation
 
@@ -266,29 +247,33 @@ Automation should begin with reminders or summaries rather than autonomous exter
 
 ## 7. Security and authority model
 
-v2 must preserve the existing layered boundary:
+v2 preserves the layered authorization boundary:
 
 ```text
-Human identity / RBAC
+trusted HumanActor
++
+Mailbox-scoped human permission
 +
 Hermes Profile capability
 +
-Ontology Object/Read/Action policy where applicable
+Ontology Object/Read/Action policy
 +
-provider-native authorization
+provider credential scope
++
+valid exact approval where required
 ```
 
-No layer should be treated as a substitute for the others.
+No layer substitutes for the others.
 
 Specifically:
 
 - a Profile API key is not proof of end-user identity;
-- natural-language instructions are not authorization;
+- natural-language instructions are not formal approval evidence;
 - UI visibility is not backend enforcement;
 - provider credentials must be least-privilege;
-- externally visible sends require a governed action path;
-- provider-native logs remain authoritative evidence of provider execution;
-- Enterprise AI Office audit should link its decision to the provider result rather than duplicate the entire mailbox.
+- externally visible sends require a governed Named Action;
+- provider-native logs/results remain authoritative evidence of provider execution;
+- Enterprise AI Office audit links its decision to provider evidence rather than duplicating the entire mailbox.
 
 ---
 
@@ -296,7 +281,7 @@ Specifically:
 
 Do not add a generic placeholder `operational_integration` capability.
 
-Once the real email provider/system is selected, add or extend a concrete conditional capability in `config/capabilities.yaml` with:
+For each real adopting deployment, the selected email provider/system must have a concrete conditional capability with:
 
 ```text
 business purpose
@@ -319,7 +304,7 @@ Messaging, Cron, and Kanban should continue to use their existing capability ent
 
 ## 9. v2 acceptance boundary
 
-The v2 milestone is complete only when one real communication/follow-up loop has been demonstrated with evidence.
+The v2 deployed milestone is complete only when one real communication/follow-up loop has been demonstrated with evidence after a separate deployment task is explicitly authorized.
 
 Minimum acceptance:
 
@@ -327,11 +312,11 @@ Minimum acceptance:
 [ ] v1 baseline remains healthy
 [ ] real email provider/system is explicitly selected and recorded
 [ ] least-privilege credentials/identity boundary is documented
-[ ] authorized Profile can read only approved communication scope
+[ ] authorized HumanActor/Profile can read only approved communication scope
 [ ] unauthorized read path fails closed
 [ ] Agent can prepare a useful draft using communication context + WeKnora evidence
-[ ] final outbound content requires explicit human approval
-[ ] send occurs through a narrow Named Action / provider binding
+[ ] final outbound content requires deterministic explicit human approval
+[ ] send occurs through send_approved_reply / narrow provider binding
 [ ] stale or changed content cannot reuse prior approval
 [ ] duplicate/retry behavior is understood and tested
 [ ] provider result/reference is captured
