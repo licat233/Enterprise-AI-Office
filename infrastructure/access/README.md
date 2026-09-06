@@ -7,6 +7,8 @@ This playbook covers two optional boundaries:
 
 Neither is required for a local/LAN Core Ready deployment. Enable only when selected by company configuration.
 
+For the first validated Open WebUI `v0.11.3` OIDC execution path, use [`OPEN-WEBUI-OIDC.md`](OPEN-WEBUI-OIDC.md) together with this policy-level playbook. Do not use that version-specific file unchanged after an Open WebUI upgrade without re-verification.
+
 ## 1. Remote/private browser access
 
 When `capabilities.remote_access.enabled: true`, the company configuration must select one access method rather than asking the deployment agent to stack several products.
@@ -65,7 +67,7 @@ When `capabilities.sso.enabled: true`, the company configuration must provide or
 
 Open WebUI versions may support OAuth/OIDC and other identity integrations. Use the selected pinned Open WebUI release's native supported mechanism before adding a custom authentication proxy or fork.
 
-The deployment agent must inspect the exact release documentation/configuration before writing identity settings; provider-specific endpoints, claims, and callback URLs are not universal defaults.
+For the validated `v0.11.3` baseline, `OPEN-WEBUI-OIDC.md` provides the verified native environment/configuration path. For another selected release, verify that release before writing identity settings; provider-specific endpoints, claims, and callback URLs are not universal defaults.
 
 ### Required identity inputs
 
@@ -99,7 +101,7 @@ enterprise identity
 → Hermes Profile
 ```
 
-Where native group/claim synchronization is supported and validated, map only the required groups. Otherwise use a controlled provisioning process. Do not automatically map every IdP group into AI permissions.
+Where native group/claim synchronization is supported and validated, map only the required groups. Otherwise use the controlled provisioning process in `infrastructure/open-webui/PROVISIONING.md`. Do not automatically map every IdP group into AI permissions.
 
 ### Local fallback / break-glass
 
@@ -128,6 +130,7 @@ If hermes-webui is enabled remotely:
 ### SSO
 
 ```text
+[ ] version-specific execution path matches the pinned Open WebUI release
 [ ] authorized enterprise user can sign in
 [ ] unauthorized user/domain cannot sign in
 [ ] intended groups/Assistant access are correct after login
