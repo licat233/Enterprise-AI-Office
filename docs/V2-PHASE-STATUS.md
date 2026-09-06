@@ -1,7 +1,7 @@
 # Enterprise AI Office v2 — Blueprint Status
 
-Status: installation design active / ID-1 through ID-3 complete / real deployment task inactive
-Version: 3.2.0
+Status: installation design active / ID-1 through ID-4 complete / real deployment task inactive
+Version: 3.3.0
 Date: 2026-09-06
 
 The authoritative machine-readable repository state is:
@@ -22,7 +22,8 @@ INSTALLATION DESIGN: ACTIVE
 ID-1 INSTALLATION ARCHITECTURE: COMPLETE
 ID-2 CONFIG / PROTECTED INPUTS: COMPLETE
 ID-3 STAGE / CAPABILITY CLOSURE: COMPLETE
-NEXT WORK PACKAGE: ID-4 TRUSTED IDENTITY / MAILBOX AUTHORIZATION
+ID-4 TRUSTED IDENTITY / MAILBOX AUTHORIZATION: COMPLETE
+NEXT WORK PACKAGE: ID-5 GOVERNANCE RUNTIME
 BLUEPRINT VALIDATION: NOT YET OPENED
 REAL DEPLOYMENT TASK: INACTIVE
 ```
@@ -63,7 +64,7 @@ governance audit
 optional internal follow-up
 ```
 
-The core email model remains:
+Core email model:
 
 ```text
 Mailbox
@@ -76,40 +77,14 @@ Installation Design must implement this contract without reopening scope merely 
 
 ---
 
-## 3. Installation Design mission
-
-Installation Design must turn the frozen system design into a blueprint a fresh capable AI Engineering Agent can follow.
-
-It must answer at least:
-
-```text
-What host/runtime topology is expected?
-What existing v1 baseline must be preserved?
-What company-private inputs are required?
-Which inputs are secrets and where are they supplied?
-What configuration schemas/templates are authoritative?
-In what order are capabilities provisioned?
-Which upstream components/adapters are used?
-How is trusted HumanActor identity propagated?
-How are mailbox-scoped permissions enforced?
-Where do DraftReply / SendApproval / audit state persist?
-How is send_approved_reply bound to the provider safely?
-How are idempotency and ambiguous outcomes reconciled?
-How is each stage removed or rolled back?
-How does a clean-host installer prove readiness?
-What evidence closes each capability and the whole installation?
-```
-
----
-
-## 4. Installation Design working order and progress
+## 3. Installation Design progress
 
 ```text
 ID-1  Installation architecture + v1 preservation     COMPLETE
 ID-2  Company configuration + protected inputs        COMPLETE
 ID-3  Stage sequencing + capability closure           COMPLETE
-ID-4  Trusted identity + mailbox authorization        NEXT
-ID-5  Draft / Approval governance runtime             NOT STARTED
+ID-4  Trusted identity + mailbox authorization        COMPLETE
+ID-5  Draft / Approval governance runtime             NEXT
 ID-6  Governed send + reconciliation                  NOT STARTED
 ID-7  Rollback / recovery / clean-host acceptance     NOT STARTED
 ```
@@ -126,52 +101,50 @@ ID-2 → docs/V2-CONFIG-PROTECTED-INPUTS.md
 
 ID-3 → docs/V2-STAGE-CONTRACTS.md
        STAGE CONTRACTS FROZEN
-```
 
-Do not parallelize optional capabilities merely to make the blueprint appear comprehensive.
+ID-4 → docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
+       infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md
+       IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN
+```
 
 ---
 
-## 5. Configuration model frozen by ID-2
+## 4. Identity / authorization path frozen by ID-4
 
-Installation inputs are separated into:
+The reference installation no longer relies on Hermes to relay HumanActor identity into downstream MCP calls.
 
-```text
-Public reusable blueprint
-→ repository contracts/templates
-
-Company-private non-secret desired state
-→ protected private overlay such as private/company.yaml
-
-Protected secrets
-→ external/native protected secret mechanism
-
-Observed runtime state
-→ actual runtime + deployment state record
-```
-
-Environment files are runtime binding templates, not a second desired-state authority.
-
-For v2 Email, the private desired-state model uses:
+Reference path:
 
 ```text
-communication_profile
-mailboxes
-mailbox_grants
-controlled_test_recipients
-email_governance state/log paths
-symbolic secret_refs
+Employee browser
+→ authenticated Open WebUI session
+→ Communication Assistant
+→ Hermes communication Profile for reasoning
+→ Open WebUI server-side Email Governance tool execution
+→ eao-email-governance
+→ mailbox-scoped authorization
+→ Email Provider
 ```
 
-No matching mailbox grant means deny, and `send_requires_human_approval: true` is a frozen v2 security invariant rather than a company override.
+Open WebUI is the trusted HumanActor source and server-side tool forwarder.
+
+Canonical HumanActor:
+
+```text
+open-webui:<Open WebUI user id>
+```
+
+The dedicated Open WebUI → Governance connection uses protected service authentication and server-side current-user/group context. Browser/model-supplied actor or group values are never trusted authorization inputs.
+
+Company logical groups are deterministically mapped to runtime Open WebUI group IDs; governance evaluates direct + current group mailbox grants additively, and no matching grant means deny.
+
+The old direct Hermes Email MCP registration template was removed because it would require unproven transitive identity propagation. Hermes remains the isolated AI role/reasoning boundary; Open WebUI's native server-side tool mechanism carries the HumanActor context.
 
 ---
 
-## 6. Stage / capability closure frozen by ID-3
+## 5. Stage / capability closure
 
-`docs/V2-STAGE-CONTRACTS.md` is the detailed Stage 0–6 installation contract.
-
-Core dependency chain:
+Core dependency chain remains:
 
 ```text
 Stage 0  V1 BASELINE VERIFIED
@@ -185,61 +158,36 @@ Stage 3  APPROVAL GATE PASS
 Stage 4  GOVERNED EMAIL LOOP PASS
 ```
 
-Stages 0–4 are mandatory when the v2 Email capability is enabled.
+Stage 5/6 remain conditional on configured Cron/follow-up and Messaging respectively.
 
-Optional extensions:
-
-```text
-Stage 5  SIMPLE FOLLOW-UP PASS
-→ only when communication follow-up/Cron is configured
-
-Stage 6  ONE MESSAGING SURFACE PASS
-→ only when Messaging is configured
-```
-
-Every applicable Stage now defines:
-
-```text
-preconditions
-required inputs
-provisioning / activation
-idempotency boundary
-acceptance
-required evidence
-rollback / removal
-result
-```
-
-Common result vocabulary:
-
-```text
-PASS — <stage milestone>
-BLOCKED — REQUIRED INPUT: <specific input or authority>
-FAIL — <specific implementation/security/acceptance boundary>
-NOT REQUESTED — capability disabled by company configuration
-```
-
-A Stage is an installation/capability closure gate, not a new runtime workflow object or service.
+A Stage is an installation/capability closure gate, not a runtime workflow engine.
 
 ---
 
-## 7. Next work package — ID-4
+## 6. Next work package — ID-5
 
-ID-4 must freeze how trusted HumanActor identity and mailbox-scoped authorization travel through the installed system:
+ID-5 now closes the smallest deterministic governance runtime behind the trusted identity path.
+
+It must freeze:
 
 ```text
-Open WebUI authenticated user
-→ trusted identity assertion
-→ Communication Assistant / Hermes Profile request
-→ eao-email-governance
-→ mailbox-scoped read/draft/approve/send decision
+SQLite schema / migrations
+DraftReply persistence
+canonical revision + content_hash
+SendApproval persistence
+stale / revoke / consume behavior
+trusted approval Action binding
+single logical-send claim boundary
+append-oriented governance evidence
+governance service API/MCP surface
+restart/concurrency/transaction behavior
 ```
 
-It must select the supported Open WebUI/Hermes mechanism, prevent spoofable client identity headers, distinguish HumanActor from Profile/service credential, and define fail-closed behavior when identity/group/grant resolution is unavailable.
+It must not create a generic workflow platform or duplicate provider mailbox state.
 
 ---
 
-## 8. Explicit boundary: not a real deployment
+## 7. Explicit boundary: not a real deployment
 
 During Installation Design:
 
@@ -253,40 +201,26 @@ REAL SMTP/API SEND: NOT AUTHORIZED
 REAL MAC STUDIO MUTATION: NOT AUTHORIZED
 ```
 
-Allowed work includes sanitized templates, scripts, adapters, synthetic fixtures, isolated rehearsals, acceptance contracts, and secret-input schemas **without real secret values**.
-
-A real deployment remains a separate consumer activity and requires both:
-
-```text
-explicit human deployment request
-+
-explicit target
-```
+A real deployment remains a separate consumer activity requiring an explicit deployment request and explicit target.
 
 ---
 
-## 9. Scope discipline
+## 8. Scope discipline
 
-Installation friction does not automatically justify changing System Design.
-
-Prefer, in order:
+Prefer:
 
 ```text
-existing ARMOR/EAO capability
+existing EAO capability
 → upstream-supported capability
 → thin adapter
 → minimum new component only if unavoidable
 ```
 
-Do not introduce a new identity platform, workflow engine, CRM, graph runtime, scheduler, audit platform, or provider abstraction merely because it would make implementation theoretically cleaner.
-
-If an actual structural contradiction in System Design is discovered, record it explicitly and reopen only the affected design contract.
+Do not introduce a new IAM platform, workflow engine, CRM, graph runtime, scheduler, audit platform, or provider abstraction merely for implementation elegance.
 
 ---
 
-## 10. Completion language
-
-Repository/blueprint milestones:
+## 9. Completion language
 
 ```text
 SYSTEM DESIGN COMPLETE        ← achieved
