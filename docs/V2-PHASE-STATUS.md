@@ -1,7 +1,7 @@
 # Enterprise AI Office v2 — Blueprint Status
 
-Status: installation design active / system design complete / real deployment task inactive
-Version: 3.0.0
+Status: installation design active / ID-1 and ID-2 complete / real deployment task inactive
+Version: 3.1.0
 Date: 2026-09-06
 
 The authoritative machine-readable repository state is:
@@ -19,6 +19,9 @@ RELEASE TRACK: v2
 BLUEPRINT PHASE: INSTALLATION DESIGN
 SYSTEM DESIGN: COMPLETE
 INSTALLATION DESIGN: ACTIVE
+ID-1 INSTALLATION ARCHITECTURE: COMPLETE
+ID-2 CONFIG / PROTECTED INPUTS: COMPLETE
+NEXT WORK PACKAGE: ID-3 STAGE / CAPABILITY CLOSURE
 BLUEPRINT VALIDATION: NOT YET OPENED
 REAL DEPLOYMENT TASK: INACTIVE
 ```
@@ -98,34 +101,73 @@ What evidence closes each capability and the whole installation?
 
 ---
 
-## 4. Installation Design working order
-
-The baseline working sequence is:
+## 4. Installation Design working order and progress
 
 ```text
-1. Installation architecture and v1 preservation boundary
-2. Company configuration + protected-input contract
-3. Stage sequencing and capability closure
-4. Read-only email provisioning/binding
-5. Trusted identity + mailbox authorization propagation
-6. Draft / Approval persistence and deterministic approval gate
-7. Governed send provider binding + idempotency/reconciliation
-8. Audit persistence and evidence model
-9. Follow-up / optional messaging installation contracts
-10. Rollback, recovery, clean-host setup, acceptance
-11. Installation Design final review
-12. INSTALLATION DESIGN COMPLETE
+ID-1  Installation architecture + v1 preservation     COMPLETE
+ID-2  Company configuration + protected inputs        COMPLETE
+ID-3  Stage sequencing + capability closure           NEXT
+ID-4  Trusted identity + mailbox authorization        NOT STARTED
+ID-5  Draft / Approval governance runtime             NOT STARTED
+ID-6  Governed send + reconciliation                  NOT STARTED
+ID-7  Rollback / recovery / clean-host acceptance     NOT STARTED
+```
+
+Completed contracts:
+
+```text
+ID-1 → docs/V2-INSTALLATION-ARCHITECTURE.md
+       INSTALLATION ARCHITECTURE FROZEN
+
+ID-2 → docs/V2-CONFIG-PROTECTED-INPUTS.md
+       config/company.private.example.yaml
+       CONFIG / SECRET INPUT CONTRACT FROZEN
 ```
 
 Do not parallelize optional capabilities merely to make the blueprint appear comprehensive.
 
 ---
 
-## 5. Existing plan artifact
+## 5. Configuration model now frozen by ID-2
 
-`docs/V2-IMPLEMENTATION-PLAN.md` is now an active Installation Design input and working blueprint rather than a future-phase note.
+Installation inputs are separated into:
 
-Its existing Stage 0–6 structure remains useful:
+```text
+Public reusable blueprint
+→ repository contracts/templates
+
+Company-private non-secret desired state
+→ protected private overlay such as private/company.yaml
+
+Protected secrets
+→ external/native protected secret mechanism
+
+Observed runtime state
+→ actual runtime + deployment state record
+```
+
+Environment files are runtime binding templates, not a second desired-state authority.
+
+For v2 Email, the private desired-state model now uses:
+
+```text
+communication_profile
+mailboxes
+mailbox_grants
+controlled_test_recipients
+email_governance state/log paths
+symbolic secret_refs
+```
+
+No matching mailbox grant means deny, and `send_requires_human_approval: true` is a frozen v2 security invariant rather than a company override.
+
+---
+
+## 6. Existing staged plan
+
+`docs/V2-IMPLEMENTATION-PLAN.md` remains the active Installation Design working blueprint.
+
+Its Stage 0–6 sequence remains:
 
 ```text
 Stage 0  preserve/verify v1 baseline
@@ -137,11 +179,22 @@ Stage 5  optional simple follow-up
 Stage 6  optional one messaging surface
 ```
 
-Installation Design must now add the missing installation contracts around those stages: configuration, private inputs, provisioning, identity propagation, persistence, reconciliation, rollback, recovery, and acceptance evidence.
+ID-3 now needs to turn these stages into explicit installation capability contracts covering:
+
+```text
+preconditions
+required inputs
+provisioning/reconciliation steps
+idempotency expectations
+acceptance evidence
+state records
+rollback/removal path
+stage gate to the next capability
+```
 
 ---
 
-## 6. Explicit boundary: not a real deployment
+## 7. Explicit boundary: not a real deployment
 
 During Installation Design:
 
@@ -167,7 +220,7 @@ explicit target
 
 ---
 
-## 7. Scope discipline
+## 8. Scope discipline
 
 Installation friction does not automatically justify changing System Design.
 
@@ -186,7 +239,7 @@ If an actual structural contradiction in System Design is discovered, record it 
 
 ---
 
-## 8. Completion language
+## 9. Completion language
 
 Repository/blueprint milestones:
 
