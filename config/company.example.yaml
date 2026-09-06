@@ -1,8 +1,9 @@
 # Enterprise AI Office — generic company configuration example
 #
-# Copy this file into a company-private deployment layer and replace placeholders.
-# Do NOT commit production secrets here.
-# This is declarative deployment intent for humans and AI agents.
+# This is the reusable PUBLIC desired-state schema/example. Real company-private
+# values should normally live in a protected overlay such as `private/company.yaml`
+# using `config/company.private.example.yaml` as the shape reference.
+# Never commit production secrets here or in the private YAML overlay.
 
 schema_version: 2
 
@@ -56,6 +57,8 @@ agent_runtime:
 
 # `general` is the baseline employee-facing Profile. The Hermes default/admin
 # Profile belongs to the control plane and is not listed as an employee Profile.
+# Additional Profiles are enabled only when an actual capability/risk boundary
+# requires them; v2 email uses a separate communication Profile when enabled.
 profiles:
   - id: general
     display_name: General Assistant
@@ -122,15 +125,14 @@ capabilities:
     routes: []
 
   # Email is a governed operational integration, not part of the core baseline.
-  # A provider-specific capability closes only after the real provider is selected.
+  # Real mailbox/user/group values belong in the company-private overlay.
   email:
     enabled: false
     provider: null # currently documented provider playbook: tencent-exmail
-    pilot_mailboxes: []
-    allowed_profiles: []
-    authorized_groups: []
-    read_folders:
-      - INBOX
+    communication_profile: null
+    mailboxes: []
+    mailbox_grants: []
+    controlled_test_recipients: []
     send_requires_human_approval: true
     attachments_enabled: false
 
@@ -150,6 +152,13 @@ capabilities:
   employee_long_term_memory:
     enabled: false
     profiles: []
+
+# v2 EAO-owned email governance persistence. Null paths are derived from
+# deployment.runtime_root by the later installation contract when email is enabled.
+email_governance:
+  state_path: null
+  technical_log_path: null
+  retention_policy: company-defined
 
 production:
   backup:
@@ -185,8 +194,8 @@ models:
       model: null
 
 # Secret classes are references only. The deployment agent must resolve them to
-# the exact native secret variables/credential stores required by selected
-# upstream providers and capabilities; never put real values here.
+# exact native secret variables/credential stores required by selected upstream
+# providers/components. Real values never belong in desired-state YAML.
 secrets:
   policy: external-protected-storage
   required_classes:
@@ -201,3 +210,7 @@ secrets:
     - messaging-platform-credentials
     - email-mailbox-client-credentials
     - sso-client-credentials
+
+# A private overlay may add symbolic secret refs with class/consumer/native-binding
+# metadata. See config/company.private.example.yaml. Never put secret values here.
+secret_refs: {}
