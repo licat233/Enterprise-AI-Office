@@ -3,7 +3,7 @@ kind: enterprise-ontology-example
 
 metadata:
   id: email-communication
-  version: "0.2.0"
+  version: "0.2.1"
   status: design-example
   normative: false
   runtime_enforcement: false
@@ -207,7 +207,10 @@ objects:
         authority: {class: ontology-owned, system: enterprise-ai-office}
 
   SendApproval:
-    description: Immutable trusted-human approval bound to one exact DraftReply revision/hash.
+    description: >-
+      Immutable trusted-human approval bound to one exact DraftReply
+      revision/hash. The Governance service validates this evidence during send;
+      the sender does not need to also possess email.approve.
     identity:
       primary_key: approval_id
       authority:
@@ -216,7 +219,7 @@ objects:
     visibility:
       default: deny
       read_requirements:
-        - entitlement: email.approve
+        - entitlement: email.send
     properties:
       approval_id:
         type: string
@@ -279,7 +282,7 @@ relations:
     cardinality: many-to-one
     authority: {class: ontology-owned, system: enterprise-ai-office}
     read_requirements:
-      - entitlement: email.approve
+      - entitlement: email.send
       - entitlement: email.draft
 
 read_operations:
@@ -414,7 +417,7 @@ actions:
     actor_requirements:
       trusted_human_identity: required
       profile_capability: email.send
-      entitlements: [email.read, email.draft, email.approve, email.send]
+      entitlements: [email.read, email.draft, email.send]
     preconditions:
       - id: source-message-exists
         rule: EmailMessage(DraftReply.source_message_id) exists
@@ -426,14 +429,21 @@ actions:
         rule: DraftReply.content_hash == expected_content_hash
         on_fail: {decision: deny, code: DRAFT_HASH_MISMATCH}
       - id: valid-bound-approval-exists
-        rule: SendApproval(DraftReply.draft_id) exists and SendApproval.draft_revision == DraftReply.revision and SendApproval.draft_content_hash == DraftReply.content_hash
+        rule: >-
+          related SendApproval exists where
+          SendApproval.draft_id == DraftReply.draft_id and
+          SendApproval.draft_revision == DraftReply.revision and
+          SendApproval.draft_content_hash == DraftReply.content_hash
         on_fail: {decision: deny, code: VALID_APPROVAL_NOT_FOUND}
       - id: actor-resolved
         rule: actor.actor_id is trusted and resolved
         on_fail: {decision: blocked, code: ACTOR_UNRESOLVED}
     approval:
       mode: role-based-approval
-      requirement: A valid SendApproval for the exact current revision/hash must exist before logical-send claim.
+      requirement: >-
+        A valid SendApproval for the exact current revision/hash must exist
+        before logical-send claim. The approver and sender may be different
+        authorized HumanActors.
       binding:
         relation: approval_authorizes_draft
         revision: DraftReply.revision
