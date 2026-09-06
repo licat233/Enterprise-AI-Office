@@ -2,95 +2,90 @@
 
 ARMOR is the first real company used to validate Enterprise AI Office.
 
-This directory exists to separate:
+This directory separates reusable Enterprise AI Office architecture from ARMOR-specific organization, roles, paths, products, credentials, and operating decisions.
+
+## Authority boundary
+
+The generic deployment contract is defined by:
 
 ```text
-Reusable Enterprise AI Office architecture
+AGENTS.md
+DEPLOY.md
+docs/COMPLETENESS.md
+config/capabilities.yaml
+current generic standards/adapters
 ```
 
-from:
+ARMOR reference material is non-normative. It must not override the generic contract for another company or the active private configuration of an ARMOR deployment.
 
-```text
-ARMOR-specific organization, roles, paths, products, credentials, and operating decisions
-```
-
-## Current reference design
-
-The original ARMOR v1 design document currently remains at the repository root for backward-compatible linking:
+The older ARMOR v1 design document remains at the repository root for reference/backward-compatible linking:
 
 - [`ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md`](../../ARMOR%20Enterprise%20AI%20Office%20v1%20%E2%80%94%20%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84%E3%80%81%E9%83%A8%E7%BD%B2%E8%93%9D%E5%9B%BE%E4%B8%8E%E9%95%BF%E6%9C%9F%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83.md)
 
-It is a concrete reference implementation, not the generic contract for every adopter.
+Use it as historical/reference design material, not as the current deployment execution contract.
 
 ## ARMOR reference technology choices
 
-The first ARMOR implementation is expected to use:
+The ARMOR reference architecture uses the same current core responsibilities as the generic v1 design:
 
 ```text
 Knowledge: WeKnora
 Agent runtime: Hermes Agent
 Employee Web client: Open WebUI
-Hermes admin client: hermes-webui
-Coding workers: Codex + Claude Code
-Host target: company Mac Studio
+Optional Hermes admin client: hermes-webui
+Optional coding workers: Codex + Claude Code
+Host target: company-managed machine
 ```
 
-These choices also define the current generic v1 reference architecture, but company-specific configuration must remain separate.
+Which optional capabilities and specialist Profiles ARMOR actually enables must come from its current private deployment configuration and real operating needs.
 
-## Example ARMOR Profiles
+## Profiles
 
-ARMOR's initial Profile model includes concepts such as:
+ARMOR does not derive Profiles from a generic department checklist.
+
+The ARMOR deployment starts from the same core Profile model:
 
 ```text
+default/admin
 general
-sales
-qc
-marketing
-engineering
 ```
 
-These reflect ARMOR's organizational needs. Another company may use different roles such as Support, Legal, Finance, Research, Procurement, or Operations.
+Additional specialist Profiles are created only for real ARMOR work/capability boundaries selected in the active deployment configuration.
 
 ## What belongs in this reference implementation
 
 Sanitized ARMOR-specific examples may include:
 
-- Profile role definitions;
-- example SOUL patterns;
-- example department Skill layouts;
+- Profile role definitions actually used by ARMOR;
+- example SOUL/Skill patterns;
 - Knowledge Base organization;
-- RBAC mapping examples;
+- RBAC mappings;
 - deployment lessons;
-- acceptance-test findings;
+- acceptance findings;
 - operational problems discovered during real use.
 
 ## What must not be committed publicly
 
 Do not commit:
 
-- real API keys;
-- production passwords;
-- bot tokens;
+- real API keys/passwords;
+- bot/OAuth secrets;
 - employee personal data;
 - customer secrets;
 - private contracts;
 - unrestricted internal documents;
-- private IP/network details that create security risk;
+- sensitive production network details;
 - production `.env` files.
 
 ## Feedback loop
-
-ARMOR exists as the first validation environment so that real operational findings can improve the generic project.
-
-The intended loop is:
 
 ```text
 Generic architecture
 → ARMOR deployment
 → real employee usage
 → concrete problem
-→ fix / refinement
-→ feed reusable lesson back into generic docs/templates
+→ smallest justified refinement
+→ reusable lesson back into generic project
 ```
 
-Do not push an ARMOR-specific workaround into the generic architecture unless the underlying problem is broadly applicable.
+Do not promote an ARMOR-specific workaround or organization choice into the generic architecture unless the underlying requirement is broadly reusable.
