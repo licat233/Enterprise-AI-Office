@@ -1,7 +1,7 @@
 # Enterprise AI Office v2 — Blueprint Status
 
-Status: installation design active / ID-1 through ID-4 complete / real deployment task inactive
-Version: 3.3.0
+Status: installation design active / ID-1 through ID-5 complete / real deployment task inactive
+Version: 3.4.0
 Date: 2026-09-06
 
 The authoritative machine-readable repository state is:
@@ -23,7 +23,8 @@ ID-1 INSTALLATION ARCHITECTURE: COMPLETE
 ID-2 CONFIG / PROTECTED INPUTS: COMPLETE
 ID-3 STAGE / CAPABILITY CLOSURE: COMPLETE
 ID-4 TRUSTED IDENTITY / MAILBOX AUTHORIZATION: COMPLETE
-NEXT WORK PACKAGE: ID-5 GOVERNANCE RUNTIME
+ID-5 DRAFT / APPROVAL GOVERNANCE RUNTIME: COMPLETE
+NEXT WORK PACKAGE: ID-6 GOVERNED SEND / RECONCILIATION
 BLUEPRINT VALIDATION: NOT YET OPENED
 REAL DEPLOYMENT TASK: INACTIVE
 ```
@@ -84,8 +85,8 @@ ID-1  Installation architecture + v1 preservation     COMPLETE
 ID-2  Company configuration + protected inputs        COMPLETE
 ID-3  Stage sequencing + capability closure           COMPLETE
 ID-4  Trusted identity + mailbox authorization        COMPLETE
-ID-5  Draft / Approval governance runtime             NEXT
-ID-6  Governed send + reconciliation                  NOT STARTED
+ID-5  Draft / Approval governance runtime             COMPLETE
+ID-6  Governed send + reconciliation                  NEXT
 ID-7  Rollback / recovery / clean-host acceptance     NOT STARTED
 ```
 
@@ -105,13 +106,20 @@ ID-3 → docs/V2-STAGE-CONTRACTS.md
 ID-4 → docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
        infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md
        IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN
+
+ID-5 → docs/V2-GOVERNANCE-RUNTIME.md
+       infrastructure/email/governance/schema.sql
+       infrastructure/email/governance/test_schema.py
+       infrastructure/open-webui/V2-APPROVAL-ACTION.md
+       infrastructure/open-webui/v2_approve_draft_action.py
+       GOVERNANCE RUNTIME CONTRACT FROZEN
 ```
 
 ---
 
 ## 4. Identity / authorization path frozen by ID-4
 
-The reference installation no longer relies on Hermes to relay HumanActor identity into downstream MCP calls.
+The reference installation does not rely on Hermes to relay HumanActor identity into downstream MCP calls.
 
 Reference path:
 
@@ -120,13 +128,13 @@ Employee browser
 → authenticated Open WebUI session
 → Communication Assistant
 → Hermes communication Profile for reasoning
-→ Open WebUI server-side Email Governance tool execution
+→ Open WebUI server-side Email Governance tool/action execution
 → eao-email-governance
 → mailbox-scoped authorization
 → Email Provider
 ```
 
-Open WebUI is the trusted HumanActor source and server-side tool forwarder.
+Open WebUI is the trusted HumanActor source and server-side tool/action forwarder.
 
 Canonical HumanActor:
 
@@ -136,13 +144,83 @@ open-webui:<Open WebUI user id>
 
 The dedicated Open WebUI → Governance connection uses protected service authentication and server-side current-user/group context. Browser/model-supplied actor or group values are never trusted authorization inputs.
 
-Company logical groups are deterministically mapped to runtime Open WebUI group IDs; governance evaluates direct + current group mailbox grants additively, and no matching grant means deny.
+---
 
-The old direct Hermes Email MCP registration template was removed because it would require unproven transitive identity propagation. Hermes remains the isolated AI role/reasoning boundary; Open WebUI's native server-side tool mechanism carries the HumanActor context.
+## 5. Governance runtime frozen by ID-5
+
+The v2 reference introduces only one thin EAO runtime:
+
+```text
+eao-email-governance
+```
+
+Reference persistence:
+
+```text
+SQLite
+<runtime_root>/runtime/email-governance/state.sqlite3
+```
+
+Minimum persistent classes:
+
+```text
+immutable DraftReply revisions
+review bindings
+SendApproval evidence
+single-logical-send approval claims
+append-oriented governance audit
+```
+
+Draft revision identity:
+
+```text
+(draft_id, revision)
+```
+
+Approval binding:
+
+```text
+draft_id + revision + content_hash
+```
+
+Approval state is derived from persisted facts:
+
+```text
+ACTIVE
+STALE
+REVOKED
+CONSUMED
+EXPIRED when optional expiry policy is configured
+```
+
+One Approval may be claimed by only one logical send.
+
+The claim is committed before any provider side effect; provider attempts and reconciliation are completed under ID-6.
 
 ---
 
-## 5. Stage / capability closure
+## 6. Deterministic approval UI frozen by ID-5
+
+The pinned Open WebUI reference line supports server-side Actions with authenticated `__user__`, current chat/message context, group lookup, and native confirmation callbacks.
+
+The reference Stage 3 Action therefore:
+
+```text
+uses HumanActor + chat + assistant-message review binding
+→ resolves exact persisted Draft from Governance
+→ displays exact From/To/Cc/Subject/Body in native confirmation UI
+→ employee explicitly confirms/cancels
+→ Governance re-checks current authorization + exact revision/hash
+→ creates SendApproval
+```
+
+It does not parse approval authority or Draft identity out of model-generated text.
+
+Stage 3 Action performs no provider send.
+
+---
+
+## 7. Stage / capability closure
 
 Core dependency chain remains:
 
@@ -164,30 +242,35 @@ A Stage is an installation/capability closure gate, not a runtime workflow engin
 
 ---
 
-## 6. Next work package — ID-5
+## 8. Next work package — ID-6
 
-ID-5 now closes the smallest deterministic governance runtime behind the trusted identity path.
-
-It must freeze:
+ID-6 must now freeze the provider-side half of the already claimed logical send:
 
 ```text
-SQLite schema / migrations
-DraftReply persistence
-canonical revision + content_hash
-SendApproval persistence
-stale / revoke / consume behavior
-trusted approval Action binding
-single logical-send claim boundary
-append-oriented governance evidence
-governance service API/MCP surface
-restart/concurrency/transaction behavior
+provider SMTP/send binding
+fully resolved immutable outbound payload
+logical send execution / provider-attempt records
+sender-mailbox restriction
+provider result normalization
+SENT / CONFIRMED_NOT_SENT / OUTCOME_UNKNOWN mapping
+controlled retry after confirmed-not-sent
+RECONCILIATION_REQUIRED after ambiguous outcome
+provider evidence lookup/correlation
+no blind duplicate send
+Stage 4 Approve & Send UX evolution
 ```
 
-It must not create a generic workflow platform or duplicate provider mailbox state.
+ID-6 must preserve ID-5's invariant:
+
+```text
+one SendApproval
+→ one logical send claim
+→ provider side effect only after claim
+```
 
 ---
 
-## 7. Explicit boundary: not a real deployment
+## 9. Explicit boundary: not a real deployment
 
 During Installation Design:
 
@@ -205,7 +288,7 @@ A real deployment remains a separate consumer activity requiring an explicit dep
 
 ---
 
-## 8. Scope discipline
+## 10. Scope discipline
 
 Prefer:
 
@@ -220,7 +303,7 @@ Do not introduce a new IAM platform, workflow engine, CRM, graph runtime, schedu
 
 ---
 
-## 9. Completion language
+## 11. Completion language
 
 ```text
 SYSTEM DESIGN COMPLETE        ← achieved
