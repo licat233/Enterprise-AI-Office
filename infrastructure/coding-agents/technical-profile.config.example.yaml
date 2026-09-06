@@ -1,0 +1,59 @@
+# Privileged technical Hermes Profile example for optional coding delegation.
+# Instantiate only when company configuration enables coding delegation for an
+# explicitly authorized Profile/workspace. This is NOT a normal employee template.
+
+model:
+  default: "<SELECT_MODEL>"
+  provider: "<SELECT_PROVIDER>"
+
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+
+# The API-facing technical Assistant needs terminal/process access to invoke the
+# selected Codex/Claude Code CLI, plus file/Skill access for repository-aware work.
+# WeKnora remains read-only through its MCP toolset.
+platform_toolsets:
+  api_server:
+    - terminal
+    - file
+    - skills
+    - mcp-weknora
+
+terminal:
+  backend: local
+  cwd: "<ABSOLUTE_APPROVED_WORKSPACE>"
+  # Use a Profile-scoped HOME so CLI auth/config can be deliberately isolated
+  # from the service user's normal ~/.ssh, ~/.config/gh, ~/.codex, ~/.claude, etc.
+  # Initialize the required Git/Codex/Claude credentials inside this Profile HOME.
+  home_mode: profile
+
+mcp_servers:
+  weknora:
+    command: uv
+    args:
+      - --directory
+      - "<ABSOLUTE_WEKNORA_MCP_SERVER_DIRECTORY>"
+      - run
+      - run_server.py
+    env:
+      WEKNORA_API_KEY: "${WEKNORA_API_KEY}"
+      WEKNORA_BASE_URL: "${WEKNORA_BASE_URL}"
+    tools:
+      include:
+        - list_knowledge_bases
+        - get_knowledge_base
+        - hybrid_search
+        - list_knowledge
+        - get_knowledge
+        - list_chunks
+      resources: false
+      prompts: false
+
+# Important security boundary:
+# - terminal.cwd selects the intended starting workspace but is not by itself a
+#   filesystem sandbox on the local backend;
+# - this Profile is privileged and must be exposed only to authorized users;
+# - use a Docker/sandbox/OS boundary instead when stronger host isolation is required;
+# - do not add Docker/system/GitHub-admin credentials unless the configured work
+#   explicitly requires them.
