@@ -36,6 +36,27 @@ ON draft_replies(source_message_id);
 CREATE INDEX IF NOT EXISTS idx_draft_replies_mailbox
 ON draft_replies(sender_mailbox_id);
 
+-- Server-side review binding used by the deterministic Open WebUI approval
+-- Action. It is governance evidence/correlation state, not a new Email Ontology
+-- business object and not approval authority by itself.
+CREATE TABLE IF NOT EXISTS draft_review_bindings (
+    human_actor_id TEXT NOT NULL,
+    chat_id TEXT NOT NULL,
+    message_id TEXT NOT NULL,
+    draft_id TEXT NOT NULL,
+    draft_revision INTEGER NOT NULL,
+    draft_content_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (human_actor_id, chat_id, message_id),
+    FOREIGN KEY (draft_id, draft_revision, draft_content_hash)
+        REFERENCES draft_replies(draft_id, revision, content_hash)
+        ON UPDATE RESTRICT
+        ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_draft_review_bindings_draft
+ON draft_review_bindings(draft_id, draft_revision);
+
 CREATE TABLE IF NOT EXISTS send_approvals (
     approval_id TEXT PRIMARY KEY,
     draft_id TEXT NOT NULL,
@@ -47,8 +68,8 @@ CREATE TABLE IF NOT EXISTS send_approvals (
     revoked_at TEXT,
     revoked_by_actor_id TEXT,
     revoke_reason_code TEXT,
-    FOREIGN KEY (draft_id, draft_revision)
-        REFERENCES draft_replies(draft_id, revision)
+    FOREIGN KEY (draft_id, draft_revision, draft_content_hash)
+        REFERENCES draft_replies(draft_id, revision, content_hash)
         ON UPDATE RESTRICT
         ON DELETE RESTRICT,
     UNIQUE (
@@ -107,13 +128,16 @@ ON governance_audit_events(correlation_id);
 -- Notes:
 -- 1. DraftReply revisions are immutable. Application code must never UPDATE
 --    material fields on draft_replies after INSERT.
--- 2. SendApproval evidence is immutable except disposition facts used for
+-- 2. draft_review_bindings ties one authenticated human/chat/message context to
+--    the exact persisted Draft revision shown for review. The binding selects
+--    the approval subject; it does not grant approval authority.
+-- 3. SendApproval evidence is immutable except disposition facts used for
 --    revocation. Application code must never rewrite draft binding fields.
--- 3. STALE is derived by comparing an approval's bound revision/hash with the
+-- 4. STALE is derived by comparing an approval's bound revision/hash with the
 --    current (max) draft revision/hash; it is not persisted as a status.
--- 4. CONSUMED is derived from the existence of approval_claims.
--- 5. One UNIQUE approval_id claim enforces one Approval -> one logical send.
--- 6. Provider send attempt/result/reconciliation state is intentionally added
+-- 5. CONSUMED is derived from the existence of approval_claims.
+-- 6. One UNIQUE approval_id claim enforces one Approval -> one logical send.
+-- 7. Provider send attempt/result/reconciliation state is intentionally added
 --    by ID-6, not this ID-5 schema contract.
--- 7. governance_audit_events is append-oriented. Do not UPDATE/DELETE normal
+-- 8. governance_audit_events is append-oriented. Do not UPDATE/DELETE normal
 --    historical events as part of ordinary runtime operation.
