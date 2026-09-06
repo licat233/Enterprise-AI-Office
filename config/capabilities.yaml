@@ -169,10 +169,16 @@ capabilities:
       - docs/V2-CONFIG-PROTECTED-INPUTS.md
       - docs/V2-STAGE-CONTRACTS.md
       - docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
+      - docs/V2-GOVERNANCE-RUNTIME.md
       - docs/ONTOLOGY.md
       - ontology/examples/email-communication.yaml
       - config/company.private.example.yaml
       - infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md
+      - infrastructure/open-webui/V2-APPROVAL-ACTION.md
+      - infrastructure/open-webui/v2_approve_draft_action.py
+      - infrastructure/email/governance/README.md
+      - infrastructure/email/governance/schema.sql
+      - infrastructure/email/governance/test_schema.py
       - infrastructure/email/tencent-exmail/README.md
       - infrastructure/email/tencent-exmail/imap_readonly_mcp.py
       - infrastructure/email/tencent-exmail/imap.env.example
@@ -197,6 +203,7 @@ capabilities:
       - deterministic logical group to Open WebUI runtime group mapping
       - Open WebUI trusted HumanActor source/actor namespace
       - protected Open WebUI to Governance forwarder credential reference
+      - private Governance service URL/runtime route
       - allowed mailbox folders/read scope
       - selected provider endpoint mode when default is not accepted
       - outbound human-approval policy must remain enabled
@@ -219,6 +226,15 @@ capabilities:
       open_webui_provisioning: infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md
       human_actor_namespace: open-webui
       no_grant_behavior: DENY
+    governance_runtime_contract:
+      document: docs/V2-GOVERNANCE-RUNTIME.md
+      sqlite_schema: infrastructure/email/governance/schema.sql
+      offline_test: infrastructure/email/governance/test_schema.py
+      approval_action_contract: infrastructure/open-webui/V2-APPROVAL-ACTION.md
+      approval_action_template: infrastructure/open-webui/v2_approve_draft_action.py
+      draft_revision_identity: draft_id + revision
+      approval_binding: draft_id + revision + content_hash
+      approval_claim_rule: one approval -> one logical send
     acceptance:
       document: docs/acceptance/TENCENT-EXMAIL.md
       section: Tencent Enterprise Mail Integration Acceptance
@@ -231,12 +247,16 @@ capabilities:
       - mailbox grant summary
       - trusted forwarder authentication method/secret reference class, never secret value
       - IMAP/SMTP endpoint mode
-      - governance state location
+      - governance state location and schema version
       - secret symbolic reference/storage class/location description, never value
-      - deterministic adapter test result
+      - deterministic provider adapter test result
+      - deterministic governance schema/hash test result
       - Stage 0–4 closure results
       - optional Stage 5/6 closure results when requested
       - positive and negative identity/mailbox authorization result
+      - Draft revision/persistence result
+      - deterministic human approval Action result
+      - approval stale/revoke/single-claim result
       - read-only behavior result
       - approval-binding result
       - send/reconciliation result
