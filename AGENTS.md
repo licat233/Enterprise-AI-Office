@@ -1,6 +1,6 @@
 # AGENTS.md — Enterprise AI Office Agent Operating Contract
 
-This repository is intentionally designed to be read and maintained by AI engineering agents as well as humans.
+This repository is intentionally designed to be read, deployed, and maintained by AI engineering agents as well as humans.
 
 If you are an AI agent asked to deploy, modify, debug, upgrade, or extend Enterprise AI Office, this file is the highest-priority repository-local operating contract.
 
@@ -16,37 +16,41 @@ Enterprise AI Office is a reusable blueprint and implementation framework for bu
 - MCP as the preferred integration boundary;
 - Hermes Profiles, Skills, Kanban, Cron, Bot Mode, and Gateway where the adopting company actually needs them.
 
-ARMOR is the first reference implementation. Do not treat ARMOR-specific values as universal defaults.
+ARMOR is the first reference implementation. Company/reference material is evidence and example, not a universal deployment default.
 
-## 2. Required reading order
+## 2. Authority and required reading
 
-Before making any material change, read in this order:
+Before making a material change, read the documents relevant to the task in this order:
 
 1. `README.md`
 2. `AGENTS.md`
-3. `DEPLOY.md` when the task includes deployment or deployment planning
-4. `docs/ARCHITECTURE.md`
-5. `docs/DEPLOYMENT.md`
-6. `docs/SECURITY.md`
-7. `docs/PROFILE-STANDARD.md`
-8. `docs/KNOWLEDGE.md`
-9. `docs/CLIENT-RBAC.md`
-10. `docs/BACKUP-RESTORE.md`
-11. `docs/UPGRADE.md`
-12. `docs/ACCEPTANCE-TESTS.md`
-13. `state/DEPLOYMENT-STATE.md` when operating an existing deployment
-14. `state/CHANGELOG.md` when changing an existing deployment
-15. the relevant company/reference implementation under `reference/`
+3. `DEPLOY.md` for deployment or deployment planning
+4. `docs/COMPLETENESS.md` for readiness/completion semantics
+5. `config/company.example.yaml` or the real company-private configuration
+6. `config/capabilities.yaml` for capability closure
+7. `config/validated-stack.yaml` for the reproducibility baseline
+8. `docs/ARCHITECTURE.md`
+9. `docs/DEPLOYMENT.md`
+10. `docs/SECURITY.md`
+11. `docs/PROFILE-STANDARD.md`
+12. `docs/KNOWLEDGE.md`
+13. `docs/CLIENT-RBAC.md`
+14. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
+15. `docs/UPGRADE.md` when versions change
+16. `docs/ACCEPTANCE-TESTS.md`
+17. `state/DEPLOYMENT-STATE.md` when operating an existing deployment
+18. `state/CHANGELOG.md` when changing an existing deployment
+19. the relevant company/reference material under `reference/` when useful
 
-If a referenced file does not exist yet, do not invent its contents silently. Record the gap and create it only when it is part of the requested work.
+For deployment tasks, `DEPLOY.md` is the execution contract. `docs/COMPLETENESS.md` defines what readiness means. `config/capabilities.yaml` maps enabled capabilities to implementation and acceptance paths.
 
-For deployment tasks, `DEPLOY.md` is the execution contract. Detailed documents may add implementation detail but must not override its baseline target, phase order, or completion semantics.
+The root-level ARMOR v1 design document and content under `reference/` are non-normative reference material. They must not override `AGENTS.md`, `DEPLOY.md`, current generic standards, the adopting company's active configuration, or actual runtime state.
+
+If a referenced implementation artifact is missing for an enabled capability, treat that as a repository deployability defect. Do not silently invent a different architecture.
 
 ## 3. Frozen architecture intent
 
 Do not silently replace the approved architecture.
-
-Current core responsibilities are:
 
 | Responsibility | Default component |
 | --- | --- |
@@ -60,73 +64,112 @@ Current core responsibilities are:
 | Scheduled automation | Hermes Cron when enabled |
 | Coding execution | Codex + Claude Code when enabled |
 | Messaging access | Hermes Gateway when enabled |
-| Deployment truth | this repository + `state/DEPLOYMENT-STATE.md` |
+| Deployment truth | active company config + this repository + actual runtime/deployment state |
 
-Implementation details may change to match current upstream releases. Component responsibility and security boundaries may not be changed without an explicit architecture decision.
+Implementation details may change to match selected upstream releases. Component responsibilities and security boundaries may not change without an explicit architecture decision.
 
 ## 4. Source-of-truth rules
 
-Do not let multiple systems become authoritative for the same class of information.
+Do not let multiple systems become authoritative for the same information class.
 
 - Company knowledge: WeKnora.
-- Agent identity / behavior: Hermes Profile configuration, SOUL, Skills, Tools, MCP.
-- Human user identity and employee Web access: Open WebUI.
+- Agent identity/behavior: Hermes Profile configuration, SOUL, Skills, Tools, MCP.
+- Human identity and employee Web access: Open WebUI or the explicitly selected enterprise identity layer.
 - Durable agent task state: Hermes Kanban when enabled.
 - Scheduled agent work: Hermes Cron when enabled.
-- Deployment configuration and operational history: this repository and deployment state files.
-- ARMOR `armor-memory`: independent from this project unless a later approved integration is documented.
+- Desired deployment state: active company deployment configuration.
+- Actual deployment state: real runtime + `state/DEPLOYMENT-STATE.md`.
+- ARMOR `armor-memory`: independent unless a later approved integration says otherwise.
 
 ## 5. Critical conceptual boundaries
 
 ### Profile is not a user
 
-A Hermes Profile is an AI role or specialist, not an employee account.
+A Hermes Profile is an AI role/specialist, not an employee account. Do not create one Profile per employee by default.
 
-Do not create one Profile per employee by default.
+### Core vs specialist Profiles
 
-### Core Profiles vs specialist Profiles
-
-The baseline Profile model is:
+Baseline:
 
 ```text
 default/admin  → privileged control plane
-general        → baseline employee-facing assistant
+general        → baseline employee-facing Assistant
 ```
 
-Additional specialist Profiles are opt-in and must be justified by actual company work, knowledge, tool, credential, automation, model, memory, or risk boundaries.
+Create specialist Profiles only when actual work, knowledge, tool, credential, automation, model, memory, or risk boundaries justify them.
 
 ### Profile is not a sandbox
 
-Hermes Profile isolation separates Hermes state. It does not automatically restrict host filesystem, shell, Docker, Git, browser, or credential access.
+Hermes Profile isolation separates Hermes state; it does not automatically restrict host filesystem, terminal, Docker, Git, browser, or external CLI credentials.
 
-Security requires both human RBAC and least-privilege Profile tools/credentials.
+Security requires human RBAC plus least-privilege Profile capabilities and, where needed, OS/container/workspace isolation.
 
 ### Knowledge is not memory
 
-Durable company facts belong in WeKnora. Do not duplicate product specifications, company policy, or other authoritative facts into every Profile memory.
+Durable company facts belong in WeKnora. Do not duplicate product specifications, policies, or SOPs into every Profile memory/SOUL.
 
 ### Employee portal is not admin console
 
-Open WebUI is the employee-facing multi-user surface. hermes-webui is an administrative control surface and must not be exposed as the normal employee client.
+Open WebUI is the baseline employee multi-user surface. hermes-webui is an administrative surface and must not be exposed as the ordinary employee portal.
 
-## 6. Deployment execution rule
+## 6. Deployment readiness rule
 
-For deployment work, follow `DEPLOY.md` from inspection through employee-client acceptance and deployment-state recording.
+Every new deployment must have an explicit target readiness from company configuration:
 
-A single deployment request should normally drive the complete Core Ready workflow without repeated human reminders.
+```text
+core-ready
+configured-ready
+production-ready
+```
+
+Use `docs/COMPLETENESS.md` for semantics.
+
+A single deployment request should drive the system to the requested readiness level without repeated human reminders about routine phases.
+
+Do not stop at `CORE READY` when the configured target is `CONFIGURED READY` or `PRODUCTION READY`.
 
 Stop for human input only when execution genuinely requires external authority or information, such as:
 
-- missing credentials;
+- missing protected credentials;
 - OS permission requiring human approval;
 - unresolved destructive conflict;
-- a real company-specific business choice absent from configuration.
+- identity-provider/application registration;
+- messaging-platform application credentials;
+- an actual company business choice absent from configuration.
 
-Do not pause merely to ask whether to perform an already-defined deployment phase, create baseline RBAC, connect the baseline components, run employee-client acceptance, or record deployment state.
+Do not pause merely to ask whether to perform a defined phase, configure baseline RBAC, connect components, implement an already-enabled capability, run acceptance, or record state.
 
-## 7. Default deployment posture
+## 7. Capability closure rule
 
-The first validated Core Ready path is:
+Before mutation, derive the exact enabled capability set from the active company configuration and `config/capabilities.yaml`.
+
+For every enabled capability resolve:
+
+```text
+requested state
+→ implementation playbook/adapter
+→ exact upstream behavior/version
+→ required protected inputs
+→ security boundary
+→ acceptance test
+→ deployment-state fields
+```
+
+An enabled capability must not be silently omitted, disabled, replaced, or deferred merely to reach a green result.
+
+If it cannot be completed safely because genuine external input/authority is unavailable, report:
+
+```text
+BLOCKED — REQUIRED INPUT: <specific input>
+```
+
+If its implementation or acceptance fails, report the specific failed boundary.
+
+Disabled capabilities are not deployment debt and must not be enabled for completeness.
+
+## 8. Default deployment posture
+
+The first validated core reference path is:
 
 ```text
 Host OS
@@ -137,247 +180,216 @@ Containers
 └── Open WebUI
 ```
 
-On the validated Apple Silicon macOS path, Hermes remains host-native because controlled technical roles may later need local repositories, Git, Codex, Claude Code, and host tools.
+On the validated Apple Silicon macOS path, Hermes remains host-native. Optional administrative, coding, automation, messaging, identity, and access capabilities are added only when selected by company configuration.
 
-Do not enable optional components merely because the repository documents them.
+## 9. Upstream-first rule
 
-## 8. Upstream-first rule
+For implementation choices use this order:
 
-For every implementation choice, use this order:
-
-1. existing official upstream capability;
-2. official extension or integration mechanism;
+1. official upstream capability;
+2. official extension/integration mechanism;
 3. configuration;
-4. thin adapter;
-5. custom infrastructure only when the previous options cannot solve a real requirement.
+4. thin repository adapter/playbook;
+5. custom infrastructure only when the prior choices cannot solve a real requirement.
 
 Do not fork WeKnora, Hermes Agent, Open WebUI, or hermes-webui by default.
 
-## 9. No feature-collection architecture
+For an optional capability not present in the first validated demo, inspect the exact selected upstream release before activation and record its version/commit where practical.
 
-Do not add a component merely because it exists or is popular.
+## 10. No feature-collection architecture
 
-Before introducing a major new component, document:
+Do not add a component merely because it exists, is popular, or has a template here.
 
-- the concrete business problem;
-- why the current stack cannot solve it;
+Before introducing a new major component, establish:
+
+- concrete business problem;
+- why current stack/native capability is insufficient;
 - expected benefit;
-- new operational cost;
-- new failure modes;
-- new security/data boundary;
-- backup/restore requirements;
+- operational cost;
+- failure modes;
+- security/data boundary;
+- backup/restore impact;
 - removal/rollback path.
 
-If the justification is weak, default to `Not now`.
+If the justification is weak, use `Not now`.
 
-## 10. Configuration minimality and clean-state rule
+## 11. Configuration minimality and clean-state rule
 
-Build each deployment from the adopting company's actual requirements, not from every example, template, reference role, optional integration, or previously tested capability present in this repository.
+Build each deployment from actual company requirements, not from every example, template, reference role, optional integration, or previously tested capability.
 
-Repository templates are a library, not a deployment checklist. Instantiate an optional Profile, group, Knowledge Base, Skill, integration, automation, or service only when the company configuration or a real operating requirement justifies it.
+Repository templates/playbooks are a library, not a deployment checklist.
 
-When correcting or simplifying the design, make maintained normative documentation describe the intended current state cleanly. Do not preserve obsolete decisions as permanent negative rules, explanatory scars, or special-case warnings unless the historical fact is operationally necessary for safety, migration, compatibility, rollback, or incident response.
+Normative documentation should describe the intended current state cleanly. Do not preserve obsolete decisions as permanent negative rules or explanatory scars unless history is operationally necessary for safety, migration, compatibility, rollback, or incident response.
 
-Prefer a general positive rule that prevents a class of mistakes over a growing list of prohibitions against individual past mistakes. Git history and deployment changelogs carry history when history is needed.
+Prefer one positive general rule over a growing list of prohibitions against individual past mistakes.
 
-## 11. Do not over-minimize either
+## 12. Do not under-engineer
 
-Do not remove useful foundations merely to make the stack look smaller.
+Minimality does not mean omitting a company-enabled capability, security boundary, acceptance test, or production control required by the requested readiness level.
 
-Keep mature upstream components when they solve a real requirement of the selected deployment.
+Build the smallest system that completely satisfies the configured target.
 
-## 12. Version discipline
+## 13. Version discipline
 
-Do not blindly track floating `main` / `latest` tags.
+Do not blindly track floating `main` / `latest` tags for reproducible deployments.
 
-For a reproducible deployment, prefer the validated stack recorded by the Golden Path unless the task explicitly includes upgrade qualification.
+For the validated core path, prefer `config/validated-stack.yaml` unless the task explicitly includes upgrade qualification.
 
-When changing versions:
+When changing/selecting versions:
 
-- inspect the current stable upstream release;
-- review release notes and breaking changes;
-- test compatibility;
-- pin the tested version or exact commit where practical;
-- record the deployed version in `state/DEPLOYMENT-STATE.md`.
+- inspect the official upstream release/source;
+- review breaking changes;
+- verify compatibility with the requested capability;
+- pin the tested version/commit where practical;
+- record deployed reality in `state/DEPLOYMENT-STATE.md`.
 
-Do not silently combine a deployment task with an unrequested major upgrade.
+Do not silently combine ordinary deployment with an unrequested major upgrade.
 
-## 13. Pre-change inspection
+## 14. Pre-change inspection
 
 Before modifying an existing deployment:
 
 1. inspect repository status;
-2. read `state/DEPLOYMENT-STATE.md`;
-3. inspect running Docker services;
-4. inspect Hermes status and Profiles;
-5. identify secrets/config locations without printing secrets;
-6. check backup freshness before risky changes.
+2. read actual deployment state;
+3. inspect running services/containers;
+4. inspect Hermes and Profiles;
+5. identify secret/config locations without printing secrets;
+6. check backup freshness before risky changes;
+7. reconcile documentation with runtime reality.
 
-Do not assume the machine matches the documentation. Reconcile documentation with reality first.
+Actual runtime is evidence of what exists; desired company config defines what should exist.
 
-## 14. Change risk classes
+## 15. Change risk classes
 
 ### Low risk
 
-Examples:
+Examples: documentation corrections, non-security SOUL wording, non-privileged Skill additions, normal employee account changes.
 
-- documentation corrections;
-- non-security SOUL wording;
-- adding a non-privileged Skill;
-- adding a normal employee account.
+Flow:
 
-Flow: inspect → change → verify → record if material.
+```text
+inspect → change → verify → record if material
+```
 
 ### High risk
 
-Examples:
+Examples: embedding-model change, database/storage migration, core major upgrade, Profile privilege expansion, sensitive RBAC change, destructive knowledge operation.
 
-- embedding-model change;
-- database migration;
-- storage migration;
-- core component major upgrade;
-- Profile tool or credential privilege expansion;
-- RBAC changes affecting sensitive roles;
-- destructive knowledge operations.
+Flow:
 
-Flow: inspect → backup → plan → change → verify → rollback if needed → document.
+```text
+inspect → backup → plan → change → verify → rollback if needed → record
+```
 
-## 15. Secrets rules
+## 16. Secrets rules
 
-Never commit:
+Never commit or expose:
 
-- `.env` files containing credentials;
+- production `.env` credentials;
 - API keys;
-- DB passwords;
-- Redis passwords;
-- OAuth secrets;
-- bot tokens;
+- database/cache passwords;
+- OAuth/client secrets;
+- messaging tokens;
 - SSH private keys;
 - cloud credentials;
 - model-provider credentials.
 
-Do not print full credentials in logs or final reports.
+Templates use placeholders. Protected values belong in approved secret storage/runtime locations with restrictive permissions.
 
-Templates must use placeholders.
+## 17. Tool privilege rules
 
-## 16. Tool privilege rules
+Normal employee Profiles default to no unrestricted:
 
-Normal employee Profiles must not receive unrestricted host capabilities by default.
-
-Default-deny powerful capabilities such as:
-
-- arbitrary terminal execution;
-- unrestricted filesystem writes;
-- Docker control;
-- system configuration;
+- terminal;
+- filesystem writes;
+- Docker/system control;
 - GitHub administration;
-- Codex / Claude Code delegation;
+- Codex/Claude Code delegation;
 - raw credential access.
 
-Grant powerful capabilities only to roles whose actual work requires them, with an explicit workspace and credential boundary.
+Grant stronger capabilities only to roles whose declared work requires them, with explicit workspace and credential boundaries.
 
-## 17. Knowledge access rule
+## 18. Knowledge access rule
 
-Hermes should access WeKnora through supported MCP/API surfaces.
+Hermes should access WeKnora through supported MCP/API surfaces, not direct database coupling.
 
-Do not couple Hermes directly to WeKnora's PostgreSQL schema.
+Prefer direct read-oriented retrieval for straightforward knowledge work. Add another reasoning layer only when it solves a measured requirement.
 
-Prefer direct retrieval tools for straightforward knowledge access rather than adding an unnecessary reasoning hop.
+## 19. User/Profile mapping rule
 
-## 18. User / Profile mapping rule
-
-Employee identity lives in Open WebUI or the enterprise messaging platform.
-
-AI work roles live in Hermes Profiles.
-
-Typical mapping:
+Human identity lives in Open WebUI or the selected enterprise identity/messaging surface. AI work roles live in Hermes Profiles.
 
 ```text
 Employee group → permitted Assistant → matching Hermes Profile
 ```
 
-The baseline employee-facing Profile is `general`. Add specialist mappings only for roles the adopting company actually uses.
+Baseline employee Profile is `general`. Add specialist mappings only for configured real roles.
 
-Do not confuse UI visibility with security. Verify direct unauthorized access is blocked.
+UI visibility is not a security boundary by itself; verify direct unauthorized access fails.
 
-## 19. Memory safety rule
+## 20. Memory safety rule
 
-Shared Profile memory must never become an uncontrolled cross-user private-data channel.
+Shared Profile memory must not become an uncontrolled cross-user private-data channel.
 
-Before enabling employee long-term memory, run the cross-user isolation tests in `docs/ACCEPTANCE-TESTS.md`.
+Keep employee Hermes long-term memory disabled unless the exact deployed user/session-scoping mechanism passes the cross-user isolation tests in `docs/ACCEPTANCE-TESTS.md`.
 
-If isolation cannot be proven, disable employee long-term memory and rely on per-user conversation history until a safe mechanism is validated.
+Open WebUI conversation history is independent and may remain enabled.
 
-## 20. Destructive operations
+## 21. Destructive operations
 
 Do not perform destructive operations based on inference alone.
 
-Examples requiring explicit intent and appropriate backup include deleting production Knowledge Bases, Profiles, Docker volumes, databases, backup generations, unknown Git changes, or performing irreversible storage migrations.
+Explicit intent and appropriate backup are required for operations such as deleting production Knowledge Bases, Profiles, persistent volumes/databases, backup generations, unknown Git work, or irreversible migrations.
 
-## 21. Documentation synchronization
+## 22. Documentation synchronization
 
-If you materially change architecture, deployment, Profile policy, RBAC, network exposure, backup, upgrade behavior, or upstream integration, update the corresponding documentation in the same change.
+When architecture, deployment, Profile policy, RBAC, network exposure, backup, upgrade behavior, capability registry, or upstream integration changes materially, update the corresponding documentation/registry in the same change.
 
-Do not allow runtime reality to drift silently away from repository documentation.
+Do not allow runtime reality or machine-readable capability contracts to drift silently from prose standards.
 
-## 22. Completion semantics
+## 23. Completion semantics
 
 ### Core Ready
 
-For a new baseline deployment, `CORE READY` means the enabled core employee workflow in `DEPLOY.md` passes end to end:
+Core employee path and Part A acceptance pass.
 
-```text
-employee login
-→ permitted Assistant
-→ Hermes Profile
-→ WeKnora grounded answer + source
-```
+### Configured Ready
 
-It also requires baseline RBAC, least-privilege tools, employee-client checks, and deployment-state recording.
+Core Ready remains PASS and every company-enabled conditional capability in `config/capabilities.yaml` is implemented, secured, accepted, and recorded.
 
 ### Production Ready
 
-`PRODUCTION READY` is a higher bar and requires the production controls relevant to that deployment, such as backup/restore, startup/recovery, external access controls, production secrets, operational ownership, and any enabled optional integrations.
+Configured Ready remains PASS and applicable production recovery, security, access, secrets, knowledge, and operations controls pass Part C acceptance.
 
-Do not block a bounded functional/demo task on unrelated optional production capabilities. Do not call a production deployment ready merely because it reached Core Ready.
+Never use vague `complete` without naming the achieved readiness level.
 
-## 23. Acceptance discipline
+## 24. Acceptance discipline
 
-Use `docs/ACCEPTANCE-TESTS.md`, but run tests according to the capabilities actually enabled by the deployment.
+Use `docs/ACCEPTANCE-TESTS.md` according to actual enabled capabilities.
 
-At minimum for Core Ready verify:
+Do not instantiate an optional feature to satisfy a test section. Conversely, do not skip the test for a capability that the company configuration enabled.
 
-- knowledge ingestion and retrieval;
-- source evidence;
-- Hermes `general` routing;
-- employee Web RBAC;
-- default/admin non-exposure;
-- least-privilege tools;
-- deliberate employee-memory disablement or proven isolation;
-- real employee-client chat and history.
+Evidence matters more than configuration intent: test the real employee client, actual MCP retrieval, actual authorization boundary, actual harmless Cron/Kanban/coding run when enabled, and actual restore for Production Ready.
 
-For optional capabilities such as specialist Profiles, Codex/Claude Code, Kanban, Cron, messaging, remote access, or long-term memory, run their acceptance sections only when they are enabled.
+## 25. Upstream mismatch rule
 
-## 24. When documentation conflicts with current upstream behavior
+If a repository command/config field no longer matches the selected upstream release:
 
-Upstream projects evolve quickly.
-
-If a command, API path, configuration field, or deployment mechanism in this repository is outdated:
-
-1. verify the current official upstream documentation/source;
+1. verify official upstream documentation/source;
 2. find the closest supported equivalent;
-3. preserve this repository's architectural intent and security boundary;
-4. implement the smallest compatible adjustment;
-5. update the relevant documentation;
-6. record deployed reality in `state/DEPLOYMENT-STATE.md`.
+3. preserve this repository's architecture/security intent;
+4. make the smallest compatible adjustment;
+5. update the relevant adapter/playbook;
+6. record deployed reality.
 
-Do not reinterpret an implementation mismatch as permission to redesign the system.
+Do not reinterpret implementation drift as permission to redesign the system.
 
-## 25. Final operating principle
+## 26. Final operating principle
 
-Build the smallest system that completely solves the current requirement, using mature capabilities and preserving future evolution.
+Build the smallest system that completely satisfies the configured company requirement and requested readiness level using mature upstream capabilities.
 
 Do not over-engineer.
 Do not under-engineer.
 Do not silently redesign.
+Do not silently downgrade enabled capabilities.
 Verify before declaring success.
