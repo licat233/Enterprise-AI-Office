@@ -1,10 +1,11 @@
 #!/bin/sh
 set -eu
 
-# Static Enterprise AI Office repository deployability check.
-# This does not install software or prove a runtime deployment works. It verifies
-# that the repository still contains the contracts/adapters/playbooks required
-# for an AI agent to resolve Core/Configured/Production deployment paths.
+# Static Enterprise AI Office repository deployability/design-contract check.
+# This does not install software, change the current project phase, or prove a
+# runtime deployment works. It verifies that the repository still contains the
+# contracts/adapters/playbooks and the explicit phase gate required for safe
+# agent behavior.
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PASS=0
@@ -45,10 +46,11 @@ require_text() {
 printf '%s\n' 'Enterprise AI Office Repository Readiness'
 printf '%s\n' '----------------------------------------'
 
-# Agent execution contract and declarative inputs.
+# Agent execution contract, phase authority, and declarative inputs.
 for path in \
   README.md \
   AGENTS.md \
+  state/PROJECT-PHASE.yaml \
   DEPLOY.md \
   docs/COMPLETENESS.md \
   docs/ARCHITECTURE.md \
@@ -65,8 +67,8 @@ for path in \
   docs/V2-EMAIL-DESIGN.md \
   docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md \
   docs/V2-DESIGN-REVIEW.md \
+  docs/V2-PHASE-STATUS.md \
   docs/V2-IMPLEMENTATION-PLAN.md \
-  docs/V2-IMPLEMENTATION-STATUS.md \
   config/company.example.yaml \
   config/capabilities.yaml \
   config/validated-stack.yaml \
@@ -92,7 +94,7 @@ do
   require_file "$path"
 done
 
-# Conditional capability closure assets.
+# Conditional capability closure/design-support assets.
 for path in \
   infrastructure/hermes/specialist.config.example.yaml \
   infrastructure/hermes/specialist.env.example \
@@ -125,7 +127,20 @@ do
   require_file "$path"
 done
 
-# Guard against high-impact contract drift.
+# Guard against project-phase drift.
+require_text state/PROJECT-PHASE.yaml 'phase: design' 'Phase authority says current phase is design'
+require_text state/PROJECT-PHASE.yaml 'transition_requires_explicit_human_authorization: true' 'Phase transition requires explicit human authority'
+require_text state/PROJECT-PHASE.yaml 'implicit_transition_allowed: false' 'Implicit phase transition is disabled'
+require_text state/PROJECT-PHASE.yaml 'continuation_words_do_not_change_phase:' 'Continuation wording cannot change phase'
+require_text state/PROJECT-PHASE.yaml 'real_provider_account_access: false' 'Design phase blocks real provider access'
+require_text state/PROJECT-PHASE.yaml 'production_or_live_runtime_mutation: false' 'Design phase blocks live runtime mutation'
+require_text AGENTS.md 'Continuation language means:' 'Agent contract defines continuation semantics'
+require_text AGENTS.md 'This deployment momentum rule must never be used to cross a project phase boundary.' 'Deployment momentum cannot override phase gate'
+require_text AGENTS.md 'Prototype is not implementation' 'Agent contract separates prototypes from implementation'
+require_text README.md 'state/PROJECT-PHASE.yaml' 'README exposes authoritative phase gate'
+require_text docs/V2-PHASE-STATUS.md 'IMPLEMENTATION: NOT AUTHORIZED' 'Human v2 status matches design phase'
+
+# Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
 require_text DEPLOY.md 'PRODUCTION READY' 'Golden Path reaches Production Ready'
 require_text AGENTS.md 'CONFIGURED READY' 'Agent contract knows Configured Ready'
@@ -149,7 +164,6 @@ require_text infrastructure/email/tencent-exmail/imap_readonly_mcp.py 'BODY.PEEK
 require_text infrastructure/email/tencent-exmail/test_imap_readonly.py 'test_folder_scope_fails_closed' 'Email adapter has fail-closed folder test'
 require_text infrastructure/email/tencent-exmail/test_imap_readonly.py 'test_get_email_uses_body_peek' 'Email adapter has BODY.PEEK safety test'
 require_text docs/V2-DESIGN-REVIEW.md 'V2 DESIGN STATUS: FROZEN' 'v2 design remains frozen'
-require_text docs/V2-IMPLEMENTATION-STATUS.md 'V2 PHASE: DESIGN' 'v2 remains in design phase'
 require_text infrastructure/weknora/PROVISIONING.md '"capabilities": ["retrieve"]' 'WeKnora contract scopes runtime retrieval key'
 require_text infrastructure/weknora/PROVISIONING.md 'BLOCKED — MIGRATION REQUIRED' 'WeKnora contract blocks unsafe embedding drift'
 require_text infrastructure/hermes/features/MESSAGING.md 'hermes gateway setup' 'Messaging contract uses native Hermes setup'
@@ -159,7 +173,7 @@ require_text README.md 'CONFIGURED READY' 'README explains configured completene
 
 printf '%s\n' '----------------------------------------'
 printf 'Summary: %s PASS, %s FAIL\n' "$PASS" "$FAIL"
-printf '%s\n' 'Static PASS means repository execution paths are present; it does not replace real runtime acceptance.'
+printf '%s\n' 'Static PASS means repository phase/deployment contracts are present; it does not change phase or replace runtime acceptance.'
 
 if [ "$FAIL" -gt 0 ]; then
   exit 2
