@@ -69,7 +69,10 @@ for path in \
   docs/V2-DESIGN-REVIEW.md \
   docs/V2-PHASE-STATUS.md \
   docs/V2-IMPLEMENTATION-PLAN.md \
+  docs/V2-INSTALLATION-ARCHITECTURE.md \
+  docs/V2-CONFIG-PROTECTED-INPUTS.md \
   config/company.example.yaml \
+  config/company.private.example.yaml \
   config/capabilities.yaml \
   config/validated-stack.yaml \
   config/.env.example \
@@ -146,6 +149,8 @@ require_text AGENTS.md 'Deployed-system readiness' 'Agent contract separates dep
 require_text docs/V2-PHASE-STATUS.md 'BLUEPRINT PHASE: INSTALLATION DESIGN' 'v2 status matches installation-design phase'
 require_text docs/V2-PHASE-STATUS.md 'SYSTEM DESIGN: COMPLETE' 'v2 status preserves completed system design'
 require_text docs/V2-PHASE-STATUS.md 'REAL DEPLOYMENT TASK: INACTIVE' 'v2 status says real deployment inactive'
+require_text docs/V2-INSTALLATION-ARCHITECTURE.md 'INSTALLATION ARCHITECTURE FROZEN' 'v2 ID-1 installation architecture is frozen'
+require_text docs/V2-CONFIG-PROTECTED-INPUTS.md 'CONFIG / SECRET INPUT CONTRACT FROZEN' 'v2 ID-2 protected-input contract is frozen'
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
@@ -156,7 +161,12 @@ require_text docs/ACCEPTANCE-TESTS.md 'Enterprise identity / SSO' 'Acceptance co
 require_text docs/ACCEPTANCE-TESTS.md 'Hermes administrative Web UI' 'Acceptance covers hermes-webui when enabled'
 require_text config/company.example.yaml 'target_readiness:' 'Company config declares readiness target'
 require_text config/company.example.yaml 'capabilities:' 'Company config declares optional capabilities'
+require_text config/company.example.yaml 'mailbox_grants:' 'Company config exposes mailbox-scoped grants'
 require_text config/company.example.yaml 'send_requires_human_approval: true' 'Email config defaults to human-approved sends'
+require_text config/company.private.example.yaml 'client_credential_ref:' 'Private overlay uses symbolic email credential reference'
+require_text config/company.private.example.yaml 'email.send' 'Private overlay demonstrates operation-scoped mailbox grants'
+require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Email capability has protected-input contract'
+require_text config/capabilities.yaml 'required_secret_classes:' 'Email capability declares required secret classes'
 require_text config/capabilities.yaml 'infrastructure/weknora/PROVISIONING.md' 'Core capability has WeKnora provisioning path'
 require_text config/capabilities.yaml 'infrastructure/open-webui/PROVISIONING.md' 'Core capability has Open WebUI provisioning path'
 require_text config/capabilities.yaml 'infrastructure/hermes/features/MESSAGING.md' 'Messaging capability has pinned execution path'
