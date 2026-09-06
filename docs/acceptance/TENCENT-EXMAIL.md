@@ -9,8 +9,11 @@ Use with:
 - `docs/V2-SCOPE.md`
 - `docs/V2-STAGE-CONTRACTS.md`
 - `docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md`
+- `docs/V2-GOVERNANCE-RUNTIME.md`
 - `docs/ONTOLOGY.md`
 - `infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md`
+- `infrastructure/open-webui/V2-APPROVAL-ACTION.md`
+- `infrastructure/email/governance/README.md`
 - `infrastructure/email/tencent-exmail/README.md`
 - `docs/SECURITY.md`
 - `docs/CLIENT-RBAC.md`
@@ -127,16 +130,29 @@ Where implementation uses IMAP directly, verify behavior equivalent to read-only
 [ ] Conflicting email context vs authoritative company source is surfaced rather than silently overwriting company truth
 ```
 
-## 6. Draft behavior
+## 6. Draft behavior / governance persistence
+
+Before runtime tests, run the offline governance contract check:
+
+```sh
+python3 infrastructure/email/governance/test_schema.py
+```
+
+Then verify on the authorized target:
 
 ```text
+[ ] Offline governance SQLite/hash/review-binding test PASS
 [ ] Authorized HumanActor can prepare a reply without sending it
 [ ] Unauthorized mailbox/message cannot produce a DraftReply
 [ ] Draft generation alone causes no SMTP side effect
-[ ] Final outbound fields are inspectable by the human approver
+[ ] New Draft begins at revision 1
+[ ] Material edit creates a new immutable revision/hash and preserves the prior revision
+[ ] content_hash is service-computed from the exact persisted outbound fields
+[ ] Re-hashing the same persisted revision after restart produces the same digest
 [ ] Draft identifies target mailbox/source/recipients before approval
-[ ] Material edit creates a new revision/hash
 [ ] Draft governance state survives the required service restart/recovery test
+[ ] Draft creation + audit event do not partially commit when the transaction fails
+[ ] HumanActor/chat/assistant-message review binding points to the exact persisted Draft revision/hash
 ```
 
 ## 7. Human approval binding
@@ -158,13 +174,22 @@ Acceptance:
 
 ```text
 [ ] Explicit trusted human approval required before send
+[ ] Version-bound Open WebUI approval Action is attached only to the intended Communication Assistant
 [ ] Approval Action derives current HumanActor server-side
 [ ] Approval Action resolves current authorization/group context server-side
+[ ] Action resolves the review subject from governance HumanActor/chat/message binding, not model-generated draft identifiers
+[ ] Native confirmation dialog displays the exact governance-persisted From/To/Cc/Subject/Body before approval commit
+[ ] Cancelling the confirmation creates no SendApproval
 [ ] Approval evidence binds to exact final outbound content/state
 [ ] Changing recipient, subject, body, source target, or attachment after approval invalidates approval
+[ ] Changing the Draft after confirmation display but before approval commit fails closed as stale/mismatch
+[ ] Duplicate delivery of the same trusted approval interaction does not create independently reusable duplicate authority
 [ ] Stale approval produces structured deny/block result
-[ ] Revoked approval cannot authorize send
+[ ] Revoked approval cannot be claimed for send
+[ ] One Approval cannot be claimed for two logical send IDs
+[ ] Current email.approve permission is re-checked at approval time
 [ ] Natural-language Agent inference cannot manufacture approval
+[ ] Stage 3 approval Action performs no provider send
 ```
 
 ## 8. Send path
@@ -174,10 +199,11 @@ Use controlled test recipients before real customer use.
 ```text
 [ ] Only the approved mailbox identity can be used as sender
 [ ] Current email.send permission is re-checked immediately before send
+[ ] Approval is atomically claimed for one logical send before provider side effect
 [ ] Narrow send action succeeds for an approved test message
 [ ] Provider result/message evidence recorded without secrets
 [ ] Unapproved send attempt fails closed
-[ ] Stale/revoked approval send fails closed
+[ ] Stale/revoked/previously-claimed approval send fails closed
 [ ] Generic SMTP/send-anything primitive is not exposed to ordinary employee Agent surface
 [ ] Bulk/campaign sending unavailable in initial v2 scope
 [ ] Attachments unavailable unless separately enabled and accepted
@@ -215,6 +241,7 @@ whether reconciliation is pending
 Acceptance:
 
 ```text
+[ ] Draft/approval/claim governance events are append-oriented
 [ ] Applied send recorded
 [ ] Denied/blocked send recorded when policy requires it
 [ ] Approval reference recorded
@@ -240,7 +267,7 @@ From the actual employee client used in the target:
 ```text
 [ ] Authorized employee can use Communication Assistant for relevant email context
 [ ] Employee can request a draft
-[ ] Employee sees final outbound content before approval
+[ ] Employee sees the exact persisted outbound content in the approval confirmation
 [ ] Approval/send result is understandable
 [ ] Unauthorized employee cannot access another mailbox by prompting
 [ ] General Assistant remains usable without Email tools
