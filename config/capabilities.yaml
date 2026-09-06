@@ -168,13 +168,14 @@ capabilities:
       - docs/V2-INSTALLATION-ARCHITECTURE.md
       - docs/V2-CONFIG-PROTECTED-INPUTS.md
       - docs/V2-STAGE-CONTRACTS.md
+      - docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
       - docs/ONTOLOGY.md
       - ontology/examples/email-communication.yaml
       - config/company.private.example.yaml
+      - infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md
       - infrastructure/email/tencent-exmail/README.md
       - infrastructure/email/tencent-exmail/imap_readonly_mcp.py
       - infrastructure/email/tencent-exmail/imap.env.example
-      - infrastructure/email/tencent-exmail/hermes.mcp.example.yaml
       - infrastructure/email/tencent-exmail/test_imap_readonly.py
     stage_closure:
       contract: docs/V2-STAGE-CONTRACTS.md
@@ -193,6 +194,9 @@ capabilities:
       - selected mailbox logical ID and address
       - mailbox business purpose/owner context
       - explicit principal + mailbox + operation grants
+      - deterministic logical group to Open WebUI runtime group mapping
+      - Open WebUI trusted HumanActor source/actor namespace
+      - protected Open WebUI to Governance forwarder credential reference
       - allowed mailbox folders/read scope
       - selected provider endpoint mode when default is not accepted
       - outbound human-approval policy must remain enabled
@@ -202,6 +206,7 @@ capabilities:
       - symbolic mailbox client-credential reference
     required_secret_classes:
       - specialist-profile-credential
+      - open-webui-governance-forwarder-credential
       - email-mailbox-client-credential
     protected_input_contract:
       document: docs/V2-CONFIG-PROTECTED-INPUTS.md
@@ -209,20 +214,29 @@ capabilities:
       missing_required_input: "BLOCKED — REQUIRED INPUT: <specific input>"
       config_conflict: "BLOCKED — CONFIG CONFLICT: <specific conflict>"
       security_violation: "FAIL — SECURITY CONTRACT VIOLATION: <invariant>"
+    identity_authorization_contract:
+      document: docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
+      open_webui_provisioning: infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md
+      human_actor_namespace: open-webui
+      no_grant_behavior: DENY
     acceptance:
       document: docs/acceptance/TENCENT-EXMAIL.md
       section: Tencent Enterprise Mail Integration Acceptance
     records:
       - provider
       - selected mailbox identifiers, never credentials
-      - authorized human/Profile scope
+      - communication Profile/Assistant identifiers
+      - Open WebUI employee identity method
+      - logical group to Open WebUI runtime group mappings
       - mailbox grant summary
+      - trusted forwarder authentication method/secret reference class, never secret value
       - IMAP/SMTP endpoint mode
       - governance state location
       - secret symbolic reference/storage class/location description, never value
       - deterministic adapter test result
       - Stage 0–4 closure results
       - optional Stage 5/6 closure results when requested
+      - positive and negative identity/mailbox authorization result
       - read-only behavior result
       - approval-binding result
       - send/reconciliation result
