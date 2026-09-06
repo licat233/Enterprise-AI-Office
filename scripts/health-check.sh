@@ -87,6 +87,13 @@ if [ -n "${HERMES_WEBUI_HEALTH_URL:-}" ]; then
   check_http "hermes-webui" "$HERMES_WEBUI_HEALTH_URL"
 fi
 
+# v2 Email Governance is conditional. Absence of a configured health URL means
+# the capability is not being checked by this generic helper; it must not make a
+# v1-only deployment fail merely because Email is disabled.
+if [ -n "${EAIO_GOVERNANCE_HEALTH_URL:-}" ]; then
+  check_http "Email Governance" "$EAIO_GOVERNANCE_HEALTH_URL"
+fi
+
 # Hermes CLI status.
 if command -v hermes >/dev/null 2>&1; then
   if hermes status >/dev/null 2>&1; then
