@@ -7,6 +7,7 @@ This playbook implements the Open WebUI side of:
 - `docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md`
 - `docs/V2-INSTALLATION-ARCHITECTURE.md`
 - `docs/V2-STAGE-CONTRACTS.md`
+- `docs/V2-GOVERNANCE-RUNTIME.md`
 
 It is version-bound to the first validated Open WebUI reference release:
 
@@ -30,7 +31,7 @@ Reference path:
 Employee
 → Open WebUI Communication Assistant
 → Hermes communication Profile for reasoning
-→ Open WebUI server-side tool loop
+→ Open WebUI server-side tool/action loop
 → eao-email-governance
 ```
 
@@ -161,12 +162,13 @@ Stage 2
 
 Stage 3
   no approval LLM tool
+  + trusted server-side approval Action
 
 Stage 4
   send_approved_reply remains governed and may be invoked only through the deterministic approval/send path
 ```
 
-The `general` Model/Assistant must not have the Email Governance tool server attached.
+The `general` Model/Assistant must not have the Email Governance tool server or Approval Action attached.
 
 Do not make the external tool public/wildcard merely because it is attached to a restricted model.
 
@@ -181,7 +183,7 @@ The Governance service receives:
 ```text
 HumanActor ID     from {{USER_ID}}
 current group IDs from {{USER_GROUP_IDS}}
-chat/message IDs  for correlation only
+chat/message IDs  for correlation/review binding
 ```
 
 Canonical HumanActor:
@@ -196,26 +198,75 @@ If group placeholder resolution fails and the authorization decision depends on 
 
 ---
 
-## 9. Formal approval Action preparation
+## 9. Formal approval Action
 
-Stage 3 adds a trusted server-side Action/Function attached only to the Communication Assistant.
-
-The exact implementation is completed under ID-5, but its identity contract is fixed here:
+Stage 3 provisions the version-bound Action implementation:
 
 ```text
-Action receives current __user__.id from Open WebUI
-Action resolves current group membership server-side
-Action calls governance using the protected forwarder channel
-browser/model cannot override actor/group identity
+infrastructure/open-webui/v2_approve_draft_action.py
 ```
 
-The pinned Open WebUI v0.11.3 backend exposes group lookup by member ID through its group model; a version-bound Action may use that supported-in-release server-side capability.
+Installation/behavior contract:
 
-Do not treat free-form chat text as approval evidence.
+```text
+infrastructure/open-webui/V2-APPROVAL-ACTION.md
+```
+
+The reference Action:
+
+```text
+receives current __user__.id from Open WebUI
+resolves current group membership server-side
+uses current chat_id + assistant message id
+calls governance through the protected forwarder channel
+resolves the exact persisted Draft from governance review binding
+displays exact From/To/Cc/Subject/Body in Open WebUI native confirmation UI
+creates SendApproval only after explicit human confirmation
+```
+
+It never parses approval subject/authority out of model-generated text.
+
+Server-side runtime bindings required by the Action:
+
+```text
+EAIO_GOVERNANCE_URL
+EAIO_TRUSTED_FORWARDER_TOKEN
+```
+
+Provision/import the Action through the selected Open WebUI Function/Action administration path and attach it only to the Communication Assistant.
+
+The pinned v0.11.3 Action runtime passes the authenticated `__user__` object into Action code and its chat-action route enforces access to the current model/action. The same release provides server-side group lookup by user ID and native confirmation callbacks; re-verify those capabilities before using another release.
+
+Stage 3 does not send provider email.
 
 ---
 
-## 10. OIDC deployments
+## 10. Review binding
+
+When `prepare_reply_draft` is called during one Communication Assistant response, Governance records:
+
+```text
+HumanActor
++ chat ID
++ assistant message ID
+→ exact draft_id + revision + content_hash
+```
+
+This server-side binding is used by the Approval Action to locate the review subject.
+
+It is not authority by itself: Governance still checks the current HumanActor, mailbox scope, operation grant, Draft currentness, revision, and content hash at approval time.
+
+If no unique current binding exists for the clicked message:
+
+```text
+DENY — REVIEW_CONTEXT_NOT_FOUND
+```
+
+Do not fall back to parsing chat text.
+
+---
+
+## 11. OIDC deployments
 
 OIDC changes how the HumanActor enters Open WebUI, not the downstream governance identity contract.
 
@@ -235,7 +286,7 @@ Do not reimplement OIDC validation inside `eao-email-governance` for the baselin
 
 ---
 
-## 11. Optional signed-user JWT
+## 12. Optional signed-user JWT
 
 Open WebUI v0.11.3 can globally forward a signed user JWT when its forwarding settings are enabled.
 
@@ -247,7 +298,7 @@ Do not invent a new JWT issuer solely for this capability.
 
 ---
 
-## 12. Reconciliation
+## 13. Reconciliation
 
 On rerun:
 
@@ -258,18 +309,19 @@ inspect communication model/Profile connection
 inspect Email Governance tool connection
 inspect tool access grants
 inspect Communication Assistant attached tool set
+inspect deterministic Approval Action attachment/version
 compare with current accepted Stage
 update only owned differences
 preserve unrelated Open WebUI resources/settings
 ```
 
-Do not create duplicate Assistants/tool connections/groups.
+Do not create duplicate Assistants/tool connections/groups/Actions.
 
-If Stage is rolled back, remove higher-stage tools before removing lower-stage dependencies.
+If Stage is rolled back below Stage 3, detach/disable Approval Action before removing Stage 2/1 dependencies.
 
 ---
 
-## 13. Acceptance
+## 14. Acceptance
 
 Run with synthetic/authorized identities on an explicitly approved target.
 
@@ -280,17 +332,18 @@ Authorized Communication user
 → sees Communication Assistant
 → has intended Email tools
 → authorized mailbox read/draft operation succeeds
+→ sees Approval Action at Stage 3+
 
 User outside Communication groups
-→ cannot use Communication Assistant/tool resource
+→ cannot use Communication Assistant/tool/Action resource
 → direct governance request without trusted forwarder auth fails
 
 Authorized user without mailbox grant
 → Open WebUI may expose Communication Assistant
-→ governance denies mailbox operation
+→ governance denies mailbox operation/approval
 
 General Assistant
-→ no Email Governance tools attached by default
+→ no Email Governance tools or Approval Action attached by default
 ```
 
 Also test:
@@ -299,15 +352,18 @@ Also test:
 missing forwarder token → deny
 forged browser/tool actor field → ignored/deny
 removed group membership → subsequent governed request loses group grant
+Approval Action resolves persisted Draft by review binding, not model text
+approval confirmation displays exact persisted Draft fields
+cancel creates no SendApproval
 Profile key A does not authenticate as another Hermes Profile
 no forwarder/mailbox/Profile secret appears in browser, prompt, logs, or Git
 ```
 
-Record non-secret runtime group IDs/mappings, resource IDs, tool connection ID, and acceptance result in deployment state.
+Record non-secret runtime group IDs/mappings, resource IDs, tool connection ID, Action ID/version, and acceptance result in deployment state.
 
 ---
 
-## 14. Result
+## 15. Result
 
 When applicable target tests pass:
 
@@ -319,4 +375,5 @@ For Installation Design closure, the existence and consistency of this playbook 
 
 ```text
 IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN
+GOVERNANCE RUNTIME CONTRACT FROZEN
 ```
