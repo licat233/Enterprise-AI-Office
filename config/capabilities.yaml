@@ -170,6 +170,7 @@ capabilities:
       - docs/V2-STAGE-CONTRACTS.md
       - docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
       - docs/V2-GOVERNANCE-RUNTIME.md
+      - docs/V2-SEND-RECONCILIATION.md
       - docs/ONTOLOGY.md
       - ontology/examples/email-communication.yaml
       - config/company.private.example.yaml
@@ -178,11 +179,16 @@ capabilities:
       - infrastructure/open-webui/v2_approve_draft_action.py
       - infrastructure/email/governance/README.md
       - infrastructure/email/governance/schema.sql
+      - infrastructure/email/governance/migrations/002_send_reconciliation.sql
       - infrastructure/email/governance/test_schema.py
+      - infrastructure/email/governance/test_send_reconciliation.py
       - infrastructure/email/tencent-exmail/README.md
       - infrastructure/email/tencent-exmail/imap_readonly_mcp.py
       - infrastructure/email/tencent-exmail/imap.env.example
       - infrastructure/email/tencent-exmail/test_imap_readonly.py
+      - infrastructure/email/tencent-exmail/smtp_send_adapter.py
+      - infrastructure/email/tencent-exmail/smtp.env.example
+      - infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
     stage_closure:
       contract: docs/V2-STAGE-CONTRACTS.md
       mandatory_when_enabled:
@@ -211,6 +217,7 @@ capabilities:
       - attachment policy
       - governance state/log path or accepted derived default
       - symbolic mailbox client-credential reference
+      - protected operator/evidence path for reconciliation
     required_secret_classes:
       - specialist-profile-credential
       - open-webui-governance-forwarder-credential
@@ -235,6 +242,20 @@ capabilities:
       draft_revision_identity: draft_id + revision
       approval_binding: draft_id + revision + content_hash
       approval_claim_rule: one approval -> one logical send
+    send_reconciliation_contract:
+      document: docs/V2-SEND-RECONCILIATION.md
+      schema_migration: infrastructure/email/governance/migrations/002_send_reconciliation.sql
+      offline_schema_test: infrastructure/email/governance/test_send_reconciliation.py
+      provider_adapter: infrastructure/email/tencent-exmail/smtp_send_adapter.py
+      provider_env_template: infrastructure/email/tencent-exmail/smtp.env.example
+      provider_adapter_test: infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
+      normalized_outcomes:
+        - SENT
+        - CONFIRMED_NOT_SENT
+        - OUTCOME_UNKNOWN
+      ambiguous_outcome_behavior: RECONCILIATION_REQUIRED
+      blind_retry_after_unknown: forbidden
+      retry_identity: same logical_send_id + Message-ID + Date + transport_payload_hash
     acceptance:
       document: docs/acceptance/TENCENT-EXMAIL.md
       section: Tencent Enterprise Mail Integration Acceptance
@@ -251,12 +272,16 @@ capabilities:
       - secret symbolic reference/storage class/location description, never value
       - deterministic provider adapter test result
       - deterministic governance schema/hash test result
+      - deterministic send/reconciliation schema test result
       - Stage 0–4 closure results
       - optional Stage 5/6 closure results when requested
       - positive and negative identity/mailbox authorization result
       - Draft revision/persistence result
       - deterministic human approval Action result
       - approval stale/revoke/single-claim result
+      - stable logical send Message-ID and transport payload hash evidence
+      - send attempt / normalized outcome evidence
+      - reconciliation evidence/reference when applicable
       - read-only behavior result
       - approval-binding result
       - send/reconciliation result
