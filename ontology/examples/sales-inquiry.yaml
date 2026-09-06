@@ -1,13 +1,14 @@
-schema_version: "0.1.0"
+schema_version: "0.2.0"
 kind: enterprise-ontology-example
 
 metadata:
   id: sales-inquiry
-  version: "0.1.0"
+  version: "0.2.0"
   status: design-example
   normative: false
   runtime_enforcement: false
   source_contract: docs/ONTOLOGY.md
+  source_contract_version: "0.2.0"
   purpose: >-
     Test whether the Enterprise Ontology Contract can express a narrow
     Customer -> Inquiry -> Product -> Follow-up workflow without selecting
@@ -363,6 +364,7 @@ validation_scenarios:
       - object visibility
       - relation traversal
       - cross-object filtering
+      - traversal authorization closure
       - read-only operation surface
 
   - id: approved-owner-follow-up
@@ -372,6 +374,7 @@ validation_scenarios:
       - named action
       - source-backed write authority
       - trusted actor propagation
+      - precondition read authorization
       - explicit human approval
       - audit
       - reconciliation expectations
@@ -405,6 +408,9 @@ experiment_findings:
     object_types: supported
     properties: supported
     relations: supported
+    object_visibility: supported
+    read_operations: supported
+    traversal_authorization: supported
     authority: supported
     named_actions: supported
     preconditions: supported
@@ -414,14 +420,15 @@ experiment_findings:
     tool_binding: supported
     audit: supported
     versioning: supported
-  candidate_contract_gap:
+  resolved_contract_finding:
     area: read-visibility-policy
     observation: >-
-      The contract requires fail-closed authorization and mentions read scope in
-      the first validation scenario, but it does not yet define a dedicated,
-      machine-readable visibility/read-operation contract comparable to Named Actions.
-      The experiment also showed that a read operation must close over the visibility
-      requirements of every object it filters or traverses, not only its primary target.
-    proposed_next_step: >-
-      Review whether docs/ONTOLOGY.md should formally add Object Visibility and
-      Read Operation requirements before freezing any schema.
+      The first experiment showed that a read operation must close over the
+      visibility requirements of every object, relation, and property it reads,
+      filters, or traverses, not only its primary target. The same requirement
+      applies to data read while evaluating Action preconditions.
+    resolution: >-
+      docs/ONTOLOGY.md version 0.2.0 now formally defines Object Visibility,
+      Read Operations, Traversal Authorization, and authorization closure over
+      the actual data path.
+    runtime_status: design-only
