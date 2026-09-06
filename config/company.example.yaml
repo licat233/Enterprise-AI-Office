@@ -54,9 +54,8 @@ agent_runtime:
     enabled: true
     explicit_allowlist: true
 
-# The Hermes default/admin Profile belongs to the control plane. `general` is the
-# baseline employee-facing Profile. Add another Profile only when the company
-# actually intends to operate that specialist role/capability boundary.
+# `general` is the baseline employee-facing Profile. The Hermes default/admin
+# Profile belongs to the control plane and is not listed as an employee Profile.
 profiles:
   - id: general
     display_name: General Assistant
@@ -69,7 +68,7 @@ profiles:
       terminal: false
       code_execution: false
       coding_delegation: false
-      web_search: optional
+      web_search: false
     memory_policy: disabled-until-isolation-validated
 
 employee_access:
@@ -88,9 +87,9 @@ employee_access:
       advanced_chat_parameters: false
     assistant_resources_private_by_default: true
 
-# Optional capabilities are selected here. A disabled capability must not be
-# instantiated merely because the repository contains a template/playbook.
-# An enabled capability must be deployed and accepted before CONFIGURED READY.
+# Optional capabilities are selected here. Disabled capabilities are not
+# instantiated. Enabled capabilities must close implementation + acceptance
+# before CONFIGURED READY.
 capabilities:
   hermes_webui:
     enabled: false
@@ -138,8 +137,6 @@ capabilities:
   employee_long_term_memory:
     enabled: false
     profiles: []
-    # Enable only after the exact deployed Open WebUI → Hermes user-scoping path
-    # passes the cross-user isolation acceptance test.
 
 production:
   backup:
@@ -148,16 +145,19 @@ production:
     daily_retention: 14
     weekly_retention: 4
     require_off_primary_disk_copy: true
+    off_primary_destination: <SELECT_PROTECTED_DESTINATION>
     restore_test_frequency: monthly
   startup_recovery:
     policy: documented-supported-recovery # automatic | documented-supported-recovery
   health:
     weekly_review: true
+    operational_owner: <ASSIGN_OWNER>
   access_security_review:
     required: true
 
-# Model IDs intentionally remain placeholders because providers/models change.
-# Exact deployed values belong in protected deployment config and deployment state.
+# Model IDs intentionally remain placeholders because providers/models evolve.
+# Exact selected values and provider credentials belong in protected deployment
+# configuration/runtime state, using the selected upstream's native fields.
 models:
   hermes:
     provider: <SELECT_PROVIDER>
@@ -171,19 +171,19 @@ models:
       provider: null
       model: null
 
-# Secrets are references only. Never put real values in this public template.
+# Secret classes are references only. The deployment agent must resolve them to
+# the exact native secret variables/credential stores required by selected
+# upstream providers and capabilities; never put real values here.
 secrets:
   policy: external-protected-storage
-  required_placeholders:
-    - HERMES_DEFAULT_API_KEY
-    - HERMES_GENERAL_API_KEY
-    - MODEL_PROVIDER_KEYS
-    - WEKNORA_DATABASE_SECRETS
-    - REDIS_SECRETS_IF_REQUIRED
-    - OPEN_WEBUI_ADMIN_CREDENTIALS
-  conditional_placeholders:
-    - SPECIALIST_PROFILE_API_KEYS
-    - HERMES_WEBUI_PASSWORD_IF_EXPOSED
-    - CODING_AGENT_AUTH_IF_ENABLED
-    - MESSAGING_CREDENTIALS_IF_ENABLED
-    - SSO_CLIENT_CREDENTIALS_IF_ENABLED
+  required_classes:
+    - hermes-profile-api-keys
+    - model-provider-credentials
+    - weknora-runtime-secrets
+    - open-webui-admin-credentials
+  conditional_classes:
+    - specialist-profile-credentials
+    - hermes-webui-password
+    - coding-agent-authentication
+    - messaging-platform-credentials
+    - sso-client-credentials
