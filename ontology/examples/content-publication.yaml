@@ -1,9 +1,9 @@
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 kind: enterprise-ontology-example
 
 metadata:
   id: content-publication
-  version: "0.1.0"
+  version: "0.2.0"
   status: design-example
   normative: false
   runtime_enforcement: false
@@ -457,7 +457,7 @@ actions:
         description: Link the Ontology publication decision to the external publication result.
     failure_behavior:
       idempotency_required: true
-      idempotency_key: content_id + expected_revision + expected_content_hash + target
+      idempotency_key: content_id + expected_revision + expected_content_hash
       stale_approval: deny
       external_success_local_failure: reconciliation-required
       local_success_external_failure: action-not-applied
@@ -545,18 +545,23 @@ experiment_findings:
     effects: supported
     actor_requirements: supported
     approval_modes: supported
+    approval_subject_binding: supported
     tool_binding: supported
     audit: supported
     versioning: supported
-  candidate_contract_gap:
+  resolved_contract_finding:
     area: approval-subject-version-binding
     observation: >-
-      The contract defines approval modes and states that an LLM cannot infer
-      approval, but it does not yet explicitly require an approval to bind to
-      the exact object version/revision/hash whose side effect is being authorized.
-      The publication experiment shows that approval detached from immutable
-      subject evidence can become stale after content changes while still looking valid.
-    proposed_next_step: >-
-      Review whether docs/ONTOLOGY.md should formally require approval evidence
-      to identify the exact subject/version/state it authorizes when the approved
-      artifact is mutable between review and execution.
+      The experiment showed that approval detached from immutable subject evidence
+      can become stale after content changes while still looking valid.
+    resolution: >-
+      docs/ONTOLOGY.md version 0.3.0 now formally requires approval evidence to
+      identify the exact subject/version/state it authorizes when the subject can
+      materially change before execution, and requires execution-time validation.
+  structural_validation_finding:
+    area: dangling-reference
+    observation: >-
+      Manual review found an idempotency expression referencing an undeclared
+      `target`. The expression was corrected, providing concrete evidence that a
+      lightweight structural validator can reduce schema drift across examples.
+    runtime_status: design-only
