@@ -1,66 +1,91 @@
 # Infrastructure
 
-This directory contains reusable deployment adapters, examples, and implementation notes for the selected Enterprise AI Office components.
+This directory contains reusable deployment adapters and capability playbooks for Enterprise AI Office.
 
-The repository intentionally does **not** vendor entire upstream projects.
+The repository intentionally does **not** vendor entire upstream projects. It pins/inspects upstream software and keeps only the smallest reusable Enterprise AI Office integration layer needed to reach the configured deployment state.
 
-## Component directories
+## Directory map
 
 ```text
 infrastructure/
-├── weknora/
-├── open-webui/
-└── hermes/
+├── weknora/          # enterprise knowledge platform adapter
+├── hermes/           # core Hermes Profile/MCP config + native feature playbook
+│   └── features/     # Kanban, Cron, messaging Gateway
+├── open-webui/       # employee Web client adapter
+├── hermes-webui/     # optional Hermes administrative Web UI playbook
+├── coding-agents/    # optional Codex / Claude Code delegation playbook
+└── access/           # optional remote/private access and SSO playbook
 ```
+
+Which directories are executed is determined by the active company configuration and `config/capabilities.yaml`.
+
+A playbook existing here does not mean its capability should be deployed.
+
+## Capability closure
+
+For deployment, use:
+
+```text
+company configuration
++
+config/capabilities.yaml
+        ↓
+selected infrastructure playbooks/adapters
+        ↓
+acceptance tests
+        ↓
+deployment state
+```
+
+Every enabled capability must have a referenced implementation path and matching acceptance test before `CONFIGURED READY` can be claimed.
 
 ## Upstream-version rule
 
-Infrastructure files must be written against a known tested upstream release.
+Infrastructure files must target a known upstream version/commit rather than silently assume today's `main`/`latest`.
 
-Do not copy configuration from an old blog post and assume it still matches current WeKnora/Hermes/Open WebUI.
+Before activating or changing an adapter/playbook:
 
-Before creating or updating deployment manifests:
+1. identify the selected upstream version;
+2. read that version's official deployment/configuration documentation or source;
+3. prefer its native feature/integration mechanism;
+4. apply the smallest Enterprise AI Office configuration layer;
+5. validate the capability;
+6. record the actual version and runtime boundary in `state/DEPLOYMENT-STATE.md`.
 
-1. identify the target upstream version;
-2. read its official deployment documentation;
-3. inspect the official example configuration/Compose files;
-4. use the smallest override necessary for Enterprise AI Office;
-5. record the tested version in `state/DEPLOYMENT-STATE.md`.
+The validated core stack is recorded in `config/validated-stack.yaml`.
 
-## Why not vendor upstream Compose files permanently?
+Optional components that were not part of that first core validation must resolve and pin their own compatible upstream version when enabled.
 
-WeKnora and Open WebUI evolve independently. Copying their full upstream deployment definitions into this repository too early creates a stale fork that future AI agents may mistakenly treat as authoritative.
+## Why not vendor upstream projects?
+
+Vendoring full upstream Compose/config trees creates a stale fork and makes future agents unsure which project is authoritative.
 
 Preferred pattern:
 
 ```text
-pinned upstream release
+pinned upstream release/commit
 +
-Enterprise AI Office configuration/override
+thin Enterprise AI Office adapter/playbook
 +
-recorded deployment state
+company-specific protected configuration
++
+recorded runtime state
 ```
 
 ## Secrets
 
-Infrastructure examples must use placeholders only.
+Infrastructure examples contain placeholders only.
 
-Never commit production `.env` files or credentials.
+Never commit production `.env` values, API keys, database passwords, OAuth secrets, messaging tokens, or private credentials.
 
 ## Port/network rules
 
-Do not publish internal databases/queues merely because an upstream Compose example exposes them for development.
+Do not publish internal databases, queues, parser services, privileged Hermes APIs, or admin surfaces merely because an upstream development example exposes them.
 
-Production exposure must follow `docs/SECURITY.md`.
+Exposure follows the company configuration, `docs/SECURITY.md`, and `infrastructure/access/README.md` when remote access is enabled.
 
-## Future files
+## Promotion rule
 
-As the ARMOR reference deployment is implemented and validated, this directory may gain:
+A generic adapter should be based on official supported behavior and reusable configuration, not a one-off workaround.
 
-- tested Compose overrides;
-- environment templates;
-- service startup examples;
-- reverse-proxy/private-access examples when justified;
-- version-specific compatibility notes.
-
-Only promote an implementation artifact into the generic project after it has been validated and is reasonably reusable.
+When an optional capability has not yet been validated in the first reference deployment, label that fact honestly and validate the exact selected upstream behavior during the real deployment. A documented playbook is an execution path, not fabricated validation evidence.
