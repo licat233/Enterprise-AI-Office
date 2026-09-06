@@ -1,0 +1,422 @@
+schema_version: "0.1.0"
+kind: enterprise-ontology-example
+
+metadata:
+  id: sales-inquiry
+  version: "0.1.0"
+  status: design-example
+  normative: false
+  runtime_enforcement: false
+  source_contract: docs/ONTOLOGY.md
+  purpose: >-
+    Test whether the Enterprise Ontology Contract can express a narrow
+    Customer -> Inquiry -> Product -> Follow-up workflow without selecting
+    or implementing an Ontology runtime.
+
+domain: sales
+
+systems:
+  crm:
+    role: system-of-record
+    binding_status: unresolved
+    note: Conceptual external CRM authority only; no real integration is authorized by this file.
+
+  product-catalog:
+    role: system-of-record
+    binding_status: unresolved
+    note: Conceptual authoritative product source only.
+
+  enterprise-ai-office:
+    role: ontology-owner
+    binding_status: design-only
+
+objects:
+  Customer:
+    description: A customer or prospect represented by the authoritative sales system.
+    identity:
+      primary_key: customer_id
+      authority:
+        class: source-backed
+        system: crm
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: sales.customer.read
+    properties:
+      customer_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: crm
+      name:
+        type: string
+        required: true
+        mutable: true
+        authority:
+          class: source-backed
+          system: crm
+      country:
+        type: string
+        required: false
+        mutable: true
+        authority:
+          class: source-backed
+          system: crm
+      email:
+        type: string
+        required: false
+        sensitivity: contact-data
+        mutable: true
+        authority:
+          class: source-backed
+          system: crm
+
+  Inquiry:
+    description: A customer inquiry tracked by the authoritative sales system.
+    identity:
+      primary_key: inquiry_id
+      authority:
+        class: source-backed
+        system: crm
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: sales.inquiry.read
+    properties:
+      inquiry_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: crm
+      customer_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: crm
+      product_id:
+        type: string
+        required: false
+        mutable: true
+        authority:
+          class: source-backed
+          system: crm
+      status:
+        type: string
+        required: true
+        mutable: true
+        allowed_values:
+          - open
+          - qualified
+          - quoted
+          - closed
+        authority:
+          class: source-backed
+          system: crm
+      owner_employee_id:
+        type: string
+        required: false
+        mutable: true
+        authority:
+          class: source-backed
+          system: crm
+      created_at:
+        type: datetime
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: crm
+      last_contacted_at:
+        type: datetime
+        required: false
+        mutable: true
+        authority:
+          class: source-backed
+          system: crm
+      ai_summary:
+        type: string
+        required: false
+        mutable: true
+        authority:
+          class: ontology-owned
+          system: enterprise-ai-office
+      days_open:
+        type: integer
+        required: false
+        mutable: false
+        authority:
+          class: derived
+          inputs:
+            - Inquiry.created_at
+          rule: current_time - Inquiry.created_at
+
+  Product:
+    description: A sellable product represented by the authoritative product source.
+    identity:
+      primary_key: product_id
+      authority:
+        class: source-backed
+        system: product-catalog
+    visibility:
+      default: deny
+      read_requirements:
+        - entitlement: sales.product.read
+    properties:
+      product_id:
+        type: string
+        required: true
+        mutable: false
+        authority:
+          class: source-backed
+          system: product-catalog
+      name:
+        type: string
+        required: true
+        mutable: true
+        authority:
+          class: source-backed
+          system: product-catalog
+      product_family:
+        type: string
+        required: false
+        mutable: true
+        authority:
+          class: source-backed
+          system: product-catalog
+
+relations:
+  customer_submits_inquiry:
+    from: Customer
+    to: Inquiry
+    predicate: submits
+    cardinality: one-to-many
+    authority:
+      class: source-backed
+      system: crm
+    binding:
+      source_property: Inquiry.customer_id
+      target_property: Customer.customer_id
+
+  inquiry_relates_to_product:
+    from: Inquiry
+    to: Product
+    predicate: relates_to
+    cardinality: many-to-one
+    authority:
+      class: source-backed
+      system: crm
+    binding:
+      source_property: Inquiry.product_id
+      target_property: Product.product_id
+
+read_operations:
+  search_inquiries:
+    target: Inquiry
+    actor_requirements:
+      trusted_human_identity: required
+      entitlements:
+        - sales.inquiry.read
+    filters:
+      - Inquiry.status
+      - Inquiry.created_at
+      - Customer.country
+      - Product.product_family
+    traversals:
+      - customer_submits_inquiry
+      - inquiry_relates_to_product
+    result_visibility: object-visibility-policy
+    tool_binding:
+      status: unresolved
+      operation: crm.search_inquiries
+    note: >-
+      This is a design-time read contract only. It demonstrates that a useful
+      employee query may require both object visibility and cross-object traversal.
+
+  get_inquiry:
+    target: Inquiry
+    actor_requirements:
+      trusted_human_identity: required
+      entitlements:
+        - sales.inquiry.read
+    result_visibility: object-visibility-policy
+    tool_binding:
+      status: unresolved
+      operation: crm.get_inquiry
+
+actions:
+  send_follow_up:
+    description: Send one customer follow-up associated with an existing inquiry.
+    target: Inquiry
+    parameters:
+      inquiry_id:
+        type: string
+        required: true
+      message_body:
+        type: string
+        required: true
+        sensitivity: customer-communication
+    actor_requirements:
+      trusted_human_identity: required
+      profile_capability: sales.follow_up
+      entitlements:
+        - sales.inquiry.read
+        - sales.follow_up.send
+    preconditions:
+      - id: inquiry-exists
+        rule: Inquiry(inquiry_id) exists
+        on_fail:
+          decision: deny
+          code: INQUIRY_NOT_FOUND
+      - id: inquiry-not-closed
+        rule: Inquiry.status != closed
+        on_fail:
+          decision: deny
+          code: INQUIRY_CLOSED
+      - id: customer-email-present
+        rule: related Customer.email exists
+        on_fail:
+          decision: deny
+          code: CUSTOMER_EMAIL_MISSING
+      - id: actor-owns-inquiry
+        rule: Inquiry.owner_employee_id == actor.employee_id
+        on_fail:
+          decision: deny
+          code: ACTOR_NOT_INQUIRY_OWNER
+      - id: trusted-actor-resolved
+        rule: actor.employee_id is trusted and resolved
+        on_fail:
+          decision: blocked
+          code: ACTOR_UNRESOLVED
+    approval:
+      mode: explicit-human-approval
+      requirement: >-
+        The authenticated human actor must explicitly approve the outbound
+        customer message after its final content is known.
+      on_missing:
+        decision: deny
+        code: MISSING_HUMAN_APPROVAL
+    authority:
+      class: source-backed
+      system: crm
+    tool_binding:
+      status: unresolved
+      operation: crm.send_follow_up
+      note: No runtime tool/API/MCP binding is authorized by this example.
+    effects:
+      - type: external-source-mutation
+        system: crm
+        description: Send the approved follow-up through the CRM-supported customer communication path.
+      - type: external-source-mutation
+        system: crm
+        property: Inquiry.last_contacted_at
+        description: Record the successful contact time in the authoritative CRM if the real integration supports this atomically or through reconciliation.
+      - type: audit-event
+        description: Record the Ontology Action decision and external result reference.
+    failure_behavior:
+      idempotency_required: true
+      external_success_local_failure: reconciliation-required
+      local_success_external_failure: action-not-applied
+      retry: only-with-idempotency-or-confirmed-no-send
+    audit:
+      enabled: true
+      record:
+        - timestamp
+        - human_actor_id
+        - profile_actor_id
+        - action
+        - target_id
+        - safe_parameter_summary
+        - contract_version
+        - decision
+        - reason_code
+        - approval_reference
+        - external_result_reference
+        - reconciliation_state
+
+operation_surface:
+  reads:
+    - search_inquiries
+    - get_inquiry
+  actions:
+    - send_follow_up
+  intentionally_absent:
+    - execute_sql
+    - generic_update
+    - generic_crm_write
+    - send_arbitrary_email
+
+validation_scenarios:
+  - id: search-german-open-product-family-inquiries
+    intent: >-
+      Find recent open inquiries from customers in Germany related to a selected product family.
+    expected: pass-if-actor-authorized-and-bindings-exist
+    demonstrates:
+      - object visibility
+      - relation traversal
+      - cross-object filtering
+      - read-only operation surface
+
+  - id: approved-owner-follow-up
+    intent: Send a reviewed follow-up for an open inquiry owned by the authenticated actor.
+    expected: pass-if-real-binding-and-all-preconditions-exist
+    demonstrates:
+      - named action
+      - source-backed write authority
+      - trusted actor propagation
+      - explicit human approval
+      - audit
+      - reconciliation expectations
+
+  - id: closed-inquiry-follow-up
+    intent: Send a follow-up for a closed inquiry.
+    expected:
+      decision: deny
+      code: INQUIRY_CLOSED
+
+  - id: missing-human-approval
+    intent: Send a follow-up before the authenticated human approves final content.
+    expected:
+      decision: deny
+      code: MISSING_HUMAN_APPROVAL
+
+  - id: unresolved-actor
+    intent: Send a follow-up when the Action layer cannot resolve trusted employee identity.
+    expected:
+      decision: blocked
+      code: ACTOR_UNRESOLVED
+
+  - id: generic-write-attempt
+    intent: Change Inquiry.status through a generic update primitive.
+    expected:
+      decision: deny-by-absence
+      reason: No generic mutation primitive exists in the approved operation surface.
+
+experiment_findings:
+  contract_coverage:
+    object_types: supported
+    properties: supported
+    relations: supported
+    authority: supported
+    named_actions: supported
+    preconditions: supported
+    effects: supported
+    actor_requirements: supported
+    approval: supported
+    tool_binding: supported
+    audit: supported
+    versioning: supported
+  candidate_contract_gap:
+    area: read-visibility-policy
+    observation: >-
+      The contract requires fail-closed authorization and mentions read scope in
+      the first validation scenario, but it does not yet define a dedicated,
+      machine-readable visibility/read-operation contract comparable to Named Actions.
+    proposed_next_step: >-
+      Review whether docs/ONTOLOGY.md should formally add Object Visibility and
+      Read Operation requirements before freezing any schema.
