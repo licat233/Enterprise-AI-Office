@@ -23,6 +23,8 @@ For deployment or deployment planning, use this order:
 7. referenced infrastructure playbooks/adapters.
 8. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) — evidence gates.
 
+When the task is specifically to extend a stable v1 deployment into the current v2 milestone, also read [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) before adding capabilities or integrations.
+
 The intended interaction is one deployment request, not a sequence of prompts reminding the agent to connect WeKnora, create Profiles, configure RBAC, implement an already-enabled optional capability, test the employee client, or record state.
 
 Human input remains legitimate for things an agent cannot invent or authorize: model/API credentials, OS permission approval, IdP/app registration, enterprise messaging credentials, private-access authority, destructive conflicts, and real company business choices missing from configuration.
@@ -114,6 +116,30 @@ Optional capability playbooks are available for company-selected needs such as:
 [`config/capabilities.yaml`](config/capabilities.yaml) maps each enabled capability to its implementation path, required external inputs, acceptance test, and state fields.
 
 An enabled capability cannot be silently skipped to reach a green result. A disabled capability must not be instantiated merely because a template exists.
+
+## Current v2 milestone
+
+The current controlled expansion milestone is defined in [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md):
+
+> **Communication & Follow-up**
+
+Its purpose is to prove one governed operational work loop on top of the stable v1 knowledge/agent foundation.
+
+The initial v2 scope is intentionally narrow:
+
+```text
+one real email integration
++
+at most one company-selected messaging surface
++
+Hermes-native follow-up automation
++
+Ontology governance where the real read/write boundary requires it
+```
+
+v2 does **not** reopen the entire deferred-feature list. CRM, ERP, Calendar, employee long-term memory, n8n, extra vector databases, local-LLM infrastructure, graph databases, and broad autonomous external actions remain outside the initial milestone unless a concrete blocking requirement justifies a separate decision.
+
+Provider-specific implementation begins only after the adopting company identifies and authorizes its real email system. Do not design against an imaginary provider merely to make progress.
 
 ## Reference architecture
 
@@ -241,6 +267,7 @@ It does **not** replace real runtime acceptance.
 | [`AGENTS.md`](AGENTS.md) | AI agent operating contract |
 | [`DEPLOY.md`](DEPLOY.md) | deployment execution Golden Path |
 | [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | Core/Configured/Production readiness semantics |
+| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | current controlled v2 Communication & Follow-up milestone |
 | [`config/company.example.yaml`](config/company.example.yaml) | generic company desired-state schema |
 | [`config/capabilities.yaml`](config/capabilities.yaml) | capability implementation/acceptance registry |
 | [`config/validated-stack.yaml`](config/validated-stack.yaml) | validated core version baseline |
@@ -250,6 +277,7 @@ It does **not** replace real runtime acceptance.
 | [`docs/PROFILE-STANDARD.md`](docs/PROFILE-STANDARD.md) | Hermes Profile design/governance |
 | [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) | WeKnora knowledge governance |
 | [`docs/CLIENT-RBAC.md`](docs/CLIENT-RBAC.md) | employee identity/group/Assistant mapping |
+| [`docs/ONTOLOGY.md`](docs/ONTOLOGY.md) | operational object/read/action governance contract |
 | [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) | readiness evidence suite |
 | [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md) | production recovery controls |
 | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | routine operations/troubleshooting |
@@ -272,13 +300,16 @@ The repository now contains:
 - production backup/restore/health controls;
 - conditional acceptance gates;
 - a clean fresh-deployment state template;
-- static repository deployability self-check.
+- static repository deployability self-check;
+- an Enterprise Ontology design/governance contract plus structural validator;
+- a scope-frozen v2 Communication & Follow-up milestone awaiting selection/authorization of the real email provider before provider-specific implementation begins.
 
 Still not claimed:
 
 - a universal one-command installer/compiler;
 - empirical proof that a completely new AI agent has already executed the newly consolidated full path on a second clean host;
-- pre-validation of every possible vendor-specific IdP, messaging provider, model provider, host OS, or private-access service.
+- pre-validation of every possible vendor-specific IdP, messaging provider, model provider, host OS, private-access service, or email provider;
+- completion of the v2 operational communication loop before a real email system is selected and accepted.
 
 Those are not excuses for manual routine prompting. During a real deployment, the agent must follow the repository until it reaches the requested readiness level, asks only for genuine external authority/input, or reports a specific failure.
 
