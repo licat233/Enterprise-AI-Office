@@ -1,102 +1,281 @@
 # Enterprise AI Office
 
-> An agent-readable and agent-executable **system blueprint + installation blueprint** for building a self-hosted enterprise AI workspace with **WeKnora + Hermes Agent + Open WebUI + MCP**, plus company-selected Profiles, administration, coding agents, automation, messaging, identity, and production controls.
+> An agent-readable and agent-executable **system blueprint + installation blueprint** for building a governed, self-hosted enterprise AI workspace around **WeKnora + Hermes Agent + Open WebUI**, with capability-driven extensions for knowledge, specialized AI roles, coding agents, automation, messaging, enterprise identity, and governed business-system actions.
 
-Enterprise AI Office is a public blueprint project for companies that want an internal AI work system around their own knowledge, roles, workflows, tools, employees, and security boundaries.
+**[简体中文 README](./README.zh-CN.md)**
 
-The repository has two primary design goals:
+## Project status at a glance
 
-```text
-1. Explain what the Enterprise AI Office should be.
-2. Explain how a capable AI engineering agent should install, configure, secure, validate, and operate it.
-```
+| Milestone / capability | Status |
+| --- | --- |
+| v1 core employee path | ✅ Validated reference implementation |
+| v2 System Design | ✅ Complete |
+| v2 Installation Design | ✅ Complete |
+| ID-1 Installation Architecture | ✅ Complete |
+| ID-2 Config / Protected Inputs | ✅ Complete |
+| ID-3 Stage / Capability Closure | ✅ Complete |
+| ID-4 Identity / Authorization | ✅ Complete |
+| ID-5 Governance Runtime | ✅ Complete |
+| ID-6 Governed Send / Reconciliation | ✅ Complete |
+| ID-7 Recovery / Clean-host Acceptance | ✅ Complete |
+| Installation Design Final Review | ✅ PASS |
+| Blueprint Validation | ⏳ Not yet opened |
+| Release Ready | ⏳ Not yet opened |
+| Real company deployment task | ⛔ Inactive |
 
-The intended lifecycle is:
+> **Important:** “implemented” in this README means the repository already contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox.
 
-```text
-System Design
-→ Installation Design
-→ Blueprint Validation
-→ Release Ready
-```
+Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml).
 
-A **real company deployment is separate from that blueprint lifecycle**. A company or AI agent consumes the blueprint later on an explicitly requested target.
+## Architecture overview
 
-The practical adoption goal is:
+![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
 
-> **Give this repository to a capable AI engineering agent, provide the adopting company's private configuration and genuine protected inputs when a real deployment is requested, and let the agent understand the intended system and drive the approved target to the requested readiness level without repeated reminders about routine installation steps.**
-
-ARMOR is the first reference implementation. The project itself remains generic.
-
-## Blueprint lifecycle and deployment-task gate
-
-Before interpreting work as system design, installation design, blueprint validation, or a real deployment, read:
-
-[`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)
-
-This file separates two different things:
+The architecture deliberately keeps the validated v1 employee path independent from the new governed communication path:
 
 ```text
-blueprint_lifecycle.current_phase
-= what part of the repository blueprint is currently being designed/validated
-
-real_deployment_task.active
-= whether a real company target is currently authorized for installation/mutation
+Employee
+  ↓
+Open WebUI
+  ├─ General Assistant
+  │    ↓
+  │  Hermes `general`
+  │    ↓
+  │  WeKnora
+  │
+  └─ Communication Assistant
+       ├─ Hermes `communication` Profile for reasoning
+       └─ Open WebUI server-side governed Email actions/tools
+            ↓
+          eao-email-governance
+            ├─ Governance SQLite
+            └─ Email Provider
 ```
 
-Do not infer either from prototype code, adapters, tests, installation plans, deployment documents, acceptance contracts, previous assistant momentum, or phrases such as `continue`, `start`, `next`, `继续`, `开始吧`, or `下一步`.
+A failure in the v2 Email capability must not break:
 
-Those continuation phrases mean:
+```text
+Open WebUI → General Assistant → Hermes general → WeKnora
+```
 
-> **Continue valid work inside the current blueprint phase.**
+## What this repository already implements
 
-They do not advance the blueprint lifecycle and they do not activate a real deployment.
+### 1. Validated core enterprise-AI employee path
 
-The current v2 blueprint phase is **System Design**. The later **Installation Design** phase will design the scripts, configuration, sequencing, rollback, and acceptance path an AI agent needs. It still will not mean installing onto ARMOR production.
+The first validated core stack provides:
 
-Human-readable v2 blueprint context: [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md).
+- **Open WebUI** as the employee-facing web client;
+- **Hermes Agent** as the primary Agent runtime;
+- **WeKnora** as the authoritative company-knowledge layer;
+- grounded answers with source evidence;
+- Open WebUI user/group/Assistant access controls;
+- distinct Hermes Profile API boundaries;
+- least-privilege employee tool exposure;
+- conversation history and controlled file-upload behavior;
+- backup / isolated restore reference procedures.
 
-## Install with an AI agent
+Core employee workflow:
 
-The installation blueprint is part of this repository even when no real deployment task is active.
+```text
+Employee
+→ Open WebUI
+→ General Assistant
+→ Hermes `general` Profile
+→ WeKnora
+→ grounded company answer + source
+```
 
-For installation-blueprint design or an explicitly activated real deployment, use this order:
+### 2. Agent-readable deployment blueprint
 
-1. [`AGENTS.md`](AGENTS.md) — highest-priority repository-local operating contract.
-2. [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml) — blueprint lifecycle and real-deployment-task gate.
-3. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path / installation contract.
-4. [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) — readiness/completion contract.
-5. active company-private configuration for a real deployment, based on [`config/company.example.yaml`](config/company.example.yaml).
-6. [`config/capabilities.yaml`](config/capabilities.yaml) — capability closure registry.
-7. [`config/validated-stack.yaml`](config/validated-stack.yaml) — validated core reproducibility baseline.
-8. referenced infrastructure playbooks/adapters.
-9. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) — evidence gates.
+The repository already includes:
 
-When the task is specifically about the current v2 milestone, also read:
+- repository-local AI Agent operating contract in [`AGENTS.md`](AGENTS.md);
+- deployment Golden Path in [`DEPLOY.md`](DEPLOY.md);
+- machine-readable company capability registry in [`config/capabilities.yaml`](config/capabilities.yaml);
+- public company configuration schema and private-overlay shape;
+- protected-input / secret-reference rules;
+- lifecycle gates separating blueprint work from real deployment;
+- Core / Configured / Production readiness semantics;
+- acceptance suites and provider-specific acceptance contracts;
+- backup, restore, health-check, recovery, and state-recording helpers.
 
-1. [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md)
-2. [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md)
-3. [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md)
-4. [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) as an early staged installation/deployment blueprint
-5. the provider-specific capability artifacts referenced by `config/capabilities.yaml`
+### 3. v2 governed Communication & Email system
 
-During a real deployment, the intended interaction is one deployment request, not a sequence of prompts reminding the agent to connect WeKnora, create Profiles, configure RBAC, implement an already-enabled optional capability, test the employee client, or record state.
+The v2 blueprint now defines and provides reference implementation assets for the complete governed email loop:
 
-Human input remains legitimate for real deployment tasks that require authority the agent cannot invent: model/API credentials, mailbox/client credentials, OS permission approval, IdP/app registration, enterprise messaging credentials, private-access authority, destructive conflicts, and real company business choices missing from configuration.
+```text
+search email
+→ read email
+→ prepare DraftReply
+→ exact human review
+→ deterministic SendApproval
+→ governed send
+→ provider result
+→ reconciliation when ambiguous
+→ optional internal follow-up
+```
 
-During blueprint development, those real credentials are deferred deployment inputs rather than blockers and must not be requested merely to maintain task momentum.
+Implemented repository capabilities include:
 
-## What does “complete” mean?
+- `Mailbox`, `EmailMessage`, `DraftReply`, `SendApproval` domain model;
+- trusted **HumanActor** identity boundary;
+- mailbox-scoped `email.read / email.draft / email.approve / email.send` authorization;
+- Open WebUI trusted server-side identity forwarding;
+- deterministic approval Action using exact persisted draft content;
+- immutable DraftReply revision + content-hash binding;
+- single logical-send claim per approval;
+- append-oriented governance evidence;
+- protected reconciliation control path;
+- failure-safe `SENT / CONFIRMED_NOT_SENT / OUTCOME_UNKNOWN` semantics.
 
-There are two different completion classes.
+### 4. Thin EAO Email Governance runtime design
+
+v2 introduces only one new EAO-owned runtime responsibility:
+
+```text
+eao-email-governance
+```
+
+Reference persistence:
+
+```text
+SQLite
+<runtime_root>/runtime/email-governance/state.sqlite3
+```
+
+The repository already contains reference assets for:
+
+- immutable DraftReply revisions;
+- review bindings;
+- SendApproval evidence;
+- ApprovalClaim / one-logical-send enforcement;
+- logical send records;
+- provider attempt records;
+- normalized provider results;
+- reconciliation evidence;
+- governance audit events;
+- schema migration and recovery contracts.
+
+It intentionally does **not** add a CRM, workflow engine, Redis, PostgreSQL cluster, event bus, or mailbox mirror merely for architectural elegance.
+
+### 5. Tencent Enterprise Mail reference provider
+
+Tencent Exmail is the first reference Email provider for v2.
+
+Repository assets include:
+
+- read-only IMAP adapter candidate;
+- non-mutating read safety tests;
+- narrow SMTP send adapter;
+- fake-SMTP deterministic tests;
+- provider environment templates;
+- provider-specific acceptance plan;
+- ambiguous-send / duplicate-send safety contract.
+
+The baseline send contract prevents generic “send anything” access and requires all intended recipients to be accepted before SMTP DATA is submitted.
+
+### 6. Recovery and rollback
+
+The repository now defines:
+
+- Governance SQLite consistent backup;
+- isolated Governance restore;
+- schema-version fail-closed behavior;
+- unresolved-send recovery without automatic retry;
+- full-stack backup integration when v2 Email is enabled;
+- v1-compatible backup behavior when v2 Email is disabled;
+- capability rollback levels;
+- clean-host installation sequence;
+- installer second-run convergence rules;
+- failure-injection acceptance expectations;
+- v1 preservation after v2 rollback/failure.
+
+## Current v2 installation-design result
+
+The completed Installation Design work packages are:
+
+| ID | Work package | Result |
+| --- | --- | --- |
+| ID-1 | Installation architecture + v1 preservation | ✅ Complete |
+| ID-2 | Company config + protected-input contract | ✅ Complete |
+| ID-3 | Stage sequencing + capability closure | ✅ Complete |
+| ID-4 | Trusted identity + mailbox authorization propagation | ✅ Complete |
+| ID-5 | Draft / approval governance runtime | ✅ Complete |
+| ID-6 | Governed send + reconciliation | ✅ Complete |
+| ID-7 | Rollback / recovery / clean-host acceptance | ✅ Complete |
+
+Final review: [`docs/V2-INSTALLATION-DESIGN-REVIEW.md`](docs/V2-INSTALLATION-DESIGN-REVIEW.md).
+
+Current repository state is intentionally:
+
+```text
+current_phase: installation_design
+installation_design.status: complete
+installation_design.transition_ready: true
+blueprint_validation.status: not_opened
+real_deployment_task.active: false
+```
+
+Completion does **not** automatically change lifecycle phase or authorize a real deployment.
+
+## What is planned next
+
+### Next blueprint milestone — Blueprint Validation
+
+The next major repository task is to prove that a **fresh capable AI engineering agent** can consume this repository without hidden chat context and reproduce the intended system on an explicitly approved clean validation target.
+
+Blueprint Validation should verify:
+
+- clean-host preflight and target-state resolution;
+- deterministic v1 installation / preservation;
+- v2 capability installation sequence;
+- protected-input handling;
+- identity / authorization propagation;
+- governance runtime initialization and migration;
+- provider adapters with synthetic or controlled inputs;
+- stage-by-stage acceptance;
+- backup / restore;
+- restart / failure recovery;
+- installer re-run convergence;
+- v2 rollback with v1 preservation;
+- evidence recording sufficient for a new agent to continue safely.
+
+### Later repository milestone — Release Ready
+
+After Blueprint Validation findings are resolved:
+
+- consolidate validation evidence;
+- fix genuine reproducibility gaps;
+- harden only where validation proves necessary;
+- declare `RELEASE READY` when the repository adequately explains both system intent and installation execution.
+
+### Future capabilities outside the current baseline
+
+Potential later extensions, only when justified by real usage:
+
+- Stage 5 simple communication follow-up through Hermes Cron;
+- Stage 6 employee messaging surface;
+- additional Email providers;
+- governed attachments;
+- governed Bcc support;
+- richer operator reconciliation tooling;
+- broader enterprise-system integrations;
+- additional identity-provider-specific playbooks;
+- other capabilities already represented by the generic capability framework.
+
+Explicitly **not** a current goal: turning this project into a CRM, ERP, generic workflow platform, another RAG engine, another Agent framework, or a collection of every possible AI tool.
+
+## Lifecycle vs deployment readiness
+
+There are two different progress systems.
 
 ### Blueprint maturity
 
 ```text
-SYSTEM DESIGN COMPLETE
-INSTALLATION DESIGN COMPLETE
-BLUEPRINT VALIDATED
-RELEASE READY
+SYSTEM DESIGN COMPLETE          ✅
+INSTALLATION DESIGN COMPLETE    ✅
+BLUEPRINT VALIDATED             ⏳
+RELEASE READY                   ⏳
 ```
 
 These describe the repository itself.
@@ -109,200 +288,42 @@ CORE READY
 
 CONFIGURED READY
 = Core Ready
-  + every capability enabled by this company is deployed and accepted
+  + every company-enabled capability is deployed and accepted
 
 PRODUCTION READY
 = Configured Ready
-  + applicable production recovery/security/access/operations controls pass
+  + applicable recovery/security/access/operations controls pass
 ```
 
 These describe an explicitly approved validation or real deployment target.
 
-This distinction avoids several failure modes:
-
-```text
-blueprint drift
-→ confuse writing the installation plan with actually installing production
-
-under-build
-→ stop after basic chat while configured capabilities are missing
-
-feature collection
-→ install Sales/QC/Kanban/Cron/SSO/etc. that the company never requested
-```
-
-The adopting company chooses deployment readiness with:
-
-```yaml
-deployment:
-  target_readiness: production-ready
-```
-
-See [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md).
-
-## Core employee workflow
-
-```text
-Employee
-   ↓
-Open WebUI
-   ↓
-General Assistant
-   ↓
-Hermes `general` Profile
-   ↓
-WeKnora
-   ↓
-grounded company answer + source
-```
-
-Baseline objects are deliberately small:
-
-```text
-Hermes control plane
-└── default/admin Profile
-
-Employee plane
-├── Open WebUI
-├── All-Employees group
-├── General Assistant
-└── general Profile
-
-Knowledge
-└── company-defined WeKnora Knowledge Base(s)
-```
-
-## Capability-driven extension
-
-Optional capability playbooks are available for company-selected needs such as:
-
-| Capability | Installation/design path |
-| --- | --- |
-| Specialist Profiles | `docs/PROFILE-STANDARD.md` + generic Hermes specialist templates |
-| Hermes admin Web UI | `infrastructure/hermes-webui/` |
-| Codex / Claude Code delegation | `infrastructure/coding-agents/` |
-| Kanban | `infrastructure/hermes/features/` |
-| Cron | `infrastructure/hermes/features/` |
-| Enterprise messaging | `infrastructure/hermes/features/` |
-| Tencent Enterprise Mail | `infrastructure/email/tencent-exmail/` when selected |
-| Remote/private access | `infrastructure/access/` |
-| SSO / enterprise identity | `infrastructure/access/` |
-| Employee long-term memory | Profile/RBAC isolation rules and acceptance gate |
-
-[`config/capabilities.yaml`](config/capabilities.yaml) maps each supported/enabled capability to its installation path, required deployment-time external inputs, acceptance test, and state fields.
-
-An enabled capability cannot be silently skipped to reach a green result during a real deployment. A disabled capability must not be instantiated merely because a template exists.
-
-## Current v2 milestone
-
-The current controlled expansion milestone is:
-
-> **Communication & Follow-up**
-
-Core direction:
-
-```text
-one governed email operational loop
-+
-Open WebUI remains primary employee surface
-+
-optional one messaging surface later
-+
-Hermes-native follow-up automation only after the email loop is proven
-+
-Ontology governance for the real read/write boundary
-```
-
-The core direction has passed its design review, while the **current blueprint phase remains System Design** for the remaining v2 design questions. Installation Design has not yet been opened. [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) is an early input for the later installation blueprint, not evidence that a real deployment has begun.
-
-Current design/prototype state:
-
-```text
-blueprint authority: state/PROJECT-PHASE.yaml
-current phase: system_design
-provider selected for ARMOR reference design: Tencent Enterprise Mail
-future read surface: search_email + get_email
-read-only adapter/test/playbook: present as design-support prototypes
-installation design: not yet opened
-real deployment task: inactive
-real provider runtime: not activated
-real mailbox credentials: not required for blueprint work
-SMTP/customer-facing send: not deployed or authorized
-```
-
-See [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md) for the current blueprint status.
-
-The candidate read surface is deliberately limited to:
-
-```text
-search_email
-get_email
-```
-
-Offline deterministic tests may be used during system design to answer design questions such as whether a proposed adapter can remain read-only. Later, installation design may turn the approved design into reproducible scripts/configuration without connecting a real mailbox. Real mailbox/provider acceptance belongs only to an explicitly approved validation/deployment target.
-
-v2 does **not** reopen the entire deferred-feature list. CRM, ERP, Calendar, employee long-term memory, n8n, extra vector databases, local-LLM infrastructure, graph databases, broad autonomous external actions, and multiple messaging platforms remain outside the initial milestone unless a concrete blocking requirement justifies a separate decision.
-
-## Reference architecture
-
-| Layer | Technology | Responsibility |
-| --- | --- | --- |
-| Enterprise Knowledge | **WeKnora** | Documents, retrieval, source evidence, Knowledge Bases |
-| Primary Agent Runtime | **Hermes Agent** | Profiles, SOUL, Skills, tools, MCP, orchestration |
-| Employee Web Client | **Open WebUI** | Human users, groups, RBAC, chat, history |
-| Hermes Admin Client | **hermes-webui** when enabled | Privileged Hermes administration |
-| AI Work Roles | **Hermes Profiles** | Role/capability boundaries |
-| Knowledge Bridge | **WeKnora MCP / supported API** | Hermes-to-knowledge integration |
-| Governed Operational Integrations | provider-specific capability when enabled | Narrow business reads/actions under capability/Ontology/security contract |
-| Durable Agent Work | **Hermes Kanban** when enabled | Persistent multi-Agent task coordination |
-| Automation | **Hermes Cron** when enabled | Scheduled Agent work |
-| Coding Execution | **Codex + Claude Code** when enabled | Specialist software engineering |
-| Messaging | **Hermes Gateway** when enabled | Enterprise messaging access/delivery |
-| Blueprint/Governance | **This repository** | System design, installation design, capability contracts, security, recovery, acceptance |
-
-## Core design rules
-
-### One responsibility, one authority
+## Source-of-truth map
 
 | Information | Authority |
 | --- | --- |
-| Current blueprint phase / real deployment-task gate | `state/PROJECT-PHASE.yaml` |
-| System and installation blueprint | current normative repository contracts |
+| Blueprint lifecycle / real deployment gate | `state/PROJECT-PHASE.yaml` |
+| System & installation blueprint | normative repository contracts |
 | Company knowledge | WeKnora |
-| Agent behavior/role config | Hermes Profiles / SOUL / Skills / Tools / MCP |
+| Agent role / behavior / tools | Hermes Profiles / SOUL / Skills / tools |
 | Employee Web identity/access | Open WebUI / selected enterprise identity layer |
-| External business-system state | selected provider/System of Record |
-| EAO-owned operational governance evidence | Enterprise AI Office capability/Ontology layer where explicitly defined |
+| Mailbox and provider delivery facts | Email Provider |
+| Draft / approval / governed-send evidence | EAO Governance layer |
 | Durable Agent tasks | Hermes Kanban when enabled |
 | Scheduled work | Hermes Cron when enabled |
-| Desired real deployment | private active company configuration |
-| Actual real deployment | real runtime + deployment state |
+| Desired deployment | company-private active configuration |
+| Actual deployment | runtime + deployment state |
 
-### Profile is not a user
+## Core design rules
 
-A Hermes Profile represents an AI work role/capability boundary, not an employee account.
-
-```text
-Employee A ─┐
-Employee B ─┼→ General Assistant → `general`
-Employee C ─┘
-```
-
-Create a specialist Profile only when distinct work, knowledge, tools, credentials, automation, model, memory, or risk boundaries require it.
-
-### Profile is not a sandbox
-
-Profile state isolation does not automatically restrict all host access.
-
-Security requires:
+### Human identity is not an Agent Profile
 
 ```text
-Human RBAC
-+
-Profile least-privilege capabilities/credentials
-+
-workspace/OS/container boundaries where required
+HumanActor
+≠ Hermes Profile
+≠ provider/mailbox credential
 ```
+
+A Hermes Profile is an AI role/capability boundary, not an employee account.
 
 ### Knowledge is not memory
 
@@ -311,7 +332,25 @@ WeKnora
 = authoritative shared company knowledge
 
 Hermes memory
-= optional role/user continuity subject to isolation rules
+= optional continuity state subject to isolation rules
+```
+
+### Natural language is not formal approval
+
+A free-form message such as “send it” may express intent, but formal SendApproval must come through the deterministic trusted-human action path.
+
+### Ambiguous external side effects fail safe
+
+```text
+SENT
+→ never retry
+
+CONFIRMED_NOT_SENT
+→ controlled retry may be allowed inside the same logical send
+
+OUTCOME_UNKNOWN
+→ RECONCILIATION_REQUIRED
+→ no blind retry
 ```
 
 ### Upstream first
@@ -324,20 +363,9 @@ official upstream capability
 → custom infrastructure only when necessary
 ```
 
-### Real use drives evolution
-
-```text
-sound blueprint
-→ reproducible installation path
-→ approved deployment
-→ real employee usage
-→ concrete problem
-→ smallest justified improvement
-```
-
 ## First validated core stack
 
-The first real reference validation used:
+The first validated reference used:
 
 ```text
 Host: Apple Silicon macOS
@@ -348,13 +376,57 @@ Open WebUI: v0.11.3
 Employee Hermes long-term memory: disabled
 ```
 
-It proved the core employee path, grounded source-backed knowledge, Open WebUI RBAC, Profile API isolation, least-privilege employee tools, conversation history/file upload, and backup/restore behavior.
-
 Machine-readable baseline: [`config/validated-stack.yaml`](config/validated-stack.yaml).
 
-Actual reference-instance evidence: [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md).
+Reference-instance evidence: [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md).
 
-A fresh deployment should use [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md) rather than copying reference-instance roles/capabilities.
+A fresh deployment should use [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md) rather than copy another environment's roles or capability state.
+
+## Install with an AI agent
+
+For blueprint validation or an explicitly authorized deployment, read in this order:
+
+1. [`AGENTS.md`](AGENTS.md)
+2. [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)
+3. [`DEPLOY.md`](DEPLOY.md)
+4. [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md)
+5. active company configuration based on [`config/company.example.yaml`](config/company.example.yaml)
+6. [`config/capabilities.yaml`](config/capabilities.yaml)
+7. [`config/validated-stack.yaml`](config/validated-stack.yaml)
+8. referenced infrastructure playbooks / adapters
+9. [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md)
+
+For v2 Email specifically, continue with:
+
+1. [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md)
+2. [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md)
+3. [`docs/V2-INSTALLATION-ARCHITECTURE.md`](docs/V2-INSTALLATION-ARCHITECTURE.md)
+4. [`docs/V2-CONFIG-PROTECTED-INPUTS.md`](docs/V2-CONFIG-PROTECTED-INPUTS.md)
+5. [`docs/V2-STAGE-CONTRACTS.md`](docs/V2-STAGE-CONTRACTS.md)
+6. [`docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md`](docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md)
+7. [`docs/V2-GOVERNANCE-RUNTIME.md`](docs/V2-GOVERNANCE-RUNTIME.md)
+8. [`docs/V2-SEND-RECONCILIATION.md`](docs/V2-SEND-RECONCILIATION.md)
+9. [`docs/V2-RECOVERY-CLEAN-HOST.md`](docs/V2-RECOVERY-CLEAN-HOST.md)
+10. [`docs/V2-INSTALLATION-DESIGN-REVIEW.md`](docs/V2-INSTALLATION-DESIGN-REVIEW.md)
+
+## Capability-driven extension
+
+Optional capabilities are installed only when selected by company configuration.
+
+| Capability | Reference path |
+| --- | --- |
+| Specialist Profiles | `docs/PROFILE-STANDARD.md` + Hermes specialist templates |
+| Hermes admin Web UI | `infrastructure/hermes-webui/` |
+| Codex / Claude Code delegation | `infrastructure/coding-agents/` |
+| Kanban | `infrastructure/hermes/features/` |
+| Cron | `infrastructure/hermes/features/` |
+| Enterprise messaging | `infrastructure/hermes/features/` |
+| Tencent Enterprise Mail | `infrastructure/email/tencent-exmail/` |
+| Remote/private access | `infrastructure/access/` |
+| SSO / enterprise identity | `infrastructure/access/` |
+| Employee long-term memory | Profile/RBAC isolation gate |
+
+An enabled capability may not be silently skipped to manufacture a green result. A disabled capability should not be instantiated merely because a template exists.
 
 ## Repository self-check
 
@@ -364,96 +436,68 @@ Without installing anything:
 sh scripts/repository-readiness-check.sh
 ```
 
-This checks that the blueprint lifecycle/deployment-task authority, installation contracts, capability registry, core adapters, conditional playbooks, v2 email design-support artifacts, acceptance gates, state template, and production-control helpers are structurally present.
+Relevant offline v2 contract checks include:
 
-It does **not** advance the blueprint phase, activate a real deployment, or replace runtime acceptance on an approved target.
+```sh
+python3 infrastructure/email/governance/test_schema.py
+python3 infrastructure/email/governance/test_send_reconciliation.py
+python3 infrastructure/email/governance/test_recovery.py
+python3 infrastructure/email/tencent-exmail/test_imap_readonly.py
+python3 infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
+```
+
+Static/offline PASS is blueprint evidence only. It does not replace acceptance on an explicitly approved validation/deployment target.
 
 ## Documentation map
 
 | Document | Purpose |
 | --- | --- |
 | [`AGENTS.md`](AGENTS.md) | AI agent operating contract |
-| [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml) | blueprint lifecycle + real-deployment-task gate |
+| [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml) | blueprint lifecycle + real deployment gate |
 | [`DEPLOY.md`](DEPLOY.md) | installation/deployment Golden Path |
-| [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | Core/Configured/Production deployment readiness semantics |
-| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | controlled v2 Communication & Follow-up scope |
-| [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md) | governed email business/authority design |
-| [`docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md`](docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md) | employee entry and follow-up boundaries |
-| [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md) | v2 core architecture review |
+| [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | readiness semantics |
 | [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md) | current v2 blueprint status |
-| [`docs/V2-IMPLEMENTATION-PLAN.md`](docs/V2-IMPLEMENTATION-PLAN.md) | early staged installation/deployment blueprint input |
-| [`config/company.example.yaml`](config/company.example.yaml) | generic company desired-state schema |
-| [`config/capabilities.yaml`](config/capabilities.yaml) | capability installation/acceptance registry |
-| [`config/validated-stack.yaml`](config/validated-stack.yaml) | validated core version baseline |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | component responsibilities/boundaries |
-| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | detailed deployment reference |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | trust/secrets/least-privilege rules |
-| [`docs/PROFILE-STANDARD.md`](docs/PROFILE-STANDARD.md) | Hermes Profile design/governance |
-| [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) | WeKnora knowledge governance |
-| [`docs/CLIENT-RBAC.md`](docs/CLIENT-RBAC.md) | employee identity/group/Assistant mapping |
-| [`docs/ONTOLOGY.md`](docs/ONTOLOGY.md) | operational object/read/action governance contract |
+| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | v2 Communication & Follow-up scope |
+| [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md) | governed email system design |
+| [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md) | System Design final review |
+| [`docs/V2-INSTALLATION-ARCHITECTURE.md`](docs/V2-INSTALLATION-ARCHITECTURE.md) | ID-1 architecture / v1 preservation |
+| [`docs/V2-CONFIG-PROTECTED-INPUTS.md`](docs/V2-CONFIG-PROTECTED-INPUTS.md) | ID-2 config + secret-input contract |
+| [`docs/V2-STAGE-CONTRACTS.md`](docs/V2-STAGE-CONTRACTS.md) | ID-3 stage closure contracts |
+| [`docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md`](docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md) | ID-4 trusted identity / authorization propagation |
+| [`docs/V2-GOVERNANCE-RUNTIME.md`](docs/V2-GOVERNANCE-RUNTIME.md) | ID-5 governance runtime |
+| [`docs/V2-SEND-RECONCILIATION.md`](docs/V2-SEND-RECONCILIATION.md) | ID-6 governed send / reconciliation |
+| [`docs/V2-RECOVERY-CLEAN-HOST.md`](docs/V2-RECOVERY-CLEAN-HOST.md) | ID-7 recovery / clean-host contract |
+| [`docs/V2-INSTALLATION-DESIGN-REVIEW.md`](docs/V2-INSTALLATION-DESIGN-REVIEW.md) | Installation Design final review |
+| [`docs/ONTOLOGY.md`](docs/ONTOLOGY.md) | governed operational object/action contract |
 | [`docs/ACCEPTANCE-TESTS.md`](docs/ACCEPTANCE-TESTS.md) | deployment readiness evidence suite |
-| [`docs/acceptance/TENCENT-EXMAIL.md`](docs/acceptance/TENCENT-EXMAIL.md) | provider-specific governed email acceptance design |
-| [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md) | production recovery controls |
-| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | routine operations/troubleshooting |
-| [`docs/UPGRADE.md`](docs/UPGRADE.md) | version/upgrade discipline |
-| [`infrastructure/README.md`](infrastructure/README.md) | adapter/playbook policy and map |
-| [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md) | clean fresh-deployment state format |
-
-## Project status
-
-The repository now contains:
-
-- an explicit blueprint lifecycle separated from real deployment authorization;
-- a validated core architecture and employee workflow;
-- machine-readable core version baseline;
-- agent deployment Golden Path;
-- explicit Core/Configured/Production deployment readiness semantics;
-- machine-readable capability closure registry;
-- core WeKnora/Hermes/Open WebUI adapters;
-- generic specialist Profile templates;
-- playbooks for hermes-webui, Codex/Claude Code, Kanban, Cron, messaging, remote access, and SSO;
-- production backup/restore/health controls;
-- conditional acceptance gates;
-- a clean fresh-deployment state template;
-- static repository blueprint/deployability self-check;
-- an Enterprise Ontology design/governance contract plus structural validator;
-- a controlled v2 Communication & Follow-up system-design direction;
-- Tencent Enterprise Mail provider research plus read-only prototype/test artifacts retained to reduce later installation-design uncertainty.
-
-Still not claimed:
-
-- `SYSTEM DESIGN COMPLETE` for all v2 questions;
-- `INSTALLATION DESIGN COMPLETE` for v2;
-- a universal one-command installer/compiler;
-- `BLUEPRINT VALIDATED` by a completely fresh AI agent on a second clean validation target for the newly consolidated v2 path;
-- pre-validation of every possible vendor-specific IdP, messaging provider, model provider, host OS, private-access service, or email provider;
-- activation of a real ARMOR v2 deployment task;
-- real Tencent Enterprise Mail v2 runtime acceptance;
-- completion of the v2 draft/approval/send operational loop on a real target.
-
-Once System Design is complete, the next repository-development phase is **Installation Design**: audit and turn the approved v2 design into a clear agent-readable, reproducible installation and acceptance path. That still does not require touching ARMOR production.
-
-A later clean-host validation is the appropriate empirical proof that a fresh AI agent can consume the blueprint end to end.
-
-## ARMOR reference
-
-ARMOR-specific design/lessons live under [`reference/armor/`](reference/armor/). Reference material must not override the generic blueprint or another adopter's private configuration.
+| [`docs/acceptance/TENCENT-EXMAIL.md`](docs/acceptance/TENCENT-EXMAIL.md) | Tencent Exmail acceptance contract |
+| [`docs/BACKUP-RESTORE.md`](docs/BACKUP-RESTORE.md) | backup / restore standard |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | operations / troubleshooting |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | trust / secrets / least privilege |
+| [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md) | clean deployment state template |
 
 ## What this project is not
 
-This project is not intended to become:
+Enterprise AI Office is not intended to become:
 
 - a new RAG engine;
-- a new Agent framework;
-- a WeKnora/Hermes/Open WebUI fork;
-- a clone of Codex/Claude Code;
-- a component collection where every possible feature is installed.
+- a new general Agent framework;
+- a WeKnora / Hermes / Open WebUI fork;
+- a CRM or ERP;
+- a generic workflow engine;
+- a replacement for Codex or Claude Code;
+- a “install every feature” component collection.
 
-Its value is the **system design + installation design**, capability-driven desired state, agent execution contract, thin upstream adapters/playbooks, security/recovery standards, acceptance evidence, and operating discipline around mature projects.
+Its value is the **system design + installation design**, capability-driven desired state, governance boundaries, thin upstream adapters, recovery rules, acceptance evidence, and operating discipline around mature projects.
+
+## ARMOR reference
+
+ARMOR is the first reference implementation, while the project itself remains generic.
+
+ARMOR-specific design and lessons belong under [`reference/armor/`](reference/armor/) and must not override another adopter's private configuration.
 
 ## License
 
-This repository is licensed under the **Apache License 2.0**. See [`LICENSE`](LICENSE).
+Licensed under the **Apache License 2.0**. See [`LICENSE`](LICENSE).
 
-Independent upstream software retains its own licenses/terms. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before distribution or rebranding.
+Independent upstream software retains its own licenses and terms. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
