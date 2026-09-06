@@ -76,9 +76,13 @@ blueprint_lifecycle:
         contract: docs/V2-STAGE-CONTRACTS.md
         evidence: STAGE CONTRACTS FROZEN
       id_4_identity_authorization_propagation:
-        status: next
+        status: complete
+        completed_on: 2026-09-06
+        contract: docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md
+        provisioning: infrastructure/open-webui/V2-COMMUNICATION-PROVISIONING.md
+        evidence: IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN
       id_5_governance_runtime:
-        status: not_started
+        status: next
       id_6_send_reconciliation:
         status: not_started
       id_7_recovery_acceptance:
@@ -141,7 +145,7 @@ interpretation_rules:
   - The repository is a system-design and installation-blueprint product, not a live deployment record.
   - The v2 baseline System Design milestone is complete and frozen.
   - The current blueprint phase is installation_design following explicit human direction on 2026-09-06.
-  - ID-1 installation architecture, ID-2 configuration/protected-input contract, and ID-3 stage/capability closure are complete; ID-4 trusted identity and mailbox authorization propagation is the next Installation Design work package.
+  - ID-1 installation architecture, ID-2 configuration/protected-input contract, ID-3 stage/capability closure, and ID-4 trusted identity/mailbox authorization propagation are complete; ID-5 governance runtime is the next Installation Design work package.
   - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
   - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
