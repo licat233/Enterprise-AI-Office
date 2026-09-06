@@ -1,44 +1,216 @@
-# Enterprise AI Office v2 — Implementation Blueprint
+# Enterprise AI Office v2 — Installation Design Blueprint
 
-Status: approved plan / implementation not authorized
-Version: 1.0
+Status: installation design active / real deployment not authorized
+Version: 2.0
 Date: 2026-09-06
 
-This document translates the frozen v2 design into a staged future implementation plan.
+This document is the primary working blueprint for the Enterprise AI Office v2 `installation_design` phase.
 
-It is a **plan only**. It does not authorize credentials, mailbox access, runtime changes, Profile binding, messaging deployment, Cron/Kanban changes, or customer-facing sends.
+It translates the frozen v2 System Design into an agent-readable and eventually agent-executable installation/acceptance contract.
+
+It does **not** authorize a real company installation, real mailbox credentials, real employee binding, SMTP/API sending, or mutation of any ARMOR host.
 
 Authoritative design inputs:
 
+- `state/PROJECT-PHASE.yaml`
 - `docs/V2-SCOPE.md`
 - `docs/V2-EMAIL-DESIGN.md`
 - `docs/V2-COMMUNICATION-FOLLOWUP-DESIGN.md`
 - `docs/V2-DESIGN-REVIEW.md`
 - `docs/ONTOLOGY.md`
 - `ontology/examples/email-communication.yaml`
+- `config/company.example.yaml`
+- `config/capabilities.yaml`
 
 ---
 
-## 1. Implementation philosophy
+## 1. Installation Design objective
 
-v2 should be implemented as a sequence of independently useful, independently testable increments.
-
-Do not begin all stages at once.
+Installation Design must make it possible for a fresh capable AI Engineering Agent to answer and execute, on an explicitly authorized future target:
 
 ```text
-complete one stage
-→ validate
-→ preserve evidence
-→ decide whether the next stage is still justified
+what must already exist
+what must be installed
+what must be configured
+which company-private values are required
+which values are secrets
+where those values enter the system
+which upstream component or thin adapter owns each function
+what order installation must follow
+what can be retried safely
+what requires reconciliation
+how each stage is accepted
+how each stage is removed or rolled back
+how readiness is recorded
 ```
 
-A later stage may be deferred without invalidating an earlier successful stage unless the active company configuration explicitly requires the full v2 milestone.
+The design must remain reusable across adopting companies. Public repository examples use synthetic identifiers only.
 
 ---
 
-## 2. Stage 0 — Preserve the v1 baseline
+## 2. Frozen runtime boundary
 
-Before adding email capability, verify that the current v1 employee path remains healthy.
+Installation Design may choose implementation mechanisms, but it must preserve the frozen System Design responsibilities:
+
+```text
+Company/Product/SOP knowledge          → WeKnora
+Employee Web identity/access           → Open WebUI / trusted identity layer
+Agent role/capability                  → Hermes Profile
+Mailbox/messages/provider send result  → Email Provider
+DraftReply / SendApproval governance   → EAO governance implementation
+Simple scheduled reminder state        → Hermes Cron
+Persistent multi-step Agent work       → Hermes Kanban only when justified
+```
+
+Do not create a mailbox mirror, CRM, second scheduler, new graph runtime, or broad generic email automation layer.
+
+---
+
+## 3. Installation Design work packages
+
+The phase is complete only when the following installation contracts are closed.
+
+### ID-1 — Installation architecture and v1 preservation boundary
+
+Define:
+
+```text
+host/runtime topology
+existing v1 components that must remain unchanged
+new v2 runtime boundaries
+network/process boundaries
+persistent-state locations/classes
+component startup/recovery ownership
+```
+
+Exit evidence:
+
+```text
+INSTALLATION ARCHITECTURE FROZEN
+```
+
+### ID-2 — Company configuration and protected-input contract
+
+Define:
+
+```text
+public reusable configuration schema
+company-private non-secret overlay
+secret classes and injection points
+required vs optional values
+validation/fail-closed behavior
+synthetic examples
+```
+
+Real secret values never belong in the public repository.
+
+Exit evidence:
+
+```text
+CONFIG / SECRET INPUT CONTRACT FROZEN
+```
+
+### ID-3 — Capability sequencing and closure
+
+Turn the Stage 0–6 rollout below into explicit per-stage:
+
+```text
+preconditions
+provisioning steps
+configuration inputs
+idempotency expectations
+acceptance tests
+evidence records
+rollback/removal path
+```
+
+Exit evidence:
+
+```text
+STAGE CONTRACTS FROZEN
+```
+
+### ID-4 — Trusted identity and mailbox authorization propagation
+
+Define how an installed system carries trusted HumanActor identity and mailbox-scoped permissions from the employee surface to governed reads/actions without confusing them with Hermes Profile or provider credentials.
+
+The exact upstream mechanism must be selected using the pinned/current supported Open WebUI/Hermes capabilities at implementation time.
+
+Exit evidence:
+
+```text
+IDENTITY / AUTHORIZATION INSTALLATION CONTRACT FROZEN
+```
+
+### ID-5 — Draft / Approval governance persistence and action gate
+
+Define the smallest runtime mechanism that can deterministically persist and enforce:
+
+```text
+DraftReply revision/hash
+SendApproval exact binding
+approval lifecycle
+single logical send claim
+current permission re-check
+append-oriented governance evidence
+```
+
+Prefer an existing supported component or thin module over a new standalone platform.
+
+Exit evidence:
+
+```text
+GOVERNANCE RUNTIME CONTRACT FROZEN
+```
+
+### ID-6 — Provider send binding and reconciliation
+
+Define:
+
+```text
+provider transport binding
+sender-mailbox restriction
+fully resolved approved payload contract
+idempotency/logical-send identity
+provider-result mapping
+ambiguous-outcome reconciliation
+controlled retry rules
+```
+
+No generic send-anything primitive may be exposed to ordinary Agent tools.
+
+Exit evidence:
+
+```text
+GOVERNED SEND / RECONCILIATION CONTRACT FROZEN
+```
+
+### ID-7 — Rollback, recovery, clean-host installation, acceptance
+
+Define:
+
+```text
+stage disable/removal
+credential revocation/removal
+persistent-state backup/restore where required
+startup/recovery behavior
+clean-host installation sequence
+acceptance evidence
+capability closure
+readiness reporting
+```
+
+Exit evidence:
+
+```text
+INSTALLATION ACCEPTANCE CONTRACT FROZEN
+```
+
+---
+
+## 4. Stage 0 — Preserve the v1 baseline
+
+Before adding email capability, a future installer must verify that the existing v1 employee path is healthy.
 
 Required evidence:
 
@@ -50,7 +222,7 @@ existing RBAC remains fail-closed
 current deployment state/backup is known
 ```
 
-No v2 work should silently repair or redesign unrelated v1 components unless a real blocker is discovered.
+No v2 stage should silently redesign unrelated v1 components.
 
 Exit condition:
 
@@ -60,24 +232,11 @@ V1 BASELINE VERIFIED
 
 ---
 
-## 3. Stage 1 — Read-only email capability
+## 5. Stage 1 — Read-only email capability
 
 Objective:
 
-> Let one authorized employee/role search and read bounded email context without changing provider state.
-
-Implementation-time decisions to resolve:
-
-```text
-selected provider account/mailbox authorization
-credential mechanism
-trusted human identity path
-Hermes Profile / employee RBAC mapping
-provider read interface
-allowed mailbox/folder scope
-safe result-size/body-size limits
-attachment behavior
-```
+> Let an authorized HumanActor search/read bounded email context without changing provider state.
 
 Required operation surface:
 
@@ -97,14 +256,29 @@ folder mutation
 arbitrary protocol command
 ```
 
+Installation contract must resolve:
+
+```text
+selected provider/mailbox configuration
+mailbox-specific protected credential class
+trusted HumanActor propagation
+mailbox-scoped read authorization
+Hermes Profile capability binding
+allowed folder scope
+safe result/body limits
+attachment policy
+adapter/tool registration
+```
+
 Acceptance emphasis:
 
 ```text
 authorized read succeeds
-unauthorized human/Profile fails
-out-of-scope mailbox/folder fails
-read does not mutate Seen/flags where provider behavior allows verification
-credentials remain outside prompts/logs/Git
+unauthorized human fails
+unauthorized Profile fails
+out-of-scope mailbox/folder fails closed
+read does not mutate Seen/flags where verifiable
+credentials stay outside prompts/logs/Git
 ```
 
 Exit condition:
@@ -113,35 +287,25 @@ Exit condition:
 READ-ONLY EMAIL PASS
 ```
 
-Stop here if real employee usage shows that email retrieval itself is not valuable enough to justify send capability.
-
 ---
 
-## 4. Stage 2 — Draft preparation
+## 6. Stage 2 — Draft preparation
 
 Objective:
 
-> Use authorized email context plus WeKnora evidence to prepare a reviewable reply with no external side effect.
+> Use authorized EmailMessage context plus WeKnora evidence to prepare a reviewable DraftReply with no provider-side send effect.
 
-Implement:
-
-```text
-prepare_reply_draft
-DraftReply persistence/evidence
-stable draft revision/content hash or equivalent immutable approval subject
-human-readable final outbound preview
-```
-
-The draft store must remain small and purpose-specific. Do not turn it into a general document-management system.
-
-Acceptance emphasis:
+Installation contract must define:
 
 ```text
-draft uses authorized source context
-company facts are grounded where required
-draft creation sends nothing
-material outbound fields are inspectable
-draft revision/evidence is stable enough for later approval binding
+prepare_reply_draft binding
+DraftReply persistence
+revision generation
+stable content_hash calculation
+creator HumanActor reference
+source message/mailbox reference
+human-readable outbound preview path
+backup/recovery requirement for draft governance state
 ```
 
 Exit condition:
@@ -152,39 +316,25 @@ DRAFT PREPARATION PASS
 
 ---
 
-## 5. Stage 3 — Trusted human approval evidence
+## 7. Stage 3 — Trusted human approval evidence
 
 Objective:
 
-> Record deterministic evidence that a real authorized human approved one exact outbound draft revision.
+> Deterministically record that an authorized HumanActor approved one exact DraftReply revision/hash.
 
-Implement:
+Installation contract must define:
 
 ```text
-approve_reply_draft
-trusted human actor propagation or equivalent deterministic identity binding
+approve_reply_draft binding
+trusted identity propagation
+email.approve mailbox scope evaluation
 SendApproval persistence
-approval binding to exact material outbound content
-stale-approval rejection
+stale/revoked/consumed semantics
+exact approval-subject binding
+append-oriented evidence
 ```
 
-Do not solve this with a prompt convention such as:
-
-```text
-"if the user says yes, assume approved"
-```
-
-The approval mechanism must be trustworthy enough for the risk of customer-facing email.
-
-Acceptance emphasis:
-
-```text
-real human actor identified
-approval references exact draft revision/hash
-edited draft invalidates prior approval
-another employee cannot reuse/forge approval
-missing/unresolved actor fails closed
-```
+Natural-language inference is never approval evidence.
 
 Exit condition:
 
@@ -192,42 +342,38 @@ Exit condition:
 APPROVAL GATE PASS
 ```
 
-Do not implement customer-facing send until this stage passes.
+No customer-facing send capability may be enabled before this stage passes.
 
 ---
 
-## 6. Stage 4 — Governed send action
+## 8. Stage 4 — Governed send action
 
 Objective:
 
-> Execute only the exact approved customer-facing reply through one narrow provider binding.
+> Execute only the exact approved reply through one narrow provider binding.
 
-Implement:
+Installation contract must define:
 
 ```text
-send_approved_reply
-provider transport/tool binding
-sender-mailbox restriction
-approval revalidation immediately before side effect
+send_approved_reply action gate
+current HumanActor permission re-check
+Hermes Profile capability re-check
+sender mailbox authorization
+approval claim / logical send identity
+provider transport binding
 provider result/reference capture
 audit decision record
-ambiguous-outcome reconciliation path
+ambiguous-outcome reconciliation
 ```
 
-Do not expose a generic transport primitive to ordinary Agent tools.
+The provider adapter receives a fully resolved approved payload. It does not reason about whether sending is allowed.
 
-The send adapter must receive a fully resolved approved payload; it should not be responsible for LLM reasoning about whether the message ought to be sent.
-
-Acceptance emphasis:
+Send outcomes normalize to:
 
 ```text
-unapproved send fails
-stale approval fails
-sender/recipient/content mismatch fails
-approved controlled test send succeeds
-provider result is captured
-ambiguous result does not blindly retry
-no bulk/campaign sending appears
+SENT
+FAILED_NOT_SENT
+RECONCILIATION_REQUIRED
 ```
 
 Exit condition:
@@ -236,23 +382,21 @@ Exit condition:
 GOVERNED EMAIL LOOP PASS
 ```
 
-At this point the core v2 business outcome exists even if messaging and follow-up automation are still disabled.
+Stages 0–4 form the v2 core.
 
 ---
 
-## 7. Stage 5 — Simple follow-up assistance
+## 9. Stage 5 — Simple follow-up assistance
 
-Objective:
+Optional controlled extension.
 
-> Add internal reminders or summaries without creating a CRM or autonomous sender.
-
-Default implementation:
+Default upstream authority:
 
 ```text
 Hermes Cron
 ```
 
-Initial use cases should be limited to examples such as:
+Installation design may enable examples such as:
 
 ```text
 internal follow-up reminder
@@ -260,11 +404,9 @@ morning communication review summary
 weekly pending-communication summary
 ```
 
-A scheduled job may read only the email scope already authorized to its execution Profile.
+Cron state must not become email/CRM state and must not bypass `send_approved_reply`.
 
-It may not execute `send_approved_reply` without the same valid human approval evidence required by interactive use.
-
-Exit condition:
+Exit condition when enabled:
 
 ```text
 SIMPLE FOLLOW-UP PASS
@@ -272,61 +414,40 @@ SIMPLE FOLLOW-UP PASS
 
 ---
 
-## 8. Stage 6 — Optional messaging surface
+## 10. Stage 6 — Optional messaging surface
 
-This stage is optional.
+Optional controlled extension.
 
-Enable only when ARMOR selects one real messaging platform and the convenience value justifies the additional identity/routing boundary.
+Enable at most one company-selected Hermes-supported messaging surface.
 
-Objective:
+It may provide:
 
 ```text
-approved employee message
-→ deterministic identity / Profile routing
-→ same v2 operations
+employee entry signal
+trusted identity signal when proven
+Profile routing
+notification/reminder delivery
 ```
 
-Do not duplicate email logic in a bot-specific workflow.
+It must not own email authorization, approval policy, provider credentials, or duplicate workflow state.
 
-If channel identity cannot support trusted approval, use the channel only for read requests/notifications and route approval back to a trusted surface.
+If channel identity cannot support trusted approval, approval routes back to the trusted employee surface.
 
-Exit condition:
+Exit condition when enabled:
 
 ```text
 ONE MESSAGING SURFACE PASS
 ```
 
-This stage must not block v2 completion if the selected v2 definition/configuration does not require messaging.
-
 ---
 
-## 9. Kanban activation gate
+## 11. Kanban activation gate
 
-Kanban is not a numbered default stage.
+Kanban is not a default installation stage.
 
-Enable only after a demonstrated workflow requires persistent multi-step coordination, for example:
+Enable only when a real configured workflow requires durable multi-step Agent coordination that Cron or an interactive session cannot satisfy.
 
-```text
-customer technical question
-→ research
-→ engineering input
-→ draft
-→ review
-→ response
-```
-
-A simple reminder is not sufficient justification.
-
-Before enabling, answer:
-
-```text
-Why Cron or a single interactive session is insufficient?
-What durable work state must survive?
-Who owns/reviews the task?
-What workspace/data scope is required?
-```
-
-If the answers are weak:
+If the requirement is only a reminder:
 
 ```text
 KANBAN: NOT NOW
@@ -334,50 +455,89 @@ KANBAN: NOT NOW
 
 ---
 
-## 10. Runtime artifacts expected when implementation begins
+## 12. Existing reusable installation assets
 
-Create or finalize only the artifacts required by the active stage.
-
-Potential artifacts include:
+Installation Design starts from existing repository capabilities rather than a blank implementation:
 
 ```text
-protected company deployment overlay
-provider secret references
-Hermes Profile/MCP configuration
-read adapter/tool binding
-DraftReply / SendApproval persistence implementation
-send Action Gate
-provider send adapter
-runtime audit/reconciliation storage
-acceptance evidence
-DEPLOYMENT-STATE updates
-CHANGELOG entry for material activation
+v1 provisioning:
+  infrastructure/weknora/
+  infrastructure/hermes/
+  infrastructure/open-webui/
+
+configuration/capability intent:
+  config/company.example.yaml
+  config/capabilities.yaml
+
+email Stage 1 candidate:
+  infrastructure/email/tencent-exmail/imap_readonly_mcp.py
+  infrastructure/email/tencent-exmail/imap.env.example
+  infrastructure/email/tencent-exmail/hermes.mcp.example.yaml
+  infrastructure/email/tencent-exmail/test_imap_readonly.py
+  docs/acceptance/TENCENT-EXMAIL.md
+
+existing production controls:
+  scripts/preflight.sh
+  scripts/health-check.sh
+  scripts/backup.sh
+  scripts/restore.sh
 ```
 
-Do not create every potential artifact at Stage 1.
+These are candidates and reusable assets, not proof that Installation Design is complete.
+
+Upstream-supported alternatives must be re-evaluated before freezing a custom adapter as the final installation path.
 
 ---
 
-## 11. Prototype policy
+## 13. Configuration authority model
 
-Existing provider/read prototypes are implementation candidates only.
-
-At implementation time:
+The future installer should consume three distinct classes of input:
 
 ```text
-re-check current Tencent Enterprise Mail behavior
-re-check current Hermes/MCP upstream capabilities
-prefer mature supported upstream integration if it now satisfies the frozen design
-reuse prototype only if it remains the smallest correct implementation
+Public blueprint defaults/templates
+→ repository
+
+Company-private non-secret desired state
+→ private company configuration overlay
+
+Secrets / credentials
+→ protected external secret input at install/runtime
 ```
 
-Do not preserve prototype code merely because it was written first.
+Do not merge these classes into one `.env` or one committed company file.
+
+The public blueprint may define secret **names/classes**, never real values.
 
 ---
 
-## 12. Rollback/removal principle
+## 14. Idempotency and reconciliation principle
 
-Each implementation stage should be removable without corrupting the v1 knowledge/employee path.
+Installation/provisioning operations should be repeatable where practical:
+
+```text
+inspect actual state
+compare desired state
+create/update only what is required
+preserve stable identifiers where needed
+report drift explicitly
+```
+
+External email send is different: it is a business side effect and must not be treated as a generic retryable provisioning operation.
+
+Ambiguous send outcome:
+
+```text
+no blind retry
+→ RECONCILIATION_REQUIRED
+→ inspect provider evidence
+→ resolve actual result
+```
+
+---
+
+## 15. Rollback/removal principle
+
+Each v2 stage must be removable without corrupting the v1 employee/knowledge path.
 
 At minimum:
 
@@ -385,57 +545,55 @@ At minimum:
 email capability can be disabled
 mail credentials can be revoked/removed
 email tools disappear from affected Profile(s)
-Cron reminder jobs can be removed
+EAO governance state can be preserved/exported according to retention policy
+Cron jobs can be removed
 messaging route can be disabled
-v1 Open WebUI → Hermes → WeKnora path remains functional
+v1 Open WebUI → Hermes → WeKnora remains functional
 ```
 
-Externally sent email cannot be rolled back; this is why send approval and duplicate prevention are pre-send controls.
+Externally sent email cannot be rolled back.
 
 ---
 
-## 13. Scope escalation rule
+## 16. Installation Design evidence and status
 
-During implementation, move a request out of v2 when it requires a new major domain such as:
+Installation Design work produces repository artifacts, tests, fixtures, and contracts.
+
+It must not write target-specific success into the public blueprint as though a company deployment occurred.
+
+Blueprint phase authority:
 
 ```text
-CRM master data
-opportunity/pipeline state
-calendar scheduling
-employee long-term memory
-multi-channel customer profile
-ERP/order synchronization
-new workflow platform
-new graph/runtime platform
+state/PROJECT-PHASE.yaml
 ```
 
-Do not absorb the feature by extending the email objects until they resemble a hidden CRM.
-
-Record it as a post-v2 candidate instead.
+Deployment-specific readiness, when a real deployment task later exists, belongs to deployment-state records rather than this document.
 
 ---
 
-## 14. Future implementation completion
+## 17. Installation Design completion gate
 
-The core v2 milestone is operationally proven when Stages 0–4 pass for the selected company configuration.
-
-Stages 5–6 are controlled extensions when selected.
-
-Conceptually:
+Do not declare `INSTALLATION DESIGN COMPLETE` until a fresh AI Engineering Agent can determine from the repository:
 
 ```text
-V2 CORE
-= v1 healthy
-+ authorized email read
-+ useful draft
-+ trusted human approval
-+ governed send
-+ audit/reconciliation evidence
-
-OPTIONAL V2 EXTENSIONS
-= internal follow-up automation
-+ one messaging surface
-+ Kanban only if justified
+[ ] v1 preservation prerequisites
+[ ] installation topology/runtime ownership
+[ ] company-private configuration schema
+[ ] protected secret-input classes
+[ ] Stage 0–4 mandatory sequence
+[ ] optional Stage 5–6 activation rules
+[ ] exact provisioning/adapters or upstream bindings for each mandatory stage
+[ ] trusted identity propagation contract
+[ ] mailbox authorization enforcement contract
+[ ] DraftReply / SendApproval persistence contract
+[ ] deterministic approval gate
+[ ] governed send binding
+[ ] idempotency / reconciliation behavior
+[ ] audit evidence storage/reference contract
+[ ] rollback/removal/recovery path
+[ ] clean-host setup path
+[ ] installation-time acceptance and capability-closure evidence
+[ ] no real deployment is implied by the blueprint itself
 ```
 
-This split prevents optional convenience features from making the v2 release difficult to finish.
+After this gate passes, the next lifecycle phase is `blueprint_validation`, and that transition again requires explicit human direction.
