@@ -1,0 +1,99 @@
+# Enterprise AI Office — synthetic company-private overlay example
+#
+# This file documents the SHAPE of deployment-private, non-secret desired state.
+# Real adopters should copy/adapt it into an ignored/protected location such as:
+#
+#   private/company.yaml
+#
+# Never put real secret values in this YAML. Secret references are symbolic only
+# and are resolved from protected external storage at install/runtime.
+
+schema_version: 2
+
+company:
+  id: example-company
+  timezone: Asia/Tokyo
+
+deployment:
+  environment: staging
+  runtime_root: /Users/Shared/enterprise-ai-office
+
+# Private employee/group identifiers may live here because the public blueprint
+# must not contain a real organization's employee directory.
+employee_access:
+  web:
+    groups:
+      - id: sales-team
+        display_name: Sales Team
+
+# Enable only the specialist Profile actually required by the selected capability.
+profiles:
+  - id: communication
+    display_name: Communication Assistant
+    employee_groups:
+      - sales-team
+    knowledge_bases:
+      - company-general
+    memory_policy: disabled-until-isolation-validated
+
+capabilities:
+  email:
+    enabled: true
+    provider: tencent-exmail
+    communication_profile: communication
+    send_requires_human_approval: true
+    attachments_enabled: false
+
+    # Mailbox identifiers/addresses are private company configuration, but they
+    # are not credential values. Use stable logical mailbox IDs for policy links.
+    mailboxes:
+      - id: sales-mailbox
+        address: sales@example.invalid
+        business_purpose: customer-sales-communication
+        read_folders:
+          - INBOX
+        provider:
+          imap_host: imap.exmail.qq.com
+          imap_port: 993
+          smtp_host: smtp.exmail.qq.com
+          smtp_port: 465
+        client_credential_ref: email-sales-mailbox-client-password
+
+    # Permissions are explicit per principal + mailbox. No matching grant = deny.
+    mailbox_grants:
+      - principal:
+          type: group
+          id: sales-team
+        mailbox_id: sales-mailbox
+        permissions:
+          - email.read
+          - email.draft
+          - email.approve
+          - email.send
+
+    # Used only for controlled installation/acceptance when real deployment or
+    # blueprint validation is explicitly authorized.
+    controlled_test_recipients:
+      - integration-test@example.invalid
+
+email_governance:
+  state_path: /Users/Shared/enterprise-ai-office/runtime/email-governance/state.sqlite3
+  technical_log_path: /Users/Shared/enterprise-ai-office/logs/email-governance
+  retention_policy: company-defined
+
+# Symbolic references only. The values themselves belong in protected storage.
+# No universal secret backend is assumed by this blueprint.
+secret_refs:
+  email-sales-mailbox-client-password:
+    class: email-mailbox-client-credential
+    consumer: eao-email-governance
+    native_binding: EAIO_EMAIL_CLIENT_PASSWORD
+
+  communication-profile-api-key:
+    class: specialist-profile-credential
+    consumer: hermes-communication-profile
+    native_binding: API_SERVER_KEY
+
+# A real private overlay may also select non-secret model IDs, private network
+# routes, real employee/group identifiers, backup destinations, and similar
+# deployment desired state. Keep actual passwords/tokens/keys outside this file.
