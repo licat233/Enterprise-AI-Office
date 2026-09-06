@@ -2,22 +2,25 @@
 
 Status: Installation Design reference asset / no real deployment authorized
 
-Normative contract:
+Normative contracts:
 
 ```text
 docs/V2-GOVERNANCE-RUNTIME.md
+docs/V2-SEND-RECONCILIATION.md
 ```
 
-Reference persistence schema:
+Reference persistence artifacts:
 
 ```text
 schema.sql
+migrations/002_send_reconciliation.sql
 ```
 
-Offline deterministic contract check:
+Offline deterministic contract checks:
 
 ```sh
 python3 infrastructure/email/governance/test_schema.py
+python3 infrastructure/email/governance/test_send_reconciliation.py
 ```
 
 This runtime is the single thin EAO-owned service introduced by v2. It must remain independent of the validated v1 `general` employee path.
@@ -41,10 +44,13 @@ load validated company/private config
 → verify or migrate schema
 → load mailbox authorization policy from ID-4 inputs
 → bind only Stage-enabled operation surfaces
+→ inspect unresolved send attempts
 → become ready
 ```
 
 Unknown/newer schema version, failed migration, missing trusted-forwarder authentication, or invalid mailbox policy means fail-closed readiness.
+
+Any durable send attempt without a terminal result is treated as reconciliation-required; startup must never auto-retry it.
 
 ## Stage surface
 
@@ -62,10 +68,14 @@ Stage 3
 
 Stage 4
   claim_approval_for_send
-  governed provider send binding added by ID-6
+  initialize logical send
+  create durable provider attempt
+  submit through narrow provider adapter
+  persist SENT / CONFIRMED_NOT_SENT / OUTCOME_UNKNOWN
+  protected reconciliation control path
 ```
 
-Formal approval is never a free-choice LLM tool.
+Formal approval and reconciliation are never free-choice LLM tools.
 
 ## Database ownership
 
@@ -75,39 +85,81 @@ Do not give Open WebUI, Hermes, an employee browser, or a provider adapter direc
 
 Do not turn this database into a mailbox cache or CRM.
 
-## Offline schema contract
+## ID-5 offline schema contract
 
-`test_schema.py` intentionally uses only Python stdlib and in-memory SQLite. It validates the repository-level contract without provider credentials or a real target:
+`test_schema.py` intentionally uses only Python stdlib and in-memory SQLite. It validates the repository-level Draft/Approval contract without provider credentials or a real target:
 
 ```text
 canonical Draft hash is deterministic
 immutable revisions coexist
+review binding references exact Draft revision/hash
 exact duplicate approval is constrained
 one Approval cannot be claimed twice
 append-oriented audit table accepts governance evidence
 foreign keys are enabled in the test connection
 ```
 
-Passing this test is blueprint/implementation evidence only. It does not prove a live runtime, HumanActor propagation, mailbox authorization, or provider behavior.
+## ID-6 offline schema contract
 
-## ID-6 boundary
-
-Do not add SMTP/provider retries or reconciliation semantics to the Stage 2/3 implementation merely because the schema has an approval claim primitive.
-
-ID-6 owns:
+`test_send_reconciliation.py` applies the initial schema plus migration 002 and validates:
 
 ```text
-logical send execution/provider attempts
-provider result normalization
-confirmed-not-sent retry
-ambiguous outcome handling
-reconciliation
+schema advances to version 2
+logical send must match the committed ApprovalClaim
+stable Message-ID / transport hash evidence can persist
+attempt numbers are unique per logical send
+attempt-without-result is detectable as unresolved
+OUTCOME_UNKNOWN observation remains intact after reconciliation
+reconciliation evidence appends rather than rewrites provider observation
 ```
 
-The ID-5 invariant that ID-6 must preserve is:
+Provider outcome classification is separately checked by:
+
+```sh
+python3 infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
+```
+
+Passing these offline checks is blueprint/implementation evidence only. It does not prove live HumanActor propagation, mailbox authorization, provider acceptance, or real delivery.
+
+## ID-6 invariant
+
+The Stage 4 implementation must preserve:
 
 ```text
 one SendApproval
 → one logical send claim
-→ provider side effect only after claim
+→ stable Message-ID / Date / transport payload hash
+→ one or more provider attempts only when state permits
 ```
+
+Outcome rules:
+
+```text
+SENT
+→ no retry
+
+CONFIRMED_NOT_SENT
+→ same logical send may perform a controlled retry if all invariants still hold
+
+OUTCOME_UNKNOWN / unresolved attempt
+→ RECONCILIATION_REQUIRED
+→ no blind retry
+```
+
+Provider side effect happens only after durable ApprovalClaim/logical-send initialization and durable attempt creation.
+
+## Reconciliation boundary
+
+Reconciliation is a protected operator/governance control-plane action. It is not an ordinary employee tool and not model authority.
+
+Possible evidence sources are provider/runtime specific and must be validated before being trusted. Do not assume SMTP automatically saves a copy in Sent.
+
+Allowed recorded reconciliation conclusions are:
+
+```text
+SENT
+CONFIRMED_NOT_SENT
+REMAINS_UNKNOWN
+```
+
+`REMAINS_UNKNOWN` stays blocked from retry.
