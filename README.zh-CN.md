@@ -25,13 +25,13 @@
 
 > **重要说明：** 本 README 中的“已经实现”，是指仓库已经具备相应的系统设计、安装合同、参考适配器/脚本、Schema 或已验证的核心资产；并不代表 v2 邮件能力已经连接真实企业邮箱并投入生产。
 
-机器可读的权威状态：[`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)。
+机器可读权威状态：[`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)。
 
 ## 系统架构图
 
 ![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
 
-整个架构刻意让已经验证过的 v1 General 路径，与新增的 v2 Communication 路径相互隔离：
+整个架构刻意让已经验证过的 v1 General 路径与新增的 v2 Communication 路径相互隔离：
 
 ```text
 Employee
@@ -90,7 +90,7 @@ Employee
 仓库已经具备：
 
 - [`AGENTS.md`](AGENTS.md)：AI Agent 仓库操作合同；
-- [`DEPLOY.md`](DEPLOY.md)：部署 Golden Path；
+- [`DEPLOY.md`](DEPLOY.md)：安装/部署 Golden Path；
 - [`config/capabilities.yaml`](config/capabilities.yaml)：机器可读能力注册表；
 - Public Company Config + Private Overlay 模板；
 - Protected Input / Secret Reference 合同；
@@ -130,7 +130,7 @@ v2 已经把完整邮件工作流设计并落实为可安装参考资产：
 
 ### 4）最小化 EAO Email Governance Runtime
 
-v2 没有引入一个大型新平台，而是只新增一个薄的 EAO Runtime：
+v2 没有引入大型新平台，而是只新增一个薄的 EAO Runtime：
 
 ```text
 eao-email-governance
@@ -157,11 +157,9 @@ SQLite
 - Schema migration；
 - Backup / Restore / Recovery。
 
-为了避免过度设计，baseline 明确 **没有** 引入 CRM、Workflow Engine、Redis、独立 PostgreSQL、Event Bus 或 Mailbox Mirror。
-
 ### 5）腾讯企业邮 Reference Provider
 
-v2 当前以腾讯企业邮作为第一套参考 Provider，仓库已经包含：
+仓库已经包含：
 
 - IMAP 只读 Adapter；
 - Non-mutating read safety tests；
@@ -171,7 +169,7 @@ v2 当前以腾讯企业邮作为第一套参考 Provider，仓库已经包含�
 - Provider-specific acceptance；
 - Ambiguous send / duplicate send 安全合同。
 
-Baseline 不暴露 generic SMTP/send-anything 能力；多收件人必须全部在 RCPT 阶段被接受后，才允许进入 DATA。
+Baseline 不暴露 generic SMTP/send-anything 能力。
 
 ### 6）恢复、回滚与 Clean-host 合同
 
@@ -189,6 +187,47 @@ ID-7 已经补齐：
 - Failure injection 预期；
 - v2 失败/回滚后重新证明 v1 正常。
 
+## 为降低复杂度而主动精简 / 延后的能力
+
+这一节专门保存 **历史架构决策**。
+
+下面这些能力并不是“从来没考虑过”，而是为了让 Enterprise AI Office 保持简单、可维护、低风险，曾经被明确 **砍掉、缩小范围或延后**。未来只有在真实业务需求证明新增复杂度值得时，才允许重新引入。
+
+详细的 v2 Scope Contract 仍以 [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) 为准。
+
+| 能力 / 想法 | 当前决定 | 当时为什么精简或延后 | 只有在什么情况下才重新考虑 |
+| --- | --- | --- | --- |
+| CRM | 延后 / 不进入 baseline | 当前受治理沟通闭环不需要 Customer/Lead/Opportunity、CRM 主数据和同步机制 | 真实 Sales / Inquiry 工作流明确需要 CRM 对象与动作 |
+| ERP | 延后 / 不进入 baseline | 会新增巨大主数据、权限与集成边界，但与第一条沟通闭环无直接必要关系 | 某个真实业务流程无法在不访问 ERP 的情况下完成 |
+| PIM | 延后 / 不进入 baseline | 当前产品/公司知识由 WeKnora 承担；提前接 PIM 会增加第二套权威数据系统 | 产品主数据同步成为被验证的真实需求 |
+| Calendar | 延后 | 简单 Follow-up 可以先用 Hermes Cron，不需要为了提醒功能引入 Calendar integration | Meeting / Scheduling 成为核心真实工作流 |
+| 员工长期记忆 | 关闭 / 延后 | 需要先证明用户隔离与隐私边界，不能为了便利提前扩大风险 | 隔离被验证，且真实员工连续性价值足够高 |
+| SSO 扩展 | 延后，除非生产访问独立要求 | Open WebUI 已经承担 reference identity surface；提前扩展身份系统会增加复杂度 | 真实生产访问政策明确要求企业 SSO |
+| `armor-memory` 同步 | 延后 | 会提前引入第二套 Memory/Continuity 同步问题 | 出现明确的跨系统记忆需求 |
+| n8n / 新 Workflow Engine | baseline 拒绝 | Hermes Cron / Kanban 已经能覆盖当前定时与持久多步任务 | 出现已验证、Hermes 无法安全表达的真实工作流 |
+| 第二个 Scheduler | 拒绝 | Hermes Cron 已经是调度权威 | Cron 被真实需求证明无法满足 |
+| 额外 Vector DB / 新 RAG Layer | baseline 拒绝 | WeKnora 已经是企业知识权威，再加一套会造成状态与维护重复 | 测量证明 WeKnora / upstream 无法解决真实检索瓶颈 |
+| Prometheus / Grafana 大型 Observability Stack | 延后 | 当前规模用 health check + operations procedure 已足够 | 实际运行规模、故障频率或 SLA 证明需要专门观测平台 |
+| Local LLM 基础设施 | 延后 | 本地模型基础设施不是证明 Enterprise AI Office 架构所必需 | 隐私、成本或离线要求成为真实部署需求 |
+| 自研 Agent Framework | 拒绝 | Hermes 已经是 Agent Runtime / Orchestration，再造一套只会重复核心平台 | Hermes 无法满足某项已证明的关键能力 |
+| Graph DB / Generic Ontology Runtime | baseline 拒绝 | Ontology 当前只需要作为 Governance / Design Contract；没必要提前再建数据库与推理平台 | 真实跨系统流程要求 graph-native 查询或执行期约束 |
+| 独立 Employee Portal | 拒绝 | Open WebUI 已经提供员工入口 | 某个必要员工流程无法安全地通过 Open WebUI 完成 |
+| 新 IAM / 第二套员工目录 | 拒绝 | HumanActor 继续来自 Open WebUI / 企业 Identity Layer，避免重复身份状态 | 真实身份要求无法通过现有 upstream identity 层满足 |
+| 多个 Messaging 平台 | 缩减为最多一个可选 Surface | 每增加一个渠道都会成倍增加身份、路由、维护和验收复杂度 | 真实员工采用证据证明第二个渠道值得维护 |
+| 多个新的外部业务系统 | v2 缩减为只做 Email | 一个外部系统已经足够验证“AI → 审批 → 外部动作”的治理模式 | 后续 milestone 明确选定第二个具体业务系统 |
+| Autonomous Customer-facing Send | baseline 拒绝 | 对客发送属于重要外部 Side Effect，必须经过确定性人工 Approval | 未来有明确政策/风险决策允许不同治理模型 |
+| Generic SMTP / 任意 IMAP Write Tool | 拒绝 | 会绕开 Named Action、Mailbox Scope、Approval 和 Audit 边界 | baseline 不应存在例外；任何例外必须重新做 Security Review |
+| Mailbox Mirror / Shadow Customer DB | 拒绝 | Email Provider 应保持 Mailbox/Message 权威来源，复制会增加同步和隐私成本 | Provider 的真实限制证明有限本地状态不可避免 |
+| Governance 使用 PostgreSQL / Redis / Event Bus | baseline 拒绝 | 单机薄服务 + SQLite 已足够，恢复和维护都更简单 | 真实并发/规模数据证明 SQLite 已不够用 |
+| First-class `EmailThread` | 不增加 | Thread Context 可以从 Provider Header/Identifier 重建 | 持久 Thread Semantics 成为 Policy/Workflow 所必需 |
+| First-class `FollowUp` / Mini CRM Object | 不增加 | 简单 Follow-up 用 Hermes Cron；持久多步任务需要时用 Kanban | 出现 Cron/Kanban 无法表达的真实业务状态 |
+| Email Attachment | 延后 | 会增加内容安全、恶意文件、隐私、存储、Hash/Approval 和 Provider 处理复杂度 | 出现明确且批准的 Governed Attachment 用例 |
+| Email Bcc | 延后 | 第一条受治理发送闭环不需要，加入后会扩大 Material Approval State | 真实批准的业务流程明确需要 Bcc |
+
+核心规则：
+
+> **不要因为某项功能“技术上可以做”就把它重新加回来。只有当真实业务价值明显高于新增的安全、维护与运维复杂度时，才重新引入。**
+
 ## v2 Installation Design 完成情况
 
 | ID | 工作包 | 状态 |
@@ -203,7 +242,7 @@ ID-7 已经补齐：
 
 最终评审：[`docs/V2-INSTALLATION-DESIGN-REVIEW.md`](docs/V2-INSTALLATION-DESIGN-REVIEW.md)。
 
-当前准确状态是：
+当前准确状态：
 
 ```text
 current_phase: installation_design
@@ -213,13 +252,11 @@ blueprint_validation.status: not_opened
 real_deployment_task.active: false
 ```
 
-也就是说：Installation Design 已完成，但不会自动切换到 Blueprint Validation，也不会自动开始真实部署。
-
 ## 接下来要实现什么
 
 ### 下一阶段：Blueprint Validation
 
-下一阶段的目标不是继续“写设计”，而是验证：
+目标是验证：
 
 > 一个全新的、有能力的 AI Engineering Agent，能否在不依赖当前聊天上下文的情况下，只阅读这个仓库，就在一个明确批准的干净验证目标上复现设计好的系统。
 
@@ -246,7 +283,7 @@ Blueprint Validation 之后：
 
 - 汇总验证证据；
 - 修复真正的 reproducibility blocker；
-- 只针对验证暴露的问题做 hardening；
+- 只针对验证暴露的问题 harden；
 - 达到条件后声明 `RELEASE READY`。
 
 ### Baseline 之外的未来能力
@@ -262,11 +299,7 @@ Blueprint Validation 之后：
 - 更多企业系统集成；
 - 更多 IdP-specific playbook。
 
-当前明确不以“堆功能”为目标，也不准备把项目变成 CRM、ERP、通用 Workflow 平台、新 RAG 引擎或新 Agent Framework。
-
 ## Blueprint 进度 ≠ 部署进度
-
-项目有两套完全不同的状态。
 
 ### Blueprint Maturity
 
@@ -276,8 +309,6 @@ INSTALLATION DESIGN COMPLETE    ✅
 BLUEPRINT VALIDATED             ⏳
 RELEASE READY                   ⏳
 ```
-
-描述的是 **这个 GitHub 仓库是否已经把系统设计和安装设计说明清楚**。
 
 ### Deployment-target readiness
 
@@ -293,8 +324,6 @@ PRODUCTION READY
 = Configured Ready
   + 生产级恢复 / 安全 / 访问 / 运维控制已验收
 ```
-
-描述的是某一个明确授权的验证/真实部署目标。
 
 ## Source of Truth
 
@@ -321,16 +350,13 @@ Hermes Profile 是 AI 工作角色/能力边界，不是员工账号。
 ### Knowledge ≠ Memory
 
 ```text
-WeKnora
-= 权威共享企业知识
-
-Hermes Memory
-= 可选的连续性状态，需要单独满足隔离条件
+WeKnora = 权威共享企业知识
+Hermes Memory = 可选连续性状态，需要单独满足隔离条件
 ```
 
 ### 自然语言 ≠ 正式 Approval
 
-“可以，发吧”可以表达 intent，但不能由 LLM 自己推断成正式 SendApproval。正式 Approval 必须通过可信的确定性 Human Action 生成。
+“可以，发吧”可以表达 intent，但不能由 LLM 自己推断成正式 SendApproval。
 
 ### 不确定的外部 Side Effect 必须 Fail Safe
 
@@ -371,7 +397,7 @@ Employee Hermes long-term memory: disabled
 
 Reference instance evidence：[`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md)。
 
-新部署应使用 [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md)，不要复制另一个企业/环境的角色与 capability state。
+新部署应使用 [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md)。
 
 ## 交给 AI Agent 时的推荐阅读顺序
 
@@ -400,13 +426,11 @@ v2 Email 继续阅读：
 
 ## Repository Self-check
 
-不执行安装，仅检查仓库结构与合同：
-
 ```sh
 sh scripts/repository-readiness-check.sh
 ```
 
-v2 相关离线测试资产包括：
+v2 相关离线测试资产：
 
 ```sh
 python3 infrastructure/email/governance/test_schema.py
@@ -416,7 +440,7 @@ python3 infrastructure/email/tencent-exmail/test_imap_readonly.py
 python3 infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
 ```
 
-离线/静态 PASS 只是 Blueprint Evidence，不代表真实 Provider 或生产环境已经完成验收。
+静态/离线 PASS 只是 Blueprint Evidence，不代表真实 Provider 或生产环境已经完成验收。
 
 ## 主要文档
 
@@ -427,6 +451,7 @@ python3 infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
 | [`DEPLOY.md`](DEPLOY.md) | 安装 / 部署 Golden Path |
 | [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | Readiness 语义 |
 | [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md) | 当前 v2 状态 |
+| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | v2 Scope + 明确精简项 / Non-goals |
 | [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md) | v2 Governed Email System Design |
 | [`docs/V2-INSTALLATION-ARCHITECTURE.md`](docs/V2-INSTALLATION-ARCHITECTURE.md) | ID-1 |
 | [`docs/V2-CONFIG-PROTECTED-INPUTS.md`](docs/V2-CONFIG-PROTECTED-INPUTS.md) | ID-2 |
