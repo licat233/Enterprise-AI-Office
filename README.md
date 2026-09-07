@@ -1,6 +1,6 @@
 # Enterprise AI Office
 
-> An agent-readable and agent-executable **system blueprint + installation blueprint** for building a governed, self-hosted enterprise AI workspace around **WeKnora + Hermes Agent + Open WebUI**, with capability-driven extensions for knowledge, specialized AI roles, coding agents, automation, messaging, enterprise identity, and governed business-system actions.
+> An agent-readable and agent-executable **system blueprint + installation blueprint** for building a governed, self-hosted enterprise AI workspace around **WeKnora + Hermes Agent + Open WebUI**, with capability-driven extensions for specialized AI roles, coding agents, automation, messaging, enterprise identity, and governed business-system actions.
 
 **[简体中文 README](./README.zh-CN.md)**
 
@@ -23,7 +23,7 @@
 | Release Ready | ⏳ Not yet opened |
 | Real company deployment task | ⛔ Inactive |
 
-> **Important:** “implemented” in this README means the repository already contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox.
+> **Important:** “implemented” in this README means the repository contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox.
 
 Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml).
 
@@ -31,7 +31,7 @@ Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.
 
 ![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
 
-The architecture deliberately keeps the validated v1 employee path independent from the new governed communication path:
+The validated v1 employee path is intentionally independent from the governed v2 communication path:
 
 ```text
 Employee
@@ -52,7 +52,7 @@ Open WebUI
             └─ Email Provider
 ```
 
-A failure in the v2 Email capability must not break:
+A v2 Email failure must not break:
 
 ```text
 Open WebUI → General Assistant → Hermes general → WeKnora
@@ -62,10 +62,10 @@ Open WebUI → General Assistant → Hermes general → WeKnora
 
 ### 1. Validated core enterprise-AI employee path
 
-The first validated core stack provides:
+The validated core stack provides:
 
 - **Open WebUI** as the employee-facing web client;
-- **Hermes Agent** as the primary Agent runtime;
+- **Hermes Agent** as the Agent runtime;
 - **WeKnora** as the authoritative company-knowledge layer;
 - grounded answers with source evidence;
 - Open WebUI user/group/Assistant access controls;
@@ -74,7 +74,7 @@ The first validated core stack provides:
 - conversation history and controlled file-upload behavior;
 - backup / isolated restore reference procedures.
 
-Core employee workflow:
+Core workflow:
 
 ```text
 Employee
@@ -85,23 +85,23 @@ Employee
 → grounded company answer + source
 ```
 
-### 2. Agent-readable deployment blueprint
+### 2. Agent-readable installation blueprint
 
-The repository already includes:
+The repository includes:
 
-- repository-local AI Agent operating contract in [`AGENTS.md`](AGENTS.md);
-- deployment Golden Path in [`DEPLOY.md`](DEPLOY.md);
-- machine-readable company capability registry in [`config/capabilities.yaml`](config/capabilities.yaml);
+- [`AGENTS.md`](AGENTS.md): repository-local AI Agent operating contract;
+- [`DEPLOY.md`](DEPLOY.md): installation/deployment Golden Path;
+- [`config/capabilities.yaml`](config/capabilities.yaml): machine-readable capability registry;
 - public company configuration schema and private-overlay shape;
 - protected-input / secret-reference rules;
 - lifecycle gates separating blueprint work from real deployment;
 - Core / Configured / Production readiness semantics;
-- acceptance suites and provider-specific acceptance contracts;
+- global and provider-specific acceptance contracts;
 - backup, restore, health-check, recovery, and state-recording helpers.
 
-### 3. v2 governed Communication & Email system
+### 3. v2 governed Communication & Email loop
 
-The v2 blueprint now defines and provides reference implementation assets for the complete governed email loop:
+The v2 blueprint defines and provides reference assets for:
 
 ```text
 search email
@@ -115,7 +115,7 @@ search email
 → optional internal follow-up
 ```
 
-Implemented repository capabilities include:
+Current repository capabilities include:
 
 - `Mailbox`, `EmailMessage`, `DraftReply`, `SendApproval` domain model;
 - trusted **HumanActor** identity boundary;
@@ -123,14 +123,14 @@ Implemented repository capabilities include:
 - Open WebUI trusted server-side identity forwarding;
 - deterministic approval Action using exact persisted draft content;
 - immutable DraftReply revision + content-hash binding;
-- single logical-send claim per approval;
+- one logical-send claim per approval;
 - append-oriented governance evidence;
 - protected reconciliation control path;
 - failure-safe `SENT / CONFIRMED_NOT_SENT / OUTCOME_UNKNOWN` semantics.
 
-### 4. Thin EAO Email Governance runtime design
+### 4. Thin EAO Email Governance runtime
 
-v2 introduces only one new EAO-owned runtime responsibility:
+v2 introduces one new EAO-owned runtime responsibility:
 
 ```text
 eao-email-governance
@@ -143,24 +143,19 @@ SQLite
 <runtime_root>/runtime/email-governance/state.sqlite3
 ```
 
-The repository already contains reference assets for:
+It covers:
 
 - immutable DraftReply revisions;
 - review bindings;
 - SendApproval evidence;
 - ApprovalClaim / one-logical-send enforcement;
-- logical send records;
-- provider attempt records;
+- logical send and provider-attempt records;
 - normalized provider results;
 - reconciliation evidence;
 - governance audit events;
 - schema migration and recovery contracts.
 
-It intentionally does **not** add a CRM, workflow engine, Redis, PostgreSQL cluster, event bus, or mailbox mirror merely for architectural elegance.
-
 ### 5. Tencent Enterprise Mail reference provider
-
-Tencent Exmail is the first reference Email provider for v2.
 
 Repository assets include:
 
@@ -172,17 +167,17 @@ Repository assets include:
 - provider-specific acceptance plan;
 - ambiguous-send / duplicate-send safety contract.
 
-The baseline send contract prevents generic “send anything” access and requires all intended recipients to be accepted before SMTP DATA is submitted.
+The baseline does not expose generic “send anything” access.
 
 ### 6. Recovery and rollback
 
-The repository now defines:
+The repository defines:
 
 - Governance SQLite consistent backup;
 - isolated Governance restore;
 - schema-version fail-closed behavior;
 - unresolved-send recovery without automatic retry;
-- full-stack backup integration when v2 Email is enabled;
+- optional full-stack backup integration for v2 Email;
 - v1-compatible backup behavior when v2 Email is disabled;
 - capability rollback levels;
 - clean-host installation sequence;
@@ -190,9 +185,48 @@ The repository now defines:
 - failure-injection acceptance expectations;
 - v1 preservation after v2 rollback/failure.
 
-## Current v2 installation-design result
+## Deliberate scope reductions and deferred capabilities
 
-The completed Installation Design work packages are:
+This section preserves **historical architecture decisions** that were made specifically to keep Enterprise AI Office understandable, maintainable, and low-risk.
+
+These items are not “forgotten features.” They were intentionally **rejected, reduced, or deferred** because the initial system did not need them. A future milestone may reintroduce one only when a real business requirement justifies the added complexity.
+
+The detailed v2 scope contract remains [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md).
+
+| Capability / idea | Current decision | Why it was reduced or deferred | Revisit only when… |
+| --- | --- | --- | --- |
+| CRM | Deferred / out of baseline | The governed communication loop can be proven without customer-master data, lead/opportunity models, or CRM synchronization | a real inquiry/sales workflow requires CRM-backed objects/actions |
+| ERP | Deferred / out of baseline | Would add a large authority, integration, and master-data boundary unrelated to the first communication loop | a real operational workflow cannot be completed without ERP data/actions |
+| PIM | Deferred / out of baseline | WeKnora already covers company/product knowledge needed by the baseline; a PIM integration would add another system of record | product-master synchronization becomes an observed requirement |
+| Calendar integration | Deferred | Simple follow-up reminders can use Hermes Cron; Calendar is not needed to prove governed email | scheduling/meeting actions become a real core workflow |
+| Employee long-term memory | Disabled / deferred | User isolation and privacy boundaries must be proven before re-enabling it | isolation is validated and real employee continuity value justifies it |
+| SSO expansion | Deferred unless independently required | Open WebUI already provides the reference identity surface; expanding identity infrastructure would enlarge scope | production access requirements actually require enterprise SSO |
+| `armor-memory` synchronization | Deferred | Would create a second continuity/memory integration problem before the baseline needs it | a concrete cross-system memory requirement exists |
+| n8n / another workflow engine | Rejected for baseline | Hermes Cron/Kanban already cover the narrow scheduling and durable-task needs | a workflow is proven that existing Hermes capabilities cannot safely express |
+| Second scheduler | Rejected | Hermes Cron is already the scheduling authority | Cron is demonstrably insufficient for a required workflow |
+| Additional vector database / new RAG layer | Rejected for baseline | WeKnora is already the company-knowledge authority; another vector store would duplicate state and maintenance | measured retrieval limits cannot be solved inside WeKnora/upstream |
+| Prometheus/Grafana-style large observability stack | Deferred | Small-system health checks and operating procedures are sufficient at the current scale | operating scale or incidents justify dedicated observability infrastructure |
+| Local-LLM infrastructure project | Deferred | Model-hosting infrastructure is independent from proving the Enterprise AI Office architecture | privacy/cost/offline requirements make local inference a real deployment need |
+| Custom Agent framework | Rejected | Hermes already owns Agent runtime/orchestration; building another framework would duplicate the core platform | Hermes cannot satisfy a demonstrated essential capability |
+| Graph database / generic Ontology Runtime | Rejected for baseline | Ontology is currently a governance/design contract; a graph runtime would add a new database/reasoning platform without proven need | a real cross-system workflow requires graph-native enforcement/query semantics |
+| Dedicated employee portal | Rejected | Open WebUI already provides the employee surface | a required employee workflow cannot be safely delivered through Open WebUI |
+| New IAM / employee directory | Rejected | Open WebUI / selected enterprise identity remains the HumanActor source; a second IAM would duplicate identity state | a real identity requirement cannot be satisfied by the selected upstream identity layer |
+| Multiple messaging platforms | Reduced to at most one optional surface | Every extra channel multiplies identity, routing, support, and acceptance complexity | real employee adoption evidence justifies another channel |
+| Multiple new external business systems | Reduced to Email only in v2 | One external system is enough to prove the governed operational pattern without integration sprawl | a later milestone selects a concrete second business system |
+| Autonomous customer-facing send | Rejected for baseline | External communication is a material side effect and requires deterministic human approval | a future explicit risk/policy decision authorizes a different governance model |
+| Generic SMTP / arbitrary IMAP-write tools | Rejected | Generic protocol access bypasses Named Actions, mailbox scope, approval, and audit boundaries | no expected baseline case; any exception requires a new security review |
+| Mailbox mirror / shadow customer database | Rejected | Email Provider remains authoritative for mailbox/message state; duplicating the mailbox creates synchronization and privacy burden | a proven provider limitation makes bounded local state unavoidable |
+| PostgreSQL / Redis / event bus for Email Governance | Rejected for baseline | One thin single-host Governance service + SQLite is sufficient and much easier to recover and maintain | scale/concurrency evidence proves SQLite is no longer adequate |
+| First-class `EmailThread` object | Not added | Thread context can be reconstructed from provider identifiers/headers | durable thread semantics become necessary for policy/workflow |
+| First-class `FollowUp` object / mini CRM | Not added | Simple follow-up state belongs to Hermes Cron; durable multi-step work can use Kanban | real business state requires a durable domain object beyond Cron/Kanban |
+| Email attachments | Deferred | Adds content handling, malware/privacy, storage, approval-hash, and provider complexity | a real approved use case requires governed attachments |
+| Email Bcc | Deferred | Not needed for the first governed send loop and expands approval/material-state semantics | an approved workflow requires it |
+
+The scope-control rule is:
+
+> **Do not re-add a removed/deferred capability merely because it is technically possible. Reintroduce it only when observed business value exceeds the additional security, maintenance, and operational complexity.**
+
+## Current v2 installation-design result
 
 | ID | Work package | Result |
 | --- | --- | --- |
@@ -260,14 +294,9 @@ Potential later extensions, only when justified by real usage:
 - governed Bcc support;
 - richer operator reconciliation tooling;
 - broader enterprise-system integrations;
-- additional identity-provider-specific playbooks;
-- other capabilities already represented by the generic capability framework.
-
-Explicitly **not** a current goal: turning this project into a CRM, ERP, generic workflow platform, another RAG engine, another Agent framework, or a collection of every possible AI tool.
+- additional identity-provider-specific playbooks.
 
 ## Lifecycle vs deployment readiness
-
-There are two different progress systems.
 
 ### Blueprint maturity
 
@@ -277,8 +306,6 @@ INSTALLATION DESIGN COMPLETE    ✅
 BLUEPRINT VALIDATED             ⏳
 RELEASE READY                   ⏳
 ```
-
-These describe the repository itself.
 
 ### Deployment-target readiness
 
@@ -294,8 +321,6 @@ PRODUCTION READY
 = Configured Ready
   + applicable recovery/security/access/operations controls pass
 ```
-
-These describe an explicitly approved validation or real deployment target.
 
 ## Source-of-truth map
 
@@ -323,16 +348,11 @@ HumanActor
 ≠ provider/mailbox credential
 ```
 
-A Hermes Profile is an AI role/capability boundary, not an employee account.
-
 ### Knowledge is not memory
 
 ```text
-WeKnora
-= authoritative shared company knowledge
-
-Hermes memory
-= optional continuity state subject to isolation rules
+WeKnora = authoritative shared company knowledge
+Hermes memory = optional continuity state subject to isolation rules
 ```
 
 ### Natural language is not formal approval
@@ -365,8 +385,6 @@ official upstream capability
 
 ## First validated core stack
 
-The first validated reference used:
-
 ```text
 Host: Apple Silicon macOS
 Container runtime: OrbStack / Docker
@@ -380,7 +398,7 @@ Machine-readable baseline: [`config/validated-stack.yaml`](config/validated-stac
 
 Reference-instance evidence: [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md).
 
-A fresh deployment should use [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md) rather than copy another environment's roles or capability state.
+A fresh deployment should use [`state/DEPLOYMENT-STATE.template.md`](state/DEPLOYMENT-STATE.template.md).
 
 ## Install with an AI agent
 
@@ -418,25 +436,20 @@ Optional capabilities are installed only when selected by company configuration.
 | Specialist Profiles | `docs/PROFILE-STANDARD.md` + Hermes specialist templates |
 | Hermes admin Web UI | `infrastructure/hermes-webui/` |
 | Codex / Claude Code delegation | `infrastructure/coding-agents/` |
-| Kanban | `infrastructure/hermes/features/` |
-| Cron | `infrastructure/hermes/features/` |
-| Enterprise messaging | `infrastructure/hermes/features/` |
+| Kanban / Cron / Messaging | `infrastructure/hermes/features/` |
 | Tencent Enterprise Mail | `infrastructure/email/tencent-exmail/` |
-| Remote/private access | `infrastructure/access/` |
-| SSO / enterprise identity | `infrastructure/access/` |
+| Remote/private access / SSO | `infrastructure/access/` |
 | Employee long-term memory | Profile/RBAC isolation gate |
 
 An enabled capability may not be silently skipped to manufacture a green result. A disabled capability should not be instantiated merely because a template exists.
 
 ## Repository self-check
 
-Without installing anything:
-
 ```sh
 sh scripts/repository-readiness-check.sh
 ```
 
-Relevant offline v2 contract checks include:
+Relevant offline v2 contract checks:
 
 ```sh
 python3 infrastructure/email/governance/test_schema.py
@@ -457,7 +470,7 @@ Static/offline PASS is blueprint evidence only. It does not replace acceptance o
 | [`DEPLOY.md`](DEPLOY.md) | installation/deployment Golden Path |
 | [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | readiness semantics |
 | [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md) | current v2 blueprint status |
-| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | v2 Communication & Follow-up scope |
+| [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | v2 scope + explicit reductions / non-goals |
 | [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md) | governed email system design |
 | [`docs/V2-DESIGN-REVIEW.md`](docs/V2-DESIGN-REVIEW.md) | System Design final review |
 | [`docs/V2-INSTALLATION-ARCHITECTURE.md`](docs/V2-INSTALLATION-ARCHITECTURE.md) | ID-1 architecture / v1 preservation |
@@ -486,7 +499,7 @@ Enterprise AI Office is not intended to become:
 - a CRM or ERP;
 - a generic workflow engine;
 - a replacement for Codex or Claude Code;
-- a “install every feature” component collection.
+- an “install every feature” component collection.
 
 Its value is the **system design + installation design**, capability-driven desired state, governance boundaries, thin upstream adapters, recovery rules, acceptance evidence, and operating discipline around mature projects.
 
