@@ -29,7 +29,7 @@
 
 ## 系统架构图
 
-![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
+![Enterprise AI Office v2 中文架构图](./enterprise-ai-office-architecture.zh-CN.svg)
 
 整个架构刻意让已经验证过的 v1 General 路径与新增的 v2 Communication 路径相互隔离：
 
