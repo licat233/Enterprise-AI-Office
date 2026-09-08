@@ -66,8 +66,8 @@ Current public status:
 | Synthetic acceptance employee | ✅ Created in protected runtime state |
 | Employee model isolation | ✅ Baseline checks passed |
 | WeKnora Owner/Admin bootstrap | ✅ Complete |
-| WeKnora embedding choice | 🚧 Local embedding qualification in progress |
-| Formal `Company Knowledge` production indexing | ⏳ Waiting for embedding decision |
+| Local Embedding qualification | ✅ `bge-m3` / 1024 dimensions passed |
+| Formal `Company Knowledge` production indexing | ⏳ Waiting for final binding/provisioning |
 | Grounded employee answer + source acceptance | ⏳ Pending final WeKnora provisioning |
 | Core Ready | ⏳ Not yet declared |
 
@@ -82,19 +82,28 @@ Hermes
 → gpt-5.6-luna
 ```
 
-WeKnora embedding is being evaluated for a **small local model** so the company knowledge layer does not require an additional recurring remote Embedding API solely for vectorization.
-
-Current minimal candidate under qualification:
+Validated local embedding for the current Mac Studio deployment:
 
 ```text
-Ollama
+WeKnora v0.8.0
+→ Ollama 0.30.8
 → bge-m3
 → 1024 dimensions
 ```
 
-This is not yet frozen as the production embedding baseline. The qualification is intentionally small: verify useful Chinese/English retrieval and confirm that local embedding does not materially degrade the Mac Studio's overall responsiveness.
+Small qualification result on 2026-09-08:
 
-Rerank remains disabled unless a real retrieval-quality need later justifies it.
+- 6 sanitized representative documents parsed successfully;
+- 8 mixed Chinese / English / cross-language retrieval questions returned relevant source evidence;
+- observed Ollama RSS was approximately 1.75 GB;
+- available-memory ratio remained approximately 68–71% on the deployment host;
+- WeKnora and Open WebUI health checks remained HTTP 200;
+- no obvious system slowdown was observed;
+- `qwen3-embedding:0.6b` was not tested because `bge-m3` already passed the intended minimal qualification.
+
+The qualification used a temporary test Knowledge Base only. The formal `Company Knowledge` Knowledge Base has not yet been reindexed/bound to this model in the public status recorded here.
+
+DashScope is not required for the selected local embedding path. Rerank remains disabled unless a real retrieval-quality need later justifies it.
 
 ## Capabilities intentionally disabled during Core deployment
 
