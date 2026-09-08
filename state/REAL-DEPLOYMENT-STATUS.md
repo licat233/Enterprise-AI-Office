@@ -36,7 +36,7 @@ Employee
 → grounded company answer + source
 ```
 
-The active company configuration currently enables only the Core employee path. No optional capability is enabled, so Configured Ready is satisfied once Core Ready passes and the configured capability closure remains empty.
+The active protected company configuration now enables the Core employee path plus the validated `media_transcription` optional capability. All currently enabled capabilities have passed their applicable acceptance boundary, so `CONFIGURED READY — PASS` remains valid.
 
 ## Current production status
 
@@ -66,6 +66,13 @@ The active company configuration currently enables only the Core employee path. 
 | Hermes → WeKnora MCP | ✅ Grounded marker/source returned |
 | Core service health | ✅ WeKnora / Open WebUI / Hermes / Ollama healthy |
 | Core Ready | ✅ PASS |
+| Media transcription capability | ✅ Enabled in protected config / 18 of 18 acceptance checks PASS |
+| English transcription route | ✅ Whisper preferred |
+| Chinese / Cantonese transcription route | ✅ SenseVoice preferred |
+| Transcript Markdown + timestamps | ✅ PASS |
+| Automatic knowledge publication | ✅ Disabled; human review required |
+| Retrieval-only transcript → WeKnora compatibility | ✅ HTTP 201 KB create / HTTP 200 ingest + retrieval |
+| WeKnora Summary/Chat model for transcript test | ✅ Not required / not configured |
 | Configured Ready | ✅ PASS |
 | Backup/restore scripts | ✅ Reconciled with active runtime layout |
 | Temporary primary-disk backup generation | ✅ Validated |
@@ -105,13 +112,64 @@ Current WeKnora model-role posture:
 
 ```text
 Embedding        enabled: bge-m3 / 1024
-KnowledgeQA/Chat not required for Core
+KnowledgeQA/Chat not required for Core or retrieval-only transcript compatibility
 Rerank           disabled
 VLLM             disabled
 ASR              disabled in WeKnora Core
 ```
 
-DashScope is not required for the selected local embedding path.
+DashScope and `qwen-plus` are not required for the selected Core or media-transcription retrieval path.
+
+Media transcription remains a separate host-native capability rather than a WeKnora ASR model role:
+
+```text
+English audio/video
+→ Whisper preferred
+
+Chinese / Cantonese audio/video
+→ SenseVoice preferred
+
+media
+→ ffmpeg-compatible audio extraction when needed
+→ local ASR
+→ timestamped Markdown transcript
+→ human review
+→ optional later knowledge publication
+```
+
+Whisper and SenseVoice are treated as complementary engines. The deployment does not run both engines by default or introduce an ensemble/benchmark pipeline merely because both are installed.
+
+## Media transcription acceptance
+
+The first real Mac Studio deployment completed the media-transcription acceptance with `18/18 PASS`.
+
+Validated boundaries include:
+
+- existing local Whisper and SenseVoice installations were reused rather than replaced by a new ASR platform;
+- English routing prefers Whisper;
+- Chinese and Cantonese routing prefer SenseVoice;
+- transcript output is UTF-8 Markdown with timestamps and source metadata;
+- original media remains unchanged;
+- temporary extraction/work files are cleaned up;
+- transcription does not automatically publish content into `Company Knowledge`;
+- the capability does not require a new background queue, daemon, database, Web UI, or cloud transcription provider;
+- Core services remained healthy after enablement.
+
+WeKnora transcript compatibility was validated through a temporary retrieval-only Knowledge Base:
+
+```text
+Temporary KB creation          HTTP 201
+Embedding                      existing bge-m3 / 1024 only
+summary_model_id               unset
+Transcript ingestion           HTTP 200
+Retrieval                      HTTP 200
+Unique marker                  returned
+Source filename                returned
+Temporary document / KB        deleted after test
+Formal Company Knowledge       unchanged
+```
+
+This evidence confirms an important deployment rule: a WeKnora UI workflow that offers or requests a Conversation/Summary model does not imply that document ingestion and retrieval require one. For retrieval-only Knowledge Bases, the deployed WeKnora v0.8.0 path can operate with Embedding bound and `summary_model_id` unset.
 
 ## Production hardening completed
 
@@ -134,8 +192,7 @@ Completed evidence includes:
 - after reboot, `bge-m3` returned 1024-dimensional embeddings;
 - after reboot, the ordinary employee path again returned a grounded marker and source;
 - after reboot, ordinary-employee visibility, `default/admin` fail-closed behavior, history, file upload, WeKnora read/write boundary, and disabled employee memory all remained correct;
-- latest health state is 6 PASS, 0 FAIL, and 1 WARN, where the only WARN is the expected missing backup-freshness marker while no approved off-primary backup destination exists;
-- no Whisper, SenseVoice, Email, Messaging, Cron, Kanban, or other optional capability was enabled during this production-hardening work.
+- latest health state is 6 PASS, 0 FAIL, and 1 WARN, where the only WARN is the expected missing backup-freshness marker while no approved off-primary backup destination exists.
 
 A primary-disk backup or temporary isolated restore is validation evidence only. It does **not** substitute for a physically independent production backup target.
 
@@ -186,11 +243,14 @@ observed runtime behavior
 
 The public repository must not contain passwords, API keys, OAuth/bearer tokens, employee credentials, real employee identifiers, private host/network identifiers beyond intentionally sanitized descriptions, or protected company configuration.
 
-## Capabilities intentionally outside the active deployment
+## Capability state
 
-No optional Enterprise AI Office capability is currently enabled in the active company configuration.
+Currently enabled employee/business capabilities:
 
-Examples currently outside the active deployment include:
+- Core employee knowledge path;
+- Media Transcription / audio-video transcription, with manual knowledge-publication review.
+
+Other optional capabilities remain disabled unless explicitly selected later, including:
 
 - governed Email / external send;
 - Messaging;
@@ -200,10 +260,13 @@ Examples currently outside the active deployment include:
 - hermes-webui employee exposure;
 - Remote access;
 - SSO expansion;
-- Employee Hermes long-term memory;
-- Media Transcription / audio-video knowledge ingestion.
+- Employee Hermes long-term memory.
 
 Optional capabilities should be added only when explicitly selected and accepted under their own capability contracts.
+
+## Public repository synchronization note
+
+The protected deployment state confirms the capability is enabled and accepted on the real Mac Studio. Public reusable implementation/configuration changes must still be synchronized separately from the target-host working copy; runtime success alone must not be confused with a complete GitHub implementation artifact.
 
 ## Reference demo vs current deployment
 
@@ -213,7 +276,7 @@ Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMEN
 
 ## Next deployment direction
 
-The system is usable at `CONFIGURED READY — PASS`, and all current Production Ready acceptance work that does not depend on external backup hardware has passed.
+The system is usable at `CONFIGURED READY — PASS`, including the currently enabled media-transcription capability, and all Production Ready acceptance work that does not depend on external backup hardware has passed.
 
 After an approved independent encrypted backup destination and policy are provided, complete the off-primary backup copy, retention/freshness evidence, and final external restore acceptance. If those pass, the deployment may advance to:
 
