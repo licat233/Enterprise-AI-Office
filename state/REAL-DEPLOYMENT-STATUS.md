@@ -9,6 +9,7 @@ Last updated: 2026-09-08
 ```text
 Real deployment task: ACTIVE
 Target: designated company Mac Studio (publicly sanitized)
+Requested readiness: production-ready
 Blueprint lifecycle: installation_design (unchanged)
 Blueprint Validation: not opened
 ```
@@ -31,10 +32,12 @@ Deployment commands execute on the remote Mac Studio unless a task explicitly sa
 
 ## Current deployment stage
 
-Current result:
+Current achieved readiness:
 
 ```text
 CORE READY — PASS
+CONFIGURED READY — PASS
+PRODUCTION READY — BLOCKED BY EXTERNAL BACKUP / RESTORE INPUT
 ```
 
 Validated employee path:
@@ -48,6 +51,8 @@ Employee
 → grounded company answer + source
 ```
 
+The active company configuration currently enables only the Core employee path. No optional capability is enabled, so Configured Ready is satisfied once Core Ready passes and the configured capability closure remains empty.
+
 Current public status:
 
 | Area | Status |
@@ -59,6 +64,7 @@ Current public status:
 | Hermes `general` | ✅ Configured |
 | Hermes reasoning model | ✅ `gpt-5.6-luna` |
 | Hermes employee long-term memory | ✅ Disabled |
+| Hermes network bind | ✅ Loopback-only baseline |
 | Open WebUI v0.11.3 | ✅ Running |
 | Open WebUI admin bootstrap | ✅ Complete |
 | Signup | ✅ Disabled |
@@ -79,6 +85,11 @@ Current public status:
 | Hermes → WeKnora MCP | ✅ Grounded marker/source returned |
 | Core service health | ✅ WeKnora / Open WebUI / Hermes / Ollama healthy |
 | Core Ready | ✅ PASS |
+| Configured Ready | ✅ PASS |
+| Independent encrypted backup target | ⏳ Not yet provided |
+| Off-primary backup generation/copy | ⏳ Pending backup target |
+| Isolated restore evidence | ⏳ Pending backup target |
+| Production Ready | ⛔ BLOCKED — backup / restore closure |
 
 Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETENESS.md).
 
@@ -142,6 +153,28 @@ The ordinary employee surface does not expose Hermes `default/admin`.
 
 The Core path is intentionally fail-closed for company facts that are not supported by approved knowledge.
 
+## Production Ready blocker
+
+The active target remains `production-ready`, but Production Ready is intentionally not declared yet.
+
+The unresolved production boundary is backup / restore resilience, not the AI employee path itself.
+
+Current external-input blocker:
+
+```text
+No approved physically independent encrypted backup destination has been provided yet.
+```
+
+Consequences:
+
+- a complete backup generation cannot yet be copied off the Mac Studio primary disk;
+- isolated restore evidence cannot yet be completed against the approved production backup target;
+- backup retention and recovery evidence cannot yet be closed.
+
+A dedicated external backup disk may be HDD or SSD. Enterprise AI Office does not require SSD for this purpose. The important properties are physical independence from the Mac Studio internal disk, adequate capacity/reliability, and approved encryption/retention policy.
+
+Until that operator input exists, deployment work should continue on Production Ready checks that do **not** depend on the external backup target. The deployment must not falsely declare Production Ready merely to remove the blocker.
+
 ## Protected deployment state
 
 Detailed non-public runtime state is maintained outside the public repository in protected deployment storage.
@@ -169,11 +202,11 @@ observed runtime behavior
 
 This public file is only a sanitized progress summary.
 
-## Capabilities intentionally outside Core
+## Capabilities intentionally outside the active deployment
 
-Core Ready does not mean every optional Enterprise AI Office capability is enabled.
+No optional Enterprise AI Office capability is currently enabled in the active company configuration.
 
-Examples currently outside the active Core deployment include:
+Examples currently outside the active deployment include:
 
 - governed Email / external send;
 - Messaging;
@@ -183,7 +216,8 @@ Examples currently outside the active Core deployment include:
 - hermes-webui employee exposure;
 - Remote access;
 - SSO expansion;
-- Employee Hermes long-term memory.
+- Employee Hermes long-term memory;
+- Media Transcription / audio-video knowledge ingestion.
 
 Optional capabilities should be added only when explicitly selected and accepted under their own capability contracts.
 
@@ -204,6 +238,6 @@ Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMEN
 
 ## Next deployment direction
 
-The Core baseline is complete.
+The system is usable at `CONFIGURED READY — PASS` while the production backup/restore boundary remains open.
 
-Future work may proceed capability-by-capability without changing the validated Core path. The next capability should be chosen from actual company value rather than enabled merely because a component already exists.
+Continue all Production Ready work that is independent of the missing external backup target. After an approved independent encrypted backup disk and policy are provided, complete backup generation, off-primary copy, isolated restore, and the remaining Production Ready acceptance evidence.
