@@ -145,9 +145,17 @@ continuation_language:
 # A real deployment is a separate consumer activity, not the automatic next
 # phase of repository development.
 real_deployment_task:
-  active: false
+  active: true
+  activated_on: 2026-09-07
+  target: designated company Mac Studio
+  target_details_public: sanitized
   activation_requires_explicit_human_request: true
   requires_explicit_target: true
+  note: >-
+    The repository owner explicitly activated a real company deployment to the
+    designated Mac Studio. Company-private configuration, credentials, host
+    identifiers, employee identifiers, and live deployment evidence remain
+    protected outside the public repository unless separately sanitized.
   must_not_be_inferred_from:
     - blueprint phase
     - system design completion
@@ -172,14 +180,16 @@ public_repository_data_policy:
   use_synthetic_identifiers_in_examples_and_tests: true
 
 interpretation_rules:
-  - The repository is a system-design and installation-blueprint product, not a live deployment record.
+  - The repository is a system-design and installation-blueprint product; an independently authorized real deployment may consume it.
   - The v2 baseline System Design milestone is complete and frozen.
   - The v2 baseline Installation Design milestone is complete and transition-ready.
   - The current blueprint phase intentionally remains installation_design until explicit human direction opens blueprint_validation.
   - ID-1 through ID-7 are complete; the next lifecycle phase is blueprint_validation but it is not yet opened.
-  - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
-  - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
-  - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
+  - Installation design means designing how an AI agent will install the system; it does not itself authorize a real installation.
+  - The designated company Mac Studio real deployment task is explicitly active as a separate consumer activity.
+  - Real deployment authorization does not advance the blueprint lifecycle.
+  - Company-private configuration, secrets, identifiers, and live runtime state must remain outside the public repository unless safely sanitized.
+  - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not by themselves evidence that a company instance is being deployed.
   - Missing real credentials are never blockers for blueprint development because credentials belong to a real deployment or explicitly approved validation task.
 
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-08
