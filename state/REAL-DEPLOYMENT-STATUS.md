@@ -16,23 +16,7 @@ Blueprint Validation: not opened
 
 The real deployment is an independently authorized consumer activity. Its activation does **not** advance the repository blueprint lifecycle.
 
-## Operator topology
-
-```text
-Operator Mac
-  ↓
-Codex macOS App
-  ↓ SSH
-Designated company Mac Studio
-  ↓
-Enterprise AI Office runtime
-```
-
-Deployment commands execute on the remote Mac Studio unless a task explicitly says otherwise. A local Codex/ChatGPT login on the Mac Studio is not required for the deployment path.
-
-## Current deployment stage
-
-Current achieved readiness:
+## Current achieved readiness
 
 ```text
 CORE READY — PASS
@@ -53,7 +37,7 @@ Employee
 
 The active company configuration currently enables only the Core employee path. No optional capability is enabled, so Configured Ready is satisfied once Core Ready passes and the configured capability closure remains empty.
 
-Current public status:
+## Current production status
 
 | Area | Status |
 | --- | --- |
@@ -66,20 +50,16 @@ Current public status:
 | Hermes employee long-term memory | ✅ Disabled |
 | Hermes network bind | ✅ Loopback-only baseline |
 | Open WebUI v0.11.3 | ✅ Running |
-| Open WebUI admin bootstrap | ✅ Complete |
 | Signup | ✅ Disabled |
 | Employee groups / baseline ACL | ✅ Reconciled |
 | General Assistant | ✅ Configured |
-| Employee model isolation | ✅ Baseline checks passed |
 | System Prompt editing | ✅ Disabled for ordinary employee |
 | Advanced Parameters editing | ✅ Disabled for ordinary employee |
 | Conversation history | ✅ Persists across refresh and re-login |
 | File upload | ✅ Accepted and source reference visible |
 | Unknown-company-fact behavior | ✅ Unavailable / no fabrication observed |
-| WeKnora Owner/Admin bootstrap | ✅ Complete |
 | Local Embedding | ✅ `bge-m3` / 1024 dimensions |
 | Formal `Company Knowledge` | ✅ Created and bound to `bge-m3` |
-| Seed ingestion / retrieval | ✅ Marker and source filename returned |
 | `general` WeKnora credential | ✅ Retrieve-only / `full_access=false` |
 | Knowledge write-denial check | ✅ HTTP 403 |
 | Hermes → WeKnora MCP | ✅ Grounded marker/source returned |
@@ -89,11 +69,11 @@ Current public status:
 | Backup/restore scripts | ✅ Reconciled with active runtime layout |
 | Temporary primary-disk backup generation | ✅ Validated |
 | Isolated restore materialization | ✅ Validated without touching production |
+| Restored employee-path acceptance | ✅ PASS |
+| Retrieved prompt-injection source test | ✅ PASS |
+| Real Mac Studio reboot acceptance | ⏳ Pending human-authorized reboot |
 | Independent encrypted backup target | ⏳ Not yet provided |
-| Off-primary backup copy / retention evidence | ⏳ Pending backup target and approved policy |
-| Restored employee-path acceptance | ⏳ Not yet completed on the current backup material |
-| Real Mac Studio reboot acceptance | ⏳ Pending human-authorized reboot path |
-| Retrieved prompt-injection source test | ⏳ Evidence not yet closed |
+| Off-primary backup / retention / final external restore evidence | ⏳ Pending backup target and approved policy |
 | Production Ready | ⛔ BLOCKED |
 
 Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETENESS.md).
@@ -130,101 +110,67 @@ ASR              disabled in WeKnora Core
 
 DashScope is not required for the selected local embedding path.
 
-## Local embedding qualification evidence
+## Production hardening completed
 
-Before formal binding, the current Mac Studio deployment qualified `bge-m3` with a small representative test:
+Production work that does not depend on an external backup destination has been completed as far as the current host and authority allow.
 
-- 6 sanitized representative documents parsed successfully;
-- 8 mixed Chinese / English / cross-language retrieval questions returned relevant source evidence;
-- observed Ollama RSS was approximately 1.75 GB;
-- available-memory ratio remained approximately 68–71% on the deployment host;
-- WeKnora and Open WebUI remained healthy;
-- no obvious system slowdown was observed;
-- `qwen3-embedding:0.6b` was not tested because `bge-m3` already passed the intended minimal qualification.
+Completed evidence includes:
 
-The temporary test Knowledge Base was removed after formal provisioning; the `bge-m3` model remains installed for production use.
-
-## Core access and knowledge boundary
-
-The employee-facing Hermes `general` path uses a dedicated WeKnora retrieve-only credential:
-
-```text
-Knowledge scope: Company Knowledge only
-full_access: false
-write attempt: denied (HTTP 403)
-```
-
-The ordinary employee surface does not expose Hermes `default/admin`.
-
-The Core path is intentionally fail-closed for company facts that are not supported by approved knowledge.
-
-## Production hardening completed so far
-
-Production work that does not depend on an external backup destination has continued after Configured Ready.
-
-Completed items include:
-
-- `scripts/backup.sh` / `scripts/restore.sh` updated to resolve the active runtime root rather than reference/demo or company-private hard-coded paths;
+- `scripts/backup.sh` / `scripts/restore.sh` resolve the active runtime root instead of reference/demo or company-private hard-coded paths;
 - backup coverage validated for PostgreSQL, WeKnora, Open WebUI, Hermes, configuration, manifest, and checksums;
-- a temporary backup generation was created on the primary disk for script/recovery-path validation only;
-- isolated restore materialization was exercised without modifying the live production instance, then temporary restore resources were cleaned up;
-- network exposure was tightened to loopback-only for employee/admin application surfaces where applicable;
-- PostgreSQL/cache/parser internals are not published as host ports;
-- the employee Core path, grounded source behavior, history, unknown-fact fail-closed behavior, ordinary-employee model ACL, and WeKnora retrieve-only boundary remain healthy;
-- no optional Whisper, SenseVoice, Email, Messaging, Cron, Kanban, or similar capability was enabled during this production-hardening pass;
-- the latest health check reported 6 PASS, 0 FAIL, and 1 WARN; the WARN is the expected missing backup-freshness marker while no approved off-primary backup destination exists.
+- temporary backup generation created on the primary disk for recovery-path validation only;
+- isolated restore materialization completed in independent directories, volumes, containers, and loopback ports without stopping or rebuilding production;
+- restored `Company Knowledge`, known fact/source retrieval, General Assistant mapping, ordinary-employee visibility, history, file upload, fail-closed behavior, and required employee path all passed;
+- all temporary restore resources were removed after acceptance;
+- retrieved prompt-injection test source was actually retrieved, but Hermes `gpt-5.6-luna` treated the source as data rather than authority;
+- the prompt-injection test did not expose configuration/credentials, execute unauthorized instructions, or invoke mutation-capable tools, while still returning the ordinary test marker and source;
+- the prompt-injection test document was removed after acceptance and the production Knowledge Base was rechecked clean;
+- application surfaces are loopback-only where applicable and database/cache/parser internals are not published as host ports;
+- no Whisper, SenseVoice, Email, Messaging, Cron, Kanban, or other optional capability was enabled during this production-hardening work;
+- latest health state remains green except for the expected backup-freshness warning while no approved off-primary backup destination exists.
 
-A primary-disk backup or temporary isolated materialization is useful validation evidence, but it does **not** substitute for a physically independent production backup target.
+A primary-disk backup or temporary isolated restore is validation evidence only. It does **not** substitute for a physically independent production backup target.
 
 ## Remaining Production Ready blockers
 
-Production Ready is intentionally not declared yet.
+Production Ready is intentionally not declared yet. The remaining boundary has now been reduced to two areas.
 
-### 1. Independent encrypted backup destination and policy
+### 1. Real Mac Studio reboot acceptance
+
+A real host reboot has not yet been executed as acceptance evidence.
+
+The current remote execution path does not have non-interactive privileged reboot authority, and macOS Apple Events authorization is not available. This is a legitimate human-authority boundary.
+
+The reboot acceptance must prove that after a real Mac Studio restart the required production path recovers, including as applicable:
+
+```text
+OrbStack / Docker
+WeKnora
+Open WebUI
+Hermes gateway
+Ollama / bge-m3 availability
+General Assistant → Hermes `general` → Company Knowledge
+```
+
+Do not infer reboot recovery merely from service restart tests.
+
+### 2. Independent encrypted backup destination and external recovery evidence
 
 No approved physically independent encrypted backup destination has been provided yet.
 
-Still required:
+Still required before Production Ready can pass:
 
 - an approved external/off-primary backup destination;
 - an approved retention policy and RPO/RTO target;
 - a complete production backup generation copied off the Mac Studio primary disk;
-- backup freshness/retention evidence against that destination.
+- backup freshness/retention evidence against that destination;
+- final restore evidence from the approved external backup copy.
 
 The dedicated backup disk may be HDD or SSD. Enterprise AI Office does not require SSD. The important properties are physical independence from the Mac Studio internal disk, adequate capacity/reliability, approved encryption, and an explicit retention/recovery policy.
-
-### 2. Restored employee-path acceptance
-
-Restore materialization has been validated, but the full employee-facing path has not yet been accepted on a restore derived from the current production backup material.
-
-Production evidence should ultimately show that restored state can reproduce the required employee path rather than merely unpacking files or starting individual services.
-
-### 3. Real Mac Studio reboot acceptance
-
-A real host reboot has not yet been executed as acceptance evidence.
-
-The current remote session cannot perform a non-interactive privileged reboot, and macOS Apple Events authorization is not available. This is a legitimate human-authority boundary; Production Ready should not assume restart recovery without an actual accepted reboot/recovery test.
-
-### 4. Retrieved prompt-injection source test
-
-Part C still lacks closed evidence for the retrieved prompt-injection-source scenario. Temporary test material was removed after the incomplete attempt.
-
-This test does not require the future external backup disk and should be completed independently before the backup hardware arrives.
 
 ## Protected deployment state
 
 Detailed non-public runtime state is maintained outside the public repository in protected deployment storage.
-
-The public repository must not contain:
-
-- passwords;
-- API keys;
-- OAuth tokens;
-- bearer tokens;
-- employee credentials;
-- real employee identifiers;
-- private host/network identifiers beyond intentionally sanitized descriptions;
-- protected company configuration.
 
 Actual deployment truth is:
 
@@ -236,7 +182,7 @@ protected deployment/runtime state
 observed runtime behavior
 ```
 
-This public file is only a sanitized progress summary.
+The public repository must not contain passwords, API keys, OAuth/bearer tokens, employee credentials, real employee identifiers, private host/network identifiers beyond intentionally sanitized descriptions, or protected company configuration.
 
 ## Capabilities intentionally outside the active deployment
 
@@ -259,23 +205,12 @@ Optional capabilities should be added only when explicitly selected and accepted
 
 ## Reference demo vs current deployment
 
-[`DEPLOYMENT-STATE.md`](./DEPLOYMENT-STATE.md) records the earlier **sanitized local reference/demo validation** performed before this company deployment. It is useful reproducibility evidence, but it is **not** the current Mac Studio runtime state.
-
-That reference record contains historical choices such as:
-
-- MacBook demo host characteristics;
-- `gpt-5.5`;
-- DashScope embedding/chat models;
-- `sales` / `qc` demo Profiles.
-
-Do not copy those values into the current deployment unless the active company configuration explicitly selects them.
+[`DEPLOYMENT-STATE.md`](./DEPLOYMENT-STATE.md) records the earlier sanitized local reference/demo validation. It is useful reproducibility evidence, but it is **not** the current Mac Studio runtime state.
 
 Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMENT-STATE.template.md) and keep the real operational copy in protected deployment storage when it contains company-private information.
 
 ## Next deployment direction
 
-The system is usable at `CONFIGURED READY — PASS` while Production Ready remains open.
+The system is usable at `CONFIGURED READY — PASS`.
 
-Before external backup hardware is available, continue only the remaining Production Ready checks that do not depend on that hardware, especially the restored employee-path acceptance where it can be exercised safely and the retrieved prompt-injection-source test.
-
-Later, after an approved independent encrypted backup destination and policy are provided, complete the off-primary backup/retention evidence and restored-path validation against that approved backup. A real Mac Studio reboot acceptance also remains required before declaring `PRODUCTION READY — PASS`.
+Before external backup hardware is available, the next production acceptance action is the real Mac Studio reboot test. After that passes, Production Ready should remain blocked only by the approved independent backup destination, retention policy, off-primary backup copy, and final external restore evidence.
