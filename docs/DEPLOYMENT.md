@@ -155,13 +155,74 @@ Requirements:
 
 - persistent database and uploaded documents;
 - internal database/cache/parser services not publicly exposed;
-- required model roles configured;
+- only the model roles required by the selected workflow configured;
 - only configured Knowledge Bases created;
 - non-sensitive seed document ingested and retrieved before Hermes integration.
 
+### 6.1 Core model responsibilities
+
+The Enterprise AI Office Core path deliberately separates reasoning from retrieval:
+
+```text
+Hermes
+→ reasoning / answer generation
+
+WeKnora
+→ knowledge ingestion / indexing / retrieval / source evidence
+```
+
+Therefore the baseline WeKnora model configuration is intentionally minimal:
+
+| Model role | Core default | Purpose |
+| --- | --- | --- |
+| Embedding | **Required** | vectorize documents and retrieval queries |
+| KnowledgeQA / Chat | **Not configured by default** | only needed when WeKnora itself must generate an answer or run a Chat/Ask workflow |
+| Rerank | **Disabled** | optional second-stage ranking when measured retrieval quality requires it |
+| VLLM / multimodal | **Disabled** | optional visual/model-assisted document workflows |
+| ASR | **Disabled** | optional audio transcription workflows |
+
+Do not confuse "WeKnora supports this model type" with "Enterprise AI Office Core requires this model type."
+
+For the normal employee path, Hermes receives retrieved WeKnora evidence and its own selected reasoning model produces the final answer. A separate WeKnora Chat/KnowledgeQA model would duplicate reasoning and add another provider/cost/failure boundary unless a concrete WeKnora-native workflow needs it.
+
+### 6.2 Embedding may be remote or local
+
+Embedding is an independent provider/runtime choice.
+
+Supported deployment patterns include:
+
+```text
+Remote:
+WeKnora → cloud Embedding API
+
+Local:
+WeKnora → Ollama → local Embedding model
+```
+
+A cloud provider such as DashScope is optional. It is not an Enterprise AI Office dependency by itself.
+
+If the deployment uses local embedding and does not enable a WeKnora-native Chat/KnowledgeQA workflow, there is no reason to request a DashScope API key merely to complete Core.
+
+The first real Mac Studio deployment validated this local path:
+
+```text
+WeKnora v0.8.0
+→ Ollama 0.30.8
+→ bge-m3
+→ 1024 dimensions
+```
+
+That validation showed successful Chinese, English, and cross-language retrieval without obvious host slowdown. Treat `bge-m3` as the preferred local starting choice for similar capable Apple Silicon deployments, while still validating a small representative corpus on the actual target host.
+
+Use `qwen3-embedding:0.6b` as a lighter fallback candidate if resource pressure becomes the real constraint. Do not default to 4B/8B embedding models without measured need.
+
+### 6.3 Retrieval tuning
+
 Start with upstream/default retrieval capabilities. Add reranking or alternate retrieval infrastructure only when the configured requirement or measured retrieval quality justifies it.
 
-Embedding changes are high risk because reindexing may be required.
+Embedding changes are high risk because reindexing may be required. Select and record the embedding model and vector dimension before production-scale ingestion whenever possible.
+
+For WeKnora v0.8.0 local Ollama embedding, re-check the version-specific `truncate_prompt_tokens` behavior documented in `docs/KNOWLEDGE.md` / `docs/DEPLOYMENT-PRACTICES.md` rather than assuming a value of `0` means unlimited.
 
 ## 7. WeKnora → Hermes knowledge bridge
 
@@ -172,6 +233,8 @@ Normal business Profiles should receive only the retrieval operations needed for
 The repository's baseline Hermes templates use a read-only WeKnora MCP whitelist.
 
 Do not give normal knowledge flows direct SQL/database coupling.
+
+For the Core path, prefer retrieval/read operations over a WeKnora-native Ask/Chat operation unless the active workflow explicitly requires WeKnora to perform its own answer generation.
 
 ## 8. Hermes baseline
 
@@ -304,7 +367,7 @@ Some complete deployments necessarily depend on external authority:
 - IdP/OIDC application registration;
 - enterprise messaging application/bot credentials;
 - private-access account/tunnel approval;
-- model-provider credentials;
+- model-provider credentials actually required by the selected model roles;
 - approved repository/workspace paths;
 - OS permissions requiring human approval.
 

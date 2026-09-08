@@ -159,7 +159,146 @@ Evaluate:
 
 Do not invent a generic question set that forces the company to model work it does not have.
 
-## 13. Embedding model changes
+## 13. Embedding deployment choices
+
+Embedding does not have to come from a cloud model API.
+
+For WeKnora deployments, treat the embedding runtime as an independent deployment choice from the reasoning/chat model used by Hermes.
+
+Two supported patterns are useful:
+
+```text
+Remote embedding API
+WeKnora → provider API → embedding vectors
+
+Local embedding
+WeKnora → local Ollama → embedding vectors
+```
+
+WeKnora v0.8.0 has a native local Ollama embedding path (`source=local`), so a deployment does not need a second inference framework merely to run embeddings locally.
+
+### Remote embedding API
+
+Use a remote embedding provider when:
+
+- the host has limited local compute or memory headroom;
+- operational simplicity is more important than per-call cost;
+- external model/API use is acceptable for the selected knowledge boundary;
+- provider availability and network dependency are acceptable.
+
+Advantages:
+
+- minimal local resource usage;
+- no local model lifecycle to manage;
+- easy to change capacity on the provider side.
+
+Costs/trade-offs:
+
+- recurring API cost;
+- external network/provider dependency;
+- provider credentials are required;
+- knowledge text is sent to the selected provider according to that provider's data-handling terms.
+
+The first synthetic reference deployment used DashScope `qwen3.7-text-embedding` at dimension `1024`. That is reference evidence, not a permanent requirement. The `3.7` in that cloud model name must not be interpreted as a `3.7B` local parameter count.
+
+### Local embedding with Ollama
+
+Use local embedding when:
+
+- the deployment host has sufficient spare resources;
+- reducing recurring API cost matters;
+- keeping embedding traffic on the local host is desirable;
+- the team prefers fewer external provider credentials/dependencies.
+
+Advantages:
+
+- no per-call embedding API fee;
+- no external embedding-provider outage dependency;
+- embedding text can remain on the local deployment host;
+- no cloud embedding API key is required.
+
+Costs/trade-offs:
+
+- local RAM/CPU/GPU resources are consumed during model load, ingestion, and query embedding;
+- the model/runtime must be kept operational;
+- actual retrieval quality must be checked on the company's languages and document types.
+
+A local embedding model does **not** imply that the main reasoning model must also run locally. A valid architecture is:
+
+```text
+Open WebUI
+→ Hermes `general`
+→ remote reasoning model (for example the selected GPT model)
+→ WeKnora retrieval
+   → local Ollama embedding model
+```
+
+### Recommended local starting candidates
+
+For multilingual enterprise knowledge, especially Chinese + English, use a small mature embedding model first and increase model size only when measured retrieval failures justify it.
+
+Current starting choices:
+
+| Candidate | Typical role | Why consider it |
+| --- | --- | --- |
+| `bge-m3` | validated first local choice on the first real Mac Studio deployment | mature multilingual retrieval, strong Chinese/English support, 1024-dimensional embeddings, no model-specific query instruction required for normal dense retrieval |
+| `qwen3-embedding:0.6b` | lighter fallback candidate | compact local footprint, strong Chinese/multilingual capability, 1024-dimensional output available |
+
+Do **not** default to 4B/8B-class embedding models merely because the host can run them. For a shared enterprise host, the smallest model that gives acceptable retrieval quality is usually the better operational choice.
+
+### First real Mac Studio validation evidence
+
+On 2026-09-08, the first real Mac Studio deployment completed a small WeKnora local-embedding qualification using:
+
+```text
+WeKnora: v0.8.0
+Ollama: 0.30.8, Apple Silicon
+Embedding model: bge-m3
+Embedding dimension: 1024
+Corpus: 6 sanitized representative documents
+Queries: 8 mixed Chinese / English / cross-language retrieval questions
+```
+
+Observed result:
+
+- all six documents parsed successfully;
+- all eight representative retrieval questions returned relevant source evidence;
+- Chinese, English, and cross-language retrieval all worked for the tested cases;
+- observed Ollama RSS was approximately 1.75 GB during the qualification;
+- available-memory ratio remained approximately 68–71% on the deployment host;
+- WeKnora and Open WebUI health checks remained HTTP 200;
+- no obvious system slowdown was observed;
+- `qwen3-embedding:0.6b` was not tested because no real quality/resource problem justified a second model.
+
+This evidence validates `bge-m3` for the current Mac Studio deployment and makes it the repository's preferred local starting choice for similar capable Apple Silicon hosts. It is **not** a universal performance guarantee for every host, corpus, language mix, or future WeKnora/Ollama version.
+
+### Minimal qualification instead of a benchmark project
+
+Do not turn embedding selection into a research project by default.
+
+For a new deployment, a practical qualification is enough:
+
+1. load the candidate model locally;
+2. create a temporary/small non-sensitive Knowledge Base;
+3. ingest roughly 5–10 representative documents;
+4. ask roughly 5–10 representative queries, including required cross-language retrieval;
+5. confirm the expected source is retrieved;
+6. observe host Memory Pressure / obvious slowdown during ingestion and normal queries;
+7. accept the model if retrieval is adequate and host impact is acceptable.
+
+Only compare another model when the first candidate shows a real quality or resource problem.
+
+### WeKnora v0.8.0 local-Ollama note
+
+In WeKnora v0.8.0's local Ollama embedding implementation, `truncate_prompt_tokens = 0` falls back to approximately `511` tokens rather than meaning unlimited input.
+
+Therefore:
+
+- do not assume UI value `0` means unlimited;
+- keep normal RAG chunks within a safe size or set/validate an explicit truncation value where needed;
+- re-check this behavior when upgrading WeKnora because it is version-specific implementation behavior.
+
+## 14. Embedding model changes
 
 Treat an embedding-model change as high risk.
 
@@ -174,19 +313,21 @@ Before changing:
 
 Do not silently switch embeddings in an established deployment.
 
-## 14. Knowledge conflict behavior
+Select and validate the embedding model before large-scale production ingestion whenever possible. Changing embedding model or vector dimension after indexing normally implies re-embedding/reindexing the affected corpus.
+
+## 15. Knowledge conflict behavior
 
 When authoritative-looking sources materially conflict, the assistant should surface the conflict rather than silently choose or invent a reconciliation.
 
 The knowledge maintainer/domain owner should then resolve document status or source quality.
 
-## 15. Unknown-answer behavior
+## 16. Unknown-answer behavior
 
 If approved company knowledge does not provide sufficient evidence, the assistant should say so.
 
 Do not allow general model priors to become invented company facts.
 
-## 16. Language behavior
+## 17. Language behavior
 
 Company knowledge may be multilingual.
 
@@ -194,7 +335,7 @@ Test cross-language retrieval only for language combinations the company actuall
 
 Do not assume monolingual retrieval performance guarantees multilingual performance.
 
-## 17. Knowledge permissions
+## 18. Knowledge permissions
 
 Normal employees primarily consume knowledge through authorized Assistants.
 
@@ -204,7 +345,7 @@ Do not give every employee unrestricted knowledge administration.
 
 Split or protect Knowledge Bases when real permission/data boundaries require it.
 
-## 18. Sensitive data
+## 19. Sensitive data
 
 Do not ingest credentials, passwords, private keys, tokens, or secret configuration values into WeKnora.
 
@@ -215,7 +356,7 @@ Before ingesting confidential/restricted information, review:
 - contractual/regulatory obligations;
 - storage/backup exposure.
 
-## 19. Hermes integration
+## 20. Hermes integration
 
 Hermes accesses WeKnora through supported MCP/API interfaces.
 
@@ -223,13 +364,13 @@ Normal employee Profiles should receive a least-privilege read-oriented retrieva
 
 Avoid direct database coupling.
 
-## 20. Nested reasoning
+## 21. Nested reasoning
 
 If WeKnora provides its own agent/reasoning features, use them only when they add concrete value to a knowledge workflow.
 
 Do not route every Hermes retrieval through another agent layer automatically.
 
-## 21. Knowledge ownership
+## 22. Knowledge ownership
 
 A production deployment should identify at least one human role responsible for knowledge hygiene.
 
@@ -244,7 +385,7 @@ Responsibilities may include:
 
 This is an operational responsibility, not a requirement to create a dedicated AI Profile or organizational department.
 
-## 22. Change traceability
+## 23. Change traceability
 
 For critical company facts, preserve enough provenance to determine:
 
@@ -253,7 +394,7 @@ For critical company facts, preserve enough provenance to determine:
 - when it changed;
 - which source supports the current answer.
 
-## 23. Knowledge acceptance checklist
+## 24. Knowledge acceptance checklist
 
 ### Core Ready
 
