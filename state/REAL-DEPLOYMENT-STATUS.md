@@ -7,14 +7,15 @@ Last updated: 2026-09-08
 ## Deployment authorization
 
 ```text
-Real deployment task: ACTIVE
+Reference real deployment: ACTIVE (separately authorized)
 Target: designated company Mac Studio (publicly sanitized)
 Requested readiness: production-ready
+Public blueprint real_deployment_task default: inactive
 Blueprint lifecycle: installation_design (unchanged)
 Blueprint Validation: not opened
 ```
 
-The real deployment is an independently authorized consumer activity. Its activation does **not** advance the repository blueprint lifecycle.
+The real deployment is an independently authorized consumer activity. This file records its sanitized progress, but it does **not** mutate the public blueprint activation gate in `state/PROJECT-PHASE.yaml`; that public/default gate intentionally remains inactive so a fresh clone never implies that a real company deployment is authorized. The real deployment authorization also does **not** advance the repository blueprint lifecycle.
 
 ## Current achieved readiness
 
@@ -266,7 +267,7 @@ Optional capabilities should be added only when explicitly selected and accepted
 
 ## Public repository synchronization note
 
-The protected deployment state confirms the capability is enabled and accepted on the real Mac Studio. Public reusable implementation/configuration changes must still be synchronized separately from the target-host working copy; runtime success alone must not be confused with a complete GitHub implementation artifact.
+The protected deployment state and the public reusable implementation are now aligned for Media Transcription. The reusable capability contract, implementation, acceptance specification, backup coverage, and production-hardened backup/restore script updates were merged into `main` through PR #3. Runtime-specific private configuration and evidence remain protected outside Git.
 
 ## Reference demo vs current deployment
 
