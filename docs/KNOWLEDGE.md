@@ -237,16 +237,40 @@ Open WebUI
 
 For multilingual enterprise knowledge, especially Chinese + English, use a small mature embedding model first and increase model size only when measured retrieval failures justify it.
 
-Current recommended starting candidates:
+Current starting choices:
 
 | Candidate | Typical role | Why consider it |
 | --- | --- | --- |
-| `bge-m3` | preferred first local candidate | mature multilingual retrieval, strong Chinese/English support, 1024-dimensional embeddings, no model-specific query instruction required for normal dense retrieval |
-| `qwen3-embedding:0.6b` | lighter alternative | compact local footprint, strong Chinese/multilingual capability, 1024-dimensional output available |
+| `bge-m3` | validated first local choice on the first real Mac Studio deployment | mature multilingual retrieval, strong Chinese/English support, 1024-dimensional embeddings, no model-specific query instruction required for normal dense retrieval |
+| `qwen3-embedding:0.6b` | lighter fallback candidate | compact local footprint, strong Chinese/multilingual capability, 1024-dimensional output available |
 
 Do **not** default to 4B/8B-class embedding models merely because the host can run them. For a shared enterprise host, the smallest model that gives acceptable retrieval quality is usually the better operational choice.
 
-`bge-m3` is currently the preferred local candidate for the first real Mac Studio deployment, but it should be promoted to a validated deployment baseline only after the deployment's small retrieval/resource smoke test passes. Until then, treat it as a recommendation, not frozen architecture.
+### First real Mac Studio validation evidence
+
+On 2026-09-08, the first real Mac Studio deployment completed a small WeKnora local-embedding qualification using:
+
+```text
+WeKnora: v0.8.0
+Ollama: 0.30.8, Apple Silicon
+Embedding model: bge-m3
+Embedding dimension: 1024
+Corpus: 6 sanitized representative documents
+Queries: 8 mixed Chinese / English / cross-language retrieval questions
+```
+
+Observed result:
+
+- all six documents parsed successfully;
+- all eight representative retrieval questions returned relevant source evidence;
+- Chinese, English, and cross-language retrieval all worked for the tested cases;
+- observed Ollama RSS was approximately 1.75 GB during the qualification;
+- available-memory ratio remained approximately 68–71% on the deployment host;
+- WeKnora and Open WebUI health checks remained HTTP 200;
+- no obvious system slowdown was observed;
+- `qwen3-embedding:0.6b` was not tested because no real quality/resource problem justified a second model.
+
+This evidence validates `bge-m3` for the current Mac Studio deployment and makes it the repository's preferred local starting choice for similar capable Apple Silicon hosts. It is **not** a universal performance guarantee for every host, corpus, language mix, or future WeKnora/Ollama version.
 
 ### Minimal qualification instead of a benchmark project
 
@@ -259,7 +283,7 @@ For a new deployment, a practical qualification is enough:
 3. ingest roughly 5–10 representative documents;
 4. ask roughly 5–10 representative queries, including required cross-language retrieval;
 5. confirm the expected source is retrieved;
-6. observe macOS Memory Pressure / obvious host slowdown during ingestion and normal queries;
+6. observe host Memory Pressure / obvious slowdown during ingestion and normal queries;
 7. accept the model if retrieval is adequate and host impact is acceptable.
 
 Only compare another model when the first candidate shows a real quality or resource problem.
