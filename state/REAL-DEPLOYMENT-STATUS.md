@@ -31,20 +31,20 @@ Deployment commands execute on the remote Mac Studio unless a task explicitly sa
 
 ## Current deployment stage
 
-Current focus:
+Current result:
 
 ```text
-Core baseline installation / acceptance
+CORE READY — PASS
 ```
 
-Target core employee path:
+Validated employee path:
 
 ```text
 Employee
 → Open WebUI
 → General Assistant
 → Hermes `general`
-→ WeKnora
+→ WeKnora `Company Knowledge`
 → grounded company answer + source
 ```
 
@@ -58,22 +58,31 @@ Current public status:
 | Hermes v0.21.0 | ✅ Running |
 | Hermes `general` | ✅ Configured |
 | Hermes reasoning model | ✅ `gpt-5.6-luna` |
+| Hermes employee long-term memory | ✅ Disabled |
 | Open WebUI v0.11.3 | ✅ Running |
 | Open WebUI admin bootstrap | ✅ Complete |
 | Signup | ✅ Disabled |
 | Employee groups / baseline ACL | ✅ Reconciled |
 | General Assistant | ✅ Configured |
-| Synthetic acceptance employee | ✅ Created in protected runtime state |
 | Employee model isolation | ✅ Baseline checks passed |
+| System Prompt editing | ✅ Disabled for ordinary employee |
+| Advanced Parameters editing | ✅ Disabled for ordinary employee |
+| Conversation history | ✅ Persists across refresh and re-login |
+| File upload | ✅ Accepted and source reference visible |
+| Unknown-company-fact behavior | ✅ Unavailable / no fabrication observed |
 | WeKnora Owner/Admin bootstrap | ✅ Complete |
-| Local Embedding qualification | ✅ `bge-m3` / 1024 dimensions passed |
-| Formal `Company Knowledge` production indexing | ⏳ Waiting for final binding/provisioning |
-| Grounded employee answer + source acceptance | ⏳ Pending final WeKnora provisioning |
-| Core Ready | ⏳ Not yet declared |
+| Local Embedding | ✅ `bge-m3` / 1024 dimensions |
+| Formal `Company Knowledge` | ✅ Created and bound to `bge-m3` |
+| Seed ingestion / retrieval | ✅ Marker and source filename returned |
+| `general` WeKnora credential | ✅ Retrieve-only / `full_access=false` |
+| Knowledge write-denial check | ✅ HTTP 403 |
+| Hermes → WeKnora MCP | ✅ Grounded marker/source returned |
+| Core service health | ✅ WeKnora / Open WebUI / Hermes / Ollama healthy |
+| Core Ready | ✅ PASS |
 
-Do not infer a higher readiness level from individual green components. Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETENESS.md).
+Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETENESS.md).
 
-## Current model direction
+## Current model configuration
 
 Reasoning / answer generation:
 
@@ -82,48 +91,60 @@ Hermes
 → gpt-5.6-luna
 ```
 
-Validated local embedding for the current Mac Studio deployment:
+Knowledge retrieval / embedding:
 
 ```text
 WeKnora v0.8.0
-→ Ollama 0.30.8
+→ local Ollama
 → bge-m3
 → 1024 dimensions
 ```
 
-Small qualification result on 2026-09-08:
+The current Core deployment does **not** require a separate WeKnora Chat/KnowledgeQA model.
+
+Current WeKnora model-role posture:
+
+```text
+Embedding        enabled: bge-m3 / 1024
+KnowledgeQA/Chat not required for Core
+Rerank           disabled
+VLLM             disabled
+ASR              disabled in WeKnora Core
+```
+
+DashScope is not required for the selected local embedding path.
+
+## Local embedding qualification evidence
+
+Before formal binding, the current Mac Studio deployment qualified `bge-m3` with a small representative test:
 
 - 6 sanitized representative documents parsed successfully;
 - 8 mixed Chinese / English / cross-language retrieval questions returned relevant source evidence;
 - observed Ollama RSS was approximately 1.75 GB;
 - available-memory ratio remained approximately 68–71% on the deployment host;
-- WeKnora and Open WebUI health checks remained HTTP 200;
+- WeKnora and Open WebUI remained healthy;
 - no obvious system slowdown was observed;
 - `qwen3-embedding:0.6b` was not tested because `bge-m3` already passed the intended minimal qualification.
 
-The qualification used a temporary test Knowledge Base only. The formal `Company Knowledge` Knowledge Base has not yet been reindexed/bound to this model in the public status recorded here.
+The temporary test Knowledge Base was removed after formal provisioning; the `bge-m3` model remains installed for production use.
 
-DashScope is not required for the selected local embedding path. Rerank remains disabled unless a real retrieval-quality need later justifies it.
+## Core access and knowledge boundary
 
-## Capabilities intentionally disabled during Core deployment
+The employee-facing Hermes `general` path uses a dedicated WeKnora retrieve-only credential:
 
-The current Core baseline does not enable optional capabilities merely because repository playbooks exist.
+```text
+Knowledge scope: Company Knowledge only
+full_access: false
+write attempt: denied (HTTP 403)
+```
 
-Examples currently outside the active Core deployment scope include:
+The ordinary employee surface does not expose Hermes `default/admin`.
 
-- Email / governed send;
-- Messaging;
-- Hermes Cron;
-- Hermes Kanban;
-- Coding delegation for employees;
-- hermes-webui employee exposure;
-- Remote access;
-- SSO expansion;
-- Employee Hermes long-term memory.
+The Core path is intentionally fail-closed for company facts that are not supported by approved knowledge.
 
-They may be enabled later only through explicit company configuration and their applicable acceptance contracts.
+## Protected deployment state
 
-## Secrets and deployment truth
+Detailed non-public runtime state is maintained outside the public repository in protected deployment storage.
 
 The public repository must not contain:
 
@@ -148,9 +169,27 @@ observed runtime behavior
 
 This public file is only a sanitized progress summary.
 
+## Capabilities intentionally outside Core
+
+Core Ready does not mean every optional Enterprise AI Office capability is enabled.
+
+Examples currently outside the active Core deployment include:
+
+- governed Email / external send;
+- Messaging;
+- Hermes Cron;
+- Hermes Kanban;
+- employee coding delegation;
+- hermes-webui employee exposure;
+- Remote access;
+- SSO expansion;
+- Employee Hermes long-term memory.
+
+Optional capabilities should be added only when explicitly selected and accepted under their own capability contracts.
+
 ## Reference demo vs current deployment
 
-[`DEPLOYMENT-STATE.md`](./DEPLOYMENT-STATE.md) records the earlier **sanitized local reference/demo validation** performed before this company deployment. It is valuable reproducibility evidence, but it is **not** the current Mac Studio runtime state.
+[`DEPLOYMENT-STATE.md`](./DEPLOYMENT-STATE.md) records the earlier **sanitized local reference/demo validation** performed before this company deployment. It is useful reproducibility evidence, but it is **not** the current Mac Studio runtime state.
 
 That reference record contains historical choices such as:
 
@@ -163,12 +202,8 @@ Do not copy those values into the current deployment unless the active company c
 
 Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMENT-STATE.template.md) and keep the real operational copy in protected deployment storage when it contains company-private information.
 
-## Next public milestone
+## Next deployment direction
 
-The next meaningful deployment milestone is:
+The Core baseline is complete.
 
-```text
-CORE READY — PASS
-```
-
-It may be declared only after the employee-facing Open WebUI → Hermes `general` → WeKnora path returns a grounded answer with source evidence and the applicable Core acceptance checks pass.
+Future work may proceed capability-by-capability without changing the validated Core path. The next capability should be chosen from actual company value rather than enabled merely because a component already exists.
