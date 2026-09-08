@@ -359,6 +359,35 @@ Required:
 
 If an enabled capability is blocked on genuine external authority/input, report `BLOCKED — REQUIRED INPUT` instead of downgrading it silently.
 
+# Media transcription
+
+Run only when capabilities.media_transcription.enabled: true. This capability
+is a host-native, explicit CLI and does not make media upload or transcription
+available in the employee Web UI.
+
+~~~
+[ ] Existing Whisper installation/version/model is recorded
+[ ] Existing SenseVoice installation/version/model is recorded
+[ ] ffmpeg/ffprobe is available and version is recorded
+[ ] English is routed to Whisper and the acceptance marker is present
+[ ] Chinese is routed to SenseVoice and the acceptance marker is present
+[ ] Explicit --engine/--language routing works
+[ ] Video audio extraction works without modifying the source media
+[ ] Timestamped UTF-8 Markdown and required metadata are produced
+[ ] Temporary audio is cleaned up on success and failure
+[ ] Transcript contains no private absolute path or secret value
+[ ] No automatic write to formal Company Knowledge occurs
+[ ] Temporary transcript ingestion/retrieval compatibility passes, then the
+    temporary document/Knowledge Base is removed
+[ ] No daemon, watcher, queue, or new ASR model is started by the CLI
+~~~
+
+The publication boundary is:
+
+~~~
+media → local transcript → human review/approval → optional WeKnora ingestion
+~~~
+
 # Part C — Production Ready
 
 Run when `deployment.target_readiness: production-ready`.

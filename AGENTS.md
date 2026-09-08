@@ -33,7 +33,7 @@ Installation Design
 → turn that approved design into an agent-readable and agent-executable installation/acceptance contract
 ```
 
-A **real company deployment is a separate consumer activity**. It is not the automatic next step of repository development and must not be inferred merely because the installation blueprint exists.
+A real company deployment is a separate consumer activity. It is not the automatic next step of repository development and must not be inferred merely because the installation blueprint exists.
 
 ARMOR is the first reference implementation. Company/reference material is evidence and example, not a universal deployment default.
 

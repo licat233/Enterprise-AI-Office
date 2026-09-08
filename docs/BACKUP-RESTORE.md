@@ -4,6 +4,15 @@ Backups are a production requirement from v1, not a future enhancement.
 
 This document defines what must be backed up, where it should be stored, and how recovery is verified.
 
+When the conditional media_transcription capability is enabled, reviewed
+Markdown transcripts under the derived runtime
+media-transcription/transcripts/ directory are deployment data and must be
+included in the encrypted backup generation. The job work/ directory is
+ephemeral and should be empty after successful transcription; it is not a
+separate recovery dependency. Transcription never auto-publishes to Company
+Knowledge, so a restored transcript remains a reviewable local artifact until
+an authorized operator chooses the documented WeKnora ingestion path.
+
 ## 1. Backup objective
 
 A successful recovery must be able to restore:

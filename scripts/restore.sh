@@ -12,7 +12,49 @@ umask 077
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-EAIO_RUNTIME_DIR="${EAIO_RUNTIME_DIR:-/Users/Shared/enterprise-ai-office/runtime}"
+COMPANY_CONFIG="${EAIO_COMPANY_CONFIG:-$REPO_ROOT/private/company.yaml}"
+
+company_yaml_runtime_root() {
+  local config="$1"
+  [ -f "$config" ] || return 0
+  awk '
+    /^deployment:[[:space:]]*$/ { in_deployment=1; next }
+    in_deployment && /^[^[:space:]]/ { in_deployment=0 }
+    in_deployment && /^[[:space:]]+runtime_root:[[:space:]]*/ {
+      line=$0
+      sub(/^[^:]*:[[:space:]]*/, "", line)
+      sub(/^"/, "", line)
+      sub(/"$/, "", line)
+      print line
+      exit
+    }
+  ' "$config"
+}
+
+discover_container() {
+  local explicit="$1"
+  local service="$2"
+  local fallback_regex="$3"
+  local found
+  if [ -n "$explicit" ]; then
+    printf '%s' "$explicit"
+    return
+  fi
+  found="$(docker ps --filter "label=com.docker.compose.service=$service" \
+    --format '{{.Names}}' | sed -n '1p')"
+  if [ -n "$found" ]; then
+    printf '%s' "$found"
+    return
+  fi
+  docker ps --format '{{.Names}}' | awk -v pattern="$fallback_regex" \
+    '$0 ~ pattern {print; exit}'
+}
+
+CONFIG_RUNTIME_ROOT="$(company_yaml_runtime_root "$COMPANY_CONFIG")"
+EAIO_RUNTIME_DIR="${EAIO_RUNTIME_DIR:-${CONFIG_RUNTIME_ROOT:-$REPO_ROOT/runtime}}"
+if [ -d "$EAIO_RUNTIME_DIR/runtime" ] && { [ -d "$EAIO_RUNTIME_DIR/runtime/WeKnora" ] || [ -d "$EAIO_RUNTIME_DIR/runtime/weknora" ]; }; then
+  EAIO_RUNTIME_DIR="$EAIO_RUNTIME_DIR/runtime"
+fi
 GOVERNANCE_RESTORE_HELPER="$REPO_ROOT/infrastructure/email/governance/restore_state.py"
 
 usage() {
@@ -22,7 +64,7 @@ Usage:
 
 The target directory must not already exist. The command restores the backup
 manifest, runtime configuration, Hermes/Profile material, protected credential
-archive, WeKnora/Open WebUI file volumes, the WeKnora PostgreSQL dump, and v2
+archive when present, WeKnora/Open WebUI file volumes, the WeKnora PostgreSQL dump, and v2
 Governance SQLite state when that conditional capability exists in the backup.
 It does not touch the live Compose projects, live Hermes, or any provider send path.
 USAGE
@@ -84,7 +126,7 @@ wait_for_postgres() {
     # The ParadeDB image can briefly accept connections during its
     # initdb/bootstrap phase. Wait for the entrypoint's final hand-off before
     # restoring, otherwise pg_restore races the bootstrap shutdown.
-    if docker logs "$container" 2>&1 | rg -q 'PostgreSQL init process complete; ready for start up\.' \
+    if docker logs "$container" 2>&1 | grep -q 'PostgreSQL init process complete; ready for start up\.' \
       && docker exec "$container" pg_isready --username="$user" --dbname="$db" >/dev/null 2>&1; then
       return 0
     fi
@@ -103,7 +145,6 @@ require_command tar
 require_command awk
 require_command sed
 require_command shasum
-require_command rg
 
 BACKUP_DIR="$(cd -- "$1" 2>/dev/null && pwd)" || fail "backup" "directory is not readable"
 target_arg="$2"
@@ -115,7 +156,7 @@ require_directory "$target_parent"
 TARGET_ROOT="$(cd -- "$target_parent" && pwd)/$(basename -- "$target_arg")"
 
 case "$TARGET_ROOT" in
-  /|"$EAIO_RUNTIME_DIR"|"$EAIO_RUNTIME_DIR/WeKnora"|"$EAIO_RUNTIME_DIR/open-webui"|"$HOME/.hermes")
+  /|"$EAIO_RUNTIME_DIR"|"$EAIO_RUNTIME_DIR/WeKnora"|"$EAIO_RUNTIME_DIR/weknora"|"$EAIO_RUNTIME_DIR/OpenWebUI"|"$EAIO_RUNTIME_DIR/open-webui"|"$HOME/.hermes")
     fail "target guard" "refusing live or broad target: $TARGET_ROOT"
     ;;
 esac
@@ -131,9 +172,7 @@ for artifact in \
   open-webui/data.tar.gz \
   open-webui/docker-compose.yml \
   hermes/runtime.tar.gz \
-  hermes/repository-profiles-skills.tar.gz \
-  hermes/ai.hermes.gateway.plist \
-  secrets/runtime-credentials.tar.gz; do
+  hermes/repository-profiles-skills.tar.gz; do
   require_file "$BACKUP_DIR/$artifact"
 done
 
@@ -147,7 +186,10 @@ OPENWEBUI_IMAGE="$(manifest_value 'Open WebUI image')"
 [ -n "$WEKNORA_IMAGE" ] || fail "manifest" "WeKnora image is missing"
 [ -n "$OPENWEBUI_IMAGE" ] || fail "manifest" "Open WebUI image is missing"
 if [ -z "$POSTGRES_IMAGE" ]; then
-  POSTGRES_IMAGE="$(docker inspect --format '{{.Config.Image}}' WeKnora-postgres 2>/dev/null || true)"
+  POSTGRES_CONTAINER="${WEKNORA_POSTGRES_CONTAINER:-$(discover_container "" postgres 'postgres')}"
+  if [ -n "$POSTGRES_CONTAINER" ]; then
+    POSTGRES_IMAGE="$(docker inspect --format '{{.Config.Image}}' "$POSTGRES_CONTAINER" 2>/dev/null || true)"
+  fi
 fi
 [ -n "$POSTGRES_IMAGE" ] || fail "manifest" "PostgreSQL image is missing and live image is unavailable"
 
@@ -165,8 +207,29 @@ chmod 700 "$TARGET_ROOT" "$TARGET_ROOT"/*
 tar -xzf "$BACKUP_DIR/weknora/runtime-config.tar.gz" -C "$TARGET_ROOT/weknora"
 tar -xzf "$BACKUP_DIR/hermes/runtime.tar.gz" -C "$TARGET_ROOT/hermes"
 tar -xzf "$BACKUP_DIR/hermes/repository-profiles-skills.tar.gz" -C "$TARGET_ROOT/repository"
-tar -xzf "$BACKUP_DIR/secrets/runtime-credentials.tar.gz" -C "$TARGET_ROOT/runtime"
+if [ -f "$BACKUP_DIR/secrets/runtime-credentials.tar.gz" ]; then
+  tar -xzf "$BACKUP_DIR/secrets/runtime-credentials.tar.gz" -C "$TARGET_ROOT/runtime"
+  pass "Secret material" "protected credential archive materialized"
+else
+  pass "Secret material" "not present; protected credentials must be re-entered"
+fi
+if [ -f "$BACKUP_DIR/config/company.yaml" ]; then
+  mkdir -p "$TARGET_ROOT/config"
+  cp "$BACKUP_DIR/config/company.yaml" "$TARGET_ROOT/config/company.yaml"
+fi
+if [ -f "$BACKUP_DIR/hermes/ai.hermes.gateway.plist" ]; then
+  cp "$BACKUP_DIR/hermes/ai.hermes.gateway.plist" "$TARGET_ROOT/hermes/ai.hermes.gateway.plist"
+  pass "Hermes LaunchAgent" "supervisor definition materialized"
+else
+  pass "Hermes LaunchAgent" "not present; use the supported supervisor procedure for the target host"
+fi
 cp "$BACKUP_DIR/open-webui/docker-compose.yml" "$TARGET_ROOT/open-webui/docker-compose.yml"
+if [ -f "$BACKUP_DIR/open-webui/.env" ]; then
+  cp "$BACKUP_DIR/open-webui/.env" "$TARGET_ROOT/open-webui/.env"
+  pass "Open WebUI runtime env" "protected .env materialized"
+else
+  pass "Open WebUI runtime env" "not present in backup; re-enter protected values for isolated bring-up"
+fi
 cp "$BACKUP_DIR/MANIFEST.txt" "$TARGET_ROOT/MANIFEST.txt"
 cp "$BACKUP_DIR/SHA256SUMS" "$TARGET_ROOT/SHA256SUMS"
 find "$TARGET_ROOT" -type f -exec chmod 600 {} +
@@ -231,6 +294,15 @@ pass "WeKnora files" "$WEKNORA_DATA_VOLUME"
 docker run --rm -i -v "$OPENWEBUI_VOLUME:/app/backend/data" --entrypoint tar "$OPENWEBUI_IMAGE" \
   -xzf - -C /app/backend/data < "$BACKUP_DIR/open-webui/data.tar.gz"
 pass "Open WebUI data" "$OPENWEBUI_VOLUME"
+if [ -f "$BACKUP_DIR/media-transcription/transcripts.tar.gz" ]; then
+  mkdir -p "$TARGET_ROOT/runtime/media-transcription"
+  tar -xzf "$BACKUP_DIR/media-transcription/transcripts.tar.gz" \
+    -C "$TARGET_ROOT/runtime/media-transcription"
+  pass "Media transcripts" "reviewed transcript archive materialized"
+else
+  pass "Media transcripts" "not enabled / state absent in backup"
+fi
+
 
 cat > "$TARGET_ROOT/RESTORE-NEXT-STEPS.txt" <<EOF
 This target was materialized by scripts/restore.sh.

@@ -153,6 +153,24 @@ capabilities:
     enabled: false
     profiles: []
 
+  media_transcription:
+    enabled: false
+    execution: host-native
+    output_format: markdown
+    timestamps: true
+
+    routing:
+      english: whisper
+      chinese: sensevoice
+      cantonese: sensevoice
+      other: whisper
+      auto_detect: true
+      fallback_on_failure: true
+
+    knowledge_publication:
+      automatic: false
+      require_human_review: true
+
 # v2 EAO-owned email governance persistence and trusted identity-forwarder
 # settings. Null paths are derived from deployment.runtime_root when email is enabled.
 email_governance:
