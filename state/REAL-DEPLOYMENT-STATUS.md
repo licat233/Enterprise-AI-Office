@@ -37,7 +37,7 @@ Current achieved readiness:
 ```text
 CORE READY — PASS
 CONFIGURED READY — PASS
-PRODUCTION READY — BLOCKED BY EXTERNAL BACKUP / RESTORE INPUT
+PRODUCTION READY — BLOCKED
 ```
 
 Validated employee path:
@@ -86,10 +86,15 @@ Current public status:
 | Core service health | ✅ WeKnora / Open WebUI / Hermes / Ollama healthy |
 | Core Ready | ✅ PASS |
 | Configured Ready | ✅ PASS |
+| Backup/restore scripts | ✅ Reconciled with active runtime layout |
+| Temporary primary-disk backup generation | ✅ Validated |
+| Isolated restore materialization | ✅ Validated without touching production |
 | Independent encrypted backup target | ⏳ Not yet provided |
-| Off-primary backup generation/copy | ⏳ Pending backup target |
-| Isolated restore evidence | ⏳ Pending backup target |
-| Production Ready | ⛔ BLOCKED — backup / restore closure |
+| Off-primary backup copy / retention evidence | ⏳ Pending backup target and approved policy |
+| Restored employee-path acceptance | ⏳ Not yet completed on the current backup material |
+| Real Mac Studio reboot acceptance | ⏳ Pending human-authorized reboot path |
+| Retrieved prompt-injection source test | ⏳ Evidence not yet closed |
+| Production Ready | ⛔ BLOCKED |
 
 Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETENESS.md).
 
@@ -153,27 +158,58 @@ The ordinary employee surface does not expose Hermes `default/admin`.
 
 The Core path is intentionally fail-closed for company facts that are not supported by approved knowledge.
 
-## Production Ready blocker
+## Production hardening completed so far
 
-The active target remains `production-ready`, but Production Ready is intentionally not declared yet.
+Production work that does not depend on an external backup destination has continued after Configured Ready.
 
-The unresolved production boundary is backup / restore resilience, not the AI employee path itself.
+Completed items include:
 
-Current external-input blocker:
+- `scripts/backup.sh` / `scripts/restore.sh` updated to resolve the active runtime root rather than reference/demo or company-private hard-coded paths;
+- backup coverage validated for PostgreSQL, WeKnora, Open WebUI, Hermes, configuration, manifest, and checksums;
+- a temporary backup generation was created on the primary disk for script/recovery-path validation only;
+- isolated restore materialization was exercised without modifying the live production instance, then temporary restore resources were cleaned up;
+- network exposure was tightened to loopback-only for employee/admin application surfaces where applicable;
+- PostgreSQL/cache/parser internals are not published as host ports;
+- the employee Core path, grounded source behavior, history, unknown-fact fail-closed behavior, ordinary-employee model ACL, and WeKnora retrieve-only boundary remain healthy;
+- no optional Whisper, SenseVoice, Email, Messaging, Cron, Kanban, or similar capability was enabled during this production-hardening pass;
+- the latest health check reported 6 PASS, 0 FAIL, and 1 WARN; the WARN is the expected missing backup-freshness marker while no approved off-primary backup destination exists.
 
-```text
+A primary-disk backup or temporary isolated materialization is useful validation evidence, but it does **not** substitute for a physically independent production backup target.
+
+## Remaining Production Ready blockers
+
+Production Ready is intentionally not declared yet.
+
+### 1. Independent encrypted backup destination and policy
+
 No approved physically independent encrypted backup destination has been provided yet.
-```
 
-Consequences:
+Still required:
 
-- a complete backup generation cannot yet be copied off the Mac Studio primary disk;
-- isolated restore evidence cannot yet be completed against the approved production backup target;
-- backup retention and recovery evidence cannot yet be closed.
+- an approved external/off-primary backup destination;
+- an approved retention policy and RPO/RTO target;
+- a complete production backup generation copied off the Mac Studio primary disk;
+- backup freshness/retention evidence against that destination.
 
-A dedicated external backup disk may be HDD or SSD. Enterprise AI Office does not require SSD for this purpose. The important properties are physical independence from the Mac Studio internal disk, adequate capacity/reliability, and approved encryption/retention policy.
+The dedicated backup disk may be HDD or SSD. Enterprise AI Office does not require SSD. The important properties are physical independence from the Mac Studio internal disk, adequate capacity/reliability, approved encryption, and an explicit retention/recovery policy.
 
-Until that operator input exists, deployment work should continue on Production Ready checks that do **not** depend on the external backup target. The deployment must not falsely declare Production Ready merely to remove the blocker.
+### 2. Restored employee-path acceptance
+
+Restore materialization has been validated, but the full employee-facing path has not yet been accepted on a restore derived from the current production backup material.
+
+Production evidence should ultimately show that restored state can reproduce the required employee path rather than merely unpacking files or starting individual services.
+
+### 3. Real Mac Studio reboot acceptance
+
+A real host reboot has not yet been executed as acceptance evidence.
+
+The current remote session cannot perform a non-interactive privileged reboot, and macOS Apple Events authorization is not available. This is a legitimate human-authority boundary; Production Ready should not assume restart recovery without an actual accepted reboot/recovery test.
+
+### 4. Retrieved prompt-injection source test
+
+Part C still lacks closed evidence for the retrieved prompt-injection-source scenario. Temporary test material was removed after the incomplete attempt.
+
+This test does not require the future external backup disk and should be completed independently before the backup hardware arrives.
 
 ## Protected deployment state
 
@@ -238,6 +274,8 @@ Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMEN
 
 ## Next deployment direction
 
-The system is usable at `CONFIGURED READY — PASS` while the production backup/restore boundary remains open.
+The system is usable at `CONFIGURED READY — PASS` while Production Ready remains open.
 
-Continue all Production Ready work that is independent of the missing external backup target. After an approved independent encrypted backup disk and policy are provided, complete backup generation, off-primary copy, isolated restore, and the remaining Production Ready acceptance evidence.
+Before external backup hardware is available, continue only the remaining Production Ready checks that do not depend on that hardware, especially the restored employee-path acceptance where it can be exercised safely and the retrieved prompt-injection-source test.
+
+Later, after an approved independent encrypted backup destination and policy are provided, complete the off-primary backup/retention evidence and restored-path validation against that approved backup. A real Mac Studio reboot acceptance also remains required before declaring `PRODUCTION READY — PASS`.
