@@ -12,16 +12,117 @@ umask 077
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 
-EAIO_RUNTIME_DIR="${EAIO_RUNTIME_DIR:-/Users/Shared/enterprise-ai-office/runtime}"
+COMPANY_CONFIG="${EAIO_COMPANY_CONFIG:-$REPO_ROOT/private/company.yaml}"
+
+company_yaml_runtime_root() {
+  local config="$1"
+  [ -f "$config" ] || return 0
+  awk '
+    /^deployment:[[:space:]]*$/ { in_deployment=1; next }
+    in_deployment && /^[^[:space:]]/ { in_deployment=0 }
+    in_deployment && /^[[:space:]]+runtime_root:[[:space:]]*/ {
+      line=$0
+      sub(/^[^:]*:[[:space:]]*/, "", line)
+      sub(/^"/, "", line)
+      sub(/"$/, "", line)
+      print line
+      exit
+    }
+  ' "$config"
+}
+
+company_yaml_capability_enabled() {
+  local config="$1"
+  [ -f "$config" ] || return 0
+  awk '
+    /^capabilities:[[:space:]]*$/ { in_capabilities=1; next }
+    in_capabilities && /^[^[:space:]]/ { in_capabilities=0 }
+    in_capabilities && /^[[:space:]]{2}media_transcription:[[:space:]]*$/ { in_media=1; next }
+    in_media && /^[[:space:]]{2}[A-Za-z0-9_]+:/ { in_media=0 }
+    in_media && /^[[:space:]]{4}enabled:[[:space:]]*true[[:space:]]*$/ { print "true"; exit }
+  ' "$config"
+}
+MEDIA_TRANSCRIPTION_ENABLED="$(company_yaml_capability_enabled "$COMPANY_CONFIG")"
+resolve_dir() {
+  local explicit="$1"
+  shift
+  if [ -n "$explicit" ]; then
+    printf '%s' "$explicit"
+    return
+  fi
+  local candidate
+  for candidate in "$@"; do
+    if [ -d "$candidate" ]; then
+      printf '%s' "$candidate"
+      return
+    fi
+  done
+  printf '%s' "${1:-}"
+}
+
+discover_container() {
+  local explicit="$1"
+  local service="$2"
+  local fallback_regex="$3"
+  local found
+  if [ -n "$explicit" ]; then
+    printf '%s' "$explicit"
+    return
+  fi
+  found="$(docker ps --filter "label=com.docker.compose.service=$service" \
+    --format '{{.Names}}' | sed -n '1p')"
+  if [ -n "$found" ]; then
+    printf '%s' "$found"
+    return
+  fi
+  docker ps --format '{{.Names}}' | awk -v pattern="$fallback_regex" \
+    '$0 ~ pattern {print; exit}'
+}
+
+CONFIG_RUNTIME_ROOT="$(company_yaml_runtime_root "$COMPANY_CONFIG")"
+EAIO_RUNTIME_DIR="${EAIO_RUNTIME_DIR:-${CONFIG_RUNTIME_ROOT:-$REPO_ROOT/runtime}}"
+if [ -d "$EAIO_RUNTIME_DIR/runtime" ] && { [ -d "$EAIO_RUNTIME_DIR/runtime/WeKnora" ] || [ -d "$EAIO_RUNTIME_DIR/runtime/weknora" ]; }; then
+  EAIO_RUNTIME_DIR="$EAIO_RUNTIME_DIR/runtime"
+fi
 HERMES_HOME="${HERMES_HOME:-${HOME}/.hermes}"
-OPENWEBUI_RUNTIME_DIR="${OPENWEBUI_RUNTIME_DIR:-${EAIO_RUNTIME_DIR}/open-webui}"
+OPENWEBUI_RUNTIME_DIR="${EAIO_OPENWEBUI_RUNTIME_DIR:-$(resolve_dir "" \
+  "$EAIO_RUNTIME_DIR/OpenWebUI" "$EAIO_RUNTIME_DIR/open-webui")}"
+WEKNORA_DIR="${EAIO_WEKNORA_RUNTIME_DIR:-$(resolve_dir "" \
+  "$EAIO_RUNTIME_DIR/WeKnora" "$EAIO_RUNTIME_DIR/weknora")}"
+WEKNORA_ENV_FILE="$WEKNORA_DIR/.env"
 BACKUP_ROOT="${EAIO_BACKUP_ROOT:-${EAIO_RUNTIME_DIR}/backups}"
-POSTGRES_CONTAINER="${WEKNORA_POSTGRES_CONTAINER:-WeKnora-postgres}"
-WEKNORA_APP_CONTAINER="${WEKNORA_APP_CONTAINER:-WeKnora-app}"
-OPENWEBUI_CONTAINER="${OPENWEBUI_CONTAINER:-eaio-open-webui}"
+POSTGRES_CONTAINER="${WEKNORA_POSTGRES_CONTAINER:-}"
+WEKNORA_APP_CONTAINER="${WEKNORA_APP_CONTAINER:-}"
+OPENWEBUI_CONTAINER="${OPENWEBUI_CONTAINER:-}"
+RUNTIME_CREDENTIALS_DIR="${EAIO_RUNTIME_CREDENTIALS_DIR:-${EAIO_RUNTIME_DIR}/credentials}"
 LAUNCH_AGENT_PLIST="${HERMES_LAUNCH_AGENT_PLIST:-${HOME}/Library/LaunchAgents/ai.hermes.gateway.plist}"
 GOVERNANCE_STATE_DB="${EAIO_GOVERNANCE_STATE_DB:-${EAIO_RUNTIME_DIR}/email-governance/state.sqlite3}"
 GOVERNANCE_BACKUP_HELPER="$REPO_ROOT/infrastructure/email/governance/backup_state.py"
+COMPANY_CONFIG_MANIFEST_LINE="- Active company configuration: not present in backup source"
+LAUNCH_AGENT_MANIFEST_LINE="- Hermes LaunchAgent definition: not present in backup source"
+CREDENTIALS_MANIFEST_LINE="not separately configured; re-enter from protected stores"
+OPENWEBUI_ENV_MANIFEST_LINE="- Open WebUI protected runtime environment: not present in backup source"
+MEDIA_TRANSCRIPTION_MANIFEST_LINE="- Media transcription reviewed transcripts: not enabled / state absent"
+
+OPENWEBUI_COMPOSE_FILE="${EAIO_OPENWEBUI_COMPOSE_FILE:-}"
+if [ -z "$OPENWEBUI_COMPOSE_FILE" ]; then
+  for candidate in \
+    "$OPENWEBUI_RUNTIME_DIR/docker-compose.yml" \
+    "$OPENWEBUI_RUNTIME_DIR/docker-compose.yaml" \
+    "$OPENWEBUI_RUNTIME_DIR/docker-compose.bootstrap.yml"; do
+    if [ -f "$candidate" ]; then
+      OPENWEBUI_COMPOSE_FILE="$candidate"
+      break
+    fi
+  done
+fi
+if [ -z "$OPENWEBUI_COMPOSE_FILE" ]; then
+  for candidate in "$OPENWEBUI_RUNTIME_DIR"/docker-compose*.yml; do
+    [ -f "$candidate" ] || continue
+    OPENWEBUI_COMPOSE_FILE="$candidate"
+    break
+  done
+fi
 
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 DEST="${1:-${BACKUP_ROOT}/${STAMP}}"
@@ -125,19 +226,22 @@ require_command tar
 require_command awk
 require_command shasum
 require_directory "$EAIO_RUNTIME_DIR"
+require_directory "$WEKNORA_DIR"
 require_directory "$OPENWEBUI_RUNTIME_DIR"
 require_directory "$HERMES_HOME"
-require_file "$EAIO_RUNTIME_DIR/WeKnora/.env"
-require_file "$OPENWEBUI_RUNTIME_DIR/docker-compose.yml"
-require_file "$LAUNCH_AGENT_PLIST"
-require_directory "$EAIO_RUNTIME_DIR/credentials"
+require_file "$WEKNORA_ENV_FILE"
+require_file "$OPENWEBUI_COMPOSE_FILE"
 
+POSTGRES_CONTAINER="$(discover_container "$POSTGRES_CONTAINER" postgres 'postgres')"
+WEKNORA_APP_CONTAINER="$(discover_container "$WEKNORA_APP_CONTAINER" app 'weknora.*app')"
+OPENWEBUI_CONTAINER="$(discover_container "$OPENWEBUI_CONTAINER" open-webui 'open-webui')"
+[ -n "$POSTGRES_CONTAINER" ] || fail "container discovery" "PostgreSQL container not found"
+[ -n "$WEKNORA_APP_CONTAINER" ] || fail "container discovery" "WeKnora app container not found"
+[ -n "$OPENWEBUI_CONTAINER" ] || fail "container discovery" "Open WebUI container not found"
 require_running_container "$POSTGRES_CONTAINER"
 require_running_container "$WEKNORA_APP_CONTAINER"
 require_running_container "$OPENWEBUI_CONTAINER"
 
-WEKNORA_DIR="$EAIO_RUNTIME_DIR/WeKnora"
-WEKNORA_ENV_FILE="$WEKNORA_DIR/.env"
 DB_USER="$(env_value DB_USER "$WEKNORA_ENV_FILE")"
 DB_NAME="$(env_value DB_NAME "$WEKNORA_ENV_FILE")"
 DB_PASSWORD="$(env_value DB_PASSWORD "$WEKNORA_ENV_FILE")"
@@ -159,7 +263,8 @@ DOCKER_VERSION="$(docker version --format '{{.Server.Version}}')"
 COMPOSE_VERSION="$(docker compose version --short)"
 
 [ ! -e "$DEST" ] || fail "destination" "already exists: $DEST"
-mkdir -p "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" "$DEST/governance"
+mkdir -p "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" \
+  "$DEST/governance" "$DEST/config"
 chmod 700 "$DEST" "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" "$DEST/governance"
 pass "destination" "$DEST"
 
@@ -188,27 +293,83 @@ pass "Open WebUI data" "$OPENWEBUI_VOLUME"
 # Include the exact runtime configuration used by the tested Compose project,
 # including protected provider configuration. The backup destination is created
 # with mode 700/umask 077 and is not a repository path.
+WEKNORA_CONFIG_ITEMS=()
+for item in .env config skills docker-compose.yml docker-compose.yaml \
+  docker-compose.eaio.yml docker-compose.eaio.override.yml \
+  docker-compose.eaio-override.yml mcp-server; do
+  [ -e "$WEKNORA_DIR/$item" ] && WEKNORA_CONFIG_ITEMS+=("$item")
+done
+[ "${#WEKNORA_CONFIG_ITEMS[@]}" -gt 0 ] \
+  || fail "WeKnora config" "no runtime configuration files found"
 tar -czf "$DEST/weknora/runtime-config.tar.gz" -C "$WEKNORA_DIR" \
-  .env config skills docker-compose.yml docker-compose.eaio.yml mcp-server
-cp "$OPENWEBUI_RUNTIME_DIR/docker-compose.yml" "$DEST/open-webui/docker-compose.yml"
+  "${WEKNORA_CONFIG_ITEMS[@]}"
+cp "$OPENWEBUI_COMPOSE_FILE" "$DEST/open-webui/docker-compose.yml"
+if [ -f "$OPENWEBUI_RUNTIME_DIR/.env" ]; then
+  cp "$OPENWEBUI_RUNTIME_DIR/.env" "$DEST/open-webui/.env"
+  OPENWEBUI_ENV_MANIFEST_LINE="- Open WebUI protected runtime environment: open-webui/.env"
+  pass "Open WebUI runtime env" "protected .env archived without printing values"
+else
+  warn "Open WebUI runtime env" "not present: $OPENWEBUI_RUNTIME_DIR/.env"
+fi
 pass "WeKnora config" "runtime .env, config, skills, Compose, MCP"
-pass "Open WebUI config" "Compose manifest"
+pass "Open WebUI config" "Compose manifest and protected runtime env when present"
 
-# Hermes archive includes the active employee Profiles, gateway configuration,
+if [ -f "$COMPANY_CONFIG" ]; then
+  cp "$COMPANY_CONFIG" "$DEST/config/company.yaml"
+  COMPANY_CONFIG_MANIFEST_LINE="- Active company configuration: config/company.yaml"
+  pass "Company configuration" "protected active config archived"
+else
+  warn "Company configuration" "not present: $COMPANY_CONFIG"
+fi
+
+# Hermes archive includes every present employee Profile, gateway configuration,
 # state databases, MCP/Skills configuration, and OAuth/provider state required
 # for recovery. The archive is intentionally private.
+HERMES_ITEMS=()
+for item in .env config.yaml SOUL.md auth.json state.db gateway_state.json state profiles skills; do
+  [ -e "$HERMES_HOME/$item" ] && HERMES_ITEMS+=("$item")
+done
+[ "${#HERMES_ITEMS[@]}" -gt 0 ] \
+  || fail "Hermes state" "no Hermes runtime state found"
 tar --exclude='*.sock' -czf "$DEST/hermes/runtime.tar.gz" -C "$HERMES_HOME" \
-  .env config.yaml SOUL.md auth.json state.db gateway_state.json state \
-  profiles/general profiles/sales profiles/qc skills
+  "${HERMES_ITEMS[@]}"
 tar -czf "$DEST/hermes/repository-profiles-skills.tar.gz" -C "$REPO_ROOT" \
   profiles skills
-cp "$LAUNCH_AGENT_PLIST" "$DEST/hermes/ai.hermes.gateway.plist"
+if [ -f "$LAUNCH_AGENT_PLIST" ]; then
+  cp "$LAUNCH_AGENT_PLIST" "$DEST/hermes/ai.hermes.gateway.plist"
+  LAUNCH_AGENT_MANIFEST_LINE="- Hermes LaunchAgent definition: hermes/ai.hermes.gateway.plist"
+  pass "Hermes LaunchAgent" "protected supervisor definition archived"
+else
+  warn "Hermes LaunchAgent" "not present: $LAUNCH_AGENT_PLIST"
+fi
 pass "Hermes state" "Profiles, gateway config, state, Skills/MCP"
+# Media transcription is conditional. Successful jobs clean their temporary
+# audio, while reviewed Markdown transcripts are durable deployment material
+# and must be included in future encrypted backup generations when enabled.
+if [ "$MEDIA_TRANSCRIPTION_ENABLED" = true ] && [ -d "$EAIO_RUNTIME_DIR/media-transcription/transcripts" ]; then
+  mkdir -p "$DEST/media-transcription"
+  tar -czf "$DEST/media-transcription/transcripts.tar.gz" \
+    -C "$EAIO_RUNTIME_DIR/media-transcription" transcripts
+  MEDIA_TRANSCRIPTION_MANIFEST_LINE="- Media transcription reviewed transcripts: media-transcription/transcripts.tar.gz"
+  pass "Media transcripts" "reviewed transcript archive"
+elif [ "$MEDIA_TRANSCRIPTION_ENABLED" = true ]; then
+  warn "Media transcripts" "enabled but transcript directory absent"
+else
+  pass "Media transcripts" "disabled / state absent"
+fi
 
 # Runtime credential inventory is recoverable but never copied into Git or the
-# non-secret manifest. Keep it in a separate restricted archive.
-tar -czf "$DEST/secrets/runtime-credentials.tar.gz" -C "$EAIO_RUNTIME_DIR" credentials
-pass "Secret recovery" "restricted local archive; values not printed"
+# non-secret manifest. Keep it in a separate restricted archive when the
+# deployment provides one; otherwise recovery must re-enter credentials from
+# protected stores.
+if [ -d "$RUNTIME_CREDENTIALS_DIR" ]; then
+  tar -czf "$DEST/secrets/runtime-credentials.tar.gz" -C "$EAIO_RUNTIME_DIR" \
+    "$(basename "$RUNTIME_CREDENTIALS_DIR")"
+  CREDENTIALS_MANIFEST_LINE="secrets/runtime-credentials.tar.gz"
+  pass "Secret recovery" "restricted local archive; values not printed"
+else
+  warn "Secret recovery" "separate runtime credential directory absent; protected stores remain external"
+fi
 
 # v2 Email Governance is conditional. When its SQLite state exists, snapshot it
 # through SQLite's online backup API rather than copying the live WAL database.
@@ -244,10 +405,13 @@ Backup components:
 - WeKnora runtime configuration and MCP server: weknora/runtime-config.tar.gz
 - Open WebUI persistent application data: open-webui/data.tar.gz
 - Open WebUI Compose configuration: open-webui/docker-compose.yml
+$OPENWEBUI_ENV_MANIFEST_LINE
 - Hermes Profiles, state, gateway configuration, Skills/MCP: hermes/runtime.tar.gz
 - Repository Profile templates and Skills: hermes/repository-profiles-skills.tar.gz
-- Hermes LaunchAgent definition: hermes/ai.hermes.gateway.plist
-- Protected runtime credentials: secrets/runtime-credentials.tar.gz
+$LAUNCH_AGENT_MANIFEST_LINE
+- Protected runtime credentials: $CREDENTIALS_MANIFEST_LINE
+$COMPANY_CONFIG_MANIFEST_LINE
+$MEDIA_TRANSCRIPTION_MANIFEST_LINE
 $GOVERNANCE_MANIFEST_LINE
 Discovered Docker volumes:
 - PostgreSQL: $POSTGRES_VOLUME

@@ -362,6 +362,37 @@ capabilities:
       - cross-user isolation result
       - cross-Profile isolation result
 
+  media_transcription:
+    kind: conditional
+    enabled_when: capabilities.media_transcription.enabled == true
+    implementation:
+      - infrastructure/media-transcription/README.md
+      - infrastructure/media-transcription/transcribe.py
+      - scripts/transcribe
+    upstream:
+      - OpenAI Whisper (local)
+      - FunASR SenseVoiceSmall (local)
+      - ffmpeg/ffprobe
+    security_boundary:
+      - host-native explicit CLI only
+      - no employee-facing upload automation
+      - no automatic WeKnora publication
+      - human review required before knowledge ingestion
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: Media transcription
+    records:
+      - Whisper version/model/runtime
+      - SenseVoice version/model/runtime
+      - ffmpeg version
+      - language routing policy
+      - transcript output location
+      - manual knowledge-publication policy
+      - English acceptance result
+      - Chinese acceptance result
+      - video extraction result
+      - temporary WeKnora compatibility result
+
 production_controls:
   production.backup_restore:
     implementation:
