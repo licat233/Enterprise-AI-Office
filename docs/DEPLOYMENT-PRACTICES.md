@@ -150,32 +150,35 @@ WeKnora embedding
 
 Local embedding does not mean the whole Enterprise AI Office must run a local LLM.
 
-## 8. Recommended local embedding starting point
+## 8. Validated local embedding starting point
 
 For a multilingual Chinese/English enterprise knowledge base on a capable Apple Silicon host, start with a small mature embedding model before considering 4B/8B-class models.
 
-Current candidates:
+The first real Mac Studio deployment validated:
 
 ```text
-Preferred first candidate: bge-m3
-Lighter alternative:        qwen3-embedding:0.6b
+Ollama 0.30.8
++ bge-m3
++ 1024-dimensional embeddings
++ WeKnora v0.8.0 native local Ollama path
 ```
 
-Why `bge-m3` is the current first candidate:
+Small qualification evidence from 2026-09-08:
 
-- mature multilingual retrieval model;
-- strong Chinese/English use case fit;
-- 1024-dimensional embeddings;
-- does not require a model-specific query instruction for ordinary dense retrieval;
-- comfortably below multi-billion-parameter model size.
+- six sanitized representative documents parsed successfully;
+- eight mixed Chinese / English / cross-language retrieval questions all returned relevant source evidence;
+- Ollama RSS was observed at approximately 1.75 GB;
+- available-memory ratio remained approximately 68–71% on the target host;
+- WeKnora and Open WebUI remained healthy with HTTP 200 checks;
+- no obvious system slowdown was observed.
 
-Why keep `qwen3-embedding:0.6b` as an alternative:
+Therefore `bge-m3` is the **validated local choice for this Mac Studio deployment** and the preferred starting choice for similar capable Apple Silicon hosts.
 
-- compact local footprint;
-- strong Chinese/multilingual capability;
-- useful when host resource efficiency becomes the stronger constraint.
+Keep `qwen3-embedding:0.6b` as a lighter fallback candidate if a future host has tighter resource constraints or `bge-m3` shows a real deployment-specific problem.
 
-Do not promote either model to a frozen validated baseline until it passes a small representative retrieval/resource smoke test on the actual deployment host.
+Do not default to 4B/8B-class embedding models merely because the host can run them.
+
+This validation is not a universal performance guarantee. Re-check resource use and retrieval quality when the host class, corpus/languages, WeKnora version, Ollama version, or model changes materially.
 
 ## 9. Do a smoke test, not a benchmark project, by default
 
@@ -192,6 +195,8 @@ A normal deployment usually needs only:
 If the first candidate works well enough, use it.
 
 Only compare another model or build a deeper benchmark when there is an observed retrieval-quality or resource problem.
+
+The first real Mac Studio deployment followed this rule and stopped after `bge-m3` passed; it did not run an unnecessary A/B benchmark against `qwen3-embedding:0.6b`.
 
 ## 10. WeKnora v0.8.0 local Ollama truncation detail
 
