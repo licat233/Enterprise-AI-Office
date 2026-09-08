@@ -21,7 +21,8 @@ The real deployment is an independently authorized consumer activity. Its activa
 ```text
 CORE READY — PASS
 CONFIGURED READY — PASS
-PRODUCTION READY — BLOCKED
+REBOOT ACCEPTANCE — PASS
+PRODUCTION READY — BLOCKED ONLY BY EXTERNAL BACKUP / RESTORE EVIDENCE
 ```
 
 Validated employee path:
@@ -71,10 +72,12 @@ The active company configuration currently enables only the Core employee path. 
 | Isolated restore materialization | ✅ Validated without touching production |
 | Restored employee-path acceptance | ✅ PASS |
 | Retrieved prompt-injection source test | ✅ PASS |
-| Real Mac Studio reboot acceptance | ⏳ Pending human-authorized reboot |
+| Real Mac Studio reboot acceptance | ✅ PASS |
+| Post-reboot employee path | ✅ Grounded answer + source |
+| Post-reboot ACL / history / upload / retrieve-only boundary | ✅ PASS |
 | Independent encrypted backup target | ⏳ Not yet provided |
 | Off-primary backup / retention / final external restore evidence | ⏳ Pending backup target and approved policy |
-| Production Ready | ⛔ BLOCKED |
+| Production Ready | ⛔ BLOCKED ONLY BY EXTERNAL BACKUP / RESTORE EVIDENCE |
 
 Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETENESS.md).
 
@@ -112,7 +115,7 @@ DashScope is not required for the selected local embedding path.
 
 ## Production hardening completed
 
-Production work that does not depend on an external backup destination has been completed as far as the current host and authority allow.
+Production work that does not depend on an external backup destination has now been completed for the current deployment.
 
 Completed evidence includes:
 
@@ -126,35 +129,34 @@ Completed evidence includes:
 - the prompt-injection test did not expose configuration/credentials, execute unauthorized instructions, or invoke mutation-capable tools, while still returning the ordinary test marker and source;
 - the prompt-injection test document was removed after acceptance and the production Knowledge Base was rechecked clean;
 - application surfaces are loopback-only where applicable and database/cache/parser internals are not published as host ports;
-- no Whisper, SenseVoice, Email, Messaging, Cron, Kanban, or other optional capability was enabled during this production-hardening work;
-- latest health state remains green except for the expected backup-freshness warning while no approved off-primary backup destination exists.
+- a real Mac Studio reboot was completed and the required production path recovered successfully;
+- after reboot, OrbStack/Docker, WeKnora, Open WebUI, Hermes, and Ollama were healthy;
+- after reboot, `bge-m3` returned 1024-dimensional embeddings;
+- after reboot, the ordinary employee path again returned a grounded marker and source;
+- after reboot, ordinary-employee visibility, `default/admin` fail-closed behavior, history, file upload, WeKnora read/write boundary, and disabled employee memory all remained correct;
+- latest health state is 6 PASS, 0 FAIL, and 1 WARN, where the only WARN is the expected missing backup-freshness marker while no approved off-primary backup destination exists;
+- no Whisper, SenseVoice, Email, Messaging, Cron, Kanban, or other optional capability was enabled during this production-hardening work.
 
 A primary-disk backup or temporary isolated restore is validation evidence only. It does **not** substitute for a physically independent production backup target.
 
-## Remaining Production Ready blockers
+## Reboot recovery boundary
 
-Production Ready is intentionally not declared yet. The remaining boundary has now been reduced to two areas.
+`REBOOT ACCEPTANCE — PASS` confirms that the deployed system can recover through a real Mac Studio restart and re-establish the validated employee path.
 
-### 1. Real Mac Studio reboot acceptance
+The current operational recovery sequence still includes a human/operator boundary after host reboot:
 
-A real host reboot has not yet been executed as acceptance evidence.
+- macOS GUI login is required;
+- the existing operator recovery mechanism is used to bring the required user-session-dependent runtime into service;
+- no macOS privilege boundary was bypassed;
+- the deployment has **not** been validated as fully unattended boot-to-service recovery.
 
-The current remote execution path does not have non-interactive privileged reboot authority, and macOS Apple Events authorization is not available. This is a legitimate human-authority boundary.
+This is an accepted current operational limitation, not a reason to invalidate the completed reboot acceptance. If future requirements demand unattended recovery after power loss without operator login, that should be treated as a separate operational improvement rather than silently assumed from the current result.
 
-The reboot acceptance must prove that after a real Mac Studio restart the required production path recovers, including as applicable:
+## Remaining Production Ready blocker
 
-```text
-OrbStack / Docker
-WeKnora
-Open WebUI
-Hermes gateway
-Ollama / bge-m3 availability
-General Assistant → Hermes `general` → Company Knowledge
-```
+Production Ready is intentionally not declared yet. The only remaining boundary is the independent external backup / restore evidence.
 
-Do not infer reboot recovery merely from service restart tests.
-
-### 2. Independent encrypted backup destination and external recovery evidence
+### Independent encrypted backup destination and external recovery evidence
 
 No approved physically independent encrypted backup destination has been provided yet.
 
@@ -211,6 +213,10 @@ Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMEN
 
 ## Next deployment direction
 
-The system is usable at `CONFIGURED READY — PASS`.
+The system is usable at `CONFIGURED READY — PASS`, and all current Production Ready acceptance work that does not depend on external backup hardware has passed.
 
-Before external backup hardware is available, the next production acceptance action is the real Mac Studio reboot test. After that passes, Production Ready should remain blocked only by the approved independent backup destination, retention policy, off-primary backup copy, and final external restore evidence.
+After an approved independent encrypted backup destination and policy are provided, complete the off-primary backup copy, retention/freshness evidence, and final external restore acceptance. If those pass, the deployment may advance to:
+
+```text
+PRODUCTION READY — PASS
+```
