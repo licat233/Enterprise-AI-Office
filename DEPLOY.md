@@ -93,7 +93,7 @@ Before mutation, resolve from the company configuration or protected operator in
 
 - company identity and timezone;
 - `deployment.target_readiness`;
-- model/provider credentials required by the selected stack;
+- model/provider credentials actually required by the selected stack; a local-only embedding path may require no cloud embedding credential;
 - administrator provisioning method/credential;
 - employee access scope;
 - enabled optional capabilities and their company-specific parameters;
@@ -138,9 +138,19 @@ Exit condition: there is one unambiguous target state; every enabled capability 
 1. Deploy the pinned WeKnora release using the supported upstream deployment plus the repository adapter.
 2. Keep database/cache/parser internals private.
 3. Persist database and uploaded documents.
-4. Configure the required embedding/chat model roles.
-5. Create only Knowledge Bases declared by company configuration.
-6. Validate ingestion/retrieval with a small non-sensitive seed document before continuing.
+4. Resolve the embedding execution mode before asking for a provider credential:
+   - **remote API** when minimizing host resource use and provider dependence/cost are acceptable;
+   - **local Ollama** when the host has sufficient headroom and reducing recurring embedding API cost / external data flow is preferred.
+5. For local multilingual Chinese/English deployments on a capable Apple Silicon host, start with a small mature model rather than a multi-billion-parameter embedding model. Current recommended candidates are:
+   - `bge-m3` as the preferred first candidate;
+   - `qwen3-embedding:0.6b` as a lighter alternative.
+6. Qualify the local candidate with a small representative corpus and a few real queries. Do not create a large benchmark project unless the first candidate shows a real retrieval or resource problem.
+7. Record the selected embedding model and dimension before production-scale ingestion. Do not silently change them after indexing; changing embeddings normally requires reindexing.
+8. Do not assume a separate WeKnora cloud chat/KnowledgeQA provider is mandatory merely because an embedding provider is configured. Configure WeKnora chat/reasoning roles only when the selected WeKnora workflow actually requires them. Hermes may use its own selected reasoning model independently from WeKnora embedding.
+9. Create only Knowledge Bases declared by company configuration.
+10. Validate ingestion/retrieval with a small non-sensitive seed document before continuing.
+
+See `docs/KNOWLEDGE.md` for the embedding deployment trade-offs, local-model guidance, and WeKnora version-specific notes.
 
 Exit condition: WeKnora is healthy and retrieval returns the seeded source.
 
