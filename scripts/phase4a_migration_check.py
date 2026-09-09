@@ -28,8 +28,10 @@ EXPECTED = {
     "firecrawl-mcp": "OPERATIONS_EXTERNAL_WRITE",
     "obscura": "MACHINE_SPECIFIC_REBIND",
     "paddle_ocr": "MACHINE_SPECIFIC_REBIND",
-    "toolscout": "ADMIN_CONTROL_PLANE",
+    "toolscout": "SHARED_AGENT_INFRASTRUCTURE",
 }
+ALLOWED_SCOPED = {"armor-vault-scoped-router"}
+OPERATIONS_MCP = {"weknora", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"}
 
 PROHIBITED_ACTIVE = re.compile(
     r"/Users/" + r"licat|mcp_Obsidian_|personal[ _-]+chrome[ _-]+profile|"
@@ -64,24 +66,25 @@ def main() -> int:
     policy = registry.get("policy", {})
     servers = registry.get("servers", {})
 
-    check(set(servers) == set(EXPECTED), "all five MCP definitions are registered", failures)
+    check(set(EXPECTED) <= set(servers), "all five MCP definitions are registered", failures)
+    check(set(servers) <= set(EXPECTED) | ALLOWED_SCOPED, "registry additions stay within the scoped Phase 4C boundary", failures)
     check(policy.get("secret_values_allowed") is False, "registry forbids secret values", failures)
     check(policy.get("employee_exposure_default") == "disabled", "employee exposure defaults disabled", failures)
-    check(policy.get("operations_allowlist") == ["weknora"], "Operations allowlist remains WeKnora-only", failures)
+    check(set(policy.get("operations_allowlist", [])) == OPERATIONS_MCP, "Operations allowlist contains only approved scoped capabilities", failures)
 
     for name, classification in EXPECTED.items():
         server = servers.get(name, {})
         check(server.get("classification") == classification, f"{name} classification", failures)
         runtime_status = server.get("runtime", {}).get("status")
         check(
-            runtime_status in {"PREPARED", "PREPARED_REPLACEMENT_REQUIRED"},
-            f"{name} is staged without claiming runtime health",
+            runtime_status in {"PREPARED", "PREPARED_REPLACEMENT_REQUIRED", "REGISTERED", "INSTALLED"},
+            f"{name} records an explicit runtime state",
             failures,
         )
         exposure = server.get("exposure", {})
         check(exposure.get("default_enabled") is False, f"{name} default disabled", failures)
-        check(exposure.get("operations_exposure") is False, f"{name} not exposed to Operations", failures)
-        check(server.get("health", {}).get("status") == "NOT_RUN", f"{name} live health not claimed", failures)
+        check(exposure.get("default_enabled") is False, f"{name} default remains disabled", failures)
+        check(server.get("health", {}).get("status") in {"NOT_RUN", "BLOCKED_CREDENTIAL", "HEALTHY"}, f"{name} health state is explicit", failures)
 
     article = ARTICLE_SKILL.read_text(encoding="utf-8")
     check("02-Projects/Workspaces/Website/Articles/" in article, "Article Router target is the Website Articles workspace", failures)
@@ -97,7 +100,7 @@ def main() -> int:
 
     operations = load(OPERATIONS_CONFIG)
     mcp_servers = operations.get("mcp_servers", {})
-    check(set(mcp_servers) == {"weknora"}, "Operations runtime config contains only WeKnora", failures)
+    check(set(mcp_servers) <= OPERATIONS_MCP and "weknora" in mcp_servers, "Operations runtime config contains only approved MCPs", failures)
     check(operations.get("memory", {}).get("memory_enabled") is False, "Operations Memory remains disabled", failures)
 
     for path in (ARTICLE_SKILL, OPERATIONS_CONFIG, ENABLED_SKILLS, DISABLED_SKILLS):

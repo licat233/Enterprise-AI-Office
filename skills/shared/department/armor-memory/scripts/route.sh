@@ -37,25 +37,18 @@ resolve_script_path() {
   final_dir="$(cd -P "$(dirname "$source_path")" >/dev/null 2>&1 && pwd)"
   printf '%s/%s\n' "$final_dir" "$(basename "$source_path")"
 }
-
 if [[ "$absolute_output" == true && "$json_output" == true ]]; then
   echo "ERROR: --absolute cannot currently be combined with --json." >&2
   exit 1
 fi
 
-if [[ -n "${ARMOR_ARCH_ROOT:-}" ]]; then
-  repo_root="$ARMOR_ARCH_ROOT"
-else
-  real_script="$(resolve_script_path)"
-  script_dir="$(dirname "$real_script")"
-  repo_root="$(cd "$script_dir/../../../.." >/dev/null 2>&1 && pwd)"
-fi
-
-router="$repo_root/minimal-stable/scripts/armor-route.py"
+real_script="$(resolve_script_path)"
+script_dir="$(dirname "$real_script")"
+router="$script_dir/armor-route.py"
 
 if [[ ! -f "$router" ]]; then
   echo "ERROR: ARMOR Router not found: $router" >&2
-  echo "Set ARMOR_ARCH_ROOT to the AI-Agent-Memory-Architecture repository root." >&2
+  echo "The armor-memory Skill must contain its local armor-route.py implementation." >&2
   exit 1
 fi
 

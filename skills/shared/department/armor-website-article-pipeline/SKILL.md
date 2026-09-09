@@ -95,8 +95,12 @@ are only `article-brief.json`, `seo-blueprint.json`, `article.md`, and
   PASS, the Codex final pass, and no unresolved critical `[TO CONFIRM]`. Save
   only through the configured Router and read back the result. Website
   publishing is outside this workflow and always requires separate user
- approval.
+  approval.
   Required interface marker: ai-writing-audit v0.3.1.
+- The configured scoped Vault MCP saves only the four durable package files:
+  `article-brief.json`, `seo-blueprint.json`, `article.md`, and
+  `audit-report.md`. Do not supply an arbitrary destination or write into
+  `03-Records/Published/` as editable source.
 - Do not load retired cross-channel quality layers, legacy article
   writer/auditor/SEO skills, or generic cross-channel content workflows as
   authorities for this pipeline. If compatibility skills appear in the

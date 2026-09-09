@@ -146,7 +146,12 @@ for path in \
   scripts/health-check.sh \
   scripts/backup.sh \
   scripts/restore.sh \
-  scripts/phase4a_migration_check.py
+  scripts/phase4a_migration_check.py \
+  scripts/phase4c_runtime_check.py \
+  scripts/test_phase4c_runtime.py \
+  skills/shared/department/armor-memory/scripts/armor-route.py \
+  skills/shared/department/armor-memory/scripts/armor-vault-mcp.py \
+  skills/shared/toolscout/SKILL.md
 do
   require_file "$path"
 done
@@ -206,6 +211,13 @@ require_text config/mcp-registry.yaml 'firecrawl-mcp:' 'Phase 4A registry contai
 require_text config/mcp-registry.yaml 'obscura:' 'Phase 4A registry contains obscura'
 require_text config/mcp-registry.yaml 'paddle_ocr:' 'Phase 4A registry contains Paddle OCR'
 require_text config/mcp-registry.yaml 'toolscout:' 'Phase 4A registry contains ToolScout'
+require_text config/mcp-registry.yaml 'schema_version: 2' 'Phase 4C registry records runtime truth'
+require_text config/mcp-registry.yaml 'SHARED_AGENT_INFRASTRUCTURE' 'ToolScout is shared agent infrastructure'
+require_text config/mcp-registry.yaml 'adapter_required: false' 'Firecrawl uses native Hermes filtering'
+require_text config/mcp-registry.yaml 'armor-vault-scoped-router:' 'Scoped Vault Router is registered'
+require_text skills/shared/department/armor-memory/scripts/route.sh 'armor-route.py' 'ARMOR memory wrapper resolves local Router'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_article_package' 'Scoped Article save tool is present'
+require_text docs/PHASE4C-ARMOR-RUNTIME-CLOSURE.md 'ARMOR_ARCH_ROOT' 'Phase 4C Router closure is documented'
 require_text config/mcp-registry.yaml 'employee_exposure_default: disabled' 'Phase 4A registry defaults employee exposure off'
 require_text config/mcp-registry.yaml 'operations_allowlist:' 'Phase 4A registry declares Operations allowlist'
 require_text docs/MCP-CONTROL-PLANE.md 'inventory and acceptance contract' 'Phase 4A MCP control-plane contract exists'

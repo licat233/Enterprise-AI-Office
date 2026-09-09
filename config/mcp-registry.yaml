@@ -1,17 +1,20 @@
-schema_version: 1
+schema_version: 2
 registry: enterprise-mcp-control-plane
 last_reviewed: 2026-09-09
 
-# Inventory and acceptance contract only. Definitions may exist without a
-# runtime installation. Employee exposure is disabled unless a later approved
-# profile-specific change records credentials, health, and acceptance evidence.
+# Inventory and acceptance contract. Runtime state is recorded separately from
+# registration, configuration, profile exposure, and health. Secret values are
+# never stored here.
 policy:
   definitions_without_runtime_allowed: true
   employee_exposure_default: disabled
   secret_values_allowed: false
-  live_probes_default: disabled
+  live_probes_default: false
   operations_allowlist:
     - weknora
+    - armor-vault-scoped-router
+    - firecrawl-mcp
+    - toolscout
 
 servers:
   anysearch:
@@ -21,7 +24,10 @@ servers:
       endpoint: https://api.anysearch.com/mcp
       timeout_seconds: 120
     runtime:
-      status: PREPARED
+      status: REGISTERED
+      installed: REMOTE_RUNTIME_KNOWN
+      configured: true
+      enabled: false
       required_environment:
         - ANYSEARCH_API_KEY
     exposure:
@@ -41,55 +47,86 @@ servers:
         - browser
         - external_write
         - account_mutation
+      native_tool_filtering: true
     health:
-      status: NOT_RUN
+      status: BLOCKED_CREDENTIAL
       live_probe: false
+      blocker: ANYSEARCH_API_KEY is not bound in the Enterprise runtime
 
   firecrawl-mcp:
     classification: OPERATIONS_EXTERNAL_WRITE
     transport:
       type: stdio
-      command: npx
-      args:
-        - -y
-        - firecrawl-mcp
+      command: ${EAIO_FIRECRAWL_BIN}
+      args: []
       timeout_seconds: 120
     runtime:
-      status: PREPARED_REPLACEMENT_REQUIRED
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: true
+      version: 3.24.0
+      install_strategy: pinned_npm_prefix
       required_environment:
         - FIRECRAWL_API_KEY
     exposure:
-      allowed_profiles: []
+      allowed_profiles:
+        - operations
       reserved_profiles:
         - admin
         - future-privileged-research
       default_enabled: false
-      operations_exposure: false
+      operations_exposure: true
     boundary:
       risk: mixed
+      native_tool_filtering: true
+      adapter_required: false
       read_lane:
-        - scrape
-        - search
-        - map
-        - extract
-      adapter_required: true
-      privileged_lane:
-        - browser_interaction
-        - monitoring
+        - firecrawl_search
+        - firecrawl_map
+        - firecrawl_check_crawl_status
+        - firecrawl_extract
+        - firecrawl_parse
+        - firecrawl_research_search_papers
+        - firecrawl_research_inspect_paper
+        - firecrawl_research_read_paper
+        - firecrawl_research_related_papers
+        - firecrawl_research_search_github
+        - firecrawl_developer_search
+      denied_lanes:
+        - firecrawl_interact
+        - firecrawl_monitor_create
+        - firecrawl_monitor_update
+        - firecrawl_monitor_delete
+        - firecrawl_monitor_run
       privileged_lane_requires: separate_approval_and_audit
+      excluded_action_capable_tools:
+        - firecrawl_scrape
+        - firecrawl_crawl
+        - firecrawl_agent
+        - firecrawl_interact
     health:
-      status: NOT_RUN
+      status: BLOCKED_CREDENTIAL
       live_probe: false
+      blocker: FIRECRAWL_API_KEY is not bound in the Enterprise runtime
 
   obscura:
     classification: MACHINE_SPECIFIC_REBIND
     transport:
       type: stdio
-      command: obscura
+      command: ${EAIO_OBSCURA_BIN}
       args:
+        - --storage-dir
+        - ${EAIO_OBSCURA_STORAGE_DIR}
         - mcp
+      timeout_seconds: 120
     runtime:
-      status: PREPARED
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: false
+      version: 0.2.2
+      install_strategy: official_aarch64_macos_release
     exposure:
       allowed_profiles: []
       reserved_profiles:
@@ -100,27 +137,42 @@ servers:
     boundary:
       machine_dependency: enterprise_browser_session_worker
       personal_state_allowed: false
+      storage_dir: ${EAIO_OBSCURA_STORAGE_DIR}
       forbidden_inputs:
         - personal_chrome_profile
         - cookies
         - storage_state
         - login_sessions
     health:
-      status: NOT_RUN
-      live_probe: false
+      status: HEALTHY
+      live_probe: true
+      checks:
+        - initialize
+        - tools/list
+        - about_blank_navigation
 
   paddle_ocr:
     classification: MACHINE_SPECIFIC_REBIND
     transport:
       type: stdio
-      command: EAIO_PADDLE_OCR_PYTHON
+      command: ${EAIO_PADDLE_OCR_BIN}
       args:
-        - EAIO_PADDLE_OCR_SERVER
+        - --pipeline_config
+        - ${EAIO_PADDLE_OCR_PIPELINE_CONFIG}
+      timeout_seconds: 120
     runtime:
-      status: PREPARED
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: false
+      version: 0.8.5
+      install_strategy: dedicated_enterprise_venv
+      provider: local
+      model: PP-OCRv6
+      mcp_tool: ocr
       required_environment:
-        - EAIO_PADDLE_OCR_PYTHON
-        - EAIO_PADDLE_OCR_SERVER
+        - EAIO_PADDLE_OCR_BIN
+        - EAIO_PADDLE_OCR_PIPELINE_CONFIG
     exposure:
       allowed_profiles: []
       reserved_profiles:
@@ -130,33 +182,44 @@ servers:
       operations_exposure: false
     boundary:
       machine_dependency: enterprise_media_runtime
-      replacement_boundary: reuse_or_wrap_media_transcription
+      source: PaddleOCR/mcp_server
       persistent_service_allowed: false
       personal_runtime_allowed: false
+      not_required_for_non_ocr_workflows: true
     health:
-      status: NOT_RUN
-      live_probe: false
+      status: HEALTHY
+      live_probe: true
+      checks:
+        - initialize
+        - basic_ocr
+        - structured_ocr
 
   toolscout:
-    classification: ADMIN_CONTROL_PLANE
+    classification: SHARED_AGENT_INFRASTRUCTURE
     transport:
       type: stdio
-      command: toolscout
+      command: ${EAIO_TOOLSCOUT_BIN}
       args:
         - mcp
         - serve
+      timeout_seconds: 120
     runtime:
-      status: PREPARED
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: true
+      version: 1.0.0
+      install_strategy: official_macos_universal_release
+      execution_architecture: x86_64_rosetta_fallback
       required_environment:
         - TOOLSCOUT_AGENT_NAME
-        - TOOLSCOUT_MEMORY_HOME
+      default_memory_home: ~/.config/toolscout/tool-memory
     exposure:
       allowed_profiles:
-        - admin
-        - engineering
+        - operations
       reserved_profiles: []
       default_enabled: false
-      operations_exposure: false
+      operations_exposure: true
     boundary:
       separate_agent_identity: true
       separate_memory_home: true
@@ -173,5 +236,61 @@ servers:
       prompts: false
       resources: false
     health:
-      status: NOT_RUN
-      live_probe: false
+      status: HEALTHY
+      live_probe: true
+      native_arm64_probe: BLOCKED_RUNTIME_SIGNAL_9
+      checks:
+        - initialize
+        - advise_tool_use
+        - query_registry
+        - detect_candidates
+        - doctor
+        - record_memory
+        - recall_memory
+
+  armor-vault-scoped-router:
+    classification: ARMOR_SCOPED_WRITE
+    transport:
+      type: stdio
+      command: ${EAIO_ARMOR_PYTHON}
+      args:
+        - ${EAIO_ARMOR_VAULT_MCP}
+      timeout_seconds: 120
+    runtime:
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: true
+      version: 1.0.0
+      install_strategy: repository_owned_stdlib_mcp
+      required_environment:
+        - ARMOR_VAULT_ROOT
+    exposure:
+      allowed_profiles:
+        - operations
+      reserved_profiles: []
+      default_enabled: false
+      operations_exposure: true
+    boundary:
+      write_scope: Article_v1.3_four_file_package_only
+      allowed_tools:
+        - route_work_product
+        - save_article_package
+      forbidden:
+        - generic_filesystem_write
+        - arbitrary_destination
+        - published_source_write
+        - absolute_model_paths
+        - path_traversal
+        - symlink_escape
+      atomic_write: true
+      read_back_verification: true
+    health:
+      status: HEALTHY
+      live_probe: true
+      checks:
+        - initialize
+        - tools/list
+        - route_work_product
+        - save_article_package
+        - read_back
