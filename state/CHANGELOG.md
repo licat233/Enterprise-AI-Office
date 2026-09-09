@@ -37,6 +37,133 @@ Environment:
 <known limitations / follow-up>
 ```
 
+## 2026-09-09 — Enterprise Hermes Phase 3 Operations Profile bootstrap
+
+Component: Hermes Operations Department Profile and controlled P0/P1 capability activation
+Environment: authorized Mac Studio deployment target; private host and checkout details omitted
+
+### Before
+
+- The `operations` Department Profile did not exist.
+- The 40 deduplicated P0/P1 Department Skills were staged but not served.
+- The active Hermes gateway served only `general` for employee-facing runtime
+  purposes.
+
+### After
+
+- Confirmed the ARMOR Operations namespace from the protected deployment
+  configuration and
+  created Hermes Profile `operations` / `Operations Assistant` using the
+  supported Profile mechanism.
+- Added a small Department SOUL inheriting the unchanged Enterprise Global
+  Rule; Department long-term Memory remains OFF.
+- Enabled 12 curated Skills: 7 `SAFE_BASELINE` and 5 `WORKFLOW`. Kept 28
+  Skills disabled, with 0 `PRIVILEGED_OR_EXTERNAL` enabled. P2/P3 assets were
+  not touched.
+- Enabled the existing target WeKnora read-only bridge with six tools. A
+  protected rebind copied only the target WeKnora variables into the new
+  Profile; no secret value was printed or copied from unrelated credentials.
+- Kept shell, SSH, sudo/root, file, code, browser, web, delegation, Memory,
+  Cron, plugins, external publishing, messaging, deletion, and administrative
+  controls outside the Department boundary. Skill mutations require operator
+  approval and no approval is granted.
+- Declared the Operations group/Profile mapping in the private company config
+- Recovered the existing `eaio-openwebui` Compose project and persistent
+  `open-webui-data` state; the earlier apparent absence was a wrong Compose
+  project-name query, not a missing deployment.
+- Added the required protected independent Operations Profile API key, then
+  provisioned the existing Open WebUI through its native admin path: reused
+  the existing test identity, created `Operations Employees`, preserved
+  General, and created the group-scoped `Operations Assistant` model.
+
+### Reason
+
+Bootstrap the first shared department-level assistant with useful, maintainable
+capabilities while preserving the Phase 2 clean-room security baseline.
+
+### Validation
+
+15/15 Department functional tests passed; 12/12 enabled-Skill smoke tests
+passed; 6/6 security probes were denied; General regression passed 3/3;
+Operations health returned HTTP 200; WeKnora retrieval returned grounded ARMOR
+company facts; Cron remains at 0. No old personal path, old Vault path,
+plaintext secret, or P2/P3 capability was activated.
+
+### Rollback
+
+Restore Hermes configuration and the pre-change environment from the protected
+Phase 3 backup; remove the
+Operations Profile from the served allowlist and review uncommitted repository
+changes under the normal repository workflow.
+
+### Notes
+
+Open WebUI exposure is complete through the existing authenticated admin path.
+The protected first-admin bootstrap variables were not needed and no
+administrator was created or reset. Operations acceptance passed `5/5`,
+security passed `5/5 DENIED`, and General regression passed `3/3`. The
+complete effective manifests are in the protected deployment manifest; the
+pre-change Operations environment is preserved in the Phase 3 backup.
+
+## 2026-09-09 — Enterprise Hermes clean-room migration Phase 2
+
+Component: Hermes Global SOUL and Profile capability boundary
+Environment: authorized Mac Studio deployment target; private host and checkout details omitted
+
+### Before
+
+- The target global SOUL contained the generic Hermes baseline without the
+  Enterprise Global Rule v1.0 Frozen Baseline.
+- Global Memory flags were enabled.
+- General's effective runtime exposed the default built-in toolsets in
+  addition to its target-native WeKnora definition.
+- The target had no clean-room Department capability staging record.
+
+### After
+
+- Installed the Frozen Global Rule in the editable Hermes global SOUL source
+  and did not introduce a generated-SOUL
+  workflow.
+- Set global and General Memory/user-profile flags to `false`.
+- Restricted General to the target-native WeKnora read-only MCP tool set;
+  employee-facing terminal, browser, file, web, code, delegation, cron,
+  Memory, session-search, computer-use, and media-generation boundaries are
+  disabled.
+- Staged 40 deduplicated P0/P1 Department-shared Skills after path
+  decontamination. The prepared Department Profile is inert because no
+  official Department identifier/name was available.
+- Bound `ARMOR_VAULT_ROOT` to the approved NAS Vault path. No Vault or WeKnora
+  content was changed.
+- Migrated no legacy Memory, secrets, P2/P3 assets, relevant plugins, or cron
+  activations. Enabled cron count remains `0`.
+
+### Reason
+
+Apply the Enterprise clean-room baseline to the actual Mac Studio installation
+while preserving the existing Hermes installation and keeping Department
+capabilities unserved until the company supplies an official identifier and
+approval.
+
+### Validation
+
+Global Rule refusal tests passed `5/5`; General WeKnora retrieval smoke passed;
+General regression passed `2/2`; path scan found zero old personal operational
+paths and zero old local Vault dependencies; gateway restart passed and the
+existing LaunchAgent remained healthy. The known stale-plist warning was
+recorded and not changed.
+
+### Rollback
+
+Restore the pre-change live Hermes files from the protected Phase 2 backup,
+then review the
+uncommitted repository changes under the normal repository workflow.
+
+### Notes
+
+The complete migration and validation records are in
+`private/hermes-migration-phase2/`. This is a Phase 2 clean-room pass, not a
+claim that the entire Enterprise AI Office is production-ready.
+
 ---
 
 ## 2026-09-06 — Final employee client permission and corpus cleanup

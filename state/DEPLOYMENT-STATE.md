@@ -310,3 +310,86 @@ Reference `docs/ACCEPTANCE-TESTS.md`.
   CLI-triggered availability as proof of automatic recovery.
 - Validate a supported per-user Hermes session-key/header mapping before enabling employee long-term memory.
 - Review and pin current upstream releases before any production deployment; decide separately on messaging, Kanban/Cron, and restricted engineering delegation.
+
+## 2026-09-09 — Phase 2 clean-room migration state
+
+This section records the later Enterprise Hermes clean-room migration on the
+actual Mac Studio target. It supersedes the earlier local synthetic-demo
+assumptions for the Hermes runtime only; it does not retroactively change the
+historical demo record above.
+
+- Target host: authorized Mac Studio deployment target; private host and
+  checkout details are intentionally omitted.
+- Hermes runtime: `0.21.1`; active global source is the protected Hermes
+  global SOUL source.
+- Enterprise Global Rule v1.0 Frozen Baseline is active, with the approved
+  communication baseline at the top of the editable target SOUL.
+- Global and General long-term Memory are OFF. No legacy Memory was read or
+  migrated.
+- The served Profile remains `general`; the prepared Department Profile is not
+  served because no official Department identifier/name was found.
+- General is fail-closed to the target-native WeKnora read-only tool set. Web,
+  browser, terminal, file, code execution, delegation, cron, Memory, session
+  search, computer use, and media-generation tools are disabled for General.
+- 40 deduplicated P0/P1 Department-shared Skills are staged under
+  `skills/shared/department/` but are not served by a live Department Profile.
+  P2/P3 assets and protected secret references were not activated.
+- `ARMOR_VAULT_ROOT` is bound to the approved private Vault path on the target.
+  Vault and WeKnora content were not modified.
+- Enabled cron jobs: `0`. Relevant plugins migrated: `0`.
+- Validation: Global Rule security tests `5/5 PASS`; General WeKnora smoke
+  `PASS`; General regression `2/2 PASS`; path decontamination `PASS`; gateway
+  restart `PASS` and remains launchd-supervised.
+- A pre-existing stale LaunchAgent plist warning remains documented; the
+  existing Hermes installation/service mechanism was not rewritten.
+- Rollback backup: protected Phase 2 backup retained outside Git.
+- Phase 2 decision: `ENTERPRISE HERMES CLEAN-ROOM PHASE 2 — PASS`.
+
+## 2026-09-09 — Phase 3 Department Profile state
+
+- Department identity confirmed from the existing protected ARMOR namespace:
+  `operations` / `Operations Assistant`.
+- Created the supported Hermes Operations Profile and added it to the explicit
+  gateway served allowlist alongside `general`.
+- Operations inherits the active Global Rule and uses a small Department SOUL;
+  long-term Memory and user-profile Memory remain OFF.
+- Bound Operations to the existing Company Knowledge WeKnora read-only MCP
+  surface. Only the six approved read tools are enabled; no WeKnora write,
+  management, deletion, or Vault write path is enabled.
+- Activated 12 of the 40 staged P0/P1 Skills: 7 `SAFE_BASELINE` and 5
+  `WORKFLOW`. 28 remain disabled; `PRIVILEGED_OR_EXTERNAL` enabled count is
+  `0`. P2/P3 assets remain untouched.
+- Operations built-in boundary: Skills plus read-only WeKnora only; Web,
+  browser, terminal, file, code execution, delegation, Memory, session search,
+  Cron, plugins, computer use, and external actions are disabled. Hermes
+  `skill_manage` remains approval-guarded with no Department approval granted.
+- Functional validation: `15/15 PASS`; enabled-Skill smoke tests `12/12 PASS`;
+  security probes `6/6 DENIED`; General regression `3/3 PASS`; Operations
+  health endpoint HTTP 200; Cron `0`.
+- Company-private configuration declares `operations-employees` and the
+  Operations Assistant mapping for the existing Open WebUI RBAC workflow.
+- Recovered the existing Open WebUI runtime through the authoritative Compose
+  project `eaio-openwebui`; the apparent absence was caused by querying the
+  wrong project name `eaio-open-webui`, not by loss of the deployment. The
+  existing `eaio-open-webui` container is healthy on `127.0.0.1:3000`, using
+  the existing named volume `eaio-openwebui_open-webui-data` and the existing
+  persistent `webui.db` state.
+- Existing Open WebUI state was preserved: existing administrator and employee
+  accounts/groups, and the existing `General Assistant` model/connection. No
+  database or volume reset,
+  replacement bootstrap, user deletion, or credential reset occurred.
+- Added the required protected independent Operations Profile authentication
+  binding; this was the minimum necessary runtime binding because Hermes
+  multiplex routing requires a named Profile's own credential. Secret values
+  and the protected environment remain outside Git.
+- Provisioned the declared `Operations Employees` group, reused the existing
+  authorized test identity, added the `Operations Assistant`
+  model with group read access, and preserved General's existing mapping.
+- Open WebUI employee visibility: `PASS` — exactly `General Assistant` and
+  `Operations Assistant`; default/admin and unrelated upstream models were
+  not visible.
+- Open WebUI Operations acceptance: `5/5 PASS`; security acceptance:
+  `5/5 DENIED`; General regression after provisioning: `3/3 PASS`.
+- Phase 3 Hermes runtime decision: `PASS`; full employee-facing Department
+  Assistant exposure: `PASS`.
+- Rollback backup: protected Phase 3 backup retained outside Git.

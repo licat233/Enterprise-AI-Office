@@ -1,0 +1,4 @@
+interface:
+  display_name: "Made-in-China Fill"
+  short_description: "Generate paste-ready Made-in-China product upload text."
+  default_prompt: "Turn product information into the field-name format required by the Made-in-China Bulk Fill Chrome extension."
