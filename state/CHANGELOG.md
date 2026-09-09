@@ -37,6 +37,54 @@ Environment:
 <known limitations / follow-up>
 ```
 
+## 2026-09-09 — Enterprise Global Rule v1.1 Root-Cause Persistence
+
+Component: Hermes Enterprise Global Rule
+Environment: authorized Mac Studio deployment target; private host and checkout details omitted
+
+### Before
+
+- Enterprise Global Rule v1.0 defined source-of-truth boundaries and kept
+  employee Profile Memory OFF, but did not state the complete root-cause repair
+  and shared “Remember This” routing contract.
+
+### After
+
+- Updated the single active Hermes Global Rule to v1.1 Root-Cause Persistence.
+- Added owning-layer routing for one-off outputs, company facts, procedures,
+  department/enterprise rules, implementations, runtime assumptions, missing
+  inputs, projects, schedules, sessions, and narrowly permitted preferences.
+- Explicitly prohibited Memory as a correction overlay or store for company
+  facts, workflow rules, machine state, runtime paths, and source-governance
+  defects.
+- Kept `general` and `operations` long-term Memory OFF and did not duplicate
+  the Global Rule into either Profile SOUL.
+- Updated the reusable public architecture summary without adding a second
+  full Global Rule source.
+
+### Reason
+
+Ensure enterprise learning repairs authoritative sources, Rules, Skills,
+Workflows, or implementations instead of accumulating hidden correction
+Memory.
+
+### Validation
+
+Operations behavioral routing tests passed `5/5`; General and Operations both
+observed the updated inherited rule. General and Operations health, Company
+Knowledge retrieval, Memory-OFF state, and Cron `0` regression checks passed.
+No Vault, WeKnora, Department Skill, or legacy Memory state was modified.
+
+### Rollback
+
+Restore the protected pre-v1.1 Hermes Global Rule backup and revert the related
+public documentation commit through normal Git history if required.
+
+### Notes
+
+The live machine-specific SOUL remains outside the public repository. The
+runtime source remains the only complete Global Rule source.
+
 ## 2026-09-09 — Enterprise Hermes Phase 3 Operations Profile bootstrap
 
 Component: Hermes Operations Department Profile and controlled P0/P1 capability activation

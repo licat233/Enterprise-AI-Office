@@ -393,3 +393,26 @@ historical demo record above.
 - Phase 3 Hermes runtime decision: `PASS`; full employee-facing Department
   Assistant exposure: `PASS`.
 - Rollback backup: protected Phase 3 backup retained outside Git.
+
+## 2026-09-09 — Global Rule v1.1 Root-Cause Persistence
+
+- Active Global Rule version: `v1.1 — Root-Cause Persistence`.
+- The complete editable rule remains in the single protected Hermes global
+  source; no competing full Global Rule source was created.
+- General and Operations inherit the updated Global Rule. Neither Profile
+  received a duplicated copy or a Profile-specific override.
+- Global, General, and Operations long-term Memory remain OFF. No legacy Memory
+  was imported.
+- Persistent errors route to their authoritative owner: Knowledge, Skill,
+  Department policy, Global Rule, implementation, protected runtime
+  configuration, Project/Operating Plan, Scheduler, or Session as applicable.
+  Memory is not used as a correction overlay.
+- Host/runtime facts remain runtime discovery or protected deployment
+  configuration concerns, not durable Memory.
+- Behavioral validation: Operations “Remember This” and root-cause routing
+  tests `5/5 PASS`; General and Operations inheritance checks `PASS`.
+- Regression: General health `PASS`; Operations health `PASS`; Company
+  Knowledge retrieval `PASS`; General/Operations Memory `OFF`; Cron `0`.
+- Vault and WeKnora were not modified. Department Skills were not modified.
+- Rollback backup: protected v1.1 pre-change Global Rule backup retained
+  outside Git.
