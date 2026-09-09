@@ -47,7 +47,7 @@ Intake / topic confirmation
 Write every pipeline artifact — Topic Brief, Core Draft, platform variants,
 and the audit report — directly into the Router destination directory
 (`route.sh --object work-product --domain marketing --artifact social-copy --json`
-→ `03-Records/Published/Social-Media/`) as soon as it exists, with
+→ `02-Projects/Workspaces/Marketing/Social-Media/`) as soon as it exists, with
 `quality_status: DRAFT` in the frontmatter.
 
 - Do not write working drafts to `/tmp`, the home directory, or anywhere
@@ -127,6 +127,11 @@ do not assume the current working directory).
   canonical knowledge without explicit authority.
 - Do not save an approved social deliverable by hand. Use the Router command
   configured in `social-pipeline-config.yaml` and read back the result.
+- The scoped ARMOR Vault MCP provides `save_social_package` for the required
+  `topic-brief.yaml`, `core-draft.md`, `social-copy.md`, and `audit-report.md`
+  files, with only the conditional `video-package.md` and `subtitles.srt`
+  artifacts additionally allowed. It does not accept arbitrary destinations,
+  generic file operations, or publication evidence paths.
 
 ## Pipeline gates
 

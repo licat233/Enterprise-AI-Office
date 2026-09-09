@@ -86,7 +86,11 @@ def scoped_probe() -> list[str]:
             print(f"FAIL: scoped MCP response shape: {exc}")
             return failures
         check(replies[0]["result"]["serverInfo"]["version"] == "1.0.0", "scoped MCP initialize", failures)
-        check(names == {"route_work_product", "save_article_package"}, "scoped MCP exposes exactly two tools", failures)
+        check(
+            names == {"route_work_product", "save_article_package", "save_social_package"},
+            "scoped MCP exposes Article and Social tools",
+            failures,
+        )
         check(route["relative_path"] == "02-Projects/Workspaces/Website/Articles/", "scoped route is Article workspace", failures)
         check(saved["read_back"] is True, "scoped Article save read-back", failures)
         package_dir = Path(temp) / "02-Projects/Workspaces/Website/Articles/phase4c-fixture"
@@ -105,7 +109,12 @@ def check_repository() -> list[str]:
     check(set(servers) == {"anysearch", "firecrawl-mcp", "obscura", "paddle_ocr", "toolscout", "armor-vault-scoped-router"}, "registry contains five MCP runtimes plus scoped Router", failures)
     check(servers["toolscout"]["classification"] == "SHARED_AGENT_INFRASTRUCTURE", "ToolScout is shared agent infrastructure", failures)
     check(servers["firecrawl-mcp"]["boundary"]["adapter_required"] is False, "Firecrawl uses native Hermes filtering", failures)
-    check(servers["armor-vault-scoped-router"]["boundary"]["write_scope"] == "Article_v1.3_four_file_package_only", "scoped write boundary is Article four-file package", failures)
+    router_boundary = servers["armor-vault-scoped-router"]["boundary"]
+    check(
+        router_boundary["article_write_scope"] == "Article_v1.3_four_file_package_only",
+        "Article write boundary remains the four-file package",
+        failures,
+    )
     check(servers["anysearch"]["health"]["status"] == "BLOCKED_CREDENTIAL", "Anysearch credential state is explicit", failures)
     check("Published evidence cannot be" in SCOPED_MCP.read_text(encoding="utf-8"), "scoped MCP rejects Published as source", failures)
     failures.extend(scoped_probe())

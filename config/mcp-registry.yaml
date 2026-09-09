@@ -272,10 +272,13 @@ servers:
       default_enabled: false
       operations_exposure: true
     boundary:
-      write_scope: Article_v1.3_four_file_package_only
+      write_scope: Article_v1.3_or_Social_v2.0_closed_packages_only
+      article_write_scope: Article_v1.3_four_file_package_only
+      social_write_scope: Social_v2.0_required_four_files_plus_optional_video_artifacts
       allowed_tools:
         - route_work_product
         - save_article_package
+        - save_social_package
       forbidden:
         - generic_filesystem_write
         - arbitrary_destination

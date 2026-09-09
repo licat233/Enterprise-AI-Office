@@ -104,7 +104,10 @@ class ScopedVaultTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 0, completed.stderr)
             replies = [json.loads(line) for line in completed.stdout.splitlines()]
             self.assertEqual(replies[0]["result"]["serverInfo"]["version"], "1.0.0")
-            self.assertEqual({tool["name"] for tool in replies[1]["result"]["tools"]}, {"route_work_product", "save_article_package"})
+            self.assertEqual(
+                {tool["name"] for tool in replies[1]["result"]["tools"]},
+                {"route_work_product", "save_article_package", "save_social_package"},
+            )
             saved = json.loads(replies[2]["result"]["content"][0]["text"])
             self.assertTrue(saved["read_back"])
             self.assertFalse(replies[2]["result"]["isError"])
