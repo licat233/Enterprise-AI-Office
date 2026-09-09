@@ -161,8 +161,11 @@ for path in \
   scripts/test_phase4c_runtime.py \
   scripts/phase5a_social_runtime_check.py \
   scripts/test_phase5a_social.py \
+  scripts/phase5b_mic_runtime_check.py \
+  scripts/test_phase5b_mic.py \
   skills/shared/department/armor-memory/scripts/armor-route.py \
   skills/shared/department/armor-memory/scripts/armor-vault-mcp.py \
+  skills/shared/department/armor-mic-product-optimization/SKILL.md \
   skills/shared/department/armor-social-media-pipeline/SKILL.md \
   skills/shared/department/armor-video-content-rules/SKILL.md \
   skills/shared/toolscout/SKILL.md
@@ -232,6 +235,16 @@ require_text config/mcp-registry.yaml 'armor-vault-scoped-router:' 'Scoped Vault
 require_text skills/shared/department/armor-memory/scripts/route.sh 'armor-route.py' 'ARMOR memory wrapper resolves local Router'
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_article_package' 'Scoped Article save tool is present'
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_social_package' 'Scoped Social save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_mic_product_package' 'Scoped MIC save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-route.py 'mic-product' 'MIC product route is present'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-product-edit-context/v1' 'MIC Skill honors current edit-page extraction'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'BLOCKED_FACTS' 'MIC Skill has explicit fact blockers'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'MIC_AUTHORITY_REVIEW_REQUIRED' 'MIC Skill has authority review gate'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-product-data.yaml' 'MIC structured artifact is documented'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-bulkfill.txt' 'MIC BulkFill artifact is documented'
+require_absent skills/shared/department/mic-product-fill 'No duplicate shared MIC fill Skill is active'
+require_absent skills/shared/department/mic-product-audit 'No duplicate shared MIC audit Skill is active'
+require_absent skills/shared/department/mic-product-detail-page 'No duplicate shared MIC detail Skill is active'
 require_text docs/PHASE4C-ARMOR-RUNTIME-CLOSURE.md 'ARMOR_ARCH_ROOT' 'Phase 4C Router closure is documented'
 require_text skills/shared/department/armor-social-media-pipeline/SKILL.md '02-Projects/Workspaces/Marketing/Social-Media/' 'Social Skill declares lifecycle-neutral Router target'
 require_text skills/shared/department/armor-social-media-pipeline/SKILL.md 'save_social_package' 'Social Skill declares scoped save boundary'
@@ -244,6 +257,13 @@ require_text private/department-profile/.symlink_manifest 'armor-social-media-pi
 require_text private/department-profile/enabled-skills.csv 'armor-social-media-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Social entrypoint'
 require_text private/department-profile/enabled-tools.csv 'save_social_package' 'Profile enables the scoped Social save tool'
 require_text private/department-profile/config.yaml 'save_social_package' 'Live Profile binds the scoped Social save tool'
+require_text private/department-profile/.symlink_manifest 'armor-mic-product-optimization -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-mic-product-optimization' 'Profile manifest exposes MIC canonically'
+require_text private/department-profile/enabled-skills.csv 'armor-mic-product-optimization,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical MIC entrypoint'
+require_text private/department-profile/enabled-tools.csv 'save_mic_product_package' 'Profile enables the scoped MIC save tool'
+require_text private/department-profile/config.yaml 'save_mic_product_package' 'Live Profile binds the scoped MIC save tool'
+require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'MIC authority: CANONICAL' 'Phase 5B records canonical MIC authority'
+require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'Automatic MIC editing enabled: NO' 'Phase 5B records no automatic MIC editing'
+require_text scripts/test_phase5b_mic.py 'publication_performed: false' 'MIC acceptance fixture forbids publication'
 require_text scripts/phase5a_social_runtime_check.py 'publication_performed: false' 'Social acceptance fixture forbids publication'
 require_text config/mcp-registry.yaml 'employee_exposure_default: disabled' 'Phase 4A registry defaults employee exposure off'
 require_text config/mcp-registry.yaml 'operations_allowlist:' 'Phase 4A registry declares Operations allowlist'

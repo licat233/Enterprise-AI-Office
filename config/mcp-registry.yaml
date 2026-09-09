@@ -272,13 +272,15 @@ servers:
       default_enabled: false
       operations_exposure: true
     boundary:
-      write_scope: Article_v1.3_or_Social_v2.0_closed_packages_only
+      write_scope: Article_v1.3_or_Social_v2.0_or_MIC_v1.0_closed_packages_only
       article_write_scope: Article_v1.3_four_file_package_only
       social_write_scope: Social_v2.0_required_four_files_plus_optional_video_artifacts
+      mic_product_write_scope: MIC_v1.0_required_data_bulkfill_audit_optional_detail_package
       allowed_tools:
         - route_work_product
         - save_article_package
         - save_social_package
+        - save_mic_product_package
       forbidden:
         - generic_filesystem_write
         - arbitrary_destination
@@ -296,4 +298,5 @@ servers:
         - tools/list
         - route_work_product
         - save_article_package
+        - save_mic_product_package
         - read_back

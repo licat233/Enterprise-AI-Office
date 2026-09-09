@@ -21,6 +21,7 @@ ARTIFACT_CHOICES = (
     "campaign",
     "email-sequence",
     "social-copy",
+    "mic-product",
     "product-manual",
     "spec-sheet",
     "price-list",
@@ -116,6 +117,15 @@ def build_work_product_path(domain: str, artifact: str, project: str | None, ent
         return "02-Projects/Workspaces/Marketing/Social-Media/"
 
     if domain == "products":
+        if artifact == "mic-product":
+            # MIC product information has a lifecycle-neutral workspace. The
+            # package id is the product identity; project/entity are accepted
+            # only as safely validated context and never create a new route.
+            if project:
+                slugify_name(project)
+            if entity:
+                slugify_name(entity)
+            return "02-Projects/Workspaces/Products/MIC-Products/"
         if artifact == "product-manual":
             if not entity:
                 raise ValueError("entity is required for products/product-manual")

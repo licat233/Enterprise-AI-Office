@@ -2,8 +2,8 @@
 """Scoped ARMOR Vault MCP server.
 
 This is intentionally not a generic filesystem tool. It exposes only the
-deterministic work-product router, the Article v1.3 package save, and the
-Social v2.0 package save.
+deterministic work-product router and closed Article, Social, and MIC package
+saves.
 """
 
 from __future__ import annotations
@@ -29,6 +29,11 @@ SOCIAL_REQUIRED_FILES = frozenset(
 )
 SOCIAL_OPTIONAL_FILES = frozenset({"video-package.md", "subtitles.srt"})
 SOCIAL_ALLOWED_FILES = SOCIAL_REQUIRED_FILES | SOCIAL_OPTIONAL_FILES
+MIC_REQUIRED_FILES = frozenset(
+    {"mic-product-data.yaml", "mic-bulkfill.txt", "mic-audit.md"}
+)
+MIC_OPTIONAL_FILES = frozenset({"mic-detail-page.md"})
+MIC_ALLOWED_FILES = MIC_REQUIRED_FILES | MIC_OPTIONAL_FILES
 MAX_FILE_BYTES = 8 * 1024 * 1024
 MAX_PACKAGE_BYTES = 20 * 1024 * 1024
 
@@ -98,6 +103,21 @@ def _social_destination(root: Path) -> tuple[str, Path]:
     return route.path, destination
 
 
+def _mic_destination(root: Path) -> tuple[str, Path]:
+    route = ROUTER.route_request(
+        object_type="work-product", domain="products", artifact="mic-product"
+    )
+    relative = Path(route.path)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ScopedVaultError("Router returned an unsafe MIC destination")
+    if relative.parts[:2] == ("03-Records", "Published"):
+        raise ScopedVaultError("Published evidence cannot be an editable MIC source")
+    destination = (root / relative).resolve()
+    if not _is_under(destination, root):
+        raise ScopedVaultError("MIC Router destination escapes ARMOR_VAULT_ROOT")
+    return route.path, destination
+
+
 def _safe_package_dir(root: Path, destination: Path, package_id: str) -> tuple[str, Path]:
     if not isinstance(package_id, str):
         raise ScopedVaultError("package_id must be a string")
@@ -127,6 +147,22 @@ def _safe_social_package_dir(root: Path, destination: Path, package_id: str) -> 
     resolved = package_dir.resolve()
     if not _is_under(resolved, root):
         raise ScopedVaultError("Social package escapes ARMOR_VAULT_ROOT")
+    return package_slug, package_dir
+
+
+def _safe_mic_package_dir(root: Path, destination: Path, package_id: str) -> tuple[str, Path]:
+    if not isinstance(package_id, str):
+        raise ScopedVaultError("package_id must be a string")
+    try:
+        package_slug = ROUTER.slugify_name(package_id)
+    except ValueError as exc:
+        raise ScopedVaultError(str(exc)) from exc
+    package_dir = destination / package_slug
+    if package_dir.is_symlink():
+        raise ScopedVaultError("MIC package directory must not be a symlink")
+    resolved = package_dir.resolve()
+    if not _is_under(resolved, root):
+        raise ScopedVaultError("MIC package escapes ARMOR_VAULT_ROOT")
     return package_slug, package_dir
 
 
@@ -199,6 +235,44 @@ def _validate_social_package(files: Any) -> dict[str, str]:
         normalized[name] = value
     if total > MAX_PACKAGE_BYTES:
         raise ScopedVaultError("Social package exceeds the total size limit")
+    return normalized
+
+
+def _validate_mic_package(files: Any) -> dict[str, str]:
+    if not isinstance(files, dict):
+        raise ScopedVaultError(
+            "files must contain the required MIC files and optional mic-detail-page.md"
+        )
+    names = set(files)
+    missing = sorted(MIC_REQUIRED_FILES - names)
+    extra = sorted(names - MIC_ALLOWED_FILES)
+    if missing or extra:
+        details = []
+        if missing:
+            details.append(f"missing={','.join(missing)}")
+        if extra:
+            details.append(f"unexpected={','.join(extra)}")
+        raise ScopedVaultError("MIC package file contract rejected: " + "; ".join(details))
+
+    normalized: dict[str, str] = {}
+    total = 0
+    for name in names:
+        value = files[name]
+        if not isinstance(value, str):
+            raise ScopedVaultError(f"{name} must be supplied as UTF-8 text")
+        encoded = value.encode("utf-8")
+        if len(encoded) > MAX_FILE_BYTES:
+            raise ScopedVaultError(f"{name} exceeds the per-file size limit")
+        if not value.strip():
+            raise ScopedVaultError(f"{name} must not be empty")
+        total += len(encoded)
+        normalized[name] = value
+    if total > MAX_PACKAGE_BYTES:
+        raise ScopedVaultError("MIC package exceeds the total size limit")
+
+    bulkfill = normalized["mic-bulkfill.txt"]
+    if "# 产品详情" in bulkfill or "# 产品展示" in bulkfill:
+        raise ScopedVaultError("mic-bulkfill.txt must not contain manual-only MIC sections")
     return normalized
 
 
@@ -352,6 +426,74 @@ def _save_social_package(arguments: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _save_mic_product_package(arguments: dict[str, Any]) -> dict[str, Any]:
+    allowed = {"package_id", "files"}
+    if set(arguments) != allowed:
+        raise ScopedVaultError("save_mic_product_package accepts only package_id and files")
+    root = _vault_root()
+    relative, destination = _mic_destination(root)
+    package_slug, package_dir = _safe_mic_package_dir(root, destination, arguments["package_id"])
+    files = _validate_mic_package(arguments["files"])
+    existed_before = package_dir.is_dir()
+
+    package_dir.mkdir(parents=True, exist_ok=True)
+    if package_dir.is_symlink() or not package_dir.is_dir():
+        raise ScopedVaultError("MIC package target is not a regular directory")
+    resolved_package = package_dir.resolve()
+    if not _is_under(resolved_package, root):
+        raise ScopedVaultError("MIC package escapes ARMOR_VAULT_ROOT")
+    existing_names = {child.name for child in package_dir.iterdir()}
+    unexpected_existing = existing_names - set(files)
+    if unexpected_existing:
+        raise ScopedVaultError(
+            "MIC package contains files outside the submitted closed contract: "
+            + ",".join(sorted(unexpected_existing))
+        )
+
+    targets = {name: package_dir / name for name in files}
+    originals: dict[str, bytes | None] = {}
+    for name, target in targets.items():
+        _validate_file_target(target)
+        originals[name] = target.read_bytes() if target.exists() else None
+
+    replaced: list[str] = []
+    try:
+        for name in sorted(files):
+            _atomic_write(targets[name], files[name])
+            replaced.append(name)
+        for name in sorted(files):
+            if targets[name].read_text(encoding="utf-8") != files[name]:
+                raise ScopedVaultError(f"Read-back verification failed for {name}")
+    except Exception:
+        for name in reversed(replaced):
+            target = targets[name]
+            previous = originals[name]
+            if previous is None:
+                if target.exists() or target.is_symlink():
+                    target.unlink()
+            else:
+                _atomic_write(target, previous.decode("utf-8"))
+        if not existed_before:
+            try:
+                package_dir.rmdir()
+            except OSError:
+                pass
+        raise
+
+    return {
+        "status": "saved",
+        "package_id": package_slug,
+        "relative_path": f"{relative}{package_slug}/",
+        "absolute_path": str(package_dir.resolve()),
+        "files": sorted(files),
+        "read_back": True,
+        "sha256": {
+            name: hashlib.sha256(targets[name].read_bytes()).hexdigest()
+            for name in sorted(files)
+        },
+    }
+
+
 def _route_work_product(arguments: dict[str, Any]) -> dict[str, Any]:
     allowed = {"domain", "artifact", "project", "entity"}
     if not set(arguments) <= allowed:
@@ -434,6 +576,26 @@ TOOLS = [
                     "required": sorted(SOCIAL_REQUIRED_FILES),
                 },
             },
+        "required": ["package_id", "files"],
+        },
+    },
+    {
+        "name": "save_mic_product_package",
+        "description": "Atomically save the closed MIC product package under the deterministic MIC Products workspace.",
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "package_id": {"type": "string", "minLength": 1},
+                "files": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        name: {"type": "string"} for name in sorted(MIC_ALLOWED_FILES)
+                    },
+                    "required": sorted(MIC_REQUIRED_FILES),
+                },
+            },
             "required": ["package_id", "files"],
         },
     },
@@ -486,6 +648,8 @@ def _dispatch(message: dict[str, Any]) -> dict[str, Any] | None:
                 payload = _save_article_package(arguments)
             elif name == "save_social_package":
                 payload = _save_social_package(arguments)
+            elif name == "save_mic_product_package":
+                payload = _save_mic_product_package(arguments)
             else:
                 raise ScopedVaultError(f"Unknown scoped Vault tool: {name}")
             result = _tool_result(payload)

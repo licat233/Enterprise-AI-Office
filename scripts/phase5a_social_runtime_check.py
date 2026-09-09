@@ -335,7 +335,7 @@ def social_probe(audit_script: Path | None) -> list[str]:
             failures.append(f"Social scoped MCP response shape: {exc}")
             print(f"FAIL: Social scoped MCP response shape: {exc}")
             return failures
-        check(names == {"route_work_product", "save_article_package", "save_social_package"}, "Social MCP exposes only the closed Router, Article, and Social tools", failures)
+        check(names == {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package"}, "Social MCP exposes the closed Router, Article, Social, and MIC tools", failures)
         check(route["relative_path"] == "02-Projects/Workspaces/Marketing/Social-Media/", "Social Router destination is lifecycle-neutral", failures)
         check(saved["read_back"] is True, "Social package read-back verification passes", failures)
         package_dir = Path(vault_temp) / "02-Projects/Workspaces/Marketing/Social-Media/phase5a-social-fixture"
@@ -378,7 +378,7 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     disabled = set(config.get("agent", {}).get("disabled_toolsets", []))
     check({"terminal", "file", "browser", "code_execution", "delegation", "memory"} <= disabled, "generic execution boundaries remain disabled", failures)
     router_include = mcp.get("armor-vault-scoped-router", {}).get("tools", {}).get("include", [])
-    check(set(router_include) == {"route_work_product", "save_article_package", "save_social_package"}, "Operations receives the exact scoped Router tool allowlist", failures)
+    check(set(router_include) == {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package"}, "Operations receives the exact scoped Router tool allowlist", failures)
     profile_skills = hermes_home / "profiles/operations/skills"
     social_link = profile_skills / "armor-social-media-pipeline"
     video_link = profile_skills / "armor-video-content-rules"

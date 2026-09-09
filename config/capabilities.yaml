@@ -22,6 +22,24 @@ readiness_levels:
       - production.operations_health
 
 capabilities:
+  mic_product_information_optimization:
+    kind: conditional
+    enabled_when: company explicitly enables the ARMOR MIC product-information workflow
+    implementation:
+      - skills/shared/department/armor-mic-product-optimization/SKILL.md
+      - skills/shared/department/armor-memory/scripts/armor-route.py
+      - skills/shared/department/armor-memory/scripts/armor-vault-mcp.py
+      - config/mcp-registry.yaml
+      - docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md
+    acceptance:
+      document: docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md
+      section: MIC E2E acceptance
+    boundary:
+      live_listing_edit: false
+      external_publication: false
+      generic_file_access: false
+      legacy_memory_migration: false
+
   mcp_control_plane_inventory:
     kind: control_plane
     always_available: true

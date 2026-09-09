@@ -24,13 +24,14 @@ This skill serves as the **central knowledge base** for all MIC (Made-in-China.c
 - Understanding MIC scoring factors
 
 **Related skills (auto-load for MIC tasks):**
-- `mic-made-in-china-fill` — Chrome extension paste format workflow
+- `armor-mic-product-optimization` — canonical closed-package MIC workflow
 - `armor-content-writing` — Brand content standards
 - `seo-optimization` — SEO keyword strategy
 
 **Legacy skills (已删除，规则已迁移到本 skill):**
-- ~~`mic-upload-workflow`~~ → 操作安全规则已合并到 `references/platform-input-safety-rules.md`
-- ~~`mic-product-upload`~~ → 平台标准规则已合并到本 SKILL.md 各章节
+- ~~`mic-product-fill`~~ → paste-ready stage is owned by `armor-mic-product-optimization`
+- ~~`mic-product-audit`~~ → audit stage is owned by `armor-mic-product-optimization`
+- ~~`mic-product-detail-page`~~ → detail-page stage is owned by `armor-mic-product-optimization`
 
 **Reference files in this skill:**
 - `references/platform-input-safety-rules.md` — 平台输入安全规则（适用于所有上传方式）
@@ -253,7 +254,7 @@ Sample: P2 500mm round LED screen with controller
 **Different MIC categories have COMPLETELY DIFFERENT attribute fields. Never assume — always extract from current page.**
 
 **Edit page is authoritative, templates are not (user-confirmed 2026-08-13):** the standard
-attributes in this skill's tables (and in `mic-product-fill` templates) are historical caches.
+attributes in this skill's tables are historical caches.
 The product edit page (`membercenter...productmanage.do`) may show different standard fields —
 per category AND over time. Workflow:
 
