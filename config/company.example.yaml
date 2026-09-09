@@ -59,6 +59,12 @@ agent_runtime:
 # Profile belongs to the control plane and is not listed as an employee Profile.
 # Additional Profiles are enabled only when an actual capability/risk boundary
 # requires them; v2 email uses a separate communication Profile when enabled.
+mcp_control_plane:
+  registry: config/mcp-registry.yaml
+  employee_exposure_default: disabled
+  operations_allowlist:
+    - weknora
+
 profiles:
   - id: general
     display_name: General Assistant

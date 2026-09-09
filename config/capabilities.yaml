@@ -22,6 +22,18 @@ readiness_levels:
       - production.operations_health
 
 capabilities:
+  mcp_control_plane_inventory:
+    kind: control_plane
+    always_available: true
+    implementation:
+      - config/mcp-registry.yaml
+      - docs/MCP-CONTROL-PLANE.md
+      - docs/PHASE4A-ARMOR-MIGRATION.md
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: ARMOR Phase 4A — Article and MCP migration
+    notes: Inventory only; no employee exposure is implied.
+
   core.employee_path:
     kind: core
     always_enabled: true

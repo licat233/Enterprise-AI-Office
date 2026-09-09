@@ -80,6 +80,7 @@ for path in \
   config/company.example.yaml \
   config/company.private.example.yaml \
   config/capabilities.yaml \
+  config/mcp-registry.yaml \
   config/validated-stack.yaml \
   config/.env.example \
   state/DEPLOYMENT-STATE.template.md
@@ -144,7 +145,8 @@ for path in \
   scripts/preflight.sh \
   scripts/health-check.sh \
   scripts/backup.sh \
-  scripts/restore.sh
+  scripts/restore.sh \
+  scripts/phase4a_migration_check.py
 do
   require_file "$path"
 done
@@ -198,6 +200,18 @@ require_text config/.env.example 'EAIO_GOVERNANCE_STATE_DB' 'Runtime bindings ex
 require_text config/.env.example 'EAIO_GOVERNANCE_HEALTH_URL' 'Runtime bindings expose optional Governance health URL'
 require_text config/.env.example 'EAIO_TRUSTED_FORWARDER_TOKEN' 'Runtime bindings expose protected forwarder token'
 require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Email capability has protected-input contract'
+require_text config/mcp-registry.yaml 'anysearch:' 'Phase 4A registry contains anysearch'
+require_text config/mcp-registry.yaml 'OPERATIONS_READ' 'Phase 4A registry classifies anysearch'
+require_text config/mcp-registry.yaml 'firecrawl-mcp:' 'Phase 4A registry contains firecrawl'
+require_text config/mcp-registry.yaml 'obscura:' 'Phase 4A registry contains obscura'
+require_text config/mcp-registry.yaml 'paddle_ocr:' 'Phase 4A registry contains Paddle OCR'
+require_text config/mcp-registry.yaml 'toolscout:' 'Phase 4A registry contains ToolScout'
+require_text config/mcp-registry.yaml 'employee_exposure_default: disabled' 'Phase 4A registry defaults employee exposure off'
+require_text config/mcp-registry.yaml 'operations_allowlist:' 'Phase 4A registry declares Operations allowlist'
+require_text docs/MCP-CONTROL-PLANE.md 'inventory and acceptance contract' 'Phase 4A MCP control-plane contract exists'
+require_text docs/PHASE4A-ARMOR-MIGRATION.md 'one Codex Final Editorial Pass' 'Phase 4A Article lifecycle is documented'
+require_text skills/shared/department/armor-website-article-pipeline/SKILL.md '02-Projects/Workspaces/Website/Articles/' 'Article Skill declares Router source target'
+require_text skills/shared/department/armor-website-article-pipeline/SKILL.md 'ai-writing-audit v0.3.1' 'Article Skill pins audit version'
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
 require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
 require_text config/capabilities.yaml 'docs/V2-GOVERNANCE-RUNTIME.md' 'Email capability has governance runtime contract'
@@ -267,6 +281,17 @@ require_text infrastructure/hermes/features/MESSAGING.md 'hermes gateway setup' 
 require_text infrastructure/hermes/features/EMPLOYEE-MEMORY.md 'BLOCKED — REQUIRED INPUT' 'Employee memory gate fails closed without isolation'
 require_text config/capabilities.yaml 'technical-profile.config.example.yaml' 'Coding capability has executable Profile template'
 require_text README.md 'CONFIGURED READY' 'README explains configured completeness'
+
+phase4a_python=python3
+if [ "$phase4a_python" = python3 ] && [ -x /Users/armor/.hermes/hermes-agent/venv/bin/python ]; then
+  phase4a_python=/Users/armor/.hermes/hermes-agent/venv/bin/python
+fi
+
+if "$phase4a_python" "$ROOT/scripts/phase4a_migration_check.py"; then
+  pass 'Phase 4A Article/MCP migration contract'
+else
+  fail 'Phase 4A Article/MCP migration contract' 'offline migration checker failed'
+fi
 
 printf '%s\n' '----------------------------------------'
 printf 'Summary: %s PASS, %s FAIL\n' "$PASS" "$FAIL"

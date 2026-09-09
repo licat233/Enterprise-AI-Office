@@ -1,0 +1,177 @@
+schema_version: 1
+registry: enterprise-mcp-control-plane
+last_reviewed: 2026-09-09
+
+# Inventory and acceptance contract only. Definitions may exist without a
+# runtime installation. Employee exposure is disabled unless a later approved
+# profile-specific change records credentials, health, and acceptance evidence.
+policy:
+  definitions_without_runtime_allowed: true
+  employee_exposure_default: disabled
+  secret_values_allowed: false
+  live_probes_default: disabled
+  operations_allowlist:
+    - weknora
+
+servers:
+  anysearch:
+    classification: OPERATIONS_READ
+    transport:
+      type: http_mcp
+      endpoint: https://api.anysearch.com/mcp
+      timeout_seconds: 120
+    runtime:
+      status: PREPARED
+      required_environment:
+        - ANYSEARCH_API_KEY
+    exposure:
+      allowed_profiles: []
+      reserved_profiles:
+        - admin
+        - future-readonly-research
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      risk: read_only
+      allowed_lanes:
+        - search
+        - extract
+        - batch_search
+      denied_lanes:
+        - browser
+        - external_write
+        - account_mutation
+    health:
+      status: NOT_RUN
+      live_probe: false
+
+  firecrawl-mcp:
+    classification: OPERATIONS_EXTERNAL_WRITE
+    transport:
+      type: stdio
+      command: npx
+      args:
+        - -y
+        - firecrawl-mcp
+      timeout_seconds: 120
+    runtime:
+      status: PREPARED_REPLACEMENT_REQUIRED
+      required_environment:
+        - FIRECRAWL_API_KEY
+    exposure:
+      allowed_profiles: []
+      reserved_profiles:
+        - admin
+        - future-privileged-research
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      risk: mixed
+      read_lane:
+        - scrape
+        - search
+        - map
+        - extract
+      adapter_required: true
+      privileged_lane:
+        - browser_interaction
+        - monitoring
+      privileged_lane_requires: separate_approval_and_audit
+    health:
+      status: NOT_RUN
+      live_probe: false
+
+  obscura:
+    classification: MACHINE_SPECIFIC_REBIND
+    transport:
+      type: stdio
+      command: obscura
+      args:
+        - mcp
+    runtime:
+      status: PREPARED
+    exposure:
+      allowed_profiles: []
+      reserved_profiles:
+        - admin
+        - future-browser-session-worker
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      machine_dependency: enterprise_browser_session_worker
+      personal_state_allowed: false
+      forbidden_inputs:
+        - personal_chrome_profile
+        - cookies
+        - storage_state
+        - login_sessions
+    health:
+      status: NOT_RUN
+      live_probe: false
+
+  paddle_ocr:
+    classification: MACHINE_SPECIFIC_REBIND
+    transport:
+      type: stdio
+      command: EAIO_PADDLE_OCR_PYTHON
+      args:
+        - EAIO_PADDLE_OCR_SERVER
+    runtime:
+      status: PREPARED
+      required_environment:
+        - EAIO_PADDLE_OCR_PYTHON
+        - EAIO_PADDLE_OCR_SERVER
+    exposure:
+      allowed_profiles: []
+      reserved_profiles:
+        - admin
+        - future-media-worker
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      machine_dependency: enterprise_media_runtime
+      replacement_boundary: reuse_or_wrap_media_transcription
+      persistent_service_allowed: false
+      personal_runtime_allowed: false
+    health:
+      status: NOT_RUN
+      live_probe: false
+
+  toolscout:
+    classification: ADMIN_CONTROL_PLANE
+    transport:
+      type: stdio
+      command: toolscout
+      args:
+        - mcp
+        - serve
+    runtime:
+      status: PREPARED
+      required_environment:
+        - TOOLSCOUT_AGENT_NAME
+        - TOOLSCOUT_MEMORY_HOME
+    exposure:
+      allowed_profiles:
+        - admin
+        - engineering
+      reserved_profiles: []
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      separate_agent_identity: true
+      separate_memory_home: true
+      employee_memory_access: false
+      allowed_tools:
+        - advise_tool_use
+        - resolve_memory_home
+        - query_registry
+        - detect_candidates
+        - recall_memory
+        - record_memory
+        - check_conflicts
+        - doctor
+      prompts: false
+      resources: false
+    health:
+      status: NOT_RUN
+      live_probe: false

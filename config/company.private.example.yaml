@@ -27,6 +27,12 @@ employee_access:
         display_name: Sales Team
 
 # Enable only the specialist Profile actually required by the selected capability.
+mcp_control_plane:
+  registry: config/mcp-registry.yaml
+  employee_exposure_default: disabled
+  operations_allowlist:
+    - weknora
+
 profiles:
   - id: communication
     display_name: Communication Assistant
