@@ -212,6 +212,13 @@ require_text docs/MCP-CONTROL-PLANE.md 'inventory and acceptance contract' 'Phas
 require_text docs/PHASE4A-ARMOR-MIGRATION.md 'one Codex Final Editorial Pass' 'Phase 4A Article lifecycle is documented'
 require_text skills/shared/department/armor-website-article-pipeline/SKILL.md '02-Projects/Workspaces/Website/Articles/' 'Article Skill declares Router source target'
 require_text skills/shared/department/armor-website-article-pipeline/SKILL.md 'ai-writing-audit v0.3.1' 'Article Skill pins audit version'
+require_file scripts/phase4b_runtime_check.py
+require_file scripts/test_phase4b_runtime_check.py
+require_text private/department-profile/.symlink_manifest 'ai-writing-audit -> /Users/armor/Enterprise-AI-Office/skills/shared/department/ai-writing-audit' 'Profile manifest exposes ai-writing-audit canonically'
+require_text private/department-profile/.symlink_manifest 'armor-website-article-pipeline -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-article-pipeline' 'Profile manifest exposes Article canonically'
+require_text private/department-profile/enabled-skills.csv 'ai-writing-audit,SAFE_BASELINE' 'Profile enables the audit dependency'
+require_text private/department-profile/enabled-skills.csv 'armor-website-article-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Article entrypoint'
+require_text docs/PHASE4B-ARMOR-RUNTIME-CLOSURE.md 'SCOPED_ROUTER_WRITE_BLOCKED' 'Phase 4B records the scoped Router blocker'
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
 require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
 require_text config/capabilities.yaml 'docs/V2-GOVERNANCE-RUNTIME.md' 'Email capability has governance runtime contract'

@@ -1,0 +1,8 @@
+interface:
+  display_name: "AI Writing Audit"
+  short_description: "Scan AI-style risk and guide evidence-safe rewrites"
+  brand_color: "#334155"
+  default_prompt: "Use $ai-writing-audit to scan this article, then perform the agent-led full repair while preserving facts, voice, and source limits."
+
+policy:
+  allow_implicit_invocation: true
