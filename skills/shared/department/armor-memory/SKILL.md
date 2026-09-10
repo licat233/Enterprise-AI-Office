@@ -83,6 +83,9 @@ ARMOR website articles use `work-product + website + article` and always route t
 
 Official social content uses `work-product + marketing + social-copy` and always routes to `02-Projects/Workspaces/Marketing/Social-Media/`, whether or not `--project` is supplied. Article and social-copy files do not move merely because their lifecycle state changes.
 
+Website Product Materials uses `work-product + website + product-materials` and routes to `02-Projects/Workspaces/Website/Product-Materials/`. It is a
+separate product-page source package, not an Article or MIC artifact.
+
 `03-Records/Published/` is for evidence of an actual publication event or an explicitly requested published snapshot. Do not place newly drafted channel content there merely because it is intended for publication.
 
 Named project work that uses project-scoped routing lives under `02-Projects/Projects/<project>/`. Project completion does not require moving the project tree.

@@ -14,6 +14,7 @@ OBJECT_CHOICES = ("work-product", "record", "knowledge", "research", "unresolved
 DOMAIN_CHOICES = ("website", "content", "marketing", "products", "operations")
 ARTIFACT_CHOICES = (
     "article",
+    "product-materials",
     "landing-page",
     "case-study",
     "blog-post",
@@ -110,6 +111,13 @@ def build_work_product_path(domain: str, artifact: str, project: str | None, ent
         if project:
             slugify_name(project)
         return "02-Projects/Workspaces/Website/Articles/"
+
+    if domain == "website" and artifact == "product-materials":
+        if project:
+            slugify_name(project)
+        if entity:
+            slugify_name(entity)
+        return "02-Projects/Workspaces/Website/Product-Materials/"
 
     if domain == "marketing" and artifact == "social-copy":
         if project:

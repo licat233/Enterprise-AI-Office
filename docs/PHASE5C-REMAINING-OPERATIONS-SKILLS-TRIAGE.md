@@ -6,6 +6,11 @@ Date: 2026-09-10
 Repository baseline: `59d3a9c371f233adb10ee2b3eb6bf4d978a74038`
 Repository branch: `codex/media-transcription`
 Audit repository HEAD: `197f65a8a3dae3826b3132c73bb1cd135fda58dc`
+Phase 5C audit starting point after Phase 5B.2: `197f65a8a3dae3826b3132c73bb1cd135fda58dc`
+
+The historical project baseline above remains unchanged; the audit HEAD is
+the clean post-Phase-5B.2 repository state from which the Phase 5C findings
+were made.
 
 ## Decision
 

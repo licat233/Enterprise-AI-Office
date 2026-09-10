@@ -236,7 +236,7 @@ class MICPackageTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 0, completed.stderr)
             replies = [json.loads(line) for line in completed.stdout.splitlines()]
             names = {tool["name"] for tool in replies[1]["result"]["tools"]}
-            self.assertEqual(names, {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package"})
+            self.assertEqual(names, {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package", "save_website_product_materials_package"})
             route = json.loads(replies[2]["result"]["content"][0]["text"])
             saved = json.loads(replies[3]["result"]["content"][0]["text"])
             self.assertEqual(route["relative_path"], "02-Projects/Workspaces/Products/MIC-Products/")

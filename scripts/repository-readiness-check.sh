@@ -165,10 +165,14 @@ for path in \
   scripts/test_phase5b_mic.py \
   scripts/test_phase5b1_mic_authority.py \
   scripts/test_phase5b2_mic_authority_dedup.py \
+  scripts/phase5d_product_materials_check.py \
+  scripts/test_phase5d_product_materials.py \
   docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md \
+  docs/PHASE5D-WEBSITE-PRODUCT-MATERIALS-MIGRATION.md \
   skills/shared/department/armor-memory/scripts/armor-route.py \
   skills/shared/department/armor-memory/scripts/armor-vault-mcp.py \
   skills/shared/department/armor-mic-product-optimization/SKILL.md \
+  skills/shared/department/armor-website-product-materials/SKILL.md \
   skills/shared/department/armor-social-media-pipeline/SKILL.md \
   skills/shared/department/armor-video-content-rules/SKILL.md \
   skills/shared/toolscout/SKILL.md
@@ -239,7 +243,16 @@ require_text skills/shared/department/armor-memory/scripts/route.sh 'armor-route
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_article_package' 'Scoped Article save tool is present'
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_social_package' 'Scoped Social save tool is present'
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_mic_product_package' 'Scoped MIC save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_website_product_materials_package' 'Scoped Website Product Materials save tool is present'
 require_text skills/shared/department/armor-memory/scripts/armor-route.py 'mic-product' 'MIC product route is present'
+require_text skills/shared/department/armor-memory/scripts/armor-route.py 'product-materials' 'Website Product Materials route is present'
+require_text skills/shared/department/armor-memory/SKILL.md 'product-materials' 'ARMOR memory Skill documents Product Materials routing'
+require_text skills/shared/department/armor-website-product-materials/SKILL.md 'ARMOR-Website-Product-Materials-Standard-v1.0.md' 'Product Materials Skill references the canonical Vault Standard'
+require_text skills/shared/department/armor-website-product-materials/SKILL.md 'PRODUCT_AUTHORITY_REVIEW_REQUIRED' 'Product Materials Skill has the authority blocker'
+require_text skills/shared/department/armor-website-product-materials/SKILL.md 'save_website_product_materials_package' 'Product Materials Skill binds the scoped save'
+require_text docs/PHASE5D-WEBSITE-PRODUCT-MATERIALS-MIGRATION.md 'Website Product Materials: PASS' 'Phase 5D report records migration status'
+require_text scripts/test_phase5d_product_materials.py 'PRODUCT_AUTHORITY_REVIEW_REQUIRED' 'Phase 5D tests cover authority review'
+require_text scripts/phase5d_product_materials_check.py 'Operations receives the exact five-tool scoped Router allowlist' 'Phase 5D runtime check covers the five-tool allowlist'
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-product-edit-context/v1' 'MIC Skill honors current edit-page extraction'
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'BLOCKED_SOURCE' 'MIC Skill fails closed when Standard is unavailable'
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'MIC_AUTHORITY_REVIEW_REQUIRED' 'MIC Skill has authority review gate'
@@ -264,6 +277,10 @@ require_text private/department-profile/.symlink_manifest 'armor-mic-product-opt
 require_text private/department-profile/enabled-skills.csv 'armor-mic-product-optimization,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical MIC entrypoint'
 require_text private/department-profile/enabled-tools.csv 'save_mic_product_package' 'Profile enables the scoped MIC save tool'
 require_text private/department-profile/config.yaml 'save_mic_product_package' 'Live Profile binds the scoped MIC save tool'
+require_text private/department-profile/.symlink_manifest 'armor-website-product-materials -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-product-materials' 'Profile manifest exposes Product Materials canonically'
+require_text private/department-profile/enabled-skills.csv 'armor-website-product-materials,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Materials entrypoint'
+require_text private/department-profile/enabled-tools.csv 'save_website_product_materials_package' 'Profile enables the scoped Product Materials save tool'
+require_text private/department-profile/config.yaml 'save_website_product_materials_package' 'Live Profile binds the scoped Product Materials save tool'
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'MIC authority: CANONICAL' 'Phase 5B records canonical MIC authority'
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'Automatic MIC editing enabled: NO' 'Phase 5B records no automatic MIC editing'
 require_text scripts/test_phase5b_mic.py 'publication_performed: false' 'MIC acceptance fixture forbids publication'

@@ -1,6 +1,6 @@
 schema_version: 2
 registry: enterprise-mcp-control-plane
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-10
 
 # Inventory and acceptance contract. Runtime state is recorded separately from
 # registration, configuration, profile exposure, and health. Secret values are
@@ -272,15 +272,17 @@ servers:
       default_enabled: false
       operations_exposure: true
     boundary:
-      write_scope: Article_v1.3_or_Social_v2.0_or_MIC_v1.0_closed_packages_only
+      write_scope: Article_v1.3_or_Social_v2.0_or_MIC_v1.0_or_Website_Product_Materials_v1.0_closed_packages_only
       article_write_scope: Article_v1.3_four_file_package_only
       social_write_scope: Social_v2.0_required_four_files_plus_optional_video_artifacts
       mic_product_write_scope: MIC_v1.0_required_data_bulkfill_audit_optional_detail_package
+      website_product_materials_write_scope: Website_Product_Materials_v1.0_required_five_files
       allowed_tools:
         - route_work_product
         - save_article_package
         - save_social_package
         - save_mic_product_package
+        - save_website_product_materials_package
       forbidden:
         - generic_filesystem_write
         - arbitrary_destination
@@ -299,4 +301,5 @@ servers:
         - route_work_product
         - save_article_package
         - save_mic_product_package
+        - save_website_product_materials_package
         - read_back
