@@ -272,17 +272,19 @@ servers:
       default_enabled: false
       operations_exposure: true
     boundary:
-      write_scope: Article_v1.3_or_Social_v2.0_or_MIC_v1.0_or_Website_Product_Materials_v1.0_closed_packages_only
+      write_scope: Article_v1.3_or_Social_v2.0_or_MIC_v1.0_or_Website_Product_Materials_v1.0_or_Product_Visual_v1.0_closed_packages_only
       article_write_scope: Article_v1.3_four_file_package_only
       social_write_scope: Social_v2.0_required_four_files_plus_optional_video_artifacts
       mic_product_write_scope: MIC_v1.0_required_data_bulkfill_audit_optional_detail_package
       website_product_materials_write_scope: Website_Product_Materials_v1.0_required_five_files
+      product_visual_write_scope: Product_Visual_v1.0_required_four_text_files_no_binary_upload
       allowed_tools:
         - route_work_product
         - save_article_package
         - save_social_package
         - save_mic_product_package
         - save_website_product_materials_package
+        - save_product_visual_package
       forbidden:
         - generic_filesystem_write
         - arbitrary_destination
@@ -302,4 +304,5 @@ servers:
         - save_article_package
         - save_mic_product_package
         - save_website_product_materials_package
+        - save_product_visual_package
         - read_back

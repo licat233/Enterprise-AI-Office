@@ -2,8 +2,8 @@
 """Scoped ARMOR Vault MCP server.
 
 This is intentionally not a generic filesystem tool. It exposes only the
-deterministic work-product router and closed Article, Social, MIC, and Website
-Product Materials package saves.
+deterministic work-product router and closed Article, Social, MIC, Website
+Product Materials, and Product Visual package saves.
 """
 
 from __future__ import annotations
@@ -42,6 +42,9 @@ PRODUCT_MATERIALS_REQUIRED_FILES = frozenset(
         "product-media-plan.md",
         "product-audit.md",
     }
+)
+PRODUCT_VISUAL_REQUIRED_FILES = frozenset(
+    {"visual-source-map.yaml", "visual-brief.md", "visual-prompt.md", "visual-audit.md"}
 )
 MAX_FILE_BYTES = 8 * 1024 * 1024
 MAX_PACKAGE_BYTES = 20 * 1024 * 1024
@@ -142,6 +145,21 @@ def _website_product_materials_destination(root: Path) -> tuple[str, Path]:
     return route.path, destination
 
 
+def _product_visual_destination(root: Path) -> tuple[str, Path]:
+    route = ROUTER.route_request(
+        object_type="work-product", domain="products", artifact="product-visual"
+    )
+    relative = Path(route.path)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ScopedVaultError("Router returned an unsafe Product Visual destination")
+    if relative.parts[:2] == ("03-Records", "Published"):
+        raise ScopedVaultError("Published evidence cannot be an editable Product Visual source")
+    destination = (root / relative).resolve()
+    if not _is_under(destination, root):
+        raise ScopedVaultError("Product Visual Router destination escapes ARMOR_VAULT_ROOT")
+    return route.path, destination
+
+
 def _safe_package_dir(root: Path, destination: Path, package_id: str) -> tuple[str, Path]:
     if not isinstance(package_id, str):
         raise ScopedVaultError("package_id must be a string")
@@ -203,6 +221,22 @@ def _safe_product_materials_package_dir(root: Path, destination: Path, package_i
     resolved = package_dir.resolve()
     if not _is_under(resolved, root):
         raise ScopedVaultError("Website Product Materials package escapes ARMOR_VAULT_ROOT")
+    return package_slug, package_dir
+
+
+def _safe_product_visual_package_dir(root: Path, destination: Path, package_id: str) -> tuple[str, Path]:
+    if not isinstance(package_id, str):
+        raise ScopedVaultError("package_id must be a string")
+    try:
+        package_slug = ROUTER.slugify_name(package_id)
+    except ValueError as exc:
+        raise ScopedVaultError(str(exc)) from exc
+    package_dir = destination / package_slug
+    if package_dir.is_symlink():
+        raise ScopedVaultError("Product Visual package directory must not be a symlink")
+    resolved = package_dir.resolve()
+    if not _is_under(resolved, root):
+        raise ScopedVaultError("Product Visual package escapes ARMOR_VAULT_ROOT")
     return package_slug, package_dir
 
 
@@ -358,6 +392,69 @@ def _validate_website_product_materials_package(files: Any) -> dict[str, str]:
             "product-source-map.yaml is missing required source-reconciliation sections: "
             + ",".join(missing_markers)
         )
+    return normalized
+
+
+def _validate_product_visual_package(files: Any) -> dict[str, str]:
+    if not isinstance(files, dict):
+        raise ScopedVaultError("files must contain exactly the four Product Visual files")
+    names = set(files)
+    if names != PRODUCT_VISUAL_REQUIRED_FILES:
+        missing = sorted(PRODUCT_VISUAL_REQUIRED_FILES - names)
+        extra = sorted(names - PRODUCT_VISUAL_REQUIRED_FILES)
+        details = []
+        if missing:
+            details.append(f"missing={','.join(missing)}")
+        if extra:
+            details.append(f"unexpected={','.join(extra)}")
+        raise ScopedVaultError("Product Visual package file contract rejected: " + "; ".join(details))
+
+    normalized: dict[str, str] = {}
+    total = 0
+    for name in PRODUCT_VISUAL_REQUIRED_FILES:
+        value = files[name]
+        if not isinstance(value, str):
+            raise ScopedVaultError(f"{name} must be supplied as UTF-8 text")
+        encoded = value.encode("utf-8")
+        if len(encoded) > MAX_FILE_BYTES:
+            raise ScopedVaultError(f"{name} exceeds the per-file size limit")
+        if not value.strip():
+            raise ScopedVaultError(f"{name} must not be empty")
+        total += len(encoded)
+        normalized[name] = value
+    if total > MAX_PACKAGE_BYTES:
+        raise ScopedVaultError("Product Visual package exceeds the total size limit")
+
+    source_map = normalized["visual-source-map.yaml"]
+    required_source_markers = (
+        "product_id:",
+        "sources:",
+        "facts:",
+        "unknowns:",
+        "conflicts:",
+        "asset_provenance:",
+    )
+    missing_markers = [marker for marker in required_source_markers if marker not in source_map]
+    if missing_markers:
+        raise ScopedVaultError(
+            "visual-source-map.yaml is missing required source/provenance sections: "
+            + ",".join(missing_markers)
+        )
+    marker_requirements = {
+        "visual-brief.md": ("visual_objective", "channel_or_use", "approval"),
+        "visual-prompt.md": (
+            "immutable_product_facts",
+            "negative_constraints",
+            "anti_moire_constraints",
+        ),
+        "visual-audit.md": ("provenance", "qa_status", "approval"),
+    }
+    for name, markers in marker_requirements.items():
+        missing = [marker for marker in markers if marker not in normalized[name]]
+        if missing:
+            raise ScopedVaultError(
+                f"{name} is missing required Product Visual sections: {','.join(missing)}"
+            )
     return normalized
 
 
@@ -652,6 +749,77 @@ def _save_website_product_materials_package(arguments: dict[str, Any]) -> dict[s
     }
 
 
+def _save_product_visual_package(arguments: dict[str, Any]) -> dict[str, Any]:
+    allowed = {"package_id", "files"}
+    if set(arguments) != allowed:
+        raise ScopedVaultError("save_product_visual_package accepts only package_id and files")
+    root = _vault_root()
+    relative, destination = _product_visual_destination(root)
+    package_slug, package_dir = _safe_product_visual_package_dir(
+        root, destination, arguments["package_id"]
+    )
+    files = _validate_product_visual_package(arguments["files"])
+    existed_before = package_dir.is_dir()
+
+    package_dir.mkdir(parents=True, exist_ok=True)
+    if package_dir.is_symlink() or not package_dir.is_dir():
+        raise ScopedVaultError("Product Visual package target is not a regular directory")
+    resolved_package = package_dir.resolve()
+    if not _is_under(resolved_package, root):
+        raise ScopedVaultError("Product Visual package escapes ARMOR_VAULT_ROOT")
+    existing_names = {child.name for child in package_dir.iterdir()}
+    unexpected_existing = existing_names - set(files)
+    if unexpected_existing:
+        raise ScopedVaultError(
+            "Product Visual package contains files outside the closed contract: "
+            + ",".join(sorted(unexpected_existing))
+        )
+
+    targets = {name: package_dir / name for name in files}
+    originals: dict[str, bytes | None] = {}
+    for name, target in targets.items():
+        _validate_file_target(target)
+        originals[name] = target.read_bytes() if target.exists() else None
+
+    replaced: list[str] = []
+    try:
+        for name in sorted(files):
+            _atomic_write(targets[name], files[name])
+            replaced.append(name)
+        for name in sorted(files):
+            if targets[name].read_text(encoding="utf-8") != files[name]:
+                raise ScopedVaultError(f"Read-back verification failed for {name}")
+    except Exception:
+        for name in reversed(replaced):
+            target = targets[name]
+            previous = originals[name]
+            if previous is None:
+                if target.exists() or target.is_symlink():
+                    target.unlink()
+            else:
+                _atomic_write(target, previous.decode("utf-8"))
+        if not existed_before:
+            try:
+                package_dir.rmdir()
+            except OSError:
+                pass
+        raise
+
+    return {
+        "status": "saved",
+        "package_id": package_slug,
+        "relative_path": f"{relative}{package_slug}/",
+        "absolute_path": str(package_dir.resolve()),
+        "contract": "ARMOR_Product_Visual_v1.0_four_file_package",
+        "files": sorted(files),
+        "read_back": True,
+        "sha256": {
+            name: hashlib.sha256(targets[name].read_bytes()).hexdigest()
+            for name in sorted(files)
+        },
+    }
+
+
 def _route_work_product(arguments: dict[str, Any]) -> dict[str, Any]:
     allowed = {"domain", "artifact", "project", "entity"}
     if not set(arguments) <= allowed:
@@ -778,6 +946,27 @@ TOOLS = [
             "required": ["package_id", "files"],
         },
     },
+    {
+        "name": "save_product_visual_package",
+        "description": "Atomically save exactly the four-file ARMOR Product Visual brief/prompt/QA handoff under the deterministic Product Visual workspace; no binary asset upload or publication.",
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "package_id": {"type": "string", "minLength": 1},
+                "files": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        name: {"type": "string"}
+                        for name in sorted(PRODUCT_VISUAL_REQUIRED_FILES)
+                    },
+                    "required": sorted(PRODUCT_VISUAL_REQUIRED_FILES),
+                },
+            },
+            "required": ["package_id", "files"],
+        },
+    },
 ]
 
 
@@ -831,6 +1020,8 @@ def _dispatch(message: dict[str, Any]) -> dict[str, Any] | None:
                 payload = _save_mic_product_package(arguments)
             elif name == "save_website_product_materials_package":
                 payload = _save_website_product_materials_package(arguments)
+            elif name == "save_product_visual_package":
+                payload = _save_product_visual_package(arguments)
             else:
                 raise ScopedVaultError(f"Unknown scoped Vault tool: {name}")
             result = _tool_result(payload)

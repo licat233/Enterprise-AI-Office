@@ -15,6 +15,7 @@ DOMAIN_CHOICES = ("website", "content", "marketing", "products", "operations")
 ARTIFACT_CHOICES = (
     "article",
     "product-materials",
+    "product-visual",
     "landing-page",
     "case-study",
     "blog-post",
@@ -118,6 +119,16 @@ def build_work_product_path(domain: str, artifact: str, project: str | None, ent
         if entity:
             slugify_name(entity)
         return "02-Projects/Workspaces/Website/Product-Materials/"
+
+    if domain == "products" and artifact == "product-visual":
+        # Product Visual is a cross-channel product work product.  Keep its
+        # semantic owner under Products rather than attaching it to Website,
+        # Social, MIC, or Published lifecycle folders.
+        if project:
+            slugify_name(project)
+        if entity:
+            slugify_name(entity)
+        return "02-Projects/Workspaces/Products/Product-Visual/"
 
     if domain == "marketing" and artifact == "social-copy":
         if project:

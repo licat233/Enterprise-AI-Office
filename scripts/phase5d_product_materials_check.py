@@ -27,6 +27,7 @@ TOOLS = {
     "save_social_package",
     "save_mic_product_package",
     "save_website_product_materials_package",
+    "save_product_visual_package",
 }
 
 
@@ -118,7 +119,7 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     check(config.get("skills", {}).get("external_dirs") == [], "Operations external Skill dirs remain empty", failures)
     check(config.get("skills", {}).get("project_discovery") is False, "Operations project discovery remains disabled", failures)
     router_include = set(config.get("mcp_servers", {}).get("armor-vault-scoped-router", {}).get("tools", {}).get("include", []))
-    check(router_include == TOOLS, "Operations receives the exact five-tool scoped Router allowlist", failures)
+    check(router_include == TOOLS, "Operations receives the exact scoped Router tool allowlist", failures)
     product_link = hermes_home / "profiles/operations/skills/armor-website-product-materials"
     check(product_link.is_symlink() and product_link.resolve() == (ROOT / "skills/shared/department/armor-website-product-materials").resolve(), "Operations exposes canonical Product Materials Skill by symlink", failures)
     check(not (hermes_home / "profiles/operations/skills/armor-fallback-content-worker").exists(), "Operations does not expose Delegate worker Profile", failures)

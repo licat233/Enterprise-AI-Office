@@ -253,6 +253,7 @@ class WebsiteProductMaterialsTests(unittest.TestCase):
                 "save_social_package",
                 "save_mic_product_package",
                 "save_website_product_materials_package",
+                "save_product_visual_package",
             },
         )
         self.assertEqual(

@@ -129,7 +129,7 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     disabled = set(config.get("agent", {}).get("disabled_toolsets", []))
     check({"terminal", "file", "browser", "code_execution", "delegation", "memory"} <= disabled, "generic execution boundaries remain disabled", failures)
     include = mcp.get("armor-vault-scoped-router", {}).get("tools", {}).get("include", [])
-    check(set(include) == {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package", "save_website_product_materials_package"}, "Operations receives the exact five-tool scoped Router allowlist", failures)
+    check(set(include) == {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package", "save_website_product_materials_package", "save_product_visual_package"}, "Operations receives the exact scoped Router tool allowlist", failures)
     profile_skills = hermes_home / "profiles/operations/skills"
     mic_link = profile_skills / "armor-mic-product-optimization"
     check(mic_link.is_symlink() and mic_link.resolve() == MIC_SKILL.parent.resolve(), "Operations exposes canonical MIC Skill by symlink", failures)

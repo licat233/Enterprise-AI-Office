@@ -86,6 +86,11 @@ Official social content uses `work-product + marketing + social-copy` and always
 Website Product Materials uses `work-product + website + product-materials` and routes to `02-Projects/Workspaces/Website/Product-Materials/`. It is a
 separate product-page source package, not an Article or MIC artifact.
 
+ARMOR Product Visual uses `work-product + products + product-visual` and routes
+to `02-Projects/Workspaces/Products/Product-Visual/`. It is a cross-channel
+visual brief/prompt/QA handoff, not Website Product Materials, Social, MIC,
+Published content, or an image-generation runtime.
+
 `03-Records/Published/` is for evidence of an actual publication event or an explicitly requested published snapshot. Do not place newly drafted channel content there merely because it is intended for publication.
 
 Named project work that uses project-scoped routing lives under `02-Projects/Projects/<project>/`. Project completion does not require moving the project tree.

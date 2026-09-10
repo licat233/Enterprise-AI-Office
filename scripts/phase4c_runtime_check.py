@@ -87,8 +87,8 @@ def scoped_probe() -> list[str]:
             return failures
         check(replies[0]["result"]["serverInfo"]["version"] == "1.0.0", "scoped MCP initialize", failures)
         check(
-            names == {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package", "save_website_product_materials_package"},
-            "scoped MCP exposes Article, Social, MIC, and Website Product Materials tools",
+            names == {"route_work_product", "save_article_package", "save_social_package", "save_mic_product_package", "save_website_product_materials_package", "save_product_visual_package"},
+            "scoped MCP exposes Article, Social, MIC, Website Product Materials, and Product Visual tools",
             failures,
         )
         check(route["relative_path"] == "02-Projects/Workspaces/Website/Articles/", "scoped route is Article workspace", failures)
