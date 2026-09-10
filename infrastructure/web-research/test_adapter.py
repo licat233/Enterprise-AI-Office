@@ -290,6 +290,9 @@ class WebResearchAdapterTests(unittest.TestCase):
         research = adapter.WebResearchAdapter(client, resolver=PUBLIC_RESOLVER)
         listed = adapter.dispatch({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, research)
         self.assertEqual({tool["name"] for tool in listed["result"]["tools"]}, {"web_search", "web_fetch"})
+        descriptions = {tool["name"]: tool["description"] for tool in listed["result"]["tools"]}
+        self.assertIn("bounded Enterprise Web Research acquisition chain", descriptions["web_fetch"])
+        self.assertNotIn("through Firecrawl", descriptions["web_fetch"])
         called = adapter.dispatch(
             {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "firecrawl_scrape", "arguments": {"url": "https://example.com/"}}},
             research,

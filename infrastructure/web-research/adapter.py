@@ -885,7 +885,7 @@ TOOLS = [
     },
     {
         "name": "web_fetch",
-        "description": "Fetch readable Markdown from one public HTTP(S) page through Firecrawl.",
+        "description": "Fetch readable content from one public HTTP(S) page through the bounded Enterprise Web Research acquisition chain.",
         "inputSchema": {
             "type": "object",
             "additionalProperties": False,
