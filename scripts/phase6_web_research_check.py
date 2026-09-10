@@ -67,7 +67,7 @@ def check_repository(failures: list[str]) -> None:
     check(adapter_boundary.get("allowed_tools") == ["web_search", "web_fetch"], "adapter allowlist is exactly web_search/web_fetch", failures)
     check(adapter_boundary.get("automatic_persistence") is False, "adapter automatic persistence is disabled", failures)
     check(adapter_boundary.get("trust_class") == "UNTRUSTED_WEB_CONTENT", "adapter trust class is explicit", failures)
-    check(adapter_boundary.get("fallback_order") == ["firecrawl", "obscura"], "Firecrawl remains primary over Obscura", failures)
+    check(adapter_boundary.get("fallback_order") == ["firecrawl", "obscura", "cloakbrowser"], "fallback order is Firecrawl, Obscura, then CloakBrowser", failures)
     check(adapter_boundary.get("obscura_internal_only") is True, "Obscura fallback is internal-only", failures)
     check(obscura.get("exposure", {}).get("operations_exposure") is False, "Obscura is not Operations-exposed", failures)
     check(obscura.get("runtime", {}).get("enabled") is False, "Obscura direct runtime lane remains disabled", failures)
@@ -76,6 +76,15 @@ def check_repository(failures: list[str]) -> None:
         "Obscura fallback uses only the bounded read interface",
         failures,
     )
+    check(adapter_boundary.get("cloakbrowser_internal_only") is True, "CloakBrowser fallback is internal-only", failures)
+    check(
+        adapter_boundary.get("cloakbrowser_allowed_sequence") == ["navigate", "wait", "final_url", "title", "body_text"],
+        "CloakBrowser fallback uses only the fixed read sequence",
+        failures,
+    )
+    check(adapter_boundary.get("cloakbrowser_wrapper_version") == "0.5.10", "CloakBrowser wrapper is pinned to the reviewed version", failures)
+    check(adapter_boundary.get("cloakbrowser_binary_version") == "145.0.7632.109.2", "CloakBrowser binary is pinned to the reviewed signed build", failures)
+    check(adapter_boundary.get("cloakbrowser_personal_state_allowed") is False, "CloakBrowser personal state is disabled", failures)
     check(firecrawl.get("runtime", {}).get("version") == "3.24.0", "Firecrawl version remains 3.24.0", failures)
     check(firecrawl_boundary.get("adapter_required") is True, "Firecrawl direct exposure requires the adapter", failures)
     check(firecrawl_boundary.get("raw_tools_exposed_to_operations") is False, "raw Firecrawl tools are not Operations-exposed", failures)
@@ -97,10 +106,21 @@ def check_runtime(runtime_root: Path, failures: list[str]) -> None:
     check(include == {"web_search", "web_fetch"}, "Operations receives exactly web_search/web_fetch", failures, f"found={sorted(include)}")
     check("firecrawl-mcp" not in servers, "Operations does not bind raw Firecrawl MCP", failures)
     check("obscura" not in servers, "Operations does not bind raw Obscura MCP", failures)
+    check("cloakbrowser" not in servers, "Operations does not bind raw CloakBrowser", failures)
     adapter_env = adapter.get("env") or {}
     check(
         adapter_env.get("EAIO_OBSCURA_BIN") and adapter_env.get("EAIO_OBSCURA_STORAGE_DIR"),
         "Operations adapter has the Enterprise Obscura bindings",
+        failures,
+    )
+    check(
+        all(adapter_env.get(name) for name in (
+            "EAIO_CLOAKBROWSER_PYTHON",
+            "EAIO_CLOAKBROWSER_WORKER",
+            "EAIO_CLOAKBROWSER_STORAGE_DIR",
+            "EAIO_CLOAKBROWSER_VERSION",
+        )),
+        "Operations adapter has the Enterprise CloakBrowser bindings",
         failures,
     )
     disabled = set((config.get("agent") or {}).get("disabled_toolsets", []))

@@ -29,9 +29,20 @@ MAX_QUERY_CHARS = 2_000
 MAX_RESULTS = 20
 MAX_RESPONSE_BYTES = 12 * 1024 * 1024
 MAX_OBSCURA_MARKDOWN_CHARS = 1_000_000
+MAX_CLOAKBROWSER_MARKDOWN_CHARS = 1_000_000
 OBSCURA_TIMEOUT_SECONDS = 45
+CLOAKBROWSER_TIMEOUT_SECONDS = 90
 DEFAULT_OBSCURA_BIN = "/Users/armor/.local/bin/obscura"
 DEFAULT_OBSCURA_STORAGE_DIR = "/Users/armor/.local/share/enterprise-mcp/obscura"
+DEFAULT_CLOAKBROWSER_PYTHON = "/Users/armor/.local/share/enterprise-mcp/cloakbrowser-runtime/bin/python"
+DEFAULT_CLOAKBROWSER_WORKER = "/Users/armor/Enterprise-AI-Office/infrastructure/web-research/cloakbrowser_worker.py"
+DEFAULT_CLOAKBROWSER_STORAGE_DIR = "/Users/armor/.local/share/enterprise-mcp/cloakbrowser"
+DEFAULT_CLOAKBROWSER_VERSION = "145.0.7632.109.2"
+APPROVED_CLOAKBROWSER_ROOTS = (
+    "/Users/armor/.local/share/enterprise-mcp",
+    "/Users/armor/.local/share/uv",
+    "/Users/armor/Enterprise-AI-Office",
+)
 OBSCURA_PROTOCOL_VERSION = "2024-11-05"
 TRUST_CLASS = "UNTRUSTED_WEB_CONTENT"
 FAILURE_REASONS = frozenset(
@@ -67,6 +78,7 @@ DYNAMIC_SHELL_MARKERS = frozenset(
         "just a moment",
         "please wait while we verify",
         "loading...",
+        "请验证",
     }
 )
 LOGIN_MARKERS = frozenset(
@@ -100,6 +112,10 @@ class WebResearchError(ValueError):
 
 class ObscuraError(WebResearchError):
     """A safe, finite error from the internal Obscura fallback."""
+
+
+class CloakBrowserError(WebResearchError):
+    """A safe, finite error from the internal CloakBrowser fallback."""
 
 
 def _mcp_text(result: dict[str, Any], *, backend: str) -> str:
@@ -302,6 +318,130 @@ class ObscuraClient:
             raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback failed") from exc
         finally:
             self.close()
+
+
+class CloakBrowserClient:
+    """Fixed, internal read-only sequence using the approved CloakBrowser worker.
+
+    This client starts a fresh worker for each URL. The worker has no input
+    surface beyond the already-validated URL and performs navigate, bounded
+    wait, final URL/title read, and body-text read only.
+    """
+
+    def __init__(
+        self,
+        *,
+        python: str | None = None,
+        worker: str | None = None,
+        storage_dir: str | None = None,
+        browser_version: str | None = None,
+        timeout: float = CLOAKBROWSER_TIMEOUT_SECONDS,
+        runner: Callable[..., Any] = subprocess.run,
+    ) -> None:
+        self.python = (python or os.environ.get("EAIO_CLOAKBROWSER_PYTHON") or DEFAULT_CLOAKBROWSER_PYTHON).strip()
+        self.worker = (worker or os.environ.get("EAIO_CLOAKBROWSER_WORKER") or DEFAULT_CLOAKBROWSER_WORKER).strip()
+        self.storage_dir = (
+            storage_dir
+            or os.environ.get("EAIO_CLOAKBROWSER_STORAGE_DIR")
+            or DEFAULT_CLOAKBROWSER_STORAGE_DIR
+        ).strip()
+        self.browser_version = (
+            browser_version
+            or os.environ.get("EAIO_CLOAKBROWSER_VERSION")
+            or DEFAULT_CLOAKBROWSER_VERSION
+        ).strip()
+        self.timeout = timeout
+        self.runner = runner
+
+    def _bounded_path(self, value: str, *, executable: bool = False) -> str:
+        if not value or not os.path.isabs(value):
+            raise CloakBrowserError("BLOCKED", "CloakBrowser Enterprise runtime is not configured")
+        resolved = os.path.realpath(value)
+        try:
+            within_root = any(os.path.commonpath((root, resolved)) == root for root in APPROVED_CLOAKBROWSER_ROOTS)
+        except ValueError:
+            within_root = False
+        if not within_root:
+            raise CloakBrowserError("BLOCKED", "CloakBrowser runtime is outside the Enterprise boundary")
+        if executable and (not os.path.isfile(resolved) or not os.access(resolved, os.X_OK)):
+            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback is unavailable")
+        # Preserve an approved virtual-environment launcher symlink for the
+        # interpreter. Executing its realpath directly can drop the venv's
+        # import context even though the target remains Enterprise-owned.
+        return os.path.abspath(value) if executable else resolved
+
+    def fetch(self, url: str) -> dict[str, Any]:
+        python = self._bounded_path(self.python, executable=True)
+        worker = self._bounded_path(self.worker, executable=False)
+        storage_dir = self._bounded_path(self.storage_dir, executable=False)
+        if not os.path.isdir(storage_dir):
+            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback is unavailable")
+        child_env = {
+            key: os.environ[key]
+            for key in (
+                "PATH",
+                "HOME",
+                "TMPDIR",
+                "TMP",
+                "TEMP",
+                "LANG",
+                "LC_ALL",
+                "SSL_CERT_FILE",
+                "SSL_CERT_DIR",
+            )
+            if key in os.environ
+        }
+        child_env.update(
+            {
+                "CLOAKBROWSER_CACHE_DIR": storage_dir,
+                "CLOAKBROWSER_VERSION": self.browser_version,
+                "EAIO_CLOAKBROWSER_VERSION": self.browser_version,
+            }
+        )
+        try:
+            completed = self.runner(
+                [python, worker, url],
+                capture_output=True,
+                text=True,
+                timeout=self.timeout,
+                check=False,
+                env=child_env,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise CloakBrowserError("TIMEOUT", "CloakBrowser fallback timed out") from exc
+        except (OSError, ValueError) as exc:
+            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback could not start") from exc
+        if getattr(completed, "returncode", 1) != 0:
+            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback failed")
+        stdout = getattr(completed, "stdout", "")
+        if not isinstance(stdout, str):
+            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback returned invalid output")
+        response: dict[str, Any] | None = None
+        for line in reversed(stdout.splitlines()):
+            if not line.strip():
+                continue
+            try:
+                candidate = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(candidate, dict):
+                response = candidate
+                break
+        if response is None:
+            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback returned invalid output")
+        if response.get("status") != "SUCCESS":
+            reason = response.get("reason")
+            if reason not in FAILURE_REASONS:
+                reason = "UPSTREAM_ERROR"
+            raise CloakBrowserError(reason, "CloakBrowser fallback could not retrieve the public page")
+        markdown = response.get("markdown")
+        if not isinstance(markdown, str) or not markdown.strip() or len(markdown) > MAX_CLOAKBROWSER_MARKDOWN_CHARS:
+            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback returned unreadable content")
+        return {
+            "final_url": response.get("final_url"),
+            "title": response.get("title"),
+            "markdown": markdown,
+        }
 
 
 def _first_match(value: str, pattern: re.Pattern[str]) -> str | None:
@@ -631,18 +771,20 @@ def _normalize_fetch_result(
 
 
 class WebResearchAdapter:
-    """Normalize Firecrawl and the internal Obscura fallback."""
+    """Normalize Firecrawl and the bounded internal fallback chain."""
 
     def __init__(
         self,
         client: FirecrawlAPIClient | Any | None = None,
         *,
         obscura: Any | None = None,
+        cloakbrowser: Any | None = None,
         clock: Callable[[], str] = _utc_now,
         resolver: Callable[[str, int], Iterable[Any]] = _default_resolver,
     ) -> None:
         self.client = client or FirecrawlAPIClient()
         self.obscura = obscura if obscura is not None else ObscuraClient()
+        self.cloakbrowser = cloakbrowser if cloakbrowser is not None else CloakBrowserClient()
         self.clock = clock
         self.resolver = resolver
 
@@ -691,7 +833,7 @@ class WebResearchAdapter:
                     obscura_raw = self.obscura.fetch(requested_url)
                     if not isinstance(obscura_raw, dict):
                         raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback returned an invalid response")
-                    return _normalize_fetch_result(
+                    obscura_result = _normalize_fetch_result(
                         obscura_raw,
                         requested_url=requested_url,
                         method="obscura",
@@ -699,10 +841,28 @@ class WebResearchAdapter:
                         clock=self.clock,
                         resolver=self.resolver,
                     )
+                    if _needs_dynamic_fallback(obscura_result["markdown"]):
+                        raise WebResearchError("UPSTREAM_ERROR", "Obscura returned an empty or verification shell")
+                    return obscura_result
                 except WebResearchError as fallback_error:
                     if fallback_error.reason in {"SECURITY_REJECTED", "LOGIN_REQUIRED", "CAPTCHA_REQUIRED"}:
                         raise
-                    raise WebResearchError("UPSTREAM_ERROR", "Web Research could not retrieve the public page") from fallback_error
+                    try:
+                        cloakbrowser_raw = self.cloakbrowser.fetch(requested_url)
+                        if not isinstance(cloakbrowser_raw, dict):
+                            raise CloakBrowserError("UPSTREAM_ERROR", "CloakBrowser fallback returned an invalid response")
+                        return _normalize_fetch_result(
+                            cloakbrowser_raw,
+                            requested_url=requested_url,
+                            method="cloakbrowser",
+                            fallback_level=3,
+                            clock=self.clock,
+                            resolver=self.resolver,
+                        )
+                    except WebResearchError as cloakbrowser_error:
+                        if cloakbrowser_error.reason in {"SECURITY_REJECTED", "LOGIN_REQUIRED", "CAPTCHA_REQUIRED"}:
+                            raise
+                        raise WebResearchError("UPSTREAM_ERROR", "Web Research could not retrieve the public page") from cloakbrowser_error
         except WebResearchError as exc:
             return _failure(exc, url=requested_url)
         except Exception:

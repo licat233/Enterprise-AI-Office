@@ -75,6 +75,7 @@ capabilities:
       - Firecrawl Search API
       - Firecrawl Scrape API
       - Obscura rendered-page fallback
+      - CloakBrowser hardened rendered-page fallback
     required_secret_classes:
       - firecrawl-api-credential
     security_boundary:
@@ -85,6 +86,9 @@ capabilities:
       - Firecrawl is primary; Obscura is an internal bounded fallback only
       - Obscura uses only a fixed navigate/snapshot/Markdown sequence
       - Obscura receives no personal cookies, sessions, or profiles
+      - CloakBrowser is an internal bounded Level 3 fallback only
+      - CloakBrowser uses only fixed navigate/wait/final-URL/title/body-text reads
+      - CloakBrowser receives no personal cookies, sessions, profiles, or login state
       - no Vault, WeKnora, Memory, cookie, session, or binary persistence
       - only web_search and web_fetch are Operations-facing
     boundary:

@@ -130,6 +130,10 @@ servers:
         - FIRECRAWL_API_KEY
         - EAIO_OBSCURA_BIN
         - EAIO_OBSCURA_STORAGE_DIR
+        - EAIO_CLOAKBROWSER_PYTHON
+        - EAIO_CLOAKBROWSER_WORKER
+        - EAIO_CLOAKBROWSER_STORAGE_DIR
+        - EAIO_CLOAKBROWSER_VERSION
     exposure:
       allowed_profiles:
         - operations
@@ -161,6 +165,7 @@ servers:
       fallback_order:
         - firecrawl
         - obscura
+        - cloakbrowser
       obscura_internal_only: true
       obscura_allowed_tools:
         - browser_navigate
@@ -168,6 +173,21 @@ servers:
         - browser_markdown
       obscura_personal_state_allowed: false
       obscura_storage_dir: ${EAIO_OBSCURA_STORAGE_DIR}
+      cloakbrowser_internal_only: true
+      cloakbrowser_allowed_sequence:
+        - navigate
+        - wait
+        - final_url
+        - title
+        - body_text
+      cloakbrowser_wrapper_version: 0.5.10
+      cloakbrowser_binary_version: 145.0.7632.109.2
+      cloakbrowser_install_strategy: official_pypi_wrapper_official_signed_binary
+      cloakbrowser_python: ${EAIO_CLOAKBROWSER_PYTHON}
+      cloakbrowser_worker: ${EAIO_CLOAKBROWSER_WORKER}
+      cloakbrowser_storage_dir: ${EAIO_CLOAKBROWSER_STORAGE_DIR}
+      cloakbrowser_license_tier: free_pinned_official_build
+      cloakbrowser_personal_state_allowed: false
       trust_class: UNTRUSTED_WEB_CONTENT
     health:
       status: HEALTHY
@@ -177,7 +197,9 @@ servers:
         - live web_search returns normalized untrusted results
         - live web_fetch returns readable Markdown
         - bounded Firecrawl-to-Obscura fallback returns level-2 Markdown
+        - bounded Firecrawl-to-Obscura-to-CloakBrowser fallback returns level-3 Markdown
         - access-control responses do not invoke Obscura
+        - CloakBrowser is internal-only and not Operations-exposed
         - loopback, metadata, and file URLs are rejected
 
   obscura:
