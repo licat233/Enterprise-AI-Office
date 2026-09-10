@@ -43,6 +43,12 @@ profiles:
     memory_policy: disabled-until-isolation-validated
 
 capabilities:
+  enterprise_web_research:
+    enabled: false
+    allowed_profiles: []
+    upstream: firecrawl
+    credential_ref: null
+
   email:
     enabled: true
     provider: tencent-exmail

@@ -60,6 +60,39 @@ capabilities:
       agent_delegate: false
       legacy_memory_migration: false
 
+  enterprise_web_research:
+    kind: conditional
+    enabled_when: company explicitly enables bounded employee-facing Web Research
+    implementation:
+      - infrastructure/web-research/adapter.py
+      - infrastructure/web-research/test_adapter.py
+      - config/mcp-registry.yaml
+      - docs/ENTERPRISE-WEB-RESEARCH-V1.md
+    acceptance:
+      document: docs/ENTERPRISE-WEB-RESEARCH-V1.md
+      section: Stage 1 acceptance
+    upstream:
+      - Firecrawl Search API
+      - Firecrawl Scrape API
+    required_secret_classes:
+      - firecrawl-api-credential
+    security_boundary:
+      - public HTTP/HTTPS URLs only
+      - DNS results must be globally routable
+      - redirects are revalidated before normalized success
+      - fetched pages are UNTRUSTED_WEB_CONTENT
+      - no Vault, WeKnora, Memory, cookie, session, or binary persistence
+      - only web_search and web_fetch are Operations-facing
+    boundary:
+      raw_firecrawl_tools_to_operations: false
+      generic_browser: false
+      generic_shell: false
+      generic_filesystem: false
+      code_execution: false
+      automatic_publication: false
+      authenticated_browsing: false
+      binary_download: false
+
   mcp_control_plane_inventory:
     kind: control_plane
     always_available: true

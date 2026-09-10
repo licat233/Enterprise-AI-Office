@@ -106,9 +106,26 @@ def check_repository() -> list[str]:
     check(ROUTER.is_file(), "Enterprise-owned deterministic Router exists", failures)
     check("ARMOR_ARCH_ROOT" not in WRAPPER.read_text(encoding="utf-8"), "route wrapper has no ARMOR_ARCH_ROOT dependency", failures)
     check(SCOPED_MCP.is_file(), "scoped Vault MCP exists", failures)
-    check(set(servers) == {"anysearch", "firecrawl-mcp", "obscura", "paddle_ocr", "toolscout", "armor-vault-scoped-router"}, "registry contains five MCP runtimes plus scoped Router", failures)
+    check(
+        set(servers)
+        == {
+            "anysearch",
+            "firecrawl-mcp",
+            "obscura",
+            "paddle_ocr",
+            "toolscout",
+            "armor-vault-scoped-router",
+            "enterprise-web-research",
+        },
+        "registry contains Firecrawl backend, bounded adapter, and scoped Router",
+        failures,
+    )
     check(servers["toolscout"]["classification"] == "SHARED_AGENT_INFRASTRUCTURE", "ToolScout is shared agent infrastructure", failures)
-    check(servers["firecrawl-mcp"]["boundary"]["adapter_required"] is False, "Firecrawl uses native Hermes filtering", failures)
+    check(servers["firecrawl-mcp"]["boundary"]["adapter_required"] is True, "Firecrawl requires the Enterprise-owned adapter", failures)
+    check(servers["firecrawl-mcp"]["boundary"]["raw_tools_exposed_to_operations"] is False, "raw Firecrawl tools are not exposed to Operations", failures)
+    adapter = servers["enterprise-web-research"]
+    check(adapter["classification"] == "OPERATIONS_READ", "Web Research adapter is Operations read-only capability", failures)
+    check(set(adapter["boundary"]["allowed_tools"]) == {"web_search", "web_fetch"}, "Web Research adapter exposes exactly two public tools", failures)
     router_boundary = servers["armor-vault-scoped-router"]["boundary"]
     check(
         router_boundary["article_write_scope"] == "Article_v1.3_four_file_package_only",
@@ -126,7 +143,18 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     config_path = runtime_root / "config.yaml"
     config = load_yaml(config_path)
     mcp = config.get("mcp_servers", {})
-    check({"weknora", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"} <= set(mcp), "Operations exposes WeKnora, ToolScout, Firecrawl, and scoped Router", failures)
+    check(
+        set(mcp) == {"weknora", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"},
+        "Operations exposes bounded Web Research adapter and approved MCPs",
+        failures,
+    )
+    check("firecrawl-mcp" not in mcp, "Operations does not bind raw Firecrawl MCP", failures)
+    if "enterprise-web-research" in mcp:
+        check(
+            set(mcp["enterprise-web-research"].get("tools", {}).get("include", [])) == {"web_search", "web_fetch"},
+            "Operations Web Research binding includes exactly web_search and web_fetch",
+            failures,
+        )
     check("obscura" not in mcp and "paddle_ocr" not in mcp, "Operations does not receive browser or raw OCR file access", failures)
     check(config.get("memory", {}).get("memory_enabled") is False, "Operations Hermes Memory is OFF", failures)
     check(config.get("memory", {}).get("user_profile_enabled") is False, "Operations user Profile Memory is OFF", failures)

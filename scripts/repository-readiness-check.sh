@@ -168,6 +168,7 @@ for path in \
   scripts/phase5c_operations_skills_triage_check.py \
   scripts/phase5d_product_materials_check.py \
   scripts/test_phase5d_product_materials.py \
+  scripts/phase6_web_research_check.py \
   docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md \
   docs/PHASE5D-WEBSITE-PRODUCT-MATERIALS-MIGRATION.md \
   skills/shared/department/armor-memory/scripts/armor-route.py \
@@ -177,6 +178,14 @@ for path in \
   skills/shared/department/armor-social-media-pipeline/SKILL.md \
   skills/shared/department/armor-video-content-rules/SKILL.md \
   skills/shared/toolscout/SKILL.md
+do
+  require_file "$path"
+done
+
+for path in \
+  infrastructure/web-research/adapter.py \
+  infrastructure/web-research/test_adapter.py \
+  docs/ENTERPRISE-WEB-RESEARCH-V1.md
 do
   require_file "$path"
 done
@@ -238,7 +247,8 @@ require_text config/mcp-registry.yaml 'paddle_ocr:' 'Phase 4A registry contains 
 require_text config/mcp-registry.yaml 'toolscout:' 'Phase 4A registry contains ToolScout'
 require_text config/mcp-registry.yaml 'schema_version: 2' 'Phase 4C registry records runtime truth'
 require_text config/mcp-registry.yaml 'SHARED_AGENT_INFRASTRUCTURE' 'ToolScout is shared agent infrastructure'
-require_text config/mcp-registry.yaml 'adapter_required: false' 'Firecrawl uses native Hermes filtering'
+require_text config/mcp-registry.yaml 'adapter_required: true' 'Firecrawl requires the Enterprise-owned adapter'
+require_text config/mcp-registry.yaml 'raw_tools_exposed_to_operations: false' 'Raw Firecrawl tools are not Operations-exposed'
 require_text config/mcp-registry.yaml 'armor-vault-scoped-router:' 'Scoped Vault Router is registered'
 require_text skills/shared/department/armor-memory/scripts/route.sh 'armor-route.py' 'ARMOR memory wrapper resolves local Router'
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_article_package' 'Scoped Article save tool is present'
@@ -263,6 +273,10 @@ require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 's
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'PRODUCT_VISUAL_REQUIRED_FILES' 'Product Visual closed contract is present'
 require_text config/mcp-registry.yaml 'product_visual_write_scope:' 'Product Visual write boundary is registered'
 require_text config/capabilities.yaml 'armor_product_visual:' 'Product Visual capability is registered'
+require_text config/capabilities.yaml 'enterprise_web_research:' 'Enterprise Web Research capability is registered'
+require_text config/mcp-registry.yaml 'enterprise-web-research:' 'Enterprise Web Research adapter is registered'
+require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'UNTRUSTED_WEB_CONTENT' 'Web Research trust boundary is documented'
+require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'BLOCKED — REQUIRED INPUT: Enterprise FIRECRAWL_API_KEY' 'Web Research credential blocker is explicit'
 require_file scripts/test_phase5e_product_visual.py
 require_file scripts/phase5e_product_visual_check.py
 require_text docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md 'Phase 5E: PASS' 'Phase 5E migration record is closed'

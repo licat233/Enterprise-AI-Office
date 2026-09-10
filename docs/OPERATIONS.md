@@ -10,6 +10,13 @@ This manual remains the general service, recovery, and troubleshooting guide;
 the acceptance record is the current capability and permission authority for
 the v1.0 Operations bundle.
 
+The optional Enterprise Web Research Stage 1 contract is recorded in
+[`docs/ENTERPRISE-WEB-RESEARCH-V1.md`](./ENTERPRISE-WEB-RESEARCH-V1.md). When
+explicitly enabled, Operations receives only `web_search` and `web_fetch`;
+Firecrawl remains an internal read-only backend and fetched pages are
+`UNTRUSTED_WEB_CONTENT`. The current ARMOR runtime is credential-blocked until
+the protected Enterprise `FIRECRAWL_API_KEY` is provisioned.
+
 ## 1. Operational priorities
 
 Use this order:

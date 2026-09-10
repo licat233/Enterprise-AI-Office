@@ -30,8 +30,8 @@ EXPECTED = {
     "paddle_ocr": "MACHINE_SPECIFIC_REBIND",
     "toolscout": "SHARED_AGENT_INFRASTRUCTURE",
 }
-ALLOWED_SCOPED = {"armor-vault-scoped-router"}
-OPERATIONS_MCP = {"weknora", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"}
+ALLOWED_SCOPED = {"armor-vault-scoped-router", "enterprise-web-research"}
+OPERATIONS_MCP = {"weknora", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"}
 
 PROHIBITED_ACTIVE = re.compile(
     r"/Users/" + r"licat|mcp_Obsidian_|personal[ _-]+chrome[ _-]+profile|"
@@ -85,6 +85,16 @@ def main() -> int:
         check(exposure.get("default_enabled") is False, f"{name} default disabled", failures)
         check(exposure.get("default_enabled") is False, f"{name} default remains disabled", failures)
         check(server.get("health", {}).get("status") in {"NOT_RUN", "BLOCKED_CREDENTIAL", "HEALTHY"}, f"{name} health state is explicit", failures)
+
+    firecrawl = servers.get("firecrawl-mcp", {})
+    firecrawl_boundary = firecrawl.get("boundary", {})
+    check(firecrawl_boundary.get("adapter_required") is True, "Firecrawl requires the Enterprise adapter", failures)
+    check(firecrawl_boundary.get("raw_tools_exposed_to_operations") is False, "raw Firecrawl tools are not Operations-exposed", failures)
+
+    adapter = servers.get("enterprise-web-research", {})
+    check(adapter.get("classification") == "OPERATIONS_READ", "Enterprise Web Research adapter classification", failures)
+    check(adapter.get("boundary", {}).get("allowed_tools") == ["web_search", "web_fetch"], "Enterprise Web Research exposes exactly two tools", failures)
+    check(adapter.get("health", {}).get("status") in {"NOT_RUN", "BLOCKED_CREDENTIAL", "HEALTHY"}, "Enterprise Web Research health state is explicit", failures)
 
     article = ARTICLE_SKILL.read_text(encoding="utf-8")
     check("02-Projects/Workspaces/Website/Articles/" in article, "Article Router target is the Website Articles workspace", failures)

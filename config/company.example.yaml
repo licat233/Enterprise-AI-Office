@@ -100,6 +100,12 @@ employee_access:
 # instantiated. Enabled capabilities must close implementation + acceptance
 # before CONFIGURED READY.
 capabilities:
+  enterprise_web_research:
+    enabled: false
+    allowed_profiles: []
+    upstream: firecrawl
+    credential_ref: null
+
   hermes_webui:
     enabled: false
     # exact_commit: <PIN_WHEN_ENABLED>

@@ -98,7 +98,21 @@ def check_repository() -> list[str]:
     check(MCP.is_file() and "MIC_REQUIRED_FILES" in MCP.read_text(encoding="utf-8"), "scoped MIC package contract is present", failures)
     check("save_mic_product_package" in MCP.read_text(encoding="utf-8"), "scoped MIC save tool is implemented", failures)
     check("mic-product" in ROUTER.read_text(encoding="utf-8"), "Router has the closed mic-product artifact", failures)
-    check(REGISTRY.is_file() and set(servers) == {"anysearch", "firecrawl-mcp", "obscura", "paddle_ocr", "toolscout", "armor-vault-scoped-router"}, "MCP registry remains complete", failures)
+    check(
+        REGISTRY.is_file()
+        and set(servers)
+        == {
+            "anysearch",
+            "firecrawl-mcp",
+            "obscura",
+            "paddle_ocr",
+            "toolscout",
+            "armor-vault-scoped-router",
+            "enterprise-web-research",
+        },
+        "MCP registry remains complete",
+        failures,
+    )
     boundary = servers.get("armor-vault-scoped-router", {}).get("boundary", {})
     check(boundary.get("mic_product_write_scope") == "MIC_v1.0_required_data_bulkfill_audit_optional_detail_package", "MIC write boundary is registered", failures)
     check("save_mic_product_package" in boundary.get("allowed_tools", []), "registry exposes the named MIC save tool", failures)
@@ -123,7 +137,12 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     failures = check_repository()
     config = load_yaml(runtime_root / "config.yaml")
     mcp = config.get("mcp_servers", {})
-    check({"weknora", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"} <= set(mcp), "Operations exposes WeKnora, ToolScout, Firecrawl, and scoped Router", failures)
+    check(
+        set(mcp) == {"weknora", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"},
+        "Operations exposes WeKnora, ToolScout, bounded Web Research, and scoped Router",
+        failures,
+    )
+    check("firecrawl-mcp" not in mcp, "Operations does not expose raw Firecrawl MCP", failures)
     check(not ({"anysearch", "obscura", "paddle_ocr"} & set(mcp)), "Operations does not expose Anysearch, Obscura, or PaddleOCR", failures)
     check(config.get("memory", {}).get("memory_enabled") is False and config.get("memory", {}).get("user_profile_enabled") is False, "deployed Operations Hermes Memory remains OFF", failures)
     disabled = set(config.get("agent", {}).get("disabled_toolsets", []))

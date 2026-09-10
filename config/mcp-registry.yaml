@@ -13,7 +13,7 @@ policy:
   operations_allowlist:
     - weknora
     - armor-vault-scoped-router
-    - firecrawl-mcp
+    - enterprise-web-research
     - toolscout
 
 servers:
@@ -80,7 +80,9 @@ servers:
     boundary:
       risk: mixed
       native_tool_filtering: true
-      adapter_required: false
+      adapter_required: true
+      employee_surface: adapter_only
+      raw_tools_exposed_to_operations: false
       read_lane:
         - firecrawl_search
         - firecrawl_map
@@ -105,6 +107,56 @@ servers:
         - firecrawl_crawl
         - firecrawl_agent
         - firecrawl_interact
+    health:
+      status: BLOCKED_CREDENTIAL
+      live_probe: false
+      blocker: FIRECRAWL_API_KEY is not bound in the Enterprise runtime
+
+  enterprise-web-research:
+    classification: OPERATIONS_READ
+    transport:
+      type: stdio
+      command: ${EAIO_WEB_RESEARCH_BIN}
+      args: []
+      timeout_seconds: 120
+    runtime:
+      status: PREPARED
+      installed: true
+      configured: true
+      enabled: false
+      version: 1.0.0
+      upstream: firecrawl-mcp 3.24.0
+      required_environment:
+        - FIRECRAWL_API_KEY
+    exposure:
+      allowed_profiles:
+        - operations
+      reserved_profiles: []
+      default_enabled: false
+      operations_exposure: true
+    boundary:
+      risk: read_only
+      adapter_required: true
+      allowed_tools:
+        - web_search
+        - web_fetch
+      denied_tools:
+        - firecrawl_scrape
+        - firecrawl_crawl
+        - firecrawl_agent
+        - firecrawl_interact
+        - firecrawl_monitor_create
+        - firecrawl_monitor_update
+        - firecrawl_monitor_delete
+        - firecrawl_monitor_run
+        - generic_browser
+        - generic_shell
+        - generic_filesystem
+        - code_execution
+        - binary_download
+      automatic_persistence: false
+      authenticated_browsing: false
+      trust_class: UNTRUSTED_WEB_CONTENT
     health:
       status: BLOCKED_CREDENTIAL
       live_probe: false

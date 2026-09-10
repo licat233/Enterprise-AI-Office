@@ -331,7 +331,7 @@ Product Visual
 |---|---|---|---|---|
 | WeKnora | Existing core runtime; configured read-only MCP | WeKnora app, docreader, PostgreSQL, Redis, and frontend containers running; app health HTTP 200 on current runtime port `18081` | Read-only retrieval | PASS |
 | ToolScout | Installed and configured | HEALTHY | Exposed through established exact shared allowlist | PASS |
-| Firecrawl | Installed and configured; filtered read lane | `BLOCKED_CREDENTIAL` because `FIRECRAWL_API_KEY` is intentionally not bound | Operations read lane only; action-capable lanes denied | ACCEPTABLE DEGRADED |
+| Firecrawl | Installed and configured; Enterprise Web Research adapter uses the read API lane | `BLOCKED_CREDENTIAL` because `FIRECRAWL_API_KEY` is intentionally not bound | Operations exposes only `web_search` and `web_fetch`; raw/action-capable lanes denied | ACCEPTABLE DEGRADED |
 | Anysearch | Registered; remote runtime known; configured | `BLOCKED_CREDENTIAL` because `ANYSEARCH_API_KEY` is not bound | Not exposed | ACCEPTABLE DEGRADED |
 | Obscura | Installed and configured | HEALTHY in registry probes | Not exposed; reserved for future approved browser-session worker | PASS / not exposed |
 | PaddleOCR | Installed and configured | HEALTHY in registry probes | Not exposed; reserved for future approved media worker | PASS / not exposed |

@@ -359,7 +359,21 @@ def check_repository() -> list[str]:
     check("03-Records/Published/Social-Media/" not in social_text, "obsolete Published Social source route is absent", failures)
     check("/Users/licat" not in social_text and "/Users/licat" not in VIDEO_SKILL.read_text(encoding="utf-8"), "active Social Skills have no personal machine paths", failures)
     check("ARMOR_ARCH_ROOT" not in ROUTE.read_text(encoding="utf-8"), "Social uses the closed local Router without ARMOR_ARCH_ROOT", failures)
-    check(REGISTRY.is_file() and set(servers) == {"anysearch", "firecrawl-mcp", "obscura", "paddle_ocr", "toolscout", "armor-vault-scoped-router"}, "Phase 4C MCP registry remains complete", failures)
+    check(
+        REGISTRY.is_file()
+        and set(servers)
+        == {
+            "anysearch",
+            "firecrawl-mcp",
+            "obscura",
+            "paddle_ocr",
+            "toolscout",
+            "armor-vault-scoped-router",
+            "enterprise-web-research",
+        },
+        "Phase 4C MCP registry remains complete",
+        failures,
+    )
     boundary = servers.get("armor-vault-scoped-router", {}).get("boundary", {})
     check(boundary.get("article_write_scope") == "Article_v1.3_four_file_package_only", "Article scoped write contract is unchanged", failures)
     check(boundary.get("social_write_scope") == "Social_v2.0_required_four_files_plus_optional_video_artifacts", "Social scoped write contract is registered", failures)
@@ -372,7 +386,12 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     failures = check_repository()
     config = load_yaml(runtime_root / "config.yaml")
     mcp = config.get("mcp_servers", {})
-    check({"weknora", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"} <= set(mcp), "Operations exposes the approved MCP set", failures)
+    check(
+        set(mcp) == {"weknora", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"},
+        "Operations exposes the approved MCP set through bounded adapters",
+        failures,
+    )
+    check("firecrawl-mcp" not in mcp, "Operations does not expose raw Firecrawl MCP", failures)
     check(not ({"anysearch", "obscura", "paddle_ocr"} & set(mcp)), "Operations does not expose Anysearch, Obscura, or PaddleOCR", failures)
     check(config.get("memory", {}).get("memory_enabled") is False and config.get("memory", {}).get("user_profile_enabled") is False, "Operations Hermes Memory remains OFF", failures)
     disabled = set(config.get("agent", {}).get("disabled_toolsets", []))

@@ -142,9 +142,9 @@ def check_repository() -> list[str]:
 
     profile = load_yaml(PROFILE_CONFIG)
     check(profile.get("memory", {}).get("memory_enabled") is False, "repository Operations Memory is OFF", failures)
-    allowed_mcp = {"weknora", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"}
+    allowed_mcp = {"weknora", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"}
     check(set(profile.get("mcp_servers", {})) <= allowed_mcp and "weknora" in profile.get("mcp_servers", {}), "repository Operations MCP config stays within approved capabilities", failures)
-    check(set(profile.get("platform_toolsets", {}).get("cli", [])) == {"weknora", "skills", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"}, "repository Operations toolsets stay within the Phase 4C allowlist", failures)
+    check(set(profile.get("platform_toolsets", {}).get("cli", [])) == {"weknora", "skills", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"}, "repository Operations toolsets stay within the Phase 4C allowlist", failures)
     check(REQUIRED_DISABLED_TOOLSETS <= set(profile.get("agent", {}).get("disabled_toolsets", [])), "generic shell/file/browser paths remain disabled", failures)
 
     for path in (ARTICLE_SKILL, PROFILE_CONFIG, PROFILE_MANIFEST, PROFILE_ENABLED, PROFILE_DISABLED):
@@ -167,9 +167,9 @@ def check_runtime(
     runtime_text = runtime_config_path.read_text(encoding="utf-8")
     check(runtime_config.get("memory", {}).get("memory_enabled") is False, "deployed Operations Memory is OFF", failures)
     runtime_mcp = set(runtime_config.get("mcp_servers", {}))
-    check(runtime_mcp <= {"weknora", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"} and "weknora" in runtime_mcp, "deployed Operations MCP config stays within approved capabilities", failures)
+    check(runtime_mcp <= {"weknora", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"} and "weknora" in runtime_mcp, "deployed Operations MCP config stays within approved capabilities", failures)
     cli_tools = set(runtime_config.get("platform_toolsets", {}).get("cli", []))
-    check(cli_tools == {"weknora", "skills", "toolscout", "firecrawl-mcp", "armor-vault-scoped-router"}, "deployed Operations toolsets stay within the Phase 4C allowlist", failures)
+    check(cli_tools == {"weknora", "skills", "toolscout", "enterprise-web-research", "armor-vault-scoped-router"}, "deployed Operations toolsets stay within the Phase 4C allowlist", failures)
     disabled = set(runtime_config.get("agent", {}).get("disabled_toolsets", []))
     check(REQUIRED_DISABLED_TOOLSETS <= disabled, "deployed generic shell/file/browser paths remain disabled", failures)
     check(not has_forbidden_active_reference(runtime_text), "deployed Operations config has no prohibited active references", failures)
