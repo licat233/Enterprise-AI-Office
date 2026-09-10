@@ -17,14 +17,13 @@ STANDARD_RELATIVE = Path(
 
 
 def _documents() -> dict[str, str]:
-    documents = {"Enterprise MIC Skill": SKILL.read_text(encoding="utf-8")}
     vault_root = os.environ.get("ARMOR_VAULT_ROOT")
-    if vault_root:
-        standard = Path(vault_root) / STANDARD_RELATIVE
-        if not standard.is_file():
-            raise AssertionError(f"canonical MIC standard is missing: {standard}")
-        documents["Canonical MIC Vault standard"] = standard.read_text(encoding="utf-8")
-    return documents
+    if not vault_root:
+        raise AssertionError("ARMOR_VAULT_ROOT is required for the canonical authority tests")
+    standard = Path(vault_root) / STANDARD_RELATIVE
+    if not standard.is_file():
+        raise AssertionError(f"canonical MIC standard is missing: {standard}")
+    return {"Canonical MIC Vault standard": standard.read_text(encoding="utf-8")}
 
 
 def _technical_section(text: str) -> str:

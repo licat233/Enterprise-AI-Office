@@ -164,6 +164,8 @@ for path in \
   scripts/phase5b_mic_runtime_check.py \
   scripts/test_phase5b_mic.py \
   scripts/test_phase5b1_mic_authority.py \
+  scripts/test_phase5b2_mic_authority_dedup.py \
+  docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md \
   skills/shared/department/armor-memory/scripts/armor-route.py \
   skills/shared/department/armor-memory/scripts/armor-vault-mcp.py \
   skills/shared/department/armor-mic-product-optimization/SKILL.md \
@@ -239,10 +241,10 @@ require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 's
 require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_mic_product_package' 'Scoped MIC save tool is present'
 require_text skills/shared/department/armor-memory/scripts/armor-route.py 'mic-product' 'MIC product route is present'
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-product-edit-context/v1' 'MIC Skill honors current edit-page extraction'
-require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'BLOCKED_FACTS' 'MIC Skill has explicit fact blockers'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'BLOCKED_SOURCE' 'MIC Skill fails closed when Standard is unavailable'
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'MIC_AUTHORITY_REVIEW_REQUIRED' 'MIC Skill has authority review gate'
-require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-product-data.yaml' 'MIC structured artifact is documented'
-require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-bulkfill.txt' 'MIC BulkFill artifact is documented'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'Exact technical values must ultimately resolve' 'MIC adapter preserves technical fact safety'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'save_mic_product_package' 'MIC adapter binds scoped save'
 require_absent skills/shared/department/mic-product-fill 'No duplicate shared MIC fill Skill is active'
 require_absent skills/shared/department/mic-product-audit 'No duplicate shared MIC audit Skill is active'
 require_absent skills/shared/department/mic-product-detail-page 'No duplicate shared MIC detail Skill is active'
@@ -265,11 +267,12 @@ require_text private/department-profile/config.yaml 'save_mic_product_package' '
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'MIC authority: CANONICAL' 'Phase 5B records canonical MIC authority'
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'Automatic MIC editing enabled: NO' 'Phase 5B records no automatic MIC editing'
 require_text scripts/test_phase5b_mic.py 'publication_performed: false' 'MIC acceptance fixture forbids publication'
-require_text skills/shared/department/armor-mic-product-optimization/SKILL.md '## Type-aware authority rules' 'MIC source authority is type-aware'
-require_text skills/shared/department/armor-mic-product-optimization/SKILL.md '1. authoritative original Datasheet' 'MIC technical facts prioritize original documents'
-require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'never as final technical authority' 'WeKnora cannot be final technical authority'
-require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'current explicit company or user confirmation' 'MIC commercial current-decision rule exists'
+require_text docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md 'CANONICAL' 'Phase 5B.2 records canonical Vault ownership'
+require_text docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md 'EXECUTION_ADAPTER' 'Phase 5B.2 records Skill adapter ownership'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'ARMOR-MIC-Product-Optimization-Standard-v1.0.md' 'MIC Skill references the canonical Vault Standard'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'Never silently fall back to an embedded duplicate rule set' 'MIC Skill has no detailed SOP fallback copy'
 require_text scripts/test_phase5b1_mic_authority.py 'conflicting Datasheet value' 'MIC authority regression covers conflicting technical values'
+require_text scripts/test_phase5b2_mic_authority_dedup.py 'not_embedded_sop' 'MIC de-duplication regression covers the thin adapter role'
 require_text scripts/phase5a_social_runtime_check.py 'publication_performed: false' 'Social acceptance fixture forbids publication'
 require_text config/mcp-registry.yaml 'employee_exposure_default: disabled' 'Phase 4A registry defaults employee exposure off'
 require_text config/mcp-registry.yaml 'operations_allowlist:' 'Phase 4A registry declares Operations allowlist'
