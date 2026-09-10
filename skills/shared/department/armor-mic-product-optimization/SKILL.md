@@ -54,25 +54,58 @@ exact missing fields. Do not fill a form merely to make it look complete.
 
 ## Fact boundary
 
-Every factual value in `mic-product-data.yaml` carries one of these classes:
+Every factual value in `mic-product-data.yaml` carries one of these classes,
+and records the source type and locator needed to apply the rules below:
 
 `USER_CONFIRMED`, `AUTHORITATIVE_DOCUMENT`, `CANONICAL_KNOWLEDGE`,
 `MIC_EXISTING_SOURCE`, `OBSERVABLE_MEDIA`, `REASONABLE_INFERENCE`, or
 `UNKNOWN`.
 
-The first five classes may support buyer-facing copy when the source is
-identified. `REASONABLE_INFERENCE` may shape wording but cannot create a
-numeric or commercial fact. `UNKNOWN` stays explicit in the structured data
-and audit, or is omitted from paste-ready output. Never fabricate or silently
-normalize power, voltage, CCT, CRI, material, dimensions, certifications, MOQ,
-price, lead time, capacity, warranty, customers, cases, markets, packaging,
-logistics, ranking, or performance claims. Conflicts between sources remain
-visible and block the affected field until an authority is selected.
+The class alone is not final authority; the source type must also be checked.
 
-Source priority is: current Vault authority/rules → read-only WeKnora result →
-original product document/datasheet → current MIC source → explicit user
-input for unresolved decisions. Historical MIC outputs are evidence only, not
-rules or proof.
+## Type-aware authority rules
+
+### Workflow governance
+
+Use current canonical ARMOR Vault Rules and Standards as the governing
+workflow authority for stages, fields, gates, artifacts, and boundaries. This
+workflow authority does not let a derived retrieval result override an
+authoritative product document.
+
+### Exact product technical facts
+
+For exact product technical facts — including model, dimensions, power,
+voltage, CCT, CRI, materials, IP rating, certifications, test standards,
+electrical characteristics, and formally documented packaging dimensions —
+apply this priority:
+
+1. authoritative original Datasheet, Manual, test, or certification document;
+2. canonical or verified Product Knowledge derived from those authoritative
+   sources;
+3. read-only WeKnora retrieval, used to locate or retrieve the Knowledge or
+   source above, never as final technical authority;
+4. the current MIC listing or edit page as existing-state evidence.
+
+WeKnora must never silently override a conflicting original authoritative
+document. If authoritative sources conflict, keep the conflict visible and
+return `MIC_AUTHORITY_REVIEW_REQUIRED` or the existing appropriate blocker.
+Historical MIC output cannot override a current authoritative specification.
+
+### Mutable commercial/business fields
+
+For mutable commercial/business fields — including MOQ, price, lead time, payment terms, sample policy, and packaging/commercial configuration — current explicit company or user confirmation, or current approved commercial documentation, may supersede historical MIC listing data. Historical MIC
+output remains evidence only, and stale retrieval or historical output must
+not be used to backfill a current commercial decision.
+
+### Observable media and inference
+
+Observable media supports directly visible facts only; it cannot create exact
+hidden technical parameters. `REASONABLE_INFERENCE` may improve wording or
+organization but cannot create numeric facts, certifications, commercial
+facts, performance claims, or technical specifications. `UNKNOWN` stays
+explicit in the structured data and audit, or is omitted from paste-ready
+output. Never fabricate or silently normalize any technical, commercial,
+customer, case, market, packaging, logistics, ranking, or performance claim.
 
 ## Canonical stages and gates
 

@@ -30,6 +30,7 @@ ENABLED_TOOLS = ROOT / "private/department-profile/enabled-tools.csv"
 MANIFEST = ROOT / "private/department-profile/.symlink_manifest"
 PHASE_DOC = ROOT / "docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md"
 TESTS = ROOT / "scripts/test_phase5b_mic.py"
+AUTHORITY_TESTS = ROOT / "scripts/test_phase5b1_mic_authority.py"
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -61,6 +62,7 @@ def check_repository() -> list[str]:
     registry = load_yaml(REGISTRY)
     servers = registry.get("servers", {})
     skill_text = MIC_SKILL.read_text(encoding="utf-8") if MIC_SKILL.is_file() else ""
+    normalized_skill_text = " ".join(skill_text.split())
     check(MIC_SKILL.is_file(), "canonical MIC Skill exists", failures)
     check(not OLD_MIC_SKILL.exists(), "legacy shared mic-product-fill entrypoint is removed", failures)
     check("save_mic_product_package" in skill_text, "MIC Skill declares the scoped save operation", failures)
@@ -68,12 +70,19 @@ def check_repository() -> list[str]:
     check("BLOCKED_FACTS" in skill_text and "BLOCKED_SOURCE" in skill_text and "BLOCKED_CATEGORY" in skill_text, "MIC Skill has explicit missing-fact states", failures)
     check("MIC_AUTHORITY_REVIEW_REQUIRED" in skill_text, "MIC Skill has explicit authority-conflict state", failures)
     check("REASONABLE_INFERENCE" in skill_text and "UNKNOWN" in skill_text, "MIC Skill defines fact classes and unknown behavior", failures)
+    check("## Type-aware authority rules" in skill_text, "MIC Skill uses type-aware authority rules", failures)
+    check("1. authoritative original Datasheet" in normalized_skill_text, "MIC technical facts start with original documents", failures)
+    check("3. read-only WeKnora retrieval" in normalized_skill_text and "never as final technical authority" in normalized_skill_text, "WeKnora remains a technical retrieval layer", failures)
+    check("Source priority is: current Vault authority/rules" not in normalized_skill_text, "obsolete single source-priority rule is absent", failures)
+    check("current explicit company or user confirmation" in normalized_skill_text and "may supersede historical MIC listing data" in normalized_skill_text, "current commercial decisions can supersede historical data", failures)
+    check("Observable media supports directly visible facts only" in normalized_skill_text and "cannot create numeric facts" in normalized_skill_text, "media and inference fact boundaries are explicit", failures)
     check("03-Records/Published" not in skill_text, "MIC Skill does not use Published as editable source", failures)
     check("/Users/licat" not in skill_text, "canonical MIC Skill has no personal machine paths", failures)
     check(not (ROOT / "skills/shared/department/mic-product-audit").exists(), "no duplicate shared MIC audit workflow is active", failures)
     check(not (ROOT / "skills/shared/department/mic-product-detail-page").exists(), "no duplicate shared MIC detail workflow is active", failures)
     check(PHASE_DOC.is_file(), "Phase 5B migration record exists", failures)
     check(TESTS.is_file(), "Phase 5B MIC tests exist", failures)
+    check(AUTHORITY_TESTS.is_file(), "Phase 5B.1 authority regression tests exist", failures)
     check(MCP.is_file() and "MIC_REQUIRED_FILES" in MCP.read_text(encoding="utf-8"), "scoped MIC package contract is present", failures)
     check("save_mic_product_package" in MCP.read_text(encoding="utf-8"), "scoped MIC save tool is implemented", failures)
     check("mic-product" in ROUTER.read_text(encoding="utf-8"), "Router has the closed mic-product artifact", failures)
@@ -114,6 +123,14 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     check(mic_link.is_symlink() and mic_link.resolve() == MIC_SKILL.parent.resolve(), "Operations exposes canonical MIC Skill by symlink", failures)
     check(not (profile_skills / "mic-product-fill").exists(), "Operations has no Legacy MIC fill symlink", failures)
     check(vault_root.is_dir(), "Enterprise Vault root is readable", failures)
+    standard = vault_root / "02-Projects/Workspaces/Products/MIC-Products/ARMOR-MIC-Product-Optimization-Standard-v1.0.md"
+    standard_text = standard.read_text(encoding="utf-8") if standard.is_file() else ""
+    normalized_standard_text = " ".join(standard_text.split())
+    check(standard.is_file(), "deployed canonical MIC standard is readable", failures)
+    check("### Exact product technical facts" in standard_text and "1. authoritative original Datasheet" in normalized_standard_text, "deployed MIC standard has the corrected technical hierarchy", failures)
+    check("3. read-only WeKnora retrieval" in normalized_standard_text and "never as final technical authority" in normalized_standard_text, "deployed MIC standard keeps WeKnora retrieval-only", failures)
+    check("current explicit company or user confirmation" in normalized_standard_text and "may supersede historical MIC listing data" in normalized_standard_text, "deployed MIC standard has the current commercial rule", failures)
+    check("REASONABLE_INFERENCE` may improve wording" in normalized_standard_text and "cannot create numeric facts" in normalized_standard_text, "deployed MIC standard blocks numeric inference", failures)
     env = dict(__import__("os").environ)
     env["ARMOR_VAULT_ROOT"] = str(vault_root)
     route_result = subprocess.run([str(ROUTE), "--object", "work-product", "--domain", "products", "--artifact", "mic-product"], text=True, capture_output=True, env=env, check=False)
@@ -123,6 +140,11 @@ def check_runtime(runtime_root: Path, hermes_home: Path, vault_root: Path) -> li
     if completed.returncode != 0:
         print(completed.stdout)
         print(completed.stderr)
+    authority = subprocess.run([sys.executable, str(AUTHORITY_TESTS)], text=True, capture_output=True, env=env, check=False)
+    check(authority.returncode == 0, "deployed MIC authority regression tests pass", failures)
+    if authority.returncode != 0:
+        print(authority.stdout)
+        print(authority.stderr)
     return failures
 
 

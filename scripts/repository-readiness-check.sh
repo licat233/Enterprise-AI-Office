@@ -163,6 +163,7 @@ for path in \
   scripts/test_phase5a_social.py \
   scripts/phase5b_mic_runtime_check.py \
   scripts/test_phase5b_mic.py \
+  scripts/test_phase5b1_mic_authority.py \
   skills/shared/department/armor-memory/scripts/armor-route.py \
   skills/shared/department/armor-memory/scripts/armor-vault-mcp.py \
   skills/shared/department/armor-mic-product-optimization/SKILL.md \
@@ -264,6 +265,11 @@ require_text private/department-profile/config.yaml 'save_mic_product_package' '
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'MIC authority: CANONICAL' 'Phase 5B records canonical MIC authority'
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'Automatic MIC editing enabled: NO' 'Phase 5B records no automatic MIC editing'
 require_text scripts/test_phase5b_mic.py 'publication_performed: false' 'MIC acceptance fixture forbids publication'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md '## Type-aware authority rules' 'MIC source authority is type-aware'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md '1. authoritative original Datasheet' 'MIC technical facts prioritize original documents'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'never as final technical authority' 'WeKnora cannot be final technical authority'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'current explicit company or user confirmation' 'MIC commercial current-decision rule exists'
+require_text scripts/test_phase5b1_mic_authority.py 'conflicting Datasheet value' 'MIC authority regression covers conflicting technical values'
 require_text scripts/phase5a_social_runtime_check.py 'publication_performed: false' 'Social acceptance fixture forbids publication'
 require_text config/mcp-registry.yaml 'employee_exposure_default: disabled' 'Phase 4A registry defaults employee exposure off'
 require_text config/mcp-registry.yaml 'operations_allowlist:' 'Phase 4A registry declares Operations allowlist'
