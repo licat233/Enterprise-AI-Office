@@ -74,6 +74,7 @@ capabilities:
     upstream:
       - Firecrawl Search API
       - Firecrawl Scrape API
+      - Obscura rendered-page fallback
     required_secret_classes:
       - firecrawl-api-credential
     security_boundary:
@@ -81,6 +82,9 @@ capabilities:
       - DNS results must be globally routable
       - redirects are revalidated before normalized success
       - fetched pages are UNTRUSTED_WEB_CONTENT
+      - Firecrawl is primary; Obscura is an internal bounded fallback only
+      - Obscura uses only a fixed navigate/snapshot/Markdown sequence
+      - Obscura receives no personal cookies, sessions, or profiles
       - no Vault, WeKnora, Memory, cookie, session, or binary persistence
       - only web_search and web_fetch are Operations-facing
     boundary:

@@ -15,12 +15,13 @@ PUBLIC_RESOLVER = lambda host, port: ["93.184.216.34"]
 
 
 class StubFirecrawl:
-    def __init__(self, *, search=None, fetch=None):
+    def __init__(self, *, search=None, fetch=None, fetch_error=None):
         self.search_response = search or {"web": []}
         self.fetch_response = fetch or {
             "markdown": "# Example",
             "metadata": {"title": "Example", "description": "A page", "language": "en"},
         }
+        self.fetch_error = fetch_error
         self.calls: list[tuple[str, object]] = []
 
     def search(self, query, limit):
@@ -29,6 +30,25 @@ class StubFirecrawl:
 
     def fetch(self, url):
         self.calls.append(("fetch", url))
+        if self.fetch_error is not None:
+            raise self.fetch_error
+        return self.fetch_response
+
+
+class StubObscura:
+    def __init__(self, *, fetch=None, fetch_error=None):
+        self.fetch_response = fetch or {
+            "final_url": "https://example.com/",
+            "title": "Example",
+            "markdown": "# Rendered Example\n\nDynamic content.",
+        }
+        self.fetch_error = fetch_error
+        self.calls: list[str] = []
+
+    def fetch(self, url):
+        self.calls.append(url)
+        if self.fetch_error is not None:
+            raise self.fetch_error
         return self.fetch_response
 
 
@@ -94,6 +114,46 @@ class WebResearchAdapterTests(unittest.TestCase):
         self.assertEqual(result["final_url"], "https://example.com/final")
         self.assertEqual(result["metadata"]["language"], "en")
 
+    def test_firecrawl_primary_success_does_not_call_obscura(self):
+        client = StubFirecrawl(fetch={"markdown": "# Primary page\n\nReadable content."})
+        obscura = StubObscura()
+        result = adapter.WebResearchAdapter(client, obscura=obscura, resolver=PUBLIC_RESOLVER).web_fetch(
+            {"url": "https://example.com/"}
+        )
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertEqual(result["retrieval"]["method"], "firecrawl")
+        self.assertEqual(result["retrieval"]["fallback_level"], 1)
+        self.assertEqual(obscura.calls, [])
+
+    def test_bounded_firecrawl_failure_uses_obscura(self):
+        client = StubFirecrawl(fetch_error=adapter.WebResearchError("BLOCKED", "upstream blocked the request"))
+        obscura = StubObscura(
+            fetch={
+                "final_url": "https://example.com/rendered",
+                "title": "Rendered page",
+                "markdown": "# Rendered page\n\nContent produced by the page runtime.",
+            }
+        )
+        result = adapter.WebResearchAdapter(client, obscura=obscura, resolver=PUBLIC_RESOLVER).web_fetch(
+            {"url": "https://example.com/"}
+        )
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertEqual(result["retrieval"]["method"], "obscura")
+        self.assertEqual(result["retrieval"]["fallback_level"], 2)
+        self.assertEqual(result["trust_class"], "UNTRUSTED_WEB_CONTENT")
+        self.assertEqual(result["final_url"], "https://example.com/rendered")
+        self.assertEqual(obscura.calls, ["https://example.com/"])
+
+    def test_dynamic_shell_uses_obscura(self):
+        client = StubFirecrawl(fetch={"markdown": "Please enable JavaScript to continue"})
+        obscura = StubObscura()
+        result = adapter.WebResearchAdapter(client, obscura=obscura, resolver=PUBLIC_RESOLVER).web_fetch(
+            {"url": "https://example.com/"}
+        )
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertEqual(result["retrieval"]["method"], "obscura")
+        self.assertEqual(obscura.calls, ["https://example.com/"])
+
     def test_public_to_private_redirect_is_rejected_after_upstream_response(self):
         client = StubFirecrawl(
             fetch={
@@ -108,9 +168,36 @@ class WebResearchAdapterTests(unittest.TestCase):
 
     def test_blocked_url_makes_no_upstream_call(self):
         client = StubFirecrawl()
-        result = adapter.WebResearchAdapter(client, resolver=PUBLIC_RESOLVER).web_fetch({"url": "http://127.0.0.1/"})
+        obscura = StubObscura()
+        result = adapter.WebResearchAdapter(client, obscura=obscura, resolver=PUBLIC_RESOLVER).web_fetch(
+            {"url": "http://127.0.0.1/"}
+        )
         self.assertEqual(result["reason"], "SECURITY_REJECTED")
         self.assertEqual(client.calls, [])
+        self.assertEqual(obscura.calls, [])
+
+    def test_login_or_captcha_is_terminal_and_does_not_use_obscura(self):
+        for reason in ("LOGIN_REQUIRED", "CAPTCHA_REQUIRED"):
+            with self.subTest(reason=reason):
+                client = StubFirecrawl(fetch_error=adapter.WebResearchError(reason, "access control"))
+                obscura = StubObscura()
+                result = adapter.WebResearchAdapter(client, obscura=obscura, resolver=PUBLIC_RESOLVER).web_fetch(
+                    {"url": "https://example.com/"}
+                )
+                self.assertEqual(result["status"], "FAILURE")
+                self.assertEqual(result["reason"], reason)
+                self.assertEqual(obscura.calls, [])
+
+    def test_both_backends_fail_with_finite_error_without_backend_details(self):
+        client = StubFirecrawl(fetch_error=adapter.WebResearchError("UPSTREAM_ERROR", "firecrawl internal detail"))
+        obscura = StubObscura(fetch_error=adapter.WebResearchError("UPSTREAM_ERROR", "obscura internal detail"))
+        result = adapter.WebResearchAdapter(client, obscura=obscura, resolver=PUBLIC_RESOLVER).web_fetch(
+            {"url": "https://example.com/"}
+        )
+        self.assertEqual(result["status"], "FAILURE")
+        self.assertEqual(result["reason"], "UPSTREAM_ERROR")
+        self.assertEqual(result["error"], "Web Research could not retrieve the public page")
+        self.assertEqual(obscura.calls, ["https://example.com/"])
 
     def test_missing_credential_is_explicit_and_does_not_persist(self):
         client = adapter.FirecrawlAPIClient(api_key="", opener=lambda request, timeout: None)

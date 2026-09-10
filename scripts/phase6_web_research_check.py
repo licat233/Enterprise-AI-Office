@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the Stage 1 Web Research capability and optional live bindings."""
+"""Validate the bounded Stage 1/2 Web Research capability and live bindings."""
 
 from __future__ import annotations
 
@@ -61,11 +61,21 @@ def check_repository(failures: list[str]) -> None:
     firecrawl_boundary = firecrawl.get("boundary", {})
     adapter = servers.get("enterprise-web-research", {})
     adapter_boundary = adapter.get("boundary", {})
+    obscura = servers.get("obscura", {})
     check("enterprise_web_research:" in CAPABILITIES.read_text(encoding="utf-8"), "capability registry contains enterprise_web_research", failures)
     check(adapter.get("classification") == "OPERATIONS_READ", "adapter is classified as Operations read-only", failures)
     check(adapter_boundary.get("allowed_tools") == ["web_search", "web_fetch"], "adapter allowlist is exactly web_search/web_fetch", failures)
     check(adapter_boundary.get("automatic_persistence") is False, "adapter automatic persistence is disabled", failures)
     check(adapter_boundary.get("trust_class") == "UNTRUSTED_WEB_CONTENT", "adapter trust class is explicit", failures)
+    check(adapter_boundary.get("fallback_order") == ["firecrawl", "obscura"], "Firecrawl remains primary over Obscura", failures)
+    check(adapter_boundary.get("obscura_internal_only") is True, "Obscura fallback is internal-only", failures)
+    check(obscura.get("exposure", {}).get("operations_exposure") is False, "Obscura is not Operations-exposed", failures)
+    check(obscura.get("runtime", {}).get("enabled") is False, "Obscura direct runtime lane remains disabled", failures)
+    check(
+        set(adapter_boundary.get("obscura_allowed_tools", [])) == {"browser_navigate", "browser_snapshot", "browser_markdown"},
+        "Obscura fallback uses only the bounded read interface",
+        failures,
+    )
     check(firecrawl.get("runtime", {}).get("version") == "3.24.0", "Firecrawl version remains 3.24.0", failures)
     check(firecrawl_boundary.get("adapter_required") is True, "Firecrawl direct exposure requires the adapter", failures)
     check(firecrawl_boundary.get("raw_tools_exposed_to_operations") is False, "raw Firecrawl tools are not Operations-exposed", failures)
@@ -86,6 +96,13 @@ def check_runtime(runtime_root: Path, failures: list[str]) -> None:
     include = set((adapter.get("tools") or {}).get("include", []))
     check(include == {"web_search", "web_fetch"}, "Operations receives exactly web_search/web_fetch", failures, f"found={sorted(include)}")
     check("firecrawl-mcp" not in servers, "Operations does not bind raw Firecrawl MCP", failures)
+    check("obscura" not in servers, "Operations does not bind raw Obscura MCP", failures)
+    adapter_env = adapter.get("env") or {}
+    check(
+        adapter_env.get("EAIO_OBSCURA_BIN") and adapter_env.get("EAIO_OBSCURA_STORAGE_DIR"),
+        "Operations adapter has the Enterprise Obscura bindings",
+        failures,
+    )
     disabled = set((config.get("agent") or {}).get("disabled_toolsets", []))
     check(FORBIDDEN_TOOLSETS <= disabled, "generic and delegation toolsets remain disabled", failures, f"missing={sorted(FORBIDDEN_TOOLSETS - disabled)}")
     memory = config.get("memory") or {}

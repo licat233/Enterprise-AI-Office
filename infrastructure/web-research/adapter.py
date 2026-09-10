@@ -12,7 +12,9 @@ import ipaddress
 import json
 import os
 import re
+import select
 import socket
+import subprocess
 import sys
 from datetime import datetime, timezone
 from typing import Any, Callable, Iterable
@@ -26,6 +28,11 @@ ALLOWED_PORTS = frozenset({80, 443})
 MAX_QUERY_CHARS = 2_000
 MAX_RESULTS = 20
 MAX_RESPONSE_BYTES = 12 * 1024 * 1024
+MAX_OBSCURA_MARKDOWN_CHARS = 1_000_000
+OBSCURA_TIMEOUT_SECONDS = 45
+DEFAULT_OBSCURA_BIN = "/Users/armor/.local/bin/obscura"
+DEFAULT_OBSCURA_STORAGE_DIR = "/Users/armor/.local/share/enterprise-mcp/obscura"
+OBSCURA_PROTOCOL_VERSION = "2024-11-05"
 TRUST_CLASS = "UNTRUSTED_WEB_CONTENT"
 FAILURE_REASONS = frozenset(
     {
@@ -49,6 +56,36 @@ INTERNAL_HOSTNAMES = frozenset(
 )
 INTERNAL_SUFFIXES = (".localhost", ".local", ".internal", ".intranet", ".home.arpa")
 NUMERIC_HOSTNAME = re.compile(r"^[0-9.]+$")
+SNAPSHOT_URL = re.compile(r"^URL:\s*(\S+)\s*$", re.MULTILINE)
+SNAPSHOT_TITLE = re.compile(r"^Title:\s*(.*?)\s*$", re.MULTILINE)
+FALLBACK_REASONS = frozenset({"BLOCKED", "TIMEOUT", "UPSTREAM_ERROR"})
+DYNAMIC_SHELL_MARKERS = frozenset(
+    {
+        "enable javascript",
+        "javascript is required",
+        "checking your browser",
+        "just a moment",
+        "please wait while we verify",
+        "loading...",
+    }
+)
+LOGIN_MARKERS = frozenset(
+    {
+        "login required",
+        "log in to continue",
+        "sign in to continue",
+        "authentication required",
+    }
+)
+CAPTCHA_MARKERS = frozenset(
+    {
+        "captcha required",
+        "verify you are human",
+        "complete the captcha",
+        "recaptcha challenge",
+        "hcaptcha challenge",
+    }
+)
 
 
 class WebResearchError(ValueError):
@@ -59,6 +96,220 @@ class WebResearchError(ValueError):
             raise ValueError(f"unsupported Web Research failure reason: {reason}")
         super().__init__(message)
         self.reason = reason
+
+
+class ObscuraError(WebResearchError):
+    """A safe, finite error from the internal Obscura fallback."""
+
+
+def _mcp_text(result: dict[str, Any], *, backend: str) -> str:
+    if result.get("isError") is True:
+        raise ObscuraError("UPSTREAM_ERROR", f"{backend} returned a bounded failure")
+    content = result.get("content")
+    if not isinstance(content, list):
+        raise ObscuraError("UPSTREAM_ERROR", f"{backend} returned unreadable content")
+    text_parts = [
+        item.get("text")
+        for item in content
+        if isinstance(item, dict) and item.get("type") == "text" and isinstance(item.get("text"), str)
+    ]
+    if not text_parts:
+        raise ObscuraError("UPSTREAM_ERROR", f"{backend} returned unreadable content")
+    return "\n".join(text_parts)
+
+
+class ObscuraClient:
+    """Fixed, internal MCP sequence for a public rendered-page fallback.
+
+    This client intentionally does not expose or call generic browser controls.
+    Each fetch gets a fresh process and uses only navigate, snapshot, and
+    markdown against the approved Enterprise storage directory.
+    """
+
+    def __init__(
+        self,
+        *,
+        command: str | None = None,
+        storage_dir: str | None = None,
+        timeout: float = OBSCURA_TIMEOUT_SECONDS,
+        popen: Callable[..., Any] = subprocess.Popen,
+    ) -> None:
+        self.command = (command or os.environ.get("EAIO_OBSCURA_BIN") or DEFAULT_OBSCURA_BIN).strip()
+        self.storage_dir = (
+            storage_dir or os.environ.get("EAIO_OBSCURA_STORAGE_DIR") or DEFAULT_OBSCURA_STORAGE_DIR
+        ).strip()
+        self.timeout = timeout
+        self.popen = popen
+        self._process: Any | None = None
+        self._next_id = 0
+
+    def _bounded_storage_dir(self) -> str:
+        if not self.storage_dir or not os.path.isabs(self.storage_dir):
+            raise ObscuraError("BLOCKED", "Obscura Enterprise storage is not configured")
+        if not os.path.isdir(self.storage_dir):
+            raise ObscuraError("BLOCKED", "Obscura Enterprise storage is unavailable")
+        approved_root = os.path.realpath(
+            os.environ.get("EAIO_OBSCURA_STORAGE_ROOT") or "/Users/armor/.local/share/enterprise-mcp"
+        )
+        resolved = os.path.realpath(self.storage_dir)
+        try:
+            within_root = os.path.commonpath((approved_root, resolved)) == approved_root
+        except ValueError:
+            within_root = False
+        if not within_root:
+            raise ObscuraError("BLOCKED", "Obscura storage is outside the Enterprise boundary")
+        return resolved
+
+    def _start(self) -> None:
+        if not self.command or not os.path.isfile(self.command) or not os.access(self.command, os.X_OK):
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback is unavailable")
+        storage_dir = self._bounded_storage_dir()
+        child_env = {
+            key: os.environ[key]
+            for key in (
+                "PATH",
+                "HOME",
+                "TMPDIR",
+                "TMP",
+                "TEMP",
+                "LANG",
+                "LC_ALL",
+                "SSL_CERT_FILE",
+                "SSL_CERT_DIR",
+            )
+            if key in os.environ
+        }
+        try:
+            self._process = self.popen(
+                [self.command, "--storage-dir", storage_dir, "mcp"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                env=child_env,
+                text=True,
+                bufsize=1,
+            )
+        except (OSError, ValueError) as exc:
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback could not start") from exc
+
+    def _request(self, method: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+        if self._process is None or self._process.stdin is None or self._process.stdout is None:
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback is not running")
+        self._next_id += 1
+        message = {"jsonrpc": "2.0", "id": self._next_id, "method": method}
+        if params is not None:
+            message["params"] = params
+        try:
+            self._process.stdin.write(json.dumps(message, separators=(",", ":")) + "\n")
+            self._process.stdin.flush()
+            ready, _, _ = select.select([self._process.stdout], [], [], self.timeout)
+            if not ready:
+                raise ObscuraError("TIMEOUT", "Obscura fallback timed out")
+            line = self._process.stdout.readline()
+            if not line:
+                raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback ended unexpectedly")
+            response = json.loads(line)
+        except ObscuraError:
+            raise
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback returned an invalid response") from exc
+        if not isinstance(response, dict) or response.get("id") != self._next_id:
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback returned an invalid response")
+        if isinstance(response.get("error"), dict):
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback rejected the request")
+        result = response.get("result")
+        if not isinstance(result, dict):
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback returned an invalid result")
+        return result
+
+    def _notify_initialized(self) -> None:
+        if self._process is None or self._process.stdin is None:
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback is not running")
+        try:
+            self._process.stdin.write(
+                json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}, separators=(",", ":")) + "\n"
+            )
+            self._process.stdin.flush()
+        except OSError as exc:
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback could not initialize") from exc
+
+    def close(self) -> None:
+        process = self._process
+        self._process = None
+        if process is None:
+            return
+        try:
+            if process.stdin is not None:
+                process.stdin.close()
+        except OSError:
+            pass
+        try:
+            if process.poll() is None:
+                process.terminate()
+                process.wait(timeout=2)
+        except (OSError, subprocess.TimeoutExpired):
+            try:
+                process.kill()
+                process.wait(timeout=2)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+
+    def fetch(self, url: str) -> dict[str, Any]:
+        try:
+            self._start()
+            self._request(
+                "initialize",
+                {
+                    "protocolVersion": OBSCURA_PROTOCOL_VERSION,
+                    "capabilities": {},
+                    "clientInfo": {"name": "enterprise-web-research", "version": "1.0.0"},
+                },
+            )
+            self._notify_initialized()
+            tools = self._request("tools/list")
+            tool_names = {
+                tool.get("name")
+                for tool in tools.get("tools", [])
+                if isinstance(tool, dict) and isinstance(tool.get("name"), str)
+            }
+            required_tools = {"browser_navigate", "browser_snapshot", "browser_markdown"}
+            if not required_tools.issubset(tool_names):
+                raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback lacks the required read interface")
+            self._request(
+                "tools/call",
+                {
+                    "name": "browser_navigate",
+                    "arguments": {"url": url, "waitUntil": "domcontentloaded"},
+                },
+            )
+            snapshot = _mcp_text(
+                self._request("tools/call", {"name": "browser_snapshot", "arguments": {"max_chars": 4_000}}),
+                backend="Obscura snapshot",
+            )
+            markdown = _mcp_text(
+                self._request(
+                    "tools/call",
+                    {"name": "browser_markdown", "arguments": {"max_chars": MAX_OBSCURA_MARKDOWN_CHARS}},
+                ),
+                backend="Obscura Markdown",
+            )
+            final_url = _first_match(snapshot, SNAPSHOT_URL) or url
+            title = _first_match(snapshot, SNAPSHOT_TITLE)
+            return {"final_url": final_url, "title": title, "markdown": markdown}
+        except ObscuraError:
+            raise
+        except Exception as exc:
+            raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback failed") from exc
+        finally:
+            self.close()
+
+
+def _first_match(value: str, pattern: re.Pattern[str]) -> str | None:
+    match = pattern.search(value)
+    if not match:
+        return None
+    candidate = match.group(1).strip()
+    return candidate or None
 
 
 def _utc_now() -> str:
@@ -286,6 +537,24 @@ def _normalize_search_result(item: dict[str, Any]) -> dict[str, str]:
     return result
 
 
+def _page_access_reason(markdown: str) -> str | None:
+    compact = " ".join(markdown.split()).lower()
+    if any(marker in compact for marker in CAPTCHA_MARKERS):
+        return "CAPTCHA_REQUIRED"
+    if any(marker in compact for marker in LOGIN_MARKERS):
+        return "LOGIN_REQUIRED"
+    return None
+
+
+def _needs_dynamic_fallback(markdown: str) -> bool:
+    compact = " ".join(markdown.split()).lower()
+    if not compact:
+        return True
+    if any(marker in compact for marker in DYNAMIC_SHELL_MARKERS) and len(compact) <= 2_000:
+        return True
+    return False
+
+
 def _candidate_redirect_urls(raw: dict[str, Any]) -> list[str]:
     data = raw.get("data") if isinstance(raw.get("data"), dict) else raw
     metadata = data.get("metadata") if isinstance(data, dict) else None
@@ -313,17 +582,67 @@ def _failure(error: WebResearchError, *, url: str | None = None) -> dict[str, An
     return payload
 
 
+def _normalize_fetch_result(
+    raw: dict[str, Any],
+    *,
+    requested_url: str,
+    method: str,
+    fallback_level: int,
+    clock: Callable[[], str],
+    resolver: Callable[[str, int], Iterable[Any]],
+) -> dict[str, Any]:
+    for candidate in _candidate_redirect_urls(raw):
+        validate_public_url(candidate, resolver=resolver)
+    data = _json_object(raw)
+    metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
+    markdown = data.get("markdown")
+    if not isinstance(markdown, str) or not markdown.strip():
+        raise WebResearchError("UPSTREAM_ERROR", "Web Research did not return readable Markdown")
+    access_reason = _page_access_reason(markdown)
+    if access_reason is not None:
+        messages = {
+            "LOGIN_REQUIRED": "The public page requires login",
+            "CAPTCHA_REQUIRED": "The public page requires CAPTCHA completion",
+        }
+        raise WebResearchError(access_reason, messages[access_reason])
+    final_url = (
+        _first_text(metadata, ("final_url", "finalUrl", "url", "sourceURL", "sourceUrl"))
+        or _first_text(data, ("final_url", "finalUrl", "url", "sourceURL", "sourceUrl"))
+        or requested_url
+    )
+    return {
+        "status": "SUCCESS",
+        "url": requested_url,
+        "final_url": final_url,
+        "title": _first_text(metadata, ("title",)) or _first_text(data, ("title",)),
+        "markdown": markdown,
+        "metadata": {
+            "description": _first_text(metadata, ("description",)),
+            "language": _first_text(metadata, ("language", "lang")),
+        },
+        "retrieval": {
+            "method": method,
+            "fallback_level": fallback_level,
+            "retrieved_at": clock(),
+        },
+        "trust_class": TRUST_CLASS,
+        "warnings": [],
+    }
+
+
 class WebResearchAdapter:
-    """Normalize Firecrawl into the two-tool Enterprise contract."""
+    """Normalize Firecrawl and the internal Obscura fallback."""
 
     def __init__(
         self,
         client: FirecrawlAPIClient | Any | None = None,
         *,
+        obscura: Any | None = None,
         clock: Callable[[], str] = _utc_now,
         resolver: Callable[[str, int], Iterable[Any]] = _default_resolver,
     ) -> None:
         self.client = client or FirecrawlAPIClient()
+        self.obscura = obscura if obscura is not None else ObscuraClient()
         self.clock = clock
         self.resolver = resolver
 
@@ -352,34 +671,38 @@ class WebResearchAdapter:
             if set(arguments) != {"url"}:
                 raise WebResearchError("UNSUPPORTED", "web_fetch accepts only url")
             requested_url = validate_public_url(arguments["url"], resolver=self.resolver)
-            raw = self.client.fetch(requested_url)
-            for candidate in _candidate_redirect_urls(raw):
-                validate_public_url(candidate, resolver=self.resolver)
-            data = _json_object(raw)
-            metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
-            markdown = data.get("markdown")
-            if not isinstance(markdown, str):
-                raise WebResearchError("UPSTREAM_ERROR", "Firecrawl did not return readable Markdown")
-            final_url = _first_text(metadata, ("final_url", "finalUrl", "url", "sourceURL", "sourceUrl")) or _first_text(data, ("final_url", "finalUrl", "url", "sourceURL", "sourceUrl")) or requested_url
-            result: dict[str, Any] = {
-                "status": "SUCCESS",
-                "url": requested_url,
-                "final_url": final_url,
-                "title": _first_text(metadata, ("title",)),
-                "markdown": markdown,
-                "metadata": {
-                    "description": _first_text(metadata, ("description",)),
-                    "language": _first_text(metadata, ("language", "lang")),
-                },
-                "retrieval": {
-                    "method": "firecrawl",
-                    "fallback_level": 1,
-                    "retrieved_at": self.clock(),
-                },
-                "trust_class": TRUST_CLASS,
-                "warnings": [],
-            }
-            return result
+            try:
+                raw = self.client.fetch(requested_url)
+                result = _normalize_fetch_result(
+                    raw,
+                    requested_url=requested_url,
+                    method="firecrawl",
+                    fallback_level=1,
+                    clock=self.clock,
+                    resolver=self.resolver,
+                )
+                if _needs_dynamic_fallback(result["markdown"]):
+                    raise WebResearchError("UPSTREAM_ERROR", "Firecrawl returned an empty or dynamic shell")
+                return result
+            except WebResearchError as primary_error:
+                if primary_error.reason not in FALLBACK_REASONS:
+                    raise
+                try:
+                    obscura_raw = self.obscura.fetch(requested_url)
+                    if not isinstance(obscura_raw, dict):
+                        raise ObscuraError("UPSTREAM_ERROR", "Obscura fallback returned an invalid response")
+                    return _normalize_fetch_result(
+                        obscura_raw,
+                        requested_url=requested_url,
+                        method="obscura",
+                        fallback_level=2,
+                        clock=self.clock,
+                        resolver=self.resolver,
+                    )
+                except WebResearchError as fallback_error:
+                    if fallback_error.reason in {"SECURITY_REJECTED", "LOGIN_REQUIRED", "CAPTCHA_REQUIRED"}:
+                        raise
+                    raise WebResearchError("UPSTREAM_ERROR", "Web Research could not retrieve the public page") from fallback_error
         except WebResearchError as exc:
             return _failure(exc, url=requested_url)
         except Exception:

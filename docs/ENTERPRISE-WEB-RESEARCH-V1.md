@@ -1,6 +1,7 @@
-# Enterprise Web Research Capability v1.0 — Stage 1
+# Enterprise Web Research Capability v1.0
 
-Status: `CLOSED / PASS`
+Stage 1 status: `CLOSED / PASS`
+Stage 2 status: `CLOSED / PASS`
 
 This document is the single Stage 1 acceptance record for the bounded,
 employee-facing public-Web research capability. It does not reopen Hermes
@@ -17,8 +18,8 @@ web_fetch(url)
 ```
 
 The Enterprise-owned stdio adapter at
-`infrastructure/web-research/adapter.py` calls only Firecrawl's read APIs:
-`/v2/search` and `/v2/scrape`. Firecrawl remains the upstream provider; its
+`infrastructure/web-research/adapter.py` calls Firecrawl's read APIs:
+`/v2/search` and `/v2/scrape`. Firecrawl remains the primary provider; its
 MCP installation is not exposed as a raw employee tool surface.
 
 ## Normalized contract
@@ -27,14 +28,14 @@ MCP installation is not exposed as a raw employee tool surface.
 array, and `searched_at`. Each result includes only source fields actually
 returned by Firecrawl: `title`, `url`, `snippet`, `published_at`, and `source`.
 
-`web_fetch` returns:
+`web_fetch` returns the same compatible schema for either acquisition level:
 
 ```text
 status: SUCCESS
 url / final_url / title / markdown
 metadata.description / metadata.language
-retrieval.method: firecrawl
-retrieval.fallback_level: 1
+retrieval.method: firecrawl | obscura
+retrieval.fallback_level: 1 | 2
 retrieval.retrieved_at
 trust_class: UNTRUSTED_WEB_CONTENT
 warnings: []
@@ -64,7 +65,7 @@ Operations continues to keep generic browser, shell, terminal, filesystem,
 code execution, delegation, image generation, SSH, and sudo/root unavailable.
 The only exposed Web Research tool names are `web_search` and `web_fetch`.
 
-## Credential state and acceptance
+## Stage 1 credential state and acceptance
 
 The Enterprise runtime has Firecrawl MCP v3.24.0 installed and the approved
 `FIRECRAWL_API_KEY` is provisioned through the protected Enterprise Hermes
@@ -85,13 +86,78 @@ Live acceptance through the Enterprise adapter passed:
 The secret remains outside Git and is never included in this document. MIC is
 not a Stage 1 hard target.
 
+## Stage 2 — bounded dynamic Web fallback
+
+Status: `CLOSED / PASS`
+
+Stage 2 extends only `web_fetch(url)` with a bounded internal fallback:
+
+```text
+Firecrawl read acquisition (Level 1)
+  → only on bounded acquisition failure
+Obscura rendered/readable acquisition (Level 2)
+  → normalized by the same adapter contract
+```
+
+The Enterprise Mac Studio has Obscura `0.2.2` installed at
+`/Users/armor/.local/bin/obscura`. Its MCP surface is broader than this
+capability, so the adapter uses a fresh process with the approved Enterprise
+storage directory `/Users/armor/.local/share/enterprise-mcp/obscura` and only
+the fixed read sequence `browser_navigate`, `browser_snapshot`, and
+`browser_markdown`. It never calls click, fill, type, evaluate, cookies,
+storage-state, forms, downloads, or session/profile controls. No personal
+browser state is supplied; the inspected Enterprise storage directory was
+empty before acceptance.
+
+Fallback is permitted for `BLOCKED`, `TIMEOUT`, `UPSTREAM_ERROR`, and empty,
+unreadable, or recognizable JavaScript-shell content from Firecrawl. It is
+not permitted after URL validation failure, a rejected final/redirect URL,
+`UNSUPPORTED`, `LOGIN_REQUIRED`, or `CAPTCHA_REQUIRED`. Obscura final URLs
+are validated by the same public-URL validator before success. All results
+remain `UNTRUSTED_WEB_CONTENT`.
+
+The adapter performs no automatic Vault, WeKnora, Hermes Memory, cookie,
+session, project-artifact, or binary persistence. Obscura's bounded technical
+cache, if required, is confined to the approved Enterprise storage directory.
+Operations continues to expose exactly `web_search` and `web_fetch`; Obscura
+and raw Firecrawl remain internal backends. Generic browser, shell, terminal,
+filesystem, code execution, Memory, Agent Delegate, and Firecrawl action lanes
+remain disabled.
+
+The installed Enterprise host has no CloakBrowser installation. CloakBrowser
+is therefore `CONDITIONAL_HARDENED_FALLBACK`, with no installation or
+integration in Stage 2.
+
+## Stage 2 acceptance record
+
+Deterministic Web Research tests pass: 15 tests, including primary-success,
+bounded fallback, dynamic-shell fallback, access-control terminal behavior,
+finite dual-backend failure, redirect validation, and exact employee tool
+surface.
+
+Live acceptance through the employee-facing adapter passed:
+
+- Normal public page `https://example.com/`: Firecrawl, Level 1, readable
+  Markdown, `UNTRUSTED_WEB_CONTENT`.
+- Controlled primary-failure acceptance for the public JavaScript page
+  `https://quotes.toscrape.com/js/`: real Obscura fallback, Level 2, readable
+  Markdown, `UNTRUSTED_WEB_CONTENT`. The control was confined to the
+  acceptance harness; production code has no failure-bypass switch.
+- SSRF regression: loopback, cloud metadata, and `file://` requests were
+  rejected before either backend.
+- MIC reconnaissance URL
+  `https://anboolighting.en.made-in-china.com/product/KdyaYlTObIGQ/China-45W-Recessed-LED-Downlight-for-Residensial-and-Commercial-with-CE.html`
+  returned readable Markdown through Firecrawl, Level 1. No MIC login,
+  submission, or CAPTCHA interaction was performed.
+
+CloakBrowser admission is `installed: NO` on the Enterprise host;
+`HARDENED_BROWSER_CANDIDATE_REQUIRED` was not triggered, so no installation or
+integration was attempted.
+
 ## Explicit exclusions and later stages
 
-Stage 1 does not implement or expose Firecrawl Interact, Agent, Crawl,
-monitor mutation, raw scrape, generic browser actions, authenticated browser
-sessions, binary downloads, Obscura, CloakBrowser, Scrapling, Anysearch, or
-automatic persistence/publication.
-
-Stage 2 may evaluate Firecrawl → Obscura → CloakBrowser hardened fallback.
-Stage 3 may perform difficult real-world acceptance and final freeze. Neither
-stage is implemented or activated here.
+Stage 1 and Stage 2 do not implement or expose Firecrawl Interact, Agent,
+Crawl, monitor mutation, raw scrape, generic browser actions, authenticated
+browser sessions, binary downloads, CloakBrowser, Scrapling, Anysearch, or
+automatic persistence/publication. Stage 3 may perform difficult real-world
+acceptance and final freeze. Do not begin Stage 3 from this document.

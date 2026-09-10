@@ -128,6 +128,8 @@ servers:
       upstream: firecrawl-mcp 3.24.0
       required_environment:
         - FIRECRAWL_API_KEY
+        - EAIO_OBSCURA_BIN
+        - EAIO_OBSCURA_STORAGE_DIR
     exposure:
       allowed_profiles:
         - operations
@@ -156,6 +158,16 @@ servers:
         - binary_download
       automatic_persistence: false
       authenticated_browsing: false
+      fallback_order:
+        - firecrawl
+        - obscura
+      obscura_internal_only: true
+      obscura_allowed_tools:
+        - browser_navigate
+        - browser_snapshot
+        - browser_markdown
+      obscura_personal_state_allowed: false
+      obscura_storage_dir: ${EAIO_OBSCURA_STORAGE_DIR}
       trust_class: UNTRUSTED_WEB_CONTENT
     health:
       status: HEALTHY
@@ -164,6 +176,8 @@ servers:
         - adapter tools/list exposes exactly web_search and web_fetch
         - live web_search returns normalized untrusted results
         - live web_fetch returns readable Markdown
+        - bounded Firecrawl-to-Obscura fallback returns level-2 Markdown
+        - access-control responses do not invoke Obscura
         - loopback, metadata, and file URLs are rejected
 
   obscura:
@@ -183,6 +197,7 @@ servers:
       enabled: false
       version: 0.2.2
       install_strategy: official_aarch64_macos_release
+      internal_consumer: enterprise-web-research
     exposure:
       allowed_profiles: []
       reserved_profiles:
