@@ -331,16 +331,16 @@ Product Visual
 |---|---|---|---|---|
 | WeKnora | Existing core runtime; configured read-only MCP | WeKnora app, docreader, PostgreSQL, Redis, and frontend containers running; app health HTTP 200 on current runtime port `18081` | Read-only retrieval | PASS |
 | ToolScout | Installed and configured | HEALTHY | Exposed through established exact shared allowlist | PASS |
-| Firecrawl | Installed and configured; Enterprise Web Research adapter uses the read API lane | `BLOCKED_CREDENTIAL` because `FIRECRAWL_API_KEY` is intentionally not bound | Operations exposes only `web_search` and `web_fetch`; raw/action-capable lanes denied | ACCEPTABLE DEGRADED |
+| Firecrawl | Installed and configured; Enterprise Web Research adapter uses the read API lane | `HEALTHY`; live Search, Fetch, and URL-security acceptance passed | Operations exposes only `web_search` and `web_fetch`; raw/action-capable lanes denied | PASS |
 | Anysearch | Registered; remote runtime known; configured | `BLOCKED_CREDENTIAL` because `ANYSEARCH_API_KEY` is not bound | Not exposed | ACCEPTABLE DEGRADED |
 | Obscura | Installed and configured | HEALTHY in registry probes | Not exposed; reserved for future approved browser-session worker | PASS / not exposed |
 | PaddleOCR | Installed and configured | HEALTHY in registry probes | Not exposed; reserved for future approved media worker | PASS / not exposed |
 | Scoped ARMOR Router | Installed and configured | HEALTHY; initialize/tools/route/save/read-back tests pass | Six closed Router tools | PASS |
 | Media Transcription | Existing conditional host-native CLI contract | CLI/contract smoke passes; no daemon or automatic publication | No direct Operations upload/tool binding | PASS / conditional |
 
-No credential was copied from Legacy. Credential-blocked external research is
-an intentional non-blocking condition because core v1.0 workflows do not
-require those credentials.
+No credential was copied from Legacy. The approved Firecrawl credential is
+held outside Git by the protected Enterprise runtime environment; raw
+Firecrawl MCP tools remain unbound to Operations.
 
 ## Product Visual image boundary
 

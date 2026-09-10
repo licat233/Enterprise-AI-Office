@@ -1,6 +1,6 @@
 # Enterprise Web Research Capability v1.0 — Stage 1
 
-Status: `IMPLEMENTED; BLOCKED — REQUIRED INPUT: Enterprise FIRECRAWL_API_KEY`
+Status: `CLOSED / PASS`
 
 This document is the single Stage 1 acceptance record for the bounded,
 employee-facing public-Web research capability. It does not reopen Hermes
@@ -66,21 +66,24 @@ The only exposed Web Research tool names are `web_search` and `web_fetch`.
 
 ## Credential state and acceptance
 
-The Enterprise runtime has Firecrawl MCP v3.24.0 installed, but
-`FIRECRAWL_API_KEY` is not provisioned. No Legacy Hermes or personal key was
-inspected or copied. Offline adapter, normalization, URL-security, redirect,
-trust-marker, no-persistence, and MCP-surface tests pass.
+The Enterprise runtime has Firecrawl MCP v3.24.0 installed and the approved
+`FIRECRAWL_API_KEY` is provisioned through the protected Enterprise Hermes
+environment mechanism. No Legacy Hermes or personal key was inspected or
+copied. Offline adapter, normalization, URL-security, redirect, trust-marker,
+no-persistence, MCP-surface, and live acceptance tests pass.
 
-Live Search and Fetch are therefore not claimed. The exact runtime blocker is:
+Live acceptance through the Enterprise adapter passed:
 
-```text
-BLOCKED — REQUIRED INPUT: Enterprise FIRECRAWL_API_KEY
-```
+- `web_search`: `SUCCESS`, multiple public results, and
+  `trust_class: UNTRUSTED_WEB_CONTENT`.
+- `web_fetch`: `SUCCESS`, readable Markdown, `retrieval.method: firecrawl`,
+  `fallback_level: 1`, and `trust_class: UNTRUSTED_WEB_CONTENT`.
+- `web_fetch` rejected loopback, cloud-metadata, and `file://` URLs with
+  `SECURITY_REJECTED`; offline tests also verify blocked requests make no
+  upstream call.
 
-When the approved Enterprise secret is provisioned outside Git and the runtime
-is restarted through normal operations, live acceptance consists of one
-harmless Search, one stable public Fetch, and rejected loopback,
-cloud-metadata, and `file://` requests. MIC is not a Stage 1 hard target.
+The secret remains outside Git and is never included in this document. MIC is
+not a Stage 1 hard target.
 
 ## Explicit exclusions and later stages
 

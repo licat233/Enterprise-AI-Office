@@ -14,8 +14,8 @@ The optional Enterprise Web Research Stage 1 contract is recorded in
 [`docs/ENTERPRISE-WEB-RESEARCH-V1.md`](./ENTERPRISE-WEB-RESEARCH-V1.md). When
 explicitly enabled, Operations receives only `web_search` and `web_fetch`;
 Firecrawl remains an internal read-only backend and fetched pages are
-`UNTRUSTED_WEB_CONTENT`. The current ARMOR runtime is credential-blocked until
-the protected Enterprise `FIRECRAWL_API_KEY` is provisioned.
+`UNTRUSTED_WEB_CONTENT`. The protected Enterprise `FIRECRAWL_API_KEY` is
+provisioned outside Git and the Stage 1 Search/Fetch acceptance is closed.
 
 ## 1. Operational priorities
 

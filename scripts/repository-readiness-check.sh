@@ -276,7 +276,7 @@ require_text config/capabilities.yaml 'armor_product_visual:' 'Product Visual ca
 require_text config/capabilities.yaml 'enterprise_web_research:' 'Enterprise Web Research capability is registered'
 require_text config/mcp-registry.yaml 'enterprise-web-research:' 'Enterprise Web Research adapter is registered'
 require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'UNTRUSTED_WEB_CONTENT' 'Web Research trust boundary is documented'
-require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'BLOCKED — REQUIRED INPUT: Enterprise FIRECRAWL_API_KEY' 'Web Research credential blocker is explicit'
+require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'Status: `CLOSED / PASS`' 'Web Research Stage 1 is closed'
 require_file scripts/test_phase5e_product_visual.py
 require_file scripts/phase5e_product_visual_check.py
 require_text docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md 'Phase 5E: PASS' 'Phase 5E migration record is closed'
