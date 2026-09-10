@@ -4,6 +4,12 @@ This document defines normal operating procedures for a deployed Enterprise AI O
 
 The goal is not maximum operational ceremony. The goal is reliable service, recoverability, and enough state documentation that another human or AI agent can safely take over.
 
+The frozen ARMOR Operations capability baseline is recorded in
+[`docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md`](./ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md).
+This manual remains the general service, recovery, and troubleshooting guide;
+the acceptance record is the current capability and permission authority for
+the v1.0 Operations bundle.
+
 ## 1. Operational priorities
 
 Use this order:

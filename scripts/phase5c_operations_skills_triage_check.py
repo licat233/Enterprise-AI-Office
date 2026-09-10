@@ -99,8 +99,15 @@ def main() -> int:
         f"unknown={sorted(classifications - VALID_CLASSIFICATIONS)}",
     )
     check(
-        {row.get("classification") for row in rows} == VALID_CLASSIFICATIONS,
-        "all seven classifications represented",
+        "KEEP_MIGRATE" not in classifications,
+        "v1.0 ledger has no unresolved KEEP_MIGRATE rows",
+        "mature Phase 5C candidates must be finalized or moved to Post-v1.0 Backlog",
+    )
+    final_classifications = VALID_CLASSIFICATIONS - {"KEEP_MIGRATE"}
+    check(
+        final_classifications <= classifications,
+        "final classification vocabulary represented",
+        f"missing={sorted(final_classifications - classifications)}",
     )
 
     profile_rows = [row for row in rows if row.get("legacy_profile") != "global-only"]

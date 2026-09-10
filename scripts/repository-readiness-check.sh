@@ -165,6 +165,7 @@ for path in \
   scripts/test_phase5b_mic.py \
   scripts/test_phase5b1_mic_authority.py \
   scripts/test_phase5b2_mic_authority_dedup.py \
+  scripts/phase5c_operations_skills_triage_check.py \
   scripts/phase5d_product_materials_check.py \
   scripts/test_phase5d_product_materials.py \
   docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md \
@@ -265,6 +266,20 @@ require_text config/capabilities.yaml 'armor_product_visual:' 'Product Visual ca
 require_file scripts/test_phase5e_product_visual.py
 require_file scripts/phase5e_product_visual_check.py
 require_text docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md 'Phase 5E: PASS' 'Phase 5E migration record is closed'
+require_file docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md
+require_file docs/POST-V1.0-BACKLOG.md
+require_file docs/inventory/legacy-operations-skills-triage.csv
+require_text README.md 'Enterprise Operations Capability Baseline v1.0' 'README links the frozen Operations baseline'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Enterprise Operations Capability Baseline v1.0: FROZEN' 'Final Operations baseline is frozen'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Hermes Skills Migration v1.0: CLOSED' 'Hermes Skills Migration v1.0 is closed'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Multi-Agent Orchestration: EXPERIMENTAL_HOLD' 'Final acceptance preserves Agent Delegate hold'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Operations Hermes Memory: OFF' 'Final acceptance preserves Operations Memory OFF'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'save_product_visual_package' 'Final acceptance records Product Visual Router save'
+if grep -F 'KEEP_MIGRATE' "$ROOT/docs/inventory/legacy-operations-skills-triage.csv" >/dev/null 2>&1; then
+  fail 'Final migration ledger has no KEEP_MIGRATE rows' 'unresolved v1.0 migration rows remain'
+else
+  pass 'Final migration ledger has no KEEP_MIGRATE rows'
+fi
 require_text private/department-profile/.symlink_manifest 'armor-product-visual -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-product-visual' 'Profile manifest exposes Product Visual canonically'
 require_text private/department-profile/enabled-skills.csv 'armor-product-visual,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Visual entrypoint'
 require_text private/department-profile/enabled-tools.csv 'save_product_visual_package' 'Profile enables the scoped Product Visual save tool'

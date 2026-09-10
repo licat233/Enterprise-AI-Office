@@ -19,6 +19,8 @@
 | ID-6 Governed Send / Reconciliation | ✅ 已完成 |
 | ID-7 Recovery / Clean-host Acceptance | ✅ 已完成 |
 | Installation Design Final Review | ✅ PASS |
+| Enterprise Operations Capability Baseline v1.0 | ✅ 已冻结 |
+| Hermes Skills Migration v1.0 | ✅ 已关闭 |
 | Blueprint Validation | ⏳ 尚未开启 |
 | Release Ready | ⏳ 尚未开启 |
 | 真实企业部署任务 | ⛔ 未激活 |
@@ -128,7 +130,23 @@ v2 已经把完整邮件工作流设计并落实为可安装参考资产：
 - Protected Reconciliation Control Path；
 - `SENT / CONFIRMED_NOT_SENT / OUTCOME_UNKNOWN` 三类发送结果语义。
 
-### 4）最小化 EAO Email Governance Runtime
+### 4）ARMOR Operations v1.0 当前状态
+
+已部署的 ARMOR Operations Profile 是一个共享、最小权限的业务能力包。
+当前 canonical 生产入口包括 Website Article、Website Product Materials、
+Social Media（含视频规则）、MIC Product Optimization，以及 ARMOR Product
+Visual 准备流程。Product Visual 只到有来源约束的 brief/prompt/provenance/QA
+交接，不生成或发布图片。
+
+Operations 只能通过封闭的 ARMOR Vault Router 合同保存经过审核的业务工作
+产物，不能使用通用 shell、terminal、filesystem、browser、computer-use、
+code execution、delegation 或自动发布路径。Hermes Memory 与员工 Profile
+Memory 均关闭。WeKnora 是共享企业知识检索层；Vault 规则是持久化业务权威。
+
+完整能力矩阵、运行时证据、迁移账本、权限边界、E2E 结果和延后事项见：
+[`docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md`](docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md)。
+
+### 5）最小化 EAO Email Governance Runtime
 
 v2 没有引入大型新平台，而是只新增一个薄的 EAO Runtime：
 
@@ -157,7 +175,7 @@ SQLite
 - Schema migration；
 - Backup / Restore / Recovery。
 
-### 5）腾讯企业邮 Reference Provider
+### 6）腾讯企业邮 Reference Provider
 
 仓库已经包含：
 
@@ -171,7 +189,7 @@ SQLite
 
 Baseline 不暴露 generic SMTP/send-anything 能力。
 
-### 6）恢复、回滚与 Clean-host 合同
+### 7）恢复、回滚与 Clean-host 合同
 
 ID-7 已经补齐：
 
