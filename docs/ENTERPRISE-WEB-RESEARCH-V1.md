@@ -1,14 +1,15 @@
 # Enterprise Web Research Capability v1.0
 
-Stage 3 status: `BLOCKED — REQUIRED INPUT: Operations-scoped FIRECRAWL_API_KEY`
+Enterprise Web Research Capability v1.0: `CLOSED / FROZEN / PASS`
 Stage 1 status: `CLOSED / PASS`
 Stage 2 status: `CLOSED / PASS`
+Stage 3 status: `CLOSED / PASS`
 
 This is the acceptance record for the bounded, employee-facing public-Web
 research capability. It does not reopen Hermes Skills Migration v1.0 or change
-the frozen Operations permissions. Stage 3 final freeze remains blocked until
-the approved Firecrawl credential is visible inside the Operations Profile
-secret scope.
+the frozen Operations permissions. Stage 3 records the accepted employee-facing
+runtime, protected credential binding, security boundary, and regression
+evidence.
 
 ## Purpose and architecture
 
@@ -208,48 +209,77 @@ downloads, Anysearch, or automatic persistence/publication.
 
 ## Stage 3 — Final Acceptance & Freeze
 
-Stage 3 preflight was run on branch `codex/web-research-v1` at reviewed HEAD
-`af42bc7e9aaa2ccfaf9ece997a751c07301c8009`. The only source change prepared
-for this closure is the implementation-neutral `web_fetch` description:
+Stage 3 was accepted on branch `codex/web-research-v1` after the reviewed
+pre-freeze HEAD `55fc42b98375ed05dd0d1a7904e537fd5cac2f03`. The employee-facing
+Operations path was exercised through the deployed Hermes API route
+`/p/operations/v1/chat/completions`, the runtime immediately behind the
+employee client.
 
-```text
-Fetch readable content from one public HTTP(S) page through the bounded Enterprise Web Research acquisition chain.
-```
-
-The employee-facing Operations path was exercised through the deployed Hermes
-API route `/p/operations/v1/chat/completions`, which is the runtime immediately
-behind the employee client. It registered exactly
-`mcp__enterprise_web_research__web_search` and
-`mcp__enterprise_web_research__web_fetch`. The natural ESL search reached the
-adapter but returned `UPSTREAM_ERROR` because the Operations Profile did not
-have the required Firecrawl credential in its scoped secret mapping. The
-stable-page and accepted MIC-page live fetches therefore remain unaccepted.
-
-The protected provisioning mechanism is the existing mode-600 Operations
-Profile environment file:
+The protected Enterprise credential is visible to the actual Operations
+runtime through the existing mode-600 Operations Profile environment file:
 
 ```text
 /Users/armor/.hermes/profiles/operations/.env
 ```
 
-`FIRECRAWL_API_KEY` is currently present in the global protected file
-`/Users/armor/.hermes/.env`, but Hermes multiplex Profile secret isolation does
-not copy global secret values into the Operations scope. No secret value was
-printed, copied, committed, or placed in this repository. The credential must
-be provisioned in the Operations Profile scope or through its already-approved
-external secret-source mechanism before the employee-path acceptance can pass.
+The approved key value was never printed, logged, committed, or placed in the
+repository. The existing non-secret `FIRECRAWL_API_URL=https://api.firecrawl.dev`
+binding was also made explicit in that protected runtime file so Hermes does
+not pass an unresolved placeholder to the adapter. The file remains owned by
+the existing runtime user with mode `0600`.
 
-The Operations boundary itself passed the deployed runtime check: the adapter
-surface is exactly `web_search` and `web_fetch`; raw Firecrawl, Obscura,
-CloakBrowser, generic browser, shell, filesystem, code execution, Memory,
-Agent Delegate, and mutation tools remain unavailable. The loopback SSRF probe
-was rejected through the employee path. The later metadata and `file://`
-probes could not be accepted after the MCP process became unreachable following
-the upstream failure, so Stage 3 is not claimed.
+### Employee-path live acceptance
+
+All results below came through the Operations employee route and the bounded
+`enterprise-web-research` adapter:
+
+- `web_search`: `SUCCESS`, 10 public results,
+  `trust_class: UNTRUSTED_WEB_CONTENT`.
+- Normal public `web_fetch` of `https://example.com/`: `SUCCESS`, readable
+  Markdown, `retrieval.method: firecrawl`, `retrieval.fallback_level: 1`, and
+  `trust_class: UNTRUSTED_WEB_CONTENT`.
+- MIC public product-page `web_fetch` of the accepted MIC target above:
+  `SUCCESS`, useful RGB/RGBW/LED product content,
+  `retrieval.method: firecrawl`, `retrieval.fallback_level: 1`, and
+  `trust_class: UNTRUSTED_WEB_CONTENT`.
+- SSRF and scheme rejection: `http://127.0.0.1/`,
+  `http://169.254.169.254/`, and `file:///etc/passwd` each returned
+  `SECURITY_REJECTED`. The adapter rejects these before any Firecrawl,
+  Obscura, or CloakBrowser upstream call.
+
+The deterministic security suite confirms `LOGIN_REQUIRED` and
+`CAPTCHA_REQUIRED` are terminal outcomes and do not escalate to Obscura or
+CloakBrowser across an authorization boundary. No login, CAPTCHA, form, or
+authenticated session was used in live acceptance.
+
+### Runtime boundary and persistence
+
+The actual Operations runtime binds exactly:
+
+```text
+weknora
+toolscout
+enterprise-web-research
+armor-vault-scoped-router
+```
+
+The Web Research adapter exposes exactly `web_search` and `web_fetch`. Raw
+`firecrawl-mcp`, Obscura, CloakBrowser, generic browser, shell, terminal,
+filesystem, code execution, computer-use, Memory, Agent Delegate, Firecrawl
+Interact/Crawl/Agent, and monitor mutation tools remain unavailable. The
+actual `phase6_web_research_check.py --runtime-root
+/Users/armor/.hermes/profiles/operations` result was `0 failure(s)`.
+
+No Vault, WeKnora, Hermes Memory, project artifact, publication artifact,
+cookie, login session, or personal-state write occurred. The large MIC
+response was retained only by the existing approved Hermes technical
+spillover cache; that cache is not Vault or Memory and is not an employee
+publication store.
 
 Deterministic Web Research tests, Phase 4A–5E regressions, repository
-readiness, and `git diff --check` remain passing. No Vault, WeKnora, Hermes
-Memory, personal cookies, login sessions, or publication artifacts were used.
+readiness, the secret scan, and `git diff --check` all passed with zero
+failures. No repository architecture, Operations permission, Profile, Router,
+or artifact contract was changed by this closure.
 
 No Stage 4 is defined. Future changes require an explicit v1.1 scope or a
 production-defect correction; they are not part of this Stage 3 closure.
