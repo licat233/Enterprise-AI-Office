@@ -73,6 +73,7 @@ class WebResearchAdapterTests(unittest.TestCase):
         result = adapter.WebResearchAdapter(client, clock=lambda: "2026-09-10T00:00:00Z").web_search({"query": "example", "limit": 2})
         self.assertEqual(result["status"], "SUCCESS")
         self.assertEqual(result["searched_at"], "2026-09-10T00:00:00Z")
+        self.assertEqual(result["trust_class"], "UNTRUSTED_WEB_CONTENT")
         self.assertEqual(result["results"][0]["published_at"], "2026-09-10")
         self.assertNotIn("snippet", result["results"][1])
         self.assertEqual(client.calls, [("search", ("example", 2))])

@@ -332,7 +332,13 @@ class WebResearchAdapter:
             query, limit = _validate_search_args(arguments)
             raw = self.client.search(query, limit)
             results = [_normalize_search_result(item) for item in _iter_search_items(raw)]
-            return {"status": "SUCCESS", "query": query, "results": results, "searched_at": self.clock()}
+            return {
+                "status": "SUCCESS",
+                "query": query,
+                "results": results,
+                "searched_at": self.clock(),
+                "trust_class": TRUST_CLASS,
+            }
         except WebResearchError as exc:
             return _failure(exc)
         except Exception:
