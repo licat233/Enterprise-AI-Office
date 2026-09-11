@@ -93,6 +93,7 @@ for path in \
   validation/scorecard.yaml \
   validation/REPORT.template.md \
   scripts/validate-fresh-agent-kit.py \
+  scripts/run-public-offline-tests.sh \
   config/eao-manifest.yaml \
   docs/CAPABILITY-REUSE-PASS.md \
   docs/README.md \
