@@ -121,7 +121,15 @@ servers:
     health:
       status: BLOCKED_CREDENTIAL
       live_probe: false
-      blocker: FIRECRAWL_API_KEY is not bound in the Enterprise runtime
+      scope: raw_firecrawl_mcp_entry_only
+      does_not_apply_to:
+        - enterprise-web-research
+      interpretation: >-
+        The raw Firecrawl MCP inventory entry has no direct Operations credential
+        binding and is not the employee-facing Web Research surface. The approved
+        enterprise-web-research adapter has its own protected credential binding and
+        separate HEALTHY acceptance.
+      blocker: FIRECRAWL_API_KEY is not bound for the raw firecrawl-mcp entry
 
   enterprise-web-research:
     classification: OPERATIONS_READ
