@@ -27,6 +27,7 @@ gates:
       - validation_kit_static_check_pass
       - markdown_link_integrity_pass
       - declarative_path_integrity_pass
+      - capability_acceptance_integrity_pass
       - public_repository_hygiene_pass
       - frozen_baseline_history_pass
       - public_offline_tests_pass
