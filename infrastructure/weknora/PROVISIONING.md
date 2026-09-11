@@ -500,6 +500,11 @@ If current runtime state conflicts with company intent in a way that cannot be r
 
 ## 14. Deployment-state record
 
+Write these values into the deployment's protected operational copy created
+from `state/DEPLOYMENT-STATE.template.md`. This is the handoff consumed by
+Hermes provisioning; do not write real runtime mappings into the repository's
+historical `state/DEPLOYMENT-STATE.md`.
+
 Record at least:
 
 ```text
@@ -514,6 +519,7 @@ seed-ingestion result
 hybrid-retrieval/source-evidence result
 for each Hermes Profile:
   retrieval key record ID/name (not token)
+  protected retrieval-token reference name (not token value)
   capability set
   allowed runtime KB IDs
   MCP implementation/version/path
