@@ -72,7 +72,7 @@ Repository templates are a capability library, not a deployment checklist.
 
 ## 4. Validated reference stack
 
-The first validated core path is recorded in `config/validated-stack.yaml` and `state/DEPLOYMENT-STATE.md`:
+The current reproducible Core version/commit authority is `config/validated-stack.yaml`. The historical `state/DEPLOYMENT-STATE.md` contains validation evidence from multiple past phases and is not a second version authority:
 
 ```text
 Host: Apple Silicon macOS
