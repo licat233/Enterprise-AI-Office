@@ -16,11 +16,17 @@ Scripts support the deployment contract; they do not replace understanding the s
 
 Static, non-installing repository self-check.
 
-Run:
+For a public clone, Fresh-Agent check, CI job, or another company's blueprint work, run:
 
 ```sh
-sh scripts/repository-readiness-check.sh
+EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
 ```
+
+This is the portable repository check.
+
+The script also retains a runtime-inclusive/reference mode for the existing ARMOR validation lineage. That mode may inspect protected `private/department-profile/*` material and ARMOR-specific closure evidence, so it is **not** the command a fresh public clone should run.
+
+Do not treat missing ARMOR private Profile files as a repository defect when validating a fresh clone. Use repository-only mode for that purpose.
 
 It verifies that the repository still contains the execution contracts, machine-readable configuration, core adapters, conditional capability playbooks, acceptance gates, state template, and production-control helpers needed to resolve a deployment.
 
