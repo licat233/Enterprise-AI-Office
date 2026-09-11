@@ -88,9 +88,11 @@ For high-risk upgrades create and verify:
 - Open WebUI persistent-state backup;
 - Hermes backup/state snapshot as appropriate;
 - configuration/ops-repo commit reference;
+- protected operational deployment-state/handoff record;
 - protected secret recovery path.
 
-Record the current component versions.
+Record the current component versions and the protected operational-state
+location before mutation.
 
 ## 7. Upgrade one core component at a time
 
@@ -203,22 +205,23 @@ Security-sensitive Skills require review of:
 
 ```text
 1. Read AGENTS.md and relevant docs
-2. Read DEPLOYMENT-STATE
+2. Read the protected operational state created from state/DEPLOYMENT-STATE.template.md
 3. Inspect actual runtime/status
-4. Confirm current version
+4. Confirm current version against config/validated-stack.yaml plus runtime identity
 5. Read target release notes
 6. Identify breaking/migration changes
-7. Create pre-upgrade backup
+7. Create pre-upgrade backup including protected operational state
 8. Verify backup exists
-9. Record previous version/config
+9. Record previous version/config/runtime identity
 10. Apply upgrade
-11. Run component health checks
+11. Run component health and runtime-identity checks
 12. Run integration smoke tests
 13. Run security/RBAC tests
 14. Run relevant Golden Questions
 15. Verify Cron/Kanban if affected
-16. Update DEPLOYMENT-STATE
-17. Update CHANGELOG
+16. Update the protected operational deployment state
+17. Record the exact version transition and evidence in state/CHANGELOG.md when it affects the reusable/reference baseline
+18. Update config/validated-stack.yaml only after the new Core baseline is explicitly qualified
 ```
 
 ## 17. Rollback decision
@@ -266,11 +269,18 @@ Confirm:
 
 ## 20. Documentation
 
-After a successful upgrade or rollback, update:
+After a successful upgrade or rollback:
 
-- `state/DEPLOYMENT-STATE.md`;
-- `state/CHANGELOG.md`;
-- relevant docs if upstream integration syntax changed.
+- update the **protected operational** deployment state created from
+  `state/DEPLOYMENT-STATE.template.md`;
+- update `state/CHANGELOG.md` when the change affects the reusable/reference
+  baseline or materially changes deployment behavior;
+- update `config/validated-stack.yaml` only after explicit qualification of a
+  new reproducible Core baseline;
+- update relevant docs if upstream integration syntax changed.
+
+Do not rewrite the historical public `state/DEPLOYMENT-STATE.md` as the live
+runtime state store.
 
 ## 21. Security emergency exception
 
@@ -293,4 +303,6 @@ Avoid:
 - ignoring RBAC tests after client/auth upgrades;
 - changing embedding and retrieval stack simultaneously without benchmark;
 - accepting major behavioral drift because the containers are healthy;
-- forgetting to update deployment state.
+- forgetting to update protected operational deployment state;
+- changing a reference-runtime version without an explicit changelog/evidence trail;
+- treating a historical deployment-state observation as the current version authority.
