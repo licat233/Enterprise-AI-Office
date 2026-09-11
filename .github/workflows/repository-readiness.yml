@@ -2,11 +2,6 @@ name: Repository Readiness
 
 on:
   push:
-    branches:
-      - main
-      - "docs/**"
-      - "codex/**"
-      - "agent/**"
   pull_request:
     branches:
       - main
