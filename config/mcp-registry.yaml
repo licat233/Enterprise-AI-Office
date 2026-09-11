@@ -1,0 +1,401 @@
+schema_version: 2
+registry: enterprise-mcp-control-plane
+last_reviewed: 2026-09-10
+
+# Inventory and acceptance contract. Runtime state is recorded separately from
+# registration, configuration, profile exposure, and health. Secret values are
+# never stored here.
+policy:
+  definitions_without_runtime_allowed: true
+  employee_exposure_default: disabled
+  secret_values_allowed: false
+  live_probes_default: false
+  operations_allowlist:
+    - weknora
+    - armor-vault-scoped-router
+    - enterprise-web-research
+    - toolscout
+
+servers:
+  anysearch:
+    classification: OPERATIONS_READ
+    transport:
+      type: http_mcp
+      endpoint: https://api.anysearch.com/mcp
+      timeout_seconds: 120
+    runtime:
+      status: REGISTERED
+      installed: REMOTE_RUNTIME_KNOWN
+      configured: true
+      enabled: false
+      required_environment:
+        - ANYSEARCH_API_KEY
+    exposure:
+      allowed_profiles: []
+      reserved_profiles:
+        - admin
+        - future-readonly-research
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      risk: read_only
+      allowed_lanes:
+        - search
+        - extract
+        - batch_search
+      denied_lanes:
+        - browser
+        - external_write
+        - account_mutation
+      native_tool_filtering: true
+    health:
+      status: BLOCKED_CREDENTIAL
+      live_probe: false
+      blocker: ANYSEARCH_API_KEY is not bound in the Enterprise runtime
+
+  firecrawl-mcp:
+    classification: OPERATIONS_EXTERNAL_WRITE
+    transport:
+      type: stdio
+      command: ${EAIO_FIRECRAWL_BIN}
+      args: []
+      timeout_seconds: 120
+    runtime:
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: true
+      version: 3.24.0
+      install_strategy: pinned_npm_prefix
+      required_environment:
+        - FIRECRAWL_API_KEY
+    exposure:
+      allowed_profiles:
+        - operations
+      reserved_profiles:
+        - admin
+        - future-privileged-research
+      default_enabled: false
+      operations_exposure: true
+    boundary:
+      risk: mixed
+      native_tool_filtering: true
+      adapter_required: true
+      employee_surface: adapter_only
+      raw_tools_exposed_to_operations: false
+      read_lane:
+        - firecrawl_search
+        - firecrawl_map
+        - firecrawl_check_crawl_status
+        - firecrawl_extract
+        - firecrawl_parse
+        - firecrawl_research_search_papers
+        - firecrawl_research_inspect_paper
+        - firecrawl_research_read_paper
+        - firecrawl_research_related_papers
+        - firecrawl_research_search_github
+        - firecrawl_developer_search
+      denied_lanes:
+        - firecrawl_interact
+        - firecrawl_monitor_create
+        - firecrawl_monitor_update
+        - firecrawl_monitor_delete
+        - firecrawl_monitor_run
+      privileged_lane_requires: separate_approval_and_audit
+      excluded_action_capable_tools:
+        - firecrawl_scrape
+        - firecrawl_crawl
+        - firecrawl_agent
+        - firecrawl_interact
+    health:
+      status: BLOCKED_CREDENTIAL
+      live_probe: false
+      blocker: FIRECRAWL_API_KEY is not bound in the Enterprise runtime
+
+  enterprise-web-research:
+    classification: OPERATIONS_READ
+    transport:
+      type: stdio
+      command: ${EAIO_WEB_RESEARCH_BIN}
+      args: []
+      timeout_seconds: 120
+    runtime:
+      status: ENABLED
+      installed: true
+      configured: true
+      enabled: true
+      version: 1.0.0
+      upstream: firecrawl-mcp 3.24.0
+      required_environment:
+        - FIRECRAWL_API_KEY
+        - EAIO_OBSCURA_BIN
+        - EAIO_OBSCURA_STORAGE_DIR
+        - EAIO_CLOAKBROWSER_PYTHON
+        - EAIO_CLOAKBROWSER_WORKER
+        - EAIO_CLOAKBROWSER_STORAGE_DIR
+        - EAIO_CLOAKBROWSER_VERSION
+    exposure:
+      allowed_profiles:
+        - operations
+      reserved_profiles: []
+      default_enabled: false
+      operations_exposure: true
+    boundary:
+      risk: read_only
+      adapter_required: true
+      allowed_tools:
+        - web_search
+        - web_fetch
+      denied_tools:
+        - firecrawl_scrape
+        - firecrawl_crawl
+        - firecrawl_agent
+        - firecrawl_interact
+        - firecrawl_monitor_create
+        - firecrawl_monitor_update
+        - firecrawl_monitor_delete
+        - firecrawl_monitor_run
+        - generic_browser
+        - generic_shell
+        - generic_filesystem
+        - code_execution
+        - binary_download
+      automatic_persistence: false
+      authenticated_browsing: false
+      fallback_order:
+        - firecrawl
+        - obscura
+        - cloakbrowser
+      obscura_internal_only: true
+      obscura_allowed_tools:
+        - browser_navigate
+        - browser_snapshot
+        - browser_markdown
+      obscura_personal_state_allowed: false
+      obscura_storage_dir: ${EAIO_OBSCURA_STORAGE_DIR}
+      cloakbrowser_internal_only: true
+      cloakbrowser_allowed_sequence:
+        - navigate
+        - wait
+        - final_url
+        - title
+        - body_text
+      cloakbrowser_wrapper_version: 0.5.10
+      cloakbrowser_binary_version: 145.0.7632.109.2
+      cloakbrowser_install_strategy: official_pypi_wrapper_official_signed_binary
+      cloakbrowser_python: ${EAIO_CLOAKBROWSER_PYTHON}
+      cloakbrowser_worker: ${EAIO_CLOAKBROWSER_WORKER}
+      cloakbrowser_storage_dir: ${EAIO_CLOAKBROWSER_STORAGE_DIR}
+      cloakbrowser_license_tier: free_pinned_official_build
+      cloakbrowser_personal_state_allowed: false
+      trust_class: UNTRUSTED_WEB_CONTENT
+    health:
+      status: HEALTHY
+      live_probe: true
+      checks:
+        - adapter tools/list exposes exactly web_search and web_fetch
+        - live web_search returns normalized untrusted results
+        - live web_fetch returns readable Markdown
+        - bounded Firecrawl-to-Obscura fallback returns level-2 Markdown
+        - bounded Firecrawl-to-Obscura-to-CloakBrowser fallback returns level-3 Markdown
+        - access-control responses do not invoke Obscura
+        - CloakBrowser is internal-only and not Operations-exposed
+        - loopback, metadata, and file URLs are rejected
+
+  obscura:
+    classification: MACHINE_SPECIFIC_REBIND
+    transport:
+      type: stdio
+      command: ${EAIO_OBSCURA_BIN}
+      args:
+        - --storage-dir
+        - ${EAIO_OBSCURA_STORAGE_DIR}
+        - mcp
+      timeout_seconds: 120
+    runtime:
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: false
+      version: 0.2.2
+      install_strategy: official_aarch64_macos_release
+      internal_consumer: enterprise-web-research
+    exposure:
+      allowed_profiles: []
+      reserved_profiles:
+        - admin
+        - future-browser-session-worker
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      machine_dependency: enterprise_browser_session_worker
+      personal_state_allowed: false
+      storage_dir: ${EAIO_OBSCURA_STORAGE_DIR}
+      forbidden_inputs:
+        - personal_chrome_profile
+        - cookies
+        - storage_state
+        - login_sessions
+    health:
+      status: HEALTHY
+      live_probe: true
+      checks:
+        - initialize
+        - tools/list
+        - about_blank_navigation
+
+  paddle_ocr:
+    classification: MACHINE_SPECIFIC_REBIND
+    transport:
+      type: stdio
+      command: ${EAIO_PADDLE_OCR_BIN}
+      args:
+        - --pipeline_config
+        - ${EAIO_PADDLE_OCR_PIPELINE_CONFIG}
+      timeout_seconds: 120
+    runtime:
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: false
+      version: 0.8.5
+      install_strategy: dedicated_enterprise_venv
+      provider: local
+      model: PP-OCRv6
+      mcp_tool: ocr
+      required_environment:
+        - EAIO_PADDLE_OCR_BIN
+        - EAIO_PADDLE_OCR_PIPELINE_CONFIG
+    exposure:
+      allowed_profiles: []
+      reserved_profiles:
+        - admin
+        - future-media-worker
+      default_enabled: false
+      operations_exposure: false
+    boundary:
+      machine_dependency: enterprise_media_runtime
+      source: PaddleOCR/mcp_server
+      persistent_service_allowed: false
+      personal_runtime_allowed: false
+      not_required_for_non_ocr_workflows: true
+    health:
+      status: HEALTHY
+      live_probe: true
+      checks:
+        - initialize
+        - basic_ocr
+        - structured_ocr
+
+  toolscout:
+    classification: SHARED_AGENT_INFRASTRUCTURE
+    transport:
+      type: stdio
+      command: ${EAIO_TOOLSCOUT_BIN}
+      args:
+        - mcp
+        - serve
+      timeout_seconds: 120
+    runtime:
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: true
+      version: 1.0.0
+      install_strategy: official_macos_universal_release
+      execution_architecture: x86_64_rosetta_fallback
+      required_environment:
+        - TOOLSCOUT_AGENT_NAME
+      default_memory_home: ~/.config/toolscout/tool-memory
+    exposure:
+      allowed_profiles:
+        - operations
+      reserved_profiles: []
+      default_enabled: false
+      operations_exposure: true
+    boundary:
+      separate_agent_identity: true
+      separate_memory_home: true
+      employee_memory_access: false
+      allowed_tools:
+        - advise_tool_use
+        - resolve_memory_home
+        - query_registry
+        - detect_candidates
+        - recall_memory
+        - record_memory
+        - check_conflicts
+        - doctor
+      prompts: false
+      resources: false
+    health:
+      status: HEALTHY
+      live_probe: true
+      native_arm64_probe: BLOCKED_RUNTIME_SIGNAL_9
+      checks:
+        - initialize
+        - advise_tool_use
+        - query_registry
+        - detect_candidates
+        - doctor
+        - record_memory
+        - recall_memory
+
+  armor-vault-scoped-router:
+    classification: ARMOR_SCOPED_WRITE
+    transport:
+      type: stdio
+      command: ${EAIO_ARMOR_PYTHON}
+      args:
+        - ${EAIO_ARMOR_VAULT_MCP}
+      timeout_seconds: 120
+    runtime:
+      status: INSTALLED
+      installed: true
+      configured: true
+      enabled: true
+      version: 1.0.0
+      install_strategy: repository_owned_stdlib_mcp
+      required_environment:
+        - ARMOR_VAULT_ROOT
+    exposure:
+      allowed_profiles:
+        - operations
+      reserved_profiles: []
+      default_enabled: false
+      operations_exposure: true
+    boundary:
+      write_scope: Article_v1.3_or_Social_v2.0_or_MIC_v1.0_or_Website_Product_Materials_v1.0_or_Product_Visual_v1.0_closed_packages_only
+      article_write_scope: Article_v1.3_four_file_package_only
+      social_write_scope: Social_v2.0_required_four_files_plus_optional_video_artifacts
+      mic_product_write_scope: MIC_v1.0_required_data_bulkfill_audit_optional_detail_package
+      website_product_materials_write_scope: Website_Product_Materials_v1.0_required_five_files
+      product_visual_write_scope: Product_Visual_v1.0_required_four_text_files_no_binary_upload
+      allowed_tools:
+        - route_work_product
+        - save_article_package
+        - save_social_package
+        - save_mic_product_package
+        - save_website_product_materials_package
+        - save_product_visual_package
+      forbidden:
+        - generic_filesystem_write
+        - arbitrary_destination
+        - published_source_write
+        - absolute_model_paths
+        - path_traversal
+        - symlink_escape
+      atomic_write: true
+      read_back_verification: true
+    health:
+      status: HEALTHY
+      live_probe: true
+      checks:
+        - initialize
+        - tools/list
+        - route_work_product
+        - save_article_package
+        - save_mic_product_package
+        - save_website_product_materials_package
+        - save_product_visual_package
+        - read_back

@@ -166,6 +166,17 @@ real_deployment_task:
     - 在指定的 Mac Studio 上开始真实部署
     - 现在开始在真实环境安装
 
+reference_implementation:
+  name: ARMOR
+  exists: true
+  independently_authorized: true
+  sanitized_public_status: state/REAL-DEPLOYMENT-STATUS.md
+  current_public_status_as_of: 2026-09-11
+  note: >-
+    This records that a real reference implementation exists. It does not activate
+    real_deployment_task for a fresh clone, authorize another deployment, or advance
+    the blueprint lifecycle. Deployment authorization is always target-specific.
+
 public_repository_data_policy:
   real_credentials: prohibited
   real_personal_or_employee_identifiers: prohibited

@@ -46,6 +46,8 @@ None of these may be substituted for another.
 
 A mailbox credential never proves human authority. A Hermes Profile key never identifies the employee. Human identity never comes from LLM text/tool arguments.
 
+Phase 1 scheduled drafting adds a distinct ServiceActor identity: service:hermes-cron:operations. It uses a dedicated protected credential that is separate from any Open WebUI forwarder, Hermes Profile key, or mailbox credential. The ServiceActor is limited to email.read and email.draft, is denied email.approve and email.send, and is never accepted as a formal human approver. Audit evidence records actor_type=service and the stable actor_id; human approval evidence remains actor_type=human.
+
 ---
 
 ## 2. Reference runtime identity path

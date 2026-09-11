@@ -15,6 +15,7 @@ config/
 ├── company.example.yaml           # public reusable desired-state schema/default posture
 ├── company.private.example.yaml   # synthetic shape for company-private non-secret overlay
 ├── capabilities.yaml              # capability implementation/input/acceptance closure
+├── mcp-registry.yaml              # Enterprise MCP control-plane definitions and boundaries
 ├── validated-stack.yaml           # validated core reproducibility baseline
 └── .env.example                   # runtime binding placeholder template, not desired-state authority
 ```
@@ -150,6 +151,19 @@ capability registry
         ↓
 exact target state
 ```
+
+### `config/mcp-registry.yaml`
+
+This is the Enterprise control-plane inventory for MCP definitions. It records
+transport, runtime rebinding requirements, logical environment names, risk
+classification, profile scope, default exposure, and health-check strategy.
+Definitions may exist in the inventory while their runtime and employee
+exposure remain disabled.
+
+The registry is not a secret store and is not a request to start a server.
+Actual Profile exposure remains controlled by the Profile configuration and
+must be explicitly allowlisted. `operations` is limited to its existing
+read-only WeKnora surface unless a later capability contract is approved.
 
 An enabled capability must be implemented and accepted before `CONFIGURED READY` can be claimed. A disabled capability must not be instantiated merely because its playbook exists and does not require unused conditional secrets.
 

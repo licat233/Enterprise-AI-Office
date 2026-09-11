@@ -1,0 +1,277 @@
+---
+name: toolscout
+description: |
+  Use this skill before writing custom scripts, installing tools, or performing
+  file/data transformation, format conversion, extraction, batch processing, or
+  other command-line work that may already have a local tool. Do not use it for
+  ordinary conversation, explanations, code reading, or simple repository
+  inspection.
+---
+
+# ToolScout
+
+Use this skill when the user asks to convert formats, extract data, batch-process
+files, transform JSON/CSV/XML/SQLite, work with PDF/Office documents, process
+images/audio/video, compress archives, install a utility, or write a custom
+script for a task that may already have a local tool.
+
+Do not use this skill for normal chat, explanations, planning, code review,
+reading source files, summarizing a repository, or basic inspection commands
+such as `rg`, `sed`, `cat`, `ls`, and `git status`.
+
+## Architecture
+
+```
+toolscout = Rust runtime core + SKILL.md rule layer + shared file-based tool-memory
+```
+
+```text
+toolscout/
+├── SKILL.md                    ← you are here (sole execution rule source)
+├── README.md                   ← installation & usage entry
+├── Cargo.toml                  ← workspace root
+├── memory_config.yaml          ← default config
+├── registry/
+│   └── tools.yaml              ← candidate tool definitions (10 categories)
+├── references/
+│   ├── memory-home-resolution.md
+│   ├── memory-migration-guide.md
+│   ├── agent-integration.md
+│   ├── claude-code-integration.md
+│   ├── soul-rule-integration.md
+│   ├── mcp-integration.md
+│   ├── rust-runtime-design.md
+│   ├── tool-memory-format.md
+│   ├── registry-schema.md
+│   └── scanning-policy.md
+└── crates/toolscout/
+    └── src/
+        ├── main.rs             # CLI entry point
+        ├── config.rs           # config loading
+        ├── resolver.rs         # default memory home + optional override markers
+        ├── registry.rs         # registry query
+        ├── detect.rs           # tool detection
+        ├── memory.rs           # MemoryRecord struct
+        ├── file_store.rs       # file-based store (append-only, atomic writes)
+        └── mcp.rs              # MCP stdio server
+```
+
+## Core Rule
+
+Do not invoke toolscout at task start. Invoke it immediately before an agent
+would write incidental code that reimplements a commodity local operation, or
+before installing a tool or dependency for that operation.
+
+1. **Check relevant skills first** — a dedicated skill outranks this general gate.
+2. Skip toolscout for ordinary software development, conversation, explanation,
+   planning, code reading/review, and already-selected tools.
+3. For an in-scope operation, run:
+   `toolscout advise --task "<operation>" --intent avoid_custom_code --category <category> --json`
+4. If the decision is `use_existing_tool`, use it instead of writing incidental code.
+5. If the decision is `verify_recalled_recipe`, re-detect the recalled tool.
+6. If the decision is `known_tool_not_installed`, ask before installing it.
+7. Write code when the task requires custom business logic, the user explicitly
+   requested an implementation, or no suitable mature tool is available.
+8. Record only verified tool success, failure, or unsafe patterns.
+
+The runtime checks the registry and current tool availability first. It recalls
+category-scoped tool-memory only when no registered candidate is currently
+available, or when the caller explicitly passes `--recall`.
+
+Do not perform blind filesystem scans. Do not run `find /`, `find ~`, or scan every
+executable on the machine.
+
+## tool-memory Is Shared Runtime Infrastructure
+
+tool-memory stores tool availability, verified command recipes, failed attempts,
+blocked command patterns, and environment-specific operational notes.
+
+It is **not** current truth. It is **not** user-approved long-term memory. It is **not**
+a replacement for Vault governance. It must **not** be promoted into high-authority
+memory automatically.
+
+All agents (Codex, Claude Code, Hermes) share one canonical runtime tool-memory home.
+Each record includes `source_agent` to identify which agent wrote it.
+
+## Tool-Memory Home
+
+Default path:
+
+```text
+~/.config/toolscout/tool-memory
+```
+
+Use this default for normal installation, including non-Obsidian and Obsidian
+users. Do not ask the user to choose a tool-memory location unless they
+explicitly request a custom path or migration from an old path.
+
+Resolution priority:
+1. `TOOLSCOUT_MEMORY_HOME` env var, only when intentionally set as an override
+2. `memory_home` key in `~/.config/toolscout/config.yaml`
+3. `file.base_dir` in config
+4. Default: `~/.config/toolscout/tool-memory`
+
+If `TOOLSCOUT_MEMORY_HOME` is set, all agents use it as the canonical home.
+Do not create private tool-memory elsewhere. Do not silently fall back while it exists.
+
+See `references/memory-home-resolution.md` for the full resolution rules.
+
+## Tool Memory Storage
+
+toolscout uses a file-based shared tool-memory store.
+
+One record per JSON file, append-only, atomic writes (`.tmp` + rename).
+
+```text
+<tool-memory-home>/
+  .tool-memory-home              # canonical marker
+  records/
+    20260612-153000-hermes-pandoc-recipe-8f3a.json
+    20260612-153102-claude-code-ffmpeg-media-a92d.json
+```
+
+Database adapters are intentionally not supported in the baseline design for:
+- lower maintenance cost
+- safer multi-agent writes
+- easier manual inspection
+- simple default installation across agents
+- better Git backup and diff
+- simpler migration
+- no database locking issues
+
+See `references/tool-memory-format.md` for the full record schema.
+
+## Multi-Agent Sharing
+
+Rules:
+- Agents may share tool-memory.
+- Agents may **not** create private tool-memory or Vault-specific homes during
+  normal installation.
+- Agents may **not** treat tool-memory as current truth.
+- Agents may **not** use another agent's execution record as approved SOP.
+- If a tool recipe should become a formal rule, create a proposal or update SKILL.md
+  through normal project maintenance.
+
+Each record must include `source_agent` (`hermes`, `claude-code`, `codex`).
+
+## Rust Runtime CLI
+
+Build: `cargo build --release`
+
+```bash
+# Resolve the canonical memory home
+toolscout advise --task "<operation>" --intent avoid_custom_code --category image --json
+toolscout memory resolve --json
+
+# Initialize the resolved memory home only after explicit intent
+toolscout memory init --json
+
+# Query the registry for candidate tools
+toolscout registry query --category document --json
+toolscout registry query --task "extract docx text" --json
+
+# Detect which candidate tools are installed
+toolscout tools detect --category document --json
+
+# Persist availability records when detection should be retained
+toolscout tools detect --category document --record --json
+
+# Recall past experience from tool-memory
+toolscout memory recall --task "extract docx text" --json
+
+# Record a tool experience
+toolscout memory record '{"record_type":"recipe","category":"document","tool":"pandoc","task":"extract_text_from_docx","status":"verified_success","command_template":"pandoc {input} -t plain","source_agent":"claude-code"}' --json
+
+# Check for memory home conflicts
+toolscout memory check-conflicts --json
+
+# Run diagnostics
+toolscout doctor
+
+# Start MCP server
+toolscout mcp serve
+```
+
+### MCP Tools
+
+| MCP Tool | Description |
+|----------|-------------|
+| `advise_tool_use` | Check for a mature tool before incidental code reimplements a commodity operation |
+| `resolve_memory_home` | Resolve the canonical tool-memory home |
+| `query_registry` | Find candidate tools by category/task |
+| `detect_candidates` | Detect which tools are installed |
+| `recall_memory` | Search retained tool-memory |
+| `record_memory` | Persist a tool experience record |
+| `check_conflicts` | Check for multiple memory home candidates |
+| `doctor` | Run diagnostic checks |
+
+## Categories
+
+- `document`: Word, Markdown, HTML, EPUB, Office-like extraction/conversion
+- `pdf`: PDF text extraction, metadata, rendering, split/merge
+- `image`: image conversion, resize, OCR, metadata
+- `media`: audio/video conversion, compression, probing
+- `data`: JSON, YAML, CSV, TSV, XML, SQLite
+- `search`: text search, file finding, fuzzy filtering
+- `archive`: zip, tar, gzip, zstd, lz4, xz, 7z
+- `dev`: git, language runtimes, package managers, build/test helpers
+- `web`: curl-like access, web search/scraping/browser automation
+- `ai`: local LLMs, coding agents, memory tools
+
+## Decision Rules
+
+Priority order (highest first):
+
+1. **Skill covers the task** — load and follow the skill.
+2. **Existing tool solves it** — use the tool for standard format conversion, text extraction, search/filter/transform, compression, media conversions, or one-shot inspection.
+3. **Write code** — for multi-step workflows with state, business-specific rules, complex parsing, error recovery, or when skills and tools both fail.
+
+If writing code, state the reason briefly: "Existing tools do not fit because ...".
+
+## Prohibited Behaviors
+
+- Do not blindly scan the entire filesystem (`find /`, `find ~`).
+- Do not create private tool-memory when `TOOLSCOUT_MEMORY_HOME` exists.
+- Do not write LLM guesses as `verified_success` tool-memory.
+- Do not treat tool-memory as Vault current truth.
+- Do not automatically write tool-memory into high-authority Vault directories
+  (`01-Facts/`, `02-Rules/`, `03-Insights/`, `05-Truth/`).
+- Do not default-create `02-Rules/Tool-Inventory`.
+- Do not copy the full SKILL.md into a Vault rule directory to form a second
+  rule source.
+- Do not write hallucinated or guessed tool-memory records.
+- Only write tool-memory records after actual detection or execution.
+
+## Agent Integration
+
+This skill supports multiple AI agents. See `references/agent-integration.md` for
+the unified guide.
+
+- **Hermes**: Add ToolScout Rule to `~/.hermes/SOUL.md` (see `references/soul-rule-integration.md`).
+- **Claude Code**: Add ToolScout Rule to `~/.claude/CLAUDE.md` (see `references/claude-code-integration.md`).
+- **Codex**: Add ToolScout Rule to your Codex agent config (see `references/agent-integration.md`).
+
+## Pitfalls
+
+- **Agent-specific rule required for auto-activation.** The skill ships as a passive reference — it only triggers when explicitly loaded or when a matching rule exists. For Hermes, add a SOUL.md rule. For Claude Code, add a CLAUDE.md rule.
+- **Default memory home first.** Use `~/.config/toolscout/tool-memory` unless
+  `TOOLSCOUT_MEMORY_HOME` is intentionally set as an override.
+- **Workspace vs installed copy.** If you develop in a separate workspace, remember to sync changes to the installed location:
+  - Hermes: `cp -r . ~/.hermes/skills/devops/toolscout/`
+  - Claude Code: `cp -r . ~/.claude/skills/toolscout/`
+  - Codex: `cp -r . ~/.codex/skills/toolscout/`
+- **macOS GUI apps** may not inherit shell environment variables. Use `launchctl setenv TOOLSCOUT_MEMORY_HOME "/path/to/tool-memory"`.
+- **Path migration verification.** After changing any config path: run `toolscout doctor` and `toolscout memory check-conflicts --json`.
+
+## References
+
+- **`references/memory-home-resolution.md`** — TOOLSCOUT_MEMORY_HOME resolution rules and marker specs.
+- **`references/memory-migration-guide.md`** — Migrating from old memory paths.
+- **`references/agent-integration.md`** — Unified multi-agent integration guide.
+- **`references/claude-code-integration.md`** — CLAUDE.md rule for auto-activation.
+- **`references/soul-rule-integration.md`** — SOUL.md rule for auto-activation.
+- **`references/mcp-integration.md`** — MCP server integration guide.
+- **`references/rust-runtime-design.md`** — Rust runtime architecture.
+- **`references/tool-memory-format.md`** — Record schema and rules.
+- **`references/registry-schema.md`** — tools.yaml format.
+- **`references/scanning-policy.md`** — What detection methods are allowed.

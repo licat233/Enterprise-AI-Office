@@ -2,7 +2,7 @@
 
 > This file is a **sanitized public progress summary** for the explicitly authorized real company deployment. It is not the protected runtime state record and must never contain credentials, real employee identifiers, private network details, mailbox data, or secret values.
 
-Last updated: 2026-09-08
+Last updated: 2026-09-11
 
 ## Deployment authorization
 
@@ -16,6 +16,39 @@ Blueprint Validation: not opened
 ```
 
 The real deployment is an independently authorized consumer activity. This file records its sanitized progress, but it does **not** mutate the public blueprint activation gate in `state/PROJECT-PHASE.yaml`; that public/default gate intentionally remains inactive so a fresh clone never implies that a real company deployment is authorized. The real deployment authorization also does **not** advance the repository blueprint lifecycle.
+
+## 2026-09-11 synchronization update
+
+The reference Mac Studio deployment has advanced beyond the 2026-09-08 core/media baseline. The following additional production capabilities and boundaries are now frozen and documented in this repository:
+
+- **Hermes Skills Migration v1.0 — CLOSED**, frozen at commit `6ee5034811681d40ac1ce61cef315aac8551fdb5`.
+- **Enterprise Web Research v1.0 — CLOSED / FROZEN / PASS**, frozen at commit `8d232285b68ed85aca146b81f3ca946f2502c357`.
+- **Operations employee RBAC v1 — CLOSED / FROZEN / PASS**, frozen at commit `6848d89877db08c57d3b8c128efe7410f9c49ccb`.
+- Open WebUI remains on **v0.11.3** and the employee surface is published on the approved private network boundary at host TCP **13000 → container 8080**. Authentication remains required.
+- The same employee surface has also been successfully reached through the host's already-installed **Tailscale** private address. This is an additional approved private access path, not a replacement architecture or a public exposure.
+- `All Employees` has explicit **READ** access to **General Assistant**.
+- `Operations Employees` has explicit **READ** access to **Operations Assistant**.
+- Employee groups do not receive Open WebUI Workspace administration grants.
+- The production Operations path is:
+
+```text
+Operations Employee
+→ Open WebUI Operations Assistant
+→ Hermes /p/operations
+→ Operations Profile
+→ operations-weknora
+→ Company Knowledge
+```
+
+- The Operations profile uses the existing shared Hermes gateway. Its profile-local API server binding is disabled to avoid a second listener conflict.
+- The Operations WeKnora MCP registration is profile-locally named `operations-weknora` so it can coexist with the General profile registration in the same Hermes process.
+- Company Knowledge access remains least privilege: `full_access=false`, `capabilities=["retrieve"]`.
+- **Open WebUI native Knowledge records = 0 is intentional** for this architecture; company knowledge is reached through Hermes → WeKnora rather than duplicated into Open WebUI Knowledge.
+- Employee long-term Hermes/Profile Memory remains **OFF**.
+- The approved Operations capability set includes the migrated/frozen department Skills and Enterprise Web Research under their documented boundaries.
+- Governed Email Operations assets exist in the repository, but unrestricted/autonomous customer-facing send is not implied by the presence of those assets. Human authority and the governed send boundary remain mandatory.
+
+These updates supersede any earlier demo-only role list or network description when interpreting the current sanitized ARMOR reference deployment. The older `state/DEPLOYMENT-STATE.md` remains historical reference evidence.
 
 ## Current achieved readiness
 

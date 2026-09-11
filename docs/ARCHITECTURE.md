@@ -1,6 +1,6 @@
 # Enterprise AI Office Architecture
 
-Status: v1 architecture baseline
+Status: v1.1 architecture baseline — Root-Cause Persistence
 
 This document defines the reusable architecture of Enterprise AI Office. Company-specific values belong in deployment configuration or the appropriate reference/private layer, not in this generic contract.
 
@@ -99,6 +99,7 @@ Owns deployment intent, standards, reusable templates/adapters, acceptance rules
 | Scheduled routines | Hermes Cron when enabled |
 | Current deployment state | `state/DEPLOYMENT-STATE.md` + real runtime |
 | Architecture intent | `AGENTS.md` + this document |
+| Persistent error correction | The authoritative owning layer, not Memory |
 
 ## 5. Hermes Profile model
 
@@ -216,6 +217,45 @@ Open WebUI user-scoped conversation history.
 
 Employee Hermes long-term memory is disabled by baseline policy until cross-user isolation is proven for the exact deployed client/runtime path.
 
+### Root-cause persistence
+
+Memory is not an error-correction mechanism. When a persistent error is found,
+correct the current output if needed, inspect or reproduce the failure, identify
+the authoritative owning layer, repair it when authorized, and verify both the
+corrected case and an adjacent representative case. If the owner cannot be
+modified, report or escalate the defect. Do not create Memory to override a
+defective source.
+
+Use this owning-layer model:
+
+```text
+wrong one-off output                  → current output
+wrong company/business fact           → authoritative knowledge source
+wrong reusable procedure              → Skill
+wrong department rule                 → Department SOUL / policy
+wrong enterprise rule                 → Global Rule / owning policy
+wrong code/config/template/integration → implementation
+wrong runtime assumption              → runtime discovery / protected config
+missing task input                    → obtain or mark missing input
+temporary/project target              → Project / Operating Plan
+scheduled recurring action            → Scheduler / Cron / Automation
+current conversation only             → Session context
+stable user preference                → Memory only if isolated and permitted
+```
+
+Memory is not a knowledge database, correction overlay, source-governance
+substitute, runtime/machine-state store, workflow-rule store, or company-fact
+store. Machine facts such as hostnames, workspace/Vault paths, ports, process
+IDs, proxy/service state, executable paths, and current endpoints come from
+runtime discovery or protected deployment configuration.
+
+For shared employee Profiles, “remember this” requests must be classified into
+the owning layer above. The Agent must not claim durable persistence when the
+request belongs in Knowledge, policy, a Skill, an operating plan, Scheduler,
+or the current Session. Enterprise learning should improve authoritative
+sources, Rules, Skills, Workflows, or implementations—not accumulate hidden
+correction Memory.
+
 ## 12. Tool security model
 
 Security has two dimensions:
@@ -298,6 +338,8 @@ Unless an explicit architecture decision changes them:
 9. Versions used for reproducible deployments are pinned/tested.
 10. Production recovery/security controls are validated before claiming Production Ready.
 11. Real company usage drives future additions.
+12. Enterprise learning improves authoritative sources and implementations,
+    not hidden correction Memory.
 
 ## 20. Future evolution
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "ARMOR Website Product Materials"
+  short_description: "Prepare source-grounded product-page materials"
+  default_prompt: "Use $armor-website-product-materials to prepare a reviewed ARMOR product-page materials package."

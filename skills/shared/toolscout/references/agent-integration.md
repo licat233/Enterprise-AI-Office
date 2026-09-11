@@ -1,0 +1,109 @@
+# Agent Integration Guide
+
+## Supported Agents
+
+| Agent | Config File | Skill Directory | Agent Name |
+|-------|-------------|-----------------|------------|
+| Hermes Agent | `~/.hermes/SOUL.md` | `~/.hermes/skills/devops/toolscout/` | `hermes` |
+| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/toolscout/` | `claude-code` |
+| Codex | `~/.codex/AGENTS.md` | `~/.codex/skills/toolscout/` | `codex` |
+
+## Shared Rules
+
+All agents must:
+
+1. Use the default shared file-based runtime tool-memory home:
+   `~/.config/toolscout/tool-memory`.
+2. Treat `TOOLSCOUT_MEMORY_HOME` as an optional explicit override only.
+3. Not create private, agent-specific, Obsidian-specific, or Vault-specific
+   tool-memory during normal installation.
+4. Not treat tool-memory as authoritative Vault memory.
+5. Not default-create `02-Rules/Tool-Inventory`.
+6. Not copy full SKILL.md to a Vault rule directory.
+
+Every record written by an agent must include `source_agent` identifying
+which agent wrote it.
+
+## Installation (All Agents)
+
+```bash
+git clone https://github.com/licat233/toolscout.git
+cd toolscout
+cargo build --release
+cp target/release/toolscout /usr/local/bin/
+
+# Verify
+toolscout doctor
+```
+
+## Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `TOOLSCOUT_MEMORY_HOME` | Optional override for the default tool-memory home |
+| `TOOLSCOUT_MEMORY_CONFIG` | Override config file location |
+| `TOOLSCOUT_AGENT_NAME` | Agent name for records (`hermes`, `claude-code`, `codex`) |
+
+```bash
+export TOOLSCOUT_AGENT_NAME="claude-code"
+
+# Optional custom path only:
+# export TOOLSCOUT_MEMORY_HOME="/path/to/tool-memory"
+# launchctl setenv TOOLSCOUT_MEMORY_HOME "/path/to/tool-memory"
+```
+
+## Hermes Agent
+
+Add the ToolScout Rule to `~/.hermes/SOUL.md`.
+See `references/soul-rule-integration.md` for the full rule text.
+
+Optionally configure MCP in `~/.hermes/config.yaml`.
+See `references/mcp-integration.md` for the config snippet.
+
+## Claude Code
+
+Add the ToolScout Rule to `~/.claude/CLAUDE.md`.
+See `references/claude-code-integration.md` for the full rule text.
+
+## Codex
+
+Add the ToolScout Rule to your Codex agent configuration:
+
+```markdown
+## ToolScout Rule
+
+Do not invoke toolscout at task start. Invoke it only immediately before
+writing incidental code that would reimplement a commodity local operation, or
+before installing a dependency for that operation.
+
+Do not run it for ordinary software development, conversation, explanations,
+planning, code reading/review, repository inspection, or an already-selected tool.
+
+1. For an in-scope operation run:
+   `toolscout advise --task "<operation>" --intent avoid_custom_code --category <category> --json`
+2. If the decision is `use_existing_tool`, use the recommended tool before
+   writing custom code.
+3. If the decision is `verify_recalled_recipe`, re-detect the tool and reuse the
+   remembered command if still valid.
+4. Recall tool-memory only when candidates are unavailable or failed.
+5. Write code when the user requested an implementation, custom logic is
+   required, or no suitable mature tool is available.
+
+If writing code, briefly state why: "No existing tool fits because …"
+
+tool-memory is shared runtime infrastructure, not authoritative Vault memory.
+Do not create private tool-memory when TOOLSCOUT_MEMORY_HOME exists.
+SKILL.md is the sole execution rule source.
+```
+
+## Post-Installation Report
+
+After installation, report:
+
+- Which agent was configured
+- Where toolscout was installed
+- Which tool-memory path is being used
+- Whether `TOOLSCOUT_MEMORY_HOME` is unset or intentionally overriding the default
+- Whether `.tool-memory-home` marker exists
+- Any legacy or conflicting tool-memory paths found
+- Which agent config file was updated

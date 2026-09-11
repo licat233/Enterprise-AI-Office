@@ -10,6 +10,7 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PASS=0
 FAIL=0
+REPOSITORY_ONLY=${EAO_REPOSITORY_ONLY:-0}
 
 pass() {
   PASS=$((PASS + 1))
@@ -43,13 +44,29 @@ require_text() {
   fi
 }
 
+require_absent() {
+  rel="$1"
+  label="$2"
+  if [ ! -e "$ROOT/$rel" ]; then
+    pass "$label"
+  else
+    fail "$label" "$rel must not be active"
+  fi
+}
+
 printf '%s\n' 'Enterprise AI Office Repository Readiness'
 printf '%s\n' '----------------------------------------'
 
 # Agent contract, blueprint lifecycle authority, and declarative inputs.
 for path in \
   README.md \
+  README.zh-CN.md \
   AGENTS.md \
+  REPRODUCE.md \
+  config/eao-manifest.yaml \
+  docs/CAPABILITY-REUSE-PASS.md \
+  docs/DEPLOYMENT-PRACTICES.md \
+  state/REAL-DEPLOYMENT-STATUS.md \
   state/PROJECT-PHASE.yaml \
   DEPLOY.md \
   docs/COMPLETENESS.md \
@@ -80,6 +97,7 @@ for path in \
   config/company.example.yaml \
   config/company.private.example.yaml \
   config/capabilities.yaml \
+  config/mcp-registry.yaml \
   config/validated-stack.yaml \
   config/.env.example \
   state/DEPLOYMENT-STATE.template.md
@@ -144,7 +162,37 @@ for path in \
   scripts/preflight.sh \
   scripts/health-check.sh \
   scripts/backup.sh \
-  scripts/restore.sh
+  scripts/restore.sh \
+  scripts/phase4a_migration_check.py \
+  scripts/phase4c_runtime_check.py \
+  scripts/test_phase4c_runtime.py \
+  scripts/phase5a_social_runtime_check.py \
+  scripts/test_phase5a_social.py \
+  scripts/phase5b_mic_runtime_check.py \
+  scripts/test_phase5b_mic.py \
+  scripts/test_phase5b1_mic_authority.py \
+  scripts/test_phase5b2_mic_authority_dedup.py \
+  scripts/phase5c_operations_skills_triage_check.py \
+  scripts/phase5d_product_materials_check.py \
+  scripts/test_phase5d_product_materials.py \
+  scripts/phase6_web_research_check.py \
+  docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md \
+  docs/PHASE5D-WEBSITE-PRODUCT-MATERIALS-MIGRATION.md \
+  skills/shared/department/armor-memory/scripts/armor-route.py \
+  skills/shared/department/armor-memory/scripts/armor-vault-mcp.py \
+  skills/shared/department/armor-mic-product-optimization/SKILL.md \
+  skills/shared/department/armor-website-product-materials/SKILL.md \
+  skills/shared/department/armor-social-media-pipeline/SKILL.md \
+  skills/shared/department/armor-video-content-rules/SKILL.md \
+  skills/shared/toolscout/SKILL.md
+do
+  require_file "$path"
+done
+
+for path in \
+  infrastructure/web-research/adapter.py \
+  infrastructure/web-research/test_adapter.py \
+  docs/ENTERPRISE-WEB-RESEARCH-V1.md
 do
   require_file "$path"
 done
@@ -198,6 +246,163 @@ require_text config/.env.example 'EAIO_GOVERNANCE_STATE_DB' 'Runtime bindings ex
 require_text config/.env.example 'EAIO_GOVERNANCE_HEALTH_URL' 'Runtime bindings expose optional Governance health URL'
 require_text config/.env.example 'EAIO_TRUSTED_FORWARDER_TOKEN' 'Runtime bindings expose protected forwarder token'
 require_text config/capabilities.yaml 'docs/V2-CONFIG-PROTECTED-INPUTS.md' 'Email capability has protected-input contract'
+require_text config/mcp-registry.yaml 'anysearch:' 'Phase 4A registry contains anysearch'
+require_text config/mcp-registry.yaml 'OPERATIONS_READ' 'Phase 4A registry classifies anysearch'
+require_text config/mcp-registry.yaml 'firecrawl-mcp:' 'Phase 4A registry contains firecrawl'
+require_text config/mcp-registry.yaml 'obscura:' 'Phase 4A registry contains obscura'
+require_text config/mcp-registry.yaml 'paddle_ocr:' 'Phase 4A registry contains Paddle OCR'
+require_text config/mcp-registry.yaml 'toolscout:' 'Phase 4A registry contains ToolScout'
+require_text config/mcp-registry.yaml 'schema_version: 2' 'Phase 4C registry records runtime truth'
+require_text config/mcp-registry.yaml 'SHARED_AGENT_INFRASTRUCTURE' 'ToolScout is shared agent infrastructure'
+require_text config/mcp-registry.yaml 'adapter_required: true' 'Firecrawl requires the Enterprise-owned adapter'
+require_text config/mcp-registry.yaml 'raw_tools_exposed_to_operations: false' 'Raw Firecrawl tools are not Operations-exposed'
+require_text config/mcp-registry.yaml 'armor-vault-scoped-router:' 'Scoped Vault Router is registered'
+require_text skills/shared/department/armor-memory/scripts/route.sh 'armor-route.py' 'ARMOR memory wrapper resolves local Router'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_article_package' 'Scoped Article save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_social_package' 'Scoped Social save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_mic_product_package' 'Scoped MIC save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_website_product_materials_package' 'Scoped Website Product Materials save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-route.py 'mic-product' 'MIC product route is present'
+require_text skills/shared/department/armor-memory/scripts/armor-route.py 'product-materials' 'Website Product Materials route is present'
+require_text skills/shared/department/armor-memory/SKILL.md 'product-materials' 'ARMOR memory Skill documents Product Materials routing'
+require_text skills/shared/department/armor-website-product-materials/SKILL.md 'ARMOR-Website-Product-Materials-Standard-v1.0.md' 'Product Materials Skill references the canonical Vault Standard'
+require_text skills/shared/department/armor-website-product-materials/SKILL.md 'PRODUCT_AUTHORITY_REVIEW_REQUIRED' 'Product Materials Skill has the authority blocker'
+require_text skills/shared/department/armor-website-product-materials/SKILL.md 'save_website_product_materials_package' 'Product Materials Skill binds the scoped save'
+require_text docs/PHASE5D-WEBSITE-PRODUCT-MATERIALS-MIGRATION.md 'Website Product Materials: PASS' 'Phase 5D report records migration status'
+require_text scripts/test_phase5d_product_materials.py 'PRODUCT_AUTHORITY_REVIEW_REQUIRED' 'Phase 5D tests cover authority review'
+require_text scripts/phase5d_product_materials_check.py 'Operations receives the exact scoped Router tool allowlist' 'Phase 5D runtime check covers the scoped allowlist'
+require_text skills/shared/department/armor-product-visual/SKILL.md 'ARMOR-Product-Visual-Standard-v1.0.md' 'Product Visual Skill references the canonical Vault Standard'
+require_text skills/shared/department/armor-product-visual/SKILL.md 'READY_FOR_GENERATION' 'Product Visual Skill is a generation handoff only'
+require_text skills/shared/department/armor-product-visual/SKILL.md 'save_product_visual_package' 'Product Visual Skill binds the scoped save'
+require_text skills/shared/department/armor-product-visual/SKILL.md 'Agent Delegate' 'Product Visual keeps delegation out of scope'
+require_text skills/shared/department/armor-memory/scripts/armor-route.py 'product-visual' 'Product Visual route is present'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'save_product_visual_package' 'Scoped Product Visual save tool is present'
+require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'PRODUCT_VISUAL_REQUIRED_FILES' 'Product Visual closed contract is present'
+require_text config/mcp-registry.yaml 'product_visual_write_scope:' 'Product Visual write boundary is registered'
+require_text config/capabilities.yaml 'armor_product_visual:' 'Product Visual capability is registered'
+require_text config/capabilities.yaml 'enterprise_web_research:' 'Enterprise Web Research capability is registered'
+require_text config/mcp-registry.yaml 'enterprise-web-research:' 'Enterprise Web Research adapter is registered'
+require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'UNTRUSTED_WEB_CONTENT' 'Web Research trust boundary is documented'
+require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'Stage 1 status: `CLOSED / PASS`' 'Web Research Stage 1 is closed'
+require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'Stage 2 status: `CLOSED / PASS`' 'Web Research Stage 2 is closed'
+require_file scripts/test_phase5e_product_visual.py
+require_file scripts/phase5e_product_visual_check.py
+require_text docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md 'Phase 5E: PASS' 'Phase 5E migration record is closed'
+require_file docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md
+require_file docs/POST-V1.0-BACKLOG.md
+require_file docs/inventory/legacy-operations-skills-triage.csv
+require_text README.md 'Enterprise Operations Capability Baseline v1.0' 'README links the frozen Operations baseline'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Enterprise Operations Capability Baseline v1.0: FROZEN' 'Final Operations baseline is frozen'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Hermes Skills Migration v1.0: CLOSED' 'Hermes Skills Migration v1.0 is closed'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Multi-Agent Orchestration: EXPERIMENTAL_HOLD' 'Final acceptance preserves Agent Delegate hold'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'Operations Hermes Memory: OFF' 'Final acceptance preserves Operations Memory OFF'
+require_text docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md 'save_product_visual_package' 'Final acceptance records Product Visual Router save'
+if grep -F 'KEEP_MIGRATE' "$ROOT/docs/inventory/legacy-operations-skills-triage.csv" >/dev/null 2>&1; then
+  fail 'Final migration ledger has no KEEP_MIGRATE rows' 'unresolved v1.0 migration rows remain'
+else
+  pass 'Final migration ledger has no KEEP_MIGRATE rows'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-product-visual -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-product-visual' 'Profile manifest exposes Product Visual canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-product-visual,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Visual entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_product_visual_package' 'Profile enables the scoped Product Visual save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_product_visual_package' 'Live Profile binds the scoped Product Visual save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'image_gen' 'Operations keeps image generation explicitly disabled'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'delegation' 'Operations keeps delegation explicitly disabled'
+fi
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-product-edit-context/v1' 'MIC Skill honors current edit-page extraction'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'BLOCKED_SOURCE' 'MIC Skill fails closed when Standard is unavailable'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'MIC_AUTHORITY_REVIEW_REQUIRED' 'MIC Skill has authority review gate'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'Exact technical values must ultimately resolve' 'MIC adapter preserves technical fact safety'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'save_mic_product_package' 'MIC adapter binds scoped save'
+require_absent skills/shared/department/mic-product-fill 'No duplicate shared MIC fill Skill is active'
+require_absent skills/shared/department/mic-product-audit 'No duplicate shared MIC audit Skill is active'
+require_absent skills/shared/department/mic-product-detail-page 'No duplicate shared MIC detail Skill is active'
+require_text docs/PHASE4C-ARMOR-RUNTIME-CLOSURE.md 'ARMOR_ARCH_ROOT' 'Phase 4C Router closure is documented'
+require_text skills/shared/department/armor-social-media-pipeline/SKILL.md '02-Projects/Workspaces/Marketing/Social-Media/' 'Social Skill declares lifecycle-neutral Router target'
+require_text skills/shared/department/armor-social-media-pipeline/SKILL.md 'save_social_package' 'Social Skill declares scoped save boundary'
+require_text skills/shared/department/armor-social-media-pipeline/SKILL.md 'ai-writing-audit' 'Social Skill reuses the canonical audit'
+require_text skills/shared/department/armor-video-content-rules/SKILL.md 'transcript' 'Video rules preserve transcript-first handling'
+require_absent skills/shared/department/armor-social-media-workflow 'No competing Social workflow Skill is active'
+require_text docs/PHASE5A-ARMOR-SOCIAL-MEDIA-MIGRATION.md 'authority: CANONICAL' 'Phase 5A records canonical Social authority'
+require_text docs/PHASE5A-ARMOR-SOCIAL-MEDIA-MIGRATION.md 'save_social_package' 'Phase 5A documents the scoped Social save'
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-social-media-pipeline -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-social-media-pipeline' 'Profile manifest exposes Social canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-social-media-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Social entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_social_package' 'Profile enables the scoped Social save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_social_package' 'Live Profile binds the scoped Social save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-mic-product-optimization -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-mic-product-optimization' 'Profile manifest exposes MIC canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-mic-product-optimization,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical MIC entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_mic_product_package' 'Profile enables the scoped MIC save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_mic_product_package' 'Live Profile binds the scoped MIC save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-website-product-materials -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-product-materials' 'Profile manifest exposes Product Materials canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-website-product-materials,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Materials entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_website_product_materials_package' 'Profile enables the scoped Product Materials save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_website_product_materials_package' 'Live Profile binds the scoped Product Materials save tool'
+fi
+require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'MIC authority: CANONICAL' 'Phase 5B records canonical MIC authority'
+require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'Automatic MIC editing enabled: NO' 'Phase 5B records no automatic MIC editing'
+require_text scripts/test_phase5b_mic.py 'publication_performed: false' 'MIC acceptance fixture forbids publication'
+require_text docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md 'CANONICAL' 'Phase 5B.2 records canonical Vault ownership'
+require_text docs/PHASE5B.2-MIC-SKILL-VAULT-AUTHORITY-DEDUPLICATION.md 'EXECUTION_ADAPTER' 'Phase 5B.2 records Skill adapter ownership'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'ARMOR-MIC-Product-Optimization-Standard-v1.0.md' 'MIC Skill references the canonical Vault Standard'
+require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'Never silently fall back to an embedded duplicate rule set' 'MIC Skill has no detailed SOP fallback copy'
+require_text scripts/test_phase5b1_mic_authority.py 'conflicting Datasheet value' 'MIC authority regression covers conflicting technical values'
+require_text scripts/test_phase5b2_mic_authority_dedup.py 'not_embedded_sop' 'MIC de-duplication regression covers the thin adapter role'
+require_text scripts/phase5a_social_runtime_check.py 'publication_performed: false' 'Social acceptance fixture forbids publication'
+require_text config/mcp-registry.yaml 'employee_exposure_default: disabled' 'Phase 4A registry defaults employee exposure off'
+require_text config/mcp-registry.yaml 'operations_allowlist:' 'Phase 4A registry declares Operations allowlist'
+require_text docs/MCP-CONTROL-PLANE.md 'inventory and acceptance contract' 'Phase 4A MCP control-plane contract exists'
+require_text docs/PHASE4A-ARMOR-MIGRATION.md 'one Codex Final Editorial Pass' 'Phase 4A Article lifecycle is documented'
+require_text skills/shared/department/armor-website-article-pipeline/SKILL.md '02-Projects/Workspaces/Website/Articles/' 'Article Skill declares Router source target'
+require_text skills/shared/department/armor-website-article-pipeline/SKILL.md 'ai-writing-audit v0.3.1' 'Article Skill pins audit version'
+require_file scripts/phase4b_runtime_check.py
+require_file scripts/test_phase4b_runtime_check.py
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'ai-writing-audit -> /Users/armor/Enterprise-AI-Office/skills/shared/department/ai-writing-audit' 'Profile manifest exposes ai-writing-audit canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-website-article-pipeline -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-article-pipeline' 'Profile manifest exposes Article canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'ai-writing-audit,SAFE_BASELINE' 'Profile enables the audit dependency'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-website-article-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Article entrypoint'
+fi
+require_text docs/PHASE4B-ARMOR-RUNTIME-CLOSURE.md 'SCOPED_ROUTER_WRITE_BLOCKED' 'Phase 4B records the scoped Router blocker'
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
 require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
 require_text config/capabilities.yaml 'docs/V2-GOVERNANCE-RUNTIME.md' 'Email capability has governance runtime contract'
@@ -267,6 +472,21 @@ require_text infrastructure/hermes/features/MESSAGING.md 'hermes gateway setup' 
 require_text infrastructure/hermes/features/EMPLOYEE-MEMORY.md 'BLOCKED — REQUIRED INPUT' 'Employee memory gate fails closed without isolation'
 require_text config/capabilities.yaml 'technical-profile.config.example.yaml' 'Coding capability has executable Profile template'
 require_text README.md 'CONFIGURED READY' 'README explains configured completeness'
+
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  phase4a_python=python3
+  if [ "$phase4a_python" = python3 ] && [ -x /Users/armor/.hermes/hermes-agent/venv/bin/python ]; then
+    phase4a_python=/Users/armor/.hermes/hermes-agent/venv/bin/python
+  fi
+
+  if "$phase4a_python" "$ROOT/scripts/phase4a_migration_check.py"; then
+    pass 'Phase 4A Article/MCP migration contract'
+  else
+    fail 'Phase 4A Article/MCP migration contract' 'offline migration checker failed'
+  fi
+else
+  printf '%s\n' 'Repository-only mode: private deployment/profile checks skipped by design.'
+fi
 
 printf '%s\n' '----------------------------------------'
 printf 'Summary: %s PASS, %s FAIL\n' "$PASS" "$FAIL"

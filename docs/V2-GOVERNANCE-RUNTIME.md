@@ -237,7 +237,9 @@ A trusted client may send an opaque request idempotency key for accidental HTTP/
 
 If implemented, store/resolve it only for the operation result and do not make it the business identity of DraftReply.
 
-Absent an explicit idempotency key, a new valid `prepare_reply_draft` invocation is allowed to create a new draft/revision.
+Absent an explicit idempotency key, a new valid prepare_reply_draft invocation is allowed to create a new draft/revision.
+
+For the Phase 1 scheduled workflow, the runtime supplies a deterministic request key from workflow version, mailbox logical ID, and source Message-ID. That mapping is persisted in governance state and points to the immutable DraftReply revision. Replaying the same scheduled request returns the existing mapping; a later human revision is never overwritten. A different source Message-ID may create a new DraftReply.
 
 ---
 

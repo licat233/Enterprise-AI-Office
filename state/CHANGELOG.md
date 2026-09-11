@@ -37,6 +37,257 @@ Environment:
 <known limitations / follow-up>
 ```
 
+## 2026-09-11 — Finalize trusted private-LAN Open WebUI exposure
+
+Component: Open WebUI employee network boundary and protected deployment configuration
+Environment: authorized Mac Studio deployment target; private host/network identifiers omitted
+
+### Before
+
+- The real employee deployment used a protected private-LAN publication on host TCP 3000.
+- The protected `WEBUI_URL` represented the prior employee endpoint.
+
+### After
+
+- Finalized the protected deployment on a dedicated host port: all IPv4 host interfaces at TCP 13000 to the Open WebUI container at TCP 8080.
+- Reconciled the protected `WEBUI_URL` to the reserved office-LAN employee endpoint; the private address is intentionally omitted here.
+- Preserved trusted private-LAN access, Open WebUI authentication, signup-disabled behavior, ordinary RBAC, General Assistant routing, employee memory policy, and the internal/admin boundary.
+- Kept the public reference Compose loopback-only; the real deployment-specific network override remains protected.
+- The all-IPv4 bind is compatible with a later Tailscale path without changing Docker publication. Tailscale was not enabled or configured by this change.
+
+### Reason
+
+Move the real employee surface from the temporary host port to the long-term trusted office-LAN baseline while retaining the existing application and service boundaries.
+
+### Validation
+
+- Protected Compose validation and reconciliation passed; Open WebUI v0.11.3 remained healthy with its persistent data volume.
+- Separate LAN-client browser reached the login page; the synthetic employee authenticated, used General Assistant, received grounded Company Knowledge evidence, and retained the conversation through reload.
+- Unauthenticated API access returned HTTP 401.
+- LAN probes to the prior host port and internal/admin ports failed closed.
+- Final health check: 5 PASS, 2 WARN, 0 FAIL; warnings are documented known limitations and not caused by this change.
+
+### Rollback
+
+Restore the protected pre-change snapshot from the deployment backup directory, then reconcile the same Compose project.
+
+### Notes
+
+No private IP, secret, credential, host identifier, or router-specific detail is recorded in public Git. No unrelated service or network configuration was changed.
+
+## 2026-09-11 - Enable private-LAN Open WebUI employee access
+
+Component: Open WebUI employee network boundary and protected deployment configuration
+Environment: authorized Mac Studio deployment target; private host/network identifiers omitted
+
+### Before
+
+- Open WebUI was published only on loopback at `127.0.0.1:3000`.
+- The protected `WEBUI_URL` represented the loopback endpoint.
+- The active private company configuration did not enable the remote/private access capability.
+
+### After
+
+- Enabled the configured `private LAN only` access method for the employee `open-webui` surface.
+- Reconciled the active protected Compose source to publish only on the current Mac Studio Wi-Fi LAN address at TCP 3000.
+- Reconciled protected `WEBUI_URL` to the employee-facing LAN endpoint.
+- Preserved Open WebUI v0.11.3, persistent data, authentication, RBAC, employee permissions, and all internal/admin service bindings.
+
+### Reason
+
+Allow employees on the trusted office LAN to use Open WebUI while preserving the existing least-privilege boundary for WeKnora internals, PostgreSQL, Redis, DocReader, Hermes privileged routes, and administrative surfaces.
+
+### Validation
+
+- Compose validation and reconciliation passed; `eaio-open-webui` is healthy.
+- Docker publication and host listener show the LAN-bound TCP 3000 endpoint.
+- Separate LAN-client browser loaded the login page; authenticated synthetic employee use of General Assistant returned grounded Company Knowledge evidence and survived reload.
+- Unauthenticated `/api/v1/models` returned HTTP 401.
+- LAN-client probes to known internal/admin ports remained closed; no non-Open-WebUI container was changed.
+
+### Rollback
+
+Restore the protected pre-change snapshot from the deployment backup directory, then reconcile the same Compose project.
+
+### Notes
+
+The current Wi-Fi address is DHCP-assigned. Configure a router reservation or update the protected binding and `WEBUI_URL` together if the address changes.
+
+## 2026-09-09 — Enterprise Global Rule v1.1 Root-Cause Persistence
+
+Component: Hermes Enterprise Global Rule
+Environment: authorized Mac Studio deployment target; private host and checkout details omitted
+
+### Before
+
+- Enterprise Global Rule v1.0 defined source-of-truth boundaries and kept
+  employee Profile Memory OFF, but did not state the complete root-cause repair
+  and shared “Remember This” routing contract.
+
+### After
+
+- Updated the single active Hermes Global Rule to v1.1 Root-Cause Persistence.
+- Added owning-layer routing for one-off outputs, company facts, procedures,
+  department/enterprise rules, implementations, runtime assumptions, missing
+  inputs, projects, schedules, sessions, and narrowly permitted preferences.
+- Explicitly prohibited Memory as a correction overlay or store for company
+  facts, workflow rules, machine state, runtime paths, and source-governance
+  defects.
+- Kept `general` and `operations` long-term Memory OFF and did not duplicate
+  the Global Rule into either Profile SOUL.
+- Updated the reusable public architecture summary without adding a second
+  full Global Rule source.
+
+### Reason
+
+Ensure enterprise learning repairs authoritative sources, Rules, Skills,
+Workflows, or implementations instead of accumulating hidden correction
+Memory.
+
+### Validation
+
+Operations behavioral routing tests passed `5/5`; General and Operations both
+observed the updated inherited rule. General and Operations health, Company
+Knowledge retrieval, Memory-OFF state, and Cron `0` regression checks passed.
+No Vault, WeKnora, Department Skill, or legacy Memory state was modified.
+
+### Rollback
+
+Restore the protected pre-v1.1 Hermes Global Rule backup and revert the related
+public documentation commit through normal Git history if required.
+
+### Notes
+
+The live machine-specific SOUL remains outside the public repository. The
+runtime source remains the only complete Global Rule source.
+
+## 2026-09-09 — Enterprise Hermes Phase 3 Operations Profile bootstrap
+
+Component: Hermes Operations Department Profile and controlled P0/P1 capability activation
+Environment: authorized Mac Studio deployment target; private host and checkout details omitted
+
+### Before
+
+- The `operations` Department Profile did not exist.
+- The 40 deduplicated P0/P1 Department Skills were staged but not served.
+- The active Hermes gateway served only `general` for employee-facing runtime
+  purposes.
+
+### After
+
+- Confirmed the ARMOR Operations namespace from the protected deployment
+  configuration and
+  created Hermes Profile `operations` / `Operations Assistant` using the
+  supported Profile mechanism.
+- Added a small Department SOUL inheriting the unchanged Enterprise Global
+  Rule; Department long-term Memory remains OFF.
+- Enabled 12 curated Skills: 7 `SAFE_BASELINE` and 5 `WORKFLOW`. Kept 28
+  Skills disabled, with 0 `PRIVILEGED_OR_EXTERNAL` enabled. P2/P3 assets were
+  not touched.
+- Enabled the existing target WeKnora read-only bridge with six tools. A
+  protected rebind copied only the target WeKnora variables into the new
+  Profile; no secret value was printed or copied from unrelated credentials.
+- Kept shell, SSH, sudo/root, file, code, browser, web, delegation, Memory,
+  Cron, plugins, external publishing, messaging, deletion, and administrative
+  controls outside the Department boundary. Skill mutations require operator
+  approval and no approval is granted.
+- Declared the Operations group/Profile mapping in the private company config
+- Recovered the existing `eaio-openwebui` Compose project and persistent
+  `open-webui-data` state; the earlier apparent absence was a wrong Compose
+  project-name query, not a missing deployment.
+- Added the required protected independent Operations Profile API key, then
+  provisioned the existing Open WebUI through its native admin path: reused
+  the existing test identity, created `Operations Employees`, preserved
+  General, and created the group-scoped `Operations Assistant` model.
+
+### Reason
+
+Bootstrap the first shared department-level assistant with useful, maintainable
+capabilities while preserving the Phase 2 clean-room security baseline.
+
+### Validation
+
+15/15 Department functional tests passed; 12/12 enabled-Skill smoke tests
+passed; 6/6 security probes were denied; General regression passed 3/3;
+Operations health returned HTTP 200; WeKnora retrieval returned grounded ARMOR
+company facts; Cron remains at 0. No old personal path, old Vault path,
+plaintext secret, or P2/P3 capability was activated.
+
+### Rollback
+
+Restore Hermes configuration and the pre-change environment from the protected
+Phase 3 backup; remove the
+Operations Profile from the served allowlist and review uncommitted repository
+changes under the normal repository workflow.
+
+### Notes
+
+Open WebUI exposure is complete through the existing authenticated admin path.
+The protected first-admin bootstrap variables were not needed and no
+administrator was created or reset. Operations acceptance passed `5/5`,
+security passed `5/5 DENIED`, and General regression passed `3/3`. The
+complete effective manifests are in the protected deployment manifest; the
+pre-change Operations environment is preserved in the Phase 3 backup.
+
+## 2026-09-09 — Enterprise Hermes clean-room migration Phase 2
+
+Component: Hermes Global SOUL and Profile capability boundary
+Environment: authorized Mac Studio deployment target; private host and checkout details omitted
+
+### Before
+
+- The target global SOUL contained the generic Hermes baseline without the
+  Enterprise Global Rule v1.0 Frozen Baseline.
+- Global Memory flags were enabled.
+- General's effective runtime exposed the default built-in toolsets in
+  addition to its target-native WeKnora definition.
+- The target had no clean-room Department capability staging record.
+
+### After
+
+- Installed the Frozen Global Rule in the editable Hermes global SOUL source
+  and did not introduce a generated-SOUL
+  workflow.
+- Set global and General Memory/user-profile flags to `false`.
+- Restricted General to the target-native WeKnora read-only MCP tool set;
+  employee-facing terminal, browser, file, web, code, delegation, cron,
+  Memory, session-search, computer-use, and media-generation boundaries are
+  disabled.
+- Staged 40 deduplicated P0/P1 Department-shared Skills after path
+  decontamination. The prepared Department Profile is inert because no
+  official Department identifier/name was available.
+- Bound `ARMOR_VAULT_ROOT` to the approved NAS Vault path. No Vault or WeKnora
+  content was changed.
+- Migrated no legacy Memory, secrets, P2/P3 assets, relevant plugins, or cron
+  activations. Enabled cron count remains `0`.
+
+### Reason
+
+Apply the Enterprise clean-room baseline to the actual Mac Studio installation
+while preserving the existing Hermes installation and keeping Department
+capabilities unserved until the company supplies an official identifier and
+approval.
+
+### Validation
+
+Global Rule refusal tests passed `5/5`; General WeKnora retrieval smoke passed;
+General regression passed `2/2`; path scan found zero old personal operational
+paths and zero old local Vault dependencies; gateway restart passed and the
+existing LaunchAgent remained healthy. The known stale-plist warning was
+recorded and not changed.
+
+### Rollback
+
+Restore the pre-change live Hermes files from the protected Phase 2 backup,
+then review the
+uncommitted repository changes under the normal repository workflow.
+
+### Notes
+
+The complete migration and validation records are in
+`private/hermes-migration-phase2/`. This is a Phase 2 clean-room pass, not a
+claim that the entire Enterprise AI Office is production-ready.
+
 ---
 
 ## 2026-09-06 — Final employee client permission and corpus cleanup

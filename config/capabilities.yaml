@@ -22,6 +22,97 @@ readiness_levels:
       - production.operations_health
 
 capabilities:
+  mic_product_information_optimization:
+    kind: conditional
+    enabled_when: company explicitly enables the ARMOR MIC product-information workflow
+    implementation:
+      - skills/shared/department/armor-mic-product-optimization/SKILL.md
+      - skills/shared/department/armor-memory/scripts/armor-route.py
+      - skills/shared/department/armor-memory/scripts/armor-vault-mcp.py
+      - config/mcp-registry.yaml
+      - docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md
+    acceptance:
+      document: docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md
+      section: MIC E2E acceptance
+    boundary:
+      live_listing_edit: false
+      external_publication: false
+      generic_file_access: false
+      legacy_memory_migration: false
+
+  armor_product_visual:
+    kind: conditional
+    enabled_when: company explicitly enables the ARMOR Product Visual preparation workflow
+    implementation:
+      - skills/shared/department/armor-product-visual/SKILL.md
+      - skills/shared/department/armor-memory/scripts/armor-route.py
+      - skills/shared/department/armor-memory/scripts/armor-vault-mcp.py
+      - config/mcp-registry.yaml
+      - docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md
+    acceptance:
+      document: docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md
+      section: Acceptance Fixture
+    boundary:
+      image_generation: false
+      binary_asset_upload: false
+      external_publication: false
+      generic_file_access: false
+      agent_delegate: false
+      legacy_memory_migration: false
+
+  enterprise_web_research:
+    kind: conditional
+    enabled_when: company explicitly enables bounded employee-facing Web Research
+    implementation:
+      - infrastructure/web-research/adapter.py
+      - infrastructure/web-research/test_adapter.py
+      - config/mcp-registry.yaml
+      - docs/ENTERPRISE-WEB-RESEARCH-V1.md
+    acceptance:
+      document: docs/ENTERPRISE-WEB-RESEARCH-V1.md
+      section: Stage 1 acceptance
+    upstream:
+      - Firecrawl Search API
+      - Firecrawl Scrape API
+      - Obscura rendered-page fallback
+      - CloakBrowser hardened rendered-page fallback
+    required_secret_classes:
+      - firecrawl-api-credential
+    security_boundary:
+      - public HTTP/HTTPS URLs only
+      - DNS results must be globally routable
+      - redirects are revalidated before normalized success
+      - fetched pages are UNTRUSTED_WEB_CONTENT
+      - Firecrawl is primary; Obscura is an internal bounded fallback only
+      - Obscura uses only a fixed navigate/snapshot/Markdown sequence
+      - Obscura receives no personal cookies, sessions, or profiles
+      - CloakBrowser is an internal bounded Level 3 fallback only
+      - CloakBrowser uses only fixed navigate/wait/final-URL/title/body-text reads
+      - CloakBrowser receives no personal cookies, sessions, profiles, or login state
+      - no Vault, WeKnora, Memory, cookie, session, or binary persistence
+      - only web_search and web_fetch are Operations-facing
+    boundary:
+      raw_firecrawl_tools_to_operations: false
+      generic_browser: false
+      generic_shell: false
+      generic_filesystem: false
+      code_execution: false
+      automatic_publication: false
+      authenticated_browsing: false
+      binary_download: false
+
+  mcp_control_plane_inventory:
+    kind: control_plane
+    always_available: true
+    implementation:
+      - config/mcp-registry.yaml
+      - docs/MCP-CONTROL-PLANE.md
+      - docs/PHASE4A-ARMOR-MIGRATION.md
+    acceptance:
+      document: docs/ACCEPTANCE-TESTS.md
+      section: ARMOR Phase 4A — Article and MCP migration
+    notes: Inventory only; no employee exposure is implied.
+
   core.employee_path:
     kind: core
     always_enabled: true

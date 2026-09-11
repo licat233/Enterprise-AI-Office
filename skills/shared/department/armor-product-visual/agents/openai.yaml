@@ -1,0 +1,4 @@
+interface:
+  display_name: "ARMOR Product Visual"
+  short_description: "Prepare source-grounded product visual handoffs"
+  default_prompt: "Use $armor-product-visual to prepare a reviewed ARMOR product visual brief, prompt, provenance, and QA package."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Armor Social Media Pipeline"
+  short_description: "Produce and audit ARMOR social content"
+  default_prompt: "Use $armor-social-media-pipeline to produce an ARMOR social-media deliverable through the full pipeline."

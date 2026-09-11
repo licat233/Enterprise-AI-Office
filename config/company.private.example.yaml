@@ -27,6 +27,12 @@ employee_access:
         display_name: Sales Team
 
 # Enable only the specialist Profile actually required by the selected capability.
+mcp_control_plane:
+  registry: config/mcp-registry.yaml
+  employee_exposure_default: disabled
+  operations_allowlist:
+    - weknora
+
 profiles:
   - id: communication
     display_name: Communication Assistant
@@ -37,6 +43,12 @@ profiles:
     memory_policy: disabled-until-isolation-validated
 
 capabilities:
+  enterprise_web_research:
+    enabled: false
+    allowed_profiles: []
+    upstream: firecrawl
+    credential_ref: null
+
   email:
     enabled: true
     provider: tencent-exmail

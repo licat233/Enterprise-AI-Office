@@ -4,6 +4,18 @@
 
 **[English README](./README.md)**
 
+## AI Agent 从这里开始
+
+如果你是一个没有任何历史聊天上下文的新 AI 工程 Agent，不要根据目录名或旧会话猜测系统结构。按以下顺序开始：
+
+1. [`AGENTS.md`](AGENTS.md) —— 仓库级 Agent 操作合同。
+2. [`REPRODUCE.md`](REPRODUCE.md) —— 从零复建 EAO 的完整合同。
+3. [`config/eao-manifest.yaml`](config/eao-manifest.yaml) —— 机器可读的系统总清单。
+4. [`DEPLOY.md`](DEPLOY.md) —— 部署 Golden Path。
+5. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) —— 当前 ARMOR 真实参考部署的脱敏状态。
+
+提出任何新组件之前，必须先执行 [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md)。
+
 ## 项目进度一眼看懂
 
 | 里程碑 / 能力 | 状态 |
@@ -19,9 +31,13 @@
 | ID-6 Governed Send / Reconciliation | ✅ 已完成 |
 | ID-7 Recovery / Clean-host Acceptance | ✅ 已完成 |
 | Installation Design Final Review | ✅ PASS |
+| Enterprise Operations Capability Baseline v1.0 | ✅ 已冻结 |
+| Hermes Skills Migration v1.0 | ✅ 已关闭 |
+| Enterprise Web Research v1.0 | ✅ 已关闭 / 冻结 / PASS |
+| Operations 员工 RBAC v1 | ✅ 已关闭 / 冻结 / PASS |
 | Blueprint Validation | ⏳ 尚未开启 |
 | Release Ready | ⏳ 尚未开启 |
-| 真实企业部署任务 | ⛔ 未激活 |
+| Public Real Deployment Gate | ⛔ 默认未激活；已有 ARMOR 脱敏真实参考部署 |
 
 > **重要说明：** 本 README 中的“已经实现”，是指仓库已经具备相应的系统设计、安装合同、参考适配器/脚本、Schema 或已验证的核心资产；并不代表 v2 邮件能力已经连接真实企业邮箱并投入生产。
 
@@ -128,7 +144,23 @@ v2 已经把完整邮件工作流设计并落实为可安装参考资产：
 - Protected Reconciliation Control Path；
 - `SENT / CONFIRMED_NOT_SENT / OUTCOME_UNKNOWN` 三类发送结果语义。
 
-### 4）最小化 EAO Email Governance Runtime
+### 4）ARMOR Operations v1.0 当前状态
+
+已部署的 ARMOR Operations Profile 是一个共享、最小权限的业务能力包。
+当前 canonical 生产入口包括 Website Article、Website Product Materials、
+Social Media（含视频规则）、MIC Product Optimization，以及 ARMOR Product
+Visual 准备流程。Product Visual 只到有来源约束的 brief/prompt/provenance/QA
+交接，不生成或发布图片。
+
+Operations 只能通过封闭的 ARMOR Vault Router 合同保存经过审核的业务工作
+产物，不能使用通用 shell、terminal、filesystem、browser、computer-use、
+code execution、delegation 或自动发布路径。Hermes Memory 与员工 Profile
+Memory 均关闭。WeKnora 是共享企业知识检索层；Vault 规则是持久化业务权威。
+
+完整能力矩阵、运行时证据、迁移账本、权限边界、E2E 结果和延后事项见：
+[`docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md`](docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md)。
+
+### 5）最小化 EAO Email Governance Runtime
 
 v2 没有引入大型新平台，而是只新增一个薄的 EAO Runtime：
 
@@ -157,7 +189,7 @@ SQLite
 - Schema migration；
 - Backup / Restore / Recovery。
 
-### 5）腾讯企业邮 Reference Provider
+### 6）腾讯企业邮 Reference Provider
 
 仓库已经包含：
 
@@ -171,7 +203,7 @@ SQLite
 
 Baseline 不暴露 generic SMTP/send-anything 能力。
 
-### 6）恢复、回滚与 Clean-host 合同
+### 7）恢复、回滚与 Clean-host 合同
 
 ID-7 已经补齐：
 

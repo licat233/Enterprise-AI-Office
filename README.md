@@ -4,6 +4,18 @@
 
 **[简体中文 README](./README.zh-CN.md)**
 
+## AI Agent start here
+
+If you are a fresh AI engineering agent, do not infer the system from directory names or old chat context. Start with:
+
+1. [`AGENTS.md`](AGENTS.md) — repository operating contract.
+2. [`REPRODUCE.md`](REPRODUCE.md) — end-to-end fresh-agent reconstruction contract.
+3. [`config/eao-manifest.yaml`](config/eao-manifest.yaml) — machine-readable system map.
+4. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
+5. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) — sanitized current ARMOR reference-deployment status.
+
+Before proposing any new component, run the mandatory [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md).
+
 ## Project status at a glance
 
 | Milestone / capability | Status |
@@ -19,9 +31,13 @@
 | ID-6 Governed Send / Reconciliation | ✅ Complete |
 | ID-7 Recovery / Clean-host Acceptance | ✅ Complete |
 | Installation Design Final Review | ✅ PASS |
+| Enterprise Operations Capability Baseline v1.0 | ✅ Frozen |
+| Hermes Skills Migration v1.0 | ✅ Closed |
+| Enterprise Web Research v1.0 | ✅ Closed / Frozen / PASS |
+| Operations employee RBAC v1 | ✅ Closed / Frozen / PASS |
 | Blueprint Validation | ⏳ Not yet opened |
 | Release Ready | ⏳ Not yet opened |
-| Real company deployment task | ⛔ Inactive |
+| Public real-deployment gate | ⛔ Inactive by default; sanitized ARMOR reference deployment exists |
 
 > **Important:** “implemented” in this README means the repository contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox.
 
@@ -128,7 +144,27 @@ Current repository capabilities include:
 - protected reconciliation control path;
 - failure-safe `SENT / CONFIRMED_NOT_SENT / OUTCOME_UNKNOWN` semantics.
 
-### 4. Thin EAO Email Governance runtime
+### 4. ARMOR Operations v1.0 current state
+
+The deployed ARMOR Operations Profile is a shared, least-privilege business
+capability bundle. Its canonical production entrypoints are Website Article,
+Website Product Materials, Social Media (including video rules), MIC Product
+Optimization, and ARMOR Product Visual preparation. Product Visual stops at a
+source-grounded brief/prompt/provenance/QA handoff; it does not generate or
+publish images.
+
+Operations can prepare reviewed business work products and persist them only
+through the closed ARMOR Vault Router contracts. It cannot use generic shell,
+terminal, filesystem, browser, computer-use, code-execution, delegation, or
+automatic publication paths. Hermes Memory and employee Profile Memory are
+off. WeKnora is the shared company-knowledge retrieval layer; Vault rules are
+the durable business authority.
+
+The definitive matrix, runtime evidence, migration ledger disposition,
+permission boundary, E2E results, and deferred work are recorded in
+[`docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md`](docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md).
+
+### 5. Thin EAO Email Governance runtime
 
 v2 introduces one new EAO-owned runtime responsibility:
 
@@ -155,7 +191,7 @@ It covers:
 - governance audit events;
 - schema migration and recovery contracts.
 
-### 5. Tencent Enterprise Mail reference provider
+### 6. Tencent Enterprise Mail reference provider
 
 Repository assets include:
 
@@ -169,7 +205,7 @@ Repository assets include:
 
 The baseline does not expose generic “send anything” access.
 
-### 6. Recovery and rollback
+### 7. Recovery and rollback
 
 The repository defines:
 
