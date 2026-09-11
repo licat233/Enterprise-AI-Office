@@ -109,6 +109,41 @@ DELETE /tenants/:id/api-keys/:key_id
 
 For new retrieval integrations use `POST /knowledge-bases/:id/hybrid-search`; the legacy GET-with-body compatibility path is not the Enterprise AI Office default.
 
+### 3.1 Pinned API-route provenance
+
+The API surface above was verified against the validated WeKnora source commit
+recorded in `config/validated-stack.yaml`:
+
+```text
+Tencent/WeKnora
+commit: 1edcd54b43606d9079bb36650efe3f68707a79ea
+tag: v0.8.0
+```
+
+Source files used for route verification:
+
+```text
+internal/router/router.go
+internal/router/routes_auth_tenant.go
+internal/router/routes_knowledge.go
+internal/router/routes_infra.go
+```
+
+At that commit:
+
+- `router.go` mounts the protected API group at `/api/v1`;
+- `routes_auth_tenant.go` defines authentication, tenant discovery, and
+  tenant API-key management;
+- `routes_knowledge.go` defines Knowledge Base, ingestion, retrieval,
+  and knowledge-item routes;
+- `routes_infra.go` defines model/provider routes and their role/capability
+  guards.
+
+These paths are a version-specific provisioning contract, not a timeless
+WeKnora API promise. On upgrade, re-read the selected commit's route files,
+re-check API-key capability/KB scoping, and re-run the focused provisioning
+acceptance before inheriting this contract.
+
 ## 4. Authenticate for provisioning
 
 ### 4.1 Check the deployed API
