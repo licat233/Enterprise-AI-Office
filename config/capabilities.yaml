@@ -160,6 +160,10 @@ capabilities:
   specialist_profiles:
     kind: conditional
     enabled_when: profiles contains any employee-facing Profile beyond general
+    selection:
+      source: company_configuration
+      path: profiles
+      rule: any_employee_facing_profile_beyond_general
     implementation:
       - docs/PROFILE-STANDARD.md
       - profiles/README.md
@@ -180,6 +184,10 @@ capabilities:
   hermes_webui:
     kind: conditional
     enabled_when: capabilities.hermes_webui.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.hermes_webui.enabled
+      required_value: true
     implementation:
       - infrastructure/hermes-webui/README.md
     upstream: nesquena/hermes-webui
@@ -196,6 +204,10 @@ capabilities:
   coding_delegation:
     kind: conditional
     enabled_when: capabilities.coding_delegation.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.coding_delegation.enabled
+      required_value: true
     implementation:
       - infrastructure/coding-agents/README.md
       - infrastructure/coding-agents/technical-profile.config.example.yaml
@@ -216,6 +228,10 @@ capabilities:
   kanban:
     kind: conditional
     enabled_when: capabilities.kanban.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.kanban.enabled
+      required_value: true
     implementation:
       - infrastructure/hermes/features/README.md
     upstream_feature: Hermes Kanban
@@ -232,6 +248,10 @@ capabilities:
   cron:
     kind: conditional
     enabled_when: capabilities.cron.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.cron.enabled
+      required_value: true
     implementation:
       - infrastructure/hermes/features/README.md
     upstream_feature: Hermes Cron
@@ -248,6 +268,10 @@ capabilities:
   messaging:
     kind: conditional
     enabled_when: capabilities.messaging.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.messaging.enabled
+      required_value: true
     implementation:
       - infrastructure/hermes/features/README.md
       - infrastructure/hermes/features/MESSAGING.md
@@ -270,6 +294,13 @@ capabilities:
   email_tencent_exmail:
     kind: conditional
     enabled_when: capabilities.email.enabled == true and capabilities.email.provider == tencent-exmail
+    selection:
+      source: company_configuration
+      path: capabilities.email.enabled
+      required_value: true
+      constraints:
+        - path: capabilities.email.provider
+          required_value: tencent-exmail
     implementation:
       - docs/V2-SCOPE.md
       - docs/V2-EMAIL-DESIGN.md
@@ -421,6 +452,10 @@ capabilities:
   remote_access:
     kind: conditional
     enabled_when: capabilities.remote_access.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.remote_access.enabled
+      required_value: true
     implementation:
       - infrastructure/access/README.md
     required_company_values:
@@ -438,6 +473,10 @@ capabilities:
   sso:
     kind: conditional
     enabled_when: capabilities.sso.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.sso.enabled
+      required_value: true
     implementation:
       - infrastructure/access/README.md
       - infrastructure/access/OPEN-WEBUI-OIDC.md
@@ -457,6 +496,10 @@ capabilities:
   employee_long_term_memory:
     kind: conditional
     enabled_when: capabilities.employee_long_term_memory.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.employee_long_term_memory.enabled
+      required_value: true
     implementation:
       - docs/CLIENT-RBAC.md
       - docs/PROFILE-STANDARD.md
@@ -475,6 +518,10 @@ capabilities:
   media_transcription:
     kind: conditional
     enabled_when: capabilities.media_transcription.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.media_transcription.enabled
+      required_value: true
     implementation:
       - infrastructure/media-transcription/README.md
       - infrastructure/media-transcription/transcribe.py

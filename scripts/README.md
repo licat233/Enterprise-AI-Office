@@ -71,6 +71,22 @@ heading to exist. It catches renamed/misspelled acceptance anchors but does not
 decide whether an older stage is semantically sufficient; final-stage selection
 still requires architecture/capability review.
 
+## `check-capability-selectors.py`
+
+Dependency-free integrity check for conditional capability selection metadata.
+
+Run:
+
+```sh
+python3 scripts/check-capability-selectors.py
+```
+
+It requires every `kind: conditional` capability to declare selection
+metadata. Generic selectors must use `source: company_configuration`, and every
+declared selector path must exist in `config/company.example.yaml`.
+ARMOR-reference-specific workflows remain explicit exceptions and are not
+forced into the generic company schema.
+
 ## `check-validated-stack-consistency.py`
 
 Dependency-free cross-file check for derived Core runtime pins.

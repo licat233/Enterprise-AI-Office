@@ -96,6 +96,7 @@ for path in \
   scripts/check-repository-links.py \
   scripts/check-declarative-paths.py \
   scripts/check-capability-acceptance.py \
+  scripts/check-capability-selectors.py \
   scripts/check-validated-stack-consistency.py \
   scripts/check-public-repository-hygiene.py \
   scripts/check-frozen-baselines.py \
@@ -441,6 +442,9 @@ require_text config/mcp-registry.yaml 'product_visual_write_scope:' 'Product Vis
 require_text config/capabilities.yaml 'armor_product_visual:' 'Product Visual capability is registered'
 require_text config/capabilities.yaml 'enterprise_web_research:' 'Enterprise Web Research capability is registered'
 require_text config/capabilities.yaml 'enabled_when: capabilities.enterprise_web_research.enabled == true' 'Web Research uses typed company selector'
+require_text config/capabilities.yaml 'source: company_configuration' 'Generic capability selector paths are machine-checkable'
+require_text config/capabilities.yaml 'path: capabilities.email.provider' 'Compound Email selector records provider path'
+require_text config/capabilities.yaml 'rule: any_employee_facing_profile_beyond_general' 'Specialist Profile selector records structural rule'
 require_text config/capabilities.yaml 'section: Stage 3 — Final Acceptance & Freeze' 'Web Research closes against final frozen acceptance'
 require_text config/capabilities.yaml 'scope: ARMOR_reference_specific' 'ARMOR-specific workflow selector scope is explicit'
 require_text config/capabilities.yaml 'generic_company_schema_field: none' 'ARMOR-specific workflows do not pollute generic company schema'

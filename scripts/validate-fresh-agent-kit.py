@@ -312,6 +312,11 @@ def main() -> int:
     )
     require_text(
         "VALIDATE.md",
+        "python3 scripts/check-capability-selectors.py",
+        "Gate 0 includes capability selector integrity",
+    )
+    require_text(
+        "VALIDATE.md",
         "python3 scripts/check-validated-stack-consistency.py",
         "Gate 0 includes validated stack consistency",
     )
@@ -329,6 +334,11 @@ def main() -> int:
         "validation/scorecard.yaml",
         "capability_acceptance_integrity_pass",
         "Scorecard requires capability acceptance integrity",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "capability_selector_integrity_pass",
+        "Scorecard requires capability selector integrity",
     )
     require_text(
         "validation/scorecard.yaml",
