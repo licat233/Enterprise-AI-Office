@@ -62,6 +62,7 @@ Run the public repository checks after relevant changes:
 ```sh
 EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
 python3 scripts/validate-fresh-agent-kit.py
+sh scripts/run-public-offline-tests.sh
 ```
 
 Use the full runtime/deployment acceptance path only on the appropriate authorized target.
