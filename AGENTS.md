@@ -52,19 +52,20 @@ Before making a material change, read the documents relevant to the task in this
 9. `config/company.example.yaml` or the real company-private configuration when a deployment task exists
 10. `config/capabilities.yaml` for capability closure
 11. `config/validated-stack.yaml` for the reproducibility baseline
-12. `docs/ARCHITECTURE.md`
-13. `docs/DEPLOYMENT.md`
-14. `docs/SECURITY.md`
-15. `docs/PROFILE-STANDARD.md`
-16. `docs/KNOWLEDGE.md`
-17. `docs/CLIENT-RBAC.md`
-18. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
-19. `docs/UPGRADE.md` when versions change
-20. `docs/ACCEPTANCE-TESTS.md`
-21. `state/REAL-DEPLOYMENT-STATUS.md` when learning from the current sanitized ARMOR reference deployment
-22. `state/DEPLOYMENT-STATE.md` only as historical local/demo validation evidence
-23. `state/CHANGELOG.md` when changing an existing deployment
-24. the relevant company/reference material under `reference/` when useful
+12. the `core_provisioning` map in `config/eao-manifest.yaml` when installing/reconciling WeKnora, Hermes, or Open WebUI
+13. `docs/ARCHITECTURE.md`
+14. `docs/DEPLOYMENT.md`
+15. `docs/SECURITY.md`
+16. `docs/PROFILE-STANDARD.md`
+17. `docs/KNOWLEDGE.md`
+18. `docs/CLIENT-RBAC.md`
+19. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
+20. `docs/UPGRADE.md` when versions change
+21. `docs/ACCEPTANCE-TESTS.md`
+22. `state/REAL-DEPLOYMENT-STATUS.md` when learning from the current sanitized ARMOR reference deployment
+23. `state/DEPLOYMENT-STATE.md` only as historical local/demo validation evidence
+24. `state/CHANGELOG.md` when changing an existing deployment
+25. the relevant company/reference material under `reference/` when useful
 
 ### Blueprint lifecycle and real-deployment gate — interpret before acting
 
