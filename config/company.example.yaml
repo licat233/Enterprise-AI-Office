@@ -24,6 +24,29 @@ deployment:
     hostname: enterprise-ai-office
   runtime_root: /Users/Shared/enterprise-ai-office
 
+# Private deployments fill these non-secret bootstrap identities and symbolic
+# secret references in the protected company overlay. Values remain outside YAML.
+core_provisioning:
+  weknora:
+    owner_identity:
+      email: null
+      display_name: null
+      password_ref: null
+    intended_workspace_name: null
+    runtime_secret_refs:
+      db_password: null
+      redis_password: null
+      jwt_secret: null
+  hermes:
+    default_api_key_ref: null
+    profile_api_key_refs:
+      general: null
+  open_webui:
+    admin_identity:
+      email: null
+      display_name: AI Administrator
+      password_ref: null
+
 knowledge:
   platform: weknora
   deployment: standard
@@ -240,6 +263,7 @@ secrets:
     - hermes-profile-api-keys
     - model-provider-credentials
     - weknora-runtime-secrets
+    - weknora-owner-provisioning-credentials
     - open-webui-admin-credentials
   conditional_classes:
     - specialist-profile-credentials
