@@ -93,7 +93,7 @@ Before mutation, resolve from the company configuration or protected operator in
 
 - company identity and timezone;
 - `deployment.target_readiness`;
-- model/provider credentials required by the selected stack;
+- model/provider credentials actually required by the selected stack; a local-only embedding path may require no cloud embedding credential;
 - administrator provisioning method/credential;
 - employee access scope;
 - enabled optional capabilities and their company-specific parameters;
@@ -138,11 +138,70 @@ Exit condition: there is one unambiguous target state; every enabled capability 
 1. Deploy the pinned WeKnora release using the supported upstream deployment plus the repository adapter.
 2. Keep database/cache/parser internals private.
 3. Persist database and uploaded documents.
-4. Configure the required embedding/chat model roles.
-5. Create only Knowledge Bases declared by company configuration.
-6. Validate ingestion/retrieval with a small non-sensitive seed document before continuing.
 
-Exit condition: WeKnora is healthy and retrieval returns the seeded source.
+### Core model-role rule
+
+For the baseline Enterprise AI Office employee path, **WeKnora does not need every model type configured**.
+
+The baseline split of responsibility is:
+
+```text
+Hermes reasoning / final answer
+→ Hermes-selected reasoning model
+
+WeKnora knowledge retrieval
+→ Embedding model
+```
+
+For Core deployment, use this model-role matrix:
+
+| WeKnora model role | Core requirement | Enable when |
+| --- | --- | --- |
+| Embedding | **Required** | always for vectorized knowledge retrieval |
+| KnowledgeQA / Chat | **Not required by default** | only when a selected WeKnora workflow itself must generate answers, such as direct WeKnora Ask/Chat behavior |
+| Rerank | **Disabled by default** | only after measured retrieval quality shows ranking problems that justify it |
+| VLLM / multimodal model | **Disabled by default** | only when a selected document/image workflow requires model-based visual understanding |
+| ASR | **Disabled by default** | only when audio transcription is an actual company requirement |
+
+Do not configure a cloud Chat/KnowledgeQA model merely because WeKnora exposes that model type. In the baseline architecture, Hermes is already the reasoning/answer layer and should consume WeKnora retrieval evidence directly.
+
+A valid Core architecture is therefore:
+
+```text
+Open WebUI
+→ Hermes `general`
+→ selected Hermes reasoning model
+→ WeKnora retrieval
+   → selected Embedding model
+```
+
+This avoids an unnecessary nested path such as:
+
+```text
+Hermes reasoning model
+→ WeKnora Chat model
+→ knowledge retrieval
+```
+
+unless that extra WeKnora reasoning layer is explicitly required by the chosen workflow.
+
+### Embedding provider choice
+
+4. Resolve the embedding execution mode before asking for a provider credential:
+   - **remote API** when minimizing host resource use and provider dependence/cost are acceptable;
+   - **local Ollama** when the host has sufficient headroom and reducing recurring embedding API cost / external data flow is preferred.
+5. Treat providers such as DashScope as optional model providers, not mandatory Enterprise AI Office components. If local embedding is selected and no WeKnora Chat/KnowledgeQA role is required, no DashScope credential is needed for Core.
+6. For local multilingual Chinese/English deployments on a capable Apple Silicon host, start with a small mature model rather than a multi-billion-parameter embedding model. Current guidance:
+   - `bge-m3` is the validated local choice for the first real Mac Studio deployment;
+   - `qwen3-embedding:0.6b` remains a lighter fallback candidate when host resource efficiency is a stronger constraint.
+7. Qualify the local candidate with a small representative corpus and a few real queries. Do not create a large benchmark project unless the first candidate shows a real retrieval or resource problem.
+8. Record the selected embedding model and dimension before production-scale ingestion. Do not silently change them after indexing; changing embeddings normally requires reindexing.
+9. Create only Knowledge Bases declared by company configuration.
+10. Validate ingestion/retrieval with a small non-sensitive seed document before continuing.
+
+See `docs/KNOWLEDGE.md` for embedding deployment trade-offs and `docs/DEPLOYMENT-PRACTICES.md` for lessons from real installations.
+
+Exit condition: WeKnora is healthy and retrieval returns the seeded source. A separate WeKnora Chat/KnowledgeQA model is not an exit requirement unless the active company workflow explicitly enables a WeKnora feature that depends on it.
 
 ## 9. Phase D — Deploy Hermes
 
