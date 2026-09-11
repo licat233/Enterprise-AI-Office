@@ -41,6 +41,29 @@ company config → target_readiness
 
 A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
 
+## `run-public-offline-tests.sh`
+
+Portable zero-production-access regression suite for a fresh clone.
+
+Run:
+
+```sh
+sh scripts/run-public-offline-tests.sh
+```
+
+The suite currently covers:
+
+- Email Governance schema/hash/review binding;
+- send/reconciliation state;
+- backup/restore recovery behavior;
+- Phase 1 governed email runtime with fake provider data;
+- SMTP send-outcome safety with fake sessions;
+- Enterprise Web Research normalization/security/path behavior.
+
+The suite uses synthetic fixtures, in-memory or temporary local state, and fake providers. It must not contact a real mailbox, production service, or protected runtime.
+
+Tests that require ARMOR private Vault/Profile state are intentionally excluded from this public suite and remain deployment/reference acceptance tests.
+
 ## `validate-ontology.py`
 
 Lightweight structural validation for design-time examples under `ontology/examples/`.
