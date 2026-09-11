@@ -230,6 +230,9 @@ servers:
       enabled: false
       version: 0.2.2
       install_strategy: official_aarch64_macos_release
+      upstream_repository: h4ckf0r0day/obscura
+      upstream_release: v0.2.2
+      license_observed: Apache-2.0
       internal_consumer: enterprise-web-research
     exposure:
       allowed_profiles: []
@@ -314,6 +317,9 @@ servers:
       enabled: true
       version: 1.0.0
       install_strategy: official_macos_universal_release
+      upstream_repository: licat233/toolscout
+      upstream_release: v1.0.0
+      license_observed: MIT
       execution_architecture: x86_64_rosetta_fallback
       required_environment:
         - TOOLSCOUT_AGENT_NAME
