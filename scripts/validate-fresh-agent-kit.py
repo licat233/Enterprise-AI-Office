@@ -190,6 +190,11 @@ def main() -> int:
         "Fresh Agent keeps real deployment state protected",
     )
     require_text(
+        "docs/BACKUP-RESTORE.md",
+        "Protected operational deployment state",
+        "Fresh Agent knows protected state is recoverable",
+    )
+    require_text(
         "REPRODUCE.md",
         "Do not overwrite the repository's historical",
         "Fresh Agent preserves public historical deployment evidence",
