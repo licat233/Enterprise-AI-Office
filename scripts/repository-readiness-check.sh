@@ -70,6 +70,7 @@ for path in \
   scripts/validate-fresh-agent-kit.py \
   config/eao-manifest.yaml \
   docs/CAPABILITY-REUSE-PASS.md \
+  docs/README.md \
   docs/DEPLOYMENT-PRACTICES.md \
   state/REAL-DEPLOYMENT-STATUS.md \
   state/PROJECT-PHASE.yaml \
