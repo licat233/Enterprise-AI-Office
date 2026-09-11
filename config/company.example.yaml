@@ -62,8 +62,9 @@ agent_runtime:
 mcp_control_plane:
   registry: config/mcp-registry.yaml
   employee_exposure_default: disabled
-  operations_allowlist:
-    - weknora
+  profile_allowlists:
+    general:
+      - weknora
 
 profiles:
   - id: general
