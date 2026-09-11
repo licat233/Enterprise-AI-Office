@@ -265,9 +265,19 @@ def main() -> int:
         "Fresh Agent must prove Core runtime identity",
     )
     require_text(
+        "REPRODUCE.md",
+        "infrastructure/weknora/PROVISIONING.md",
+        "Fresh Agent uses WeKnora Core provisioning contract",
+    )
+    require_text(
         "DEPLOY.md",
         "infrastructure/hermes/PROVISIONING.md",
         "Fresh Agent uses Hermes Core provisioning contract",
+    )
+    require_text(
+        "REPRODUCE.md",
+        "infrastructure/open-webui/PROVISIONING.md",
+        "Fresh Agent uses Open WebUI Core provisioning contract",
     )
     require_text(
         "infrastructure/hermes/PROVISIONING.md",
