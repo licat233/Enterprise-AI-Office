@@ -24,7 +24,18 @@ class FixtureProvider:
         return [{"uid": "1", "message_id": "<one@example.invalid>"}]
 
     def get_email(self, uid, folder="INBOX"):
-        return {"uid": uid, "message_id": "<one@example.invalid>"}
+        message_id = (
+            "<two@example.invalid>" if str(uid) == "2" else "<one@example.invalid>"
+        )
+        return {
+            "uid": uid,
+            "folder": folder,
+            "message_id": message_id,
+            "from": ["Customer <customer@example.invalid>"],
+            "to": ["pilot@example.invalid"],
+            "subject": "Inquiry",
+            "body_text": "Please send the product specification.",
+        }
 
 
 class Phase1RuntimeTests(unittest.TestCase):
@@ -56,6 +67,18 @@ class Phase1RuntimeTests(unittest.TestCase):
         )}
         self.assertTrue({"logical_sends", "send_attempts", "send_reconciliations"} <= tables)
 
+    @staticmethod
+    def _source(uid="1", message_id="<one@example.invalid>", body="Please send the product specification."):
+        return {
+            "uid": uid,
+            "folder": "INBOX",
+            "message_id": message_id,
+            "from": ["Customer <customer@example.invalid>"],
+            "to": ["pilot@example.invalid"],
+            "subject": "Inquiry",
+            "body_text": body,
+        }
+
     def tearDown(self):
         self.service.close()
 
@@ -74,6 +97,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             to_addresses=["customer@example.invalid"],
             subject="Re: Inquiry",
             body="Draft for human review.",
+            source_email=self._source(),
         )
         self.assertTrue(draft["created"])
         audit = self.service._db.execute(
@@ -109,6 +133,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             subject="Re: Inquiry",
             body="First draft.",
             request_key="caller-supplied-value-must-not-change-service-key",
+            source_email=self._source(),
         )
         replay = self.service.prepare_reply_draft(
             self.service_actor,
@@ -117,6 +142,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             to_addresses=["customer@example.invalid"],
             subject="Re: Inquiry",
             body="Must not overwrite.",
+            source_email=self._source(),
         )
         self.assertFalse(replay["created"])
         self.assertEqual(first["draft"]["draft_id"], replay["draft"]["draft_id"])
@@ -133,6 +159,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             to_addresses=["customer@example.invalid"],
             subject="Re: Inquiry",
             body="First draft.",
+            source_email=self._source(),
         )
         second = self.service.prepare_reply_draft(
             self.service_actor,
@@ -141,6 +168,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             to_addresses=["customer@example.invalid"],
             subject="Re: Inquiry",
             body="Second draft.",
+            source_email=self._source(uid="2", message_id="<two@example.invalid>"),
         )
         self.assertNotEqual(first["draft"]["draft_id"], second["draft"]["draft_id"])
 
@@ -152,6 +180,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             to_addresses=["customer@example.invalid"],
             subject="Re: Inquiry",
             body="Service draft.",
+            source_email=self._source(),
         )
         self.service.prepare_reply_draft(
             self.human,
@@ -170,6 +199,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             to_addresses=["customer@example.invalid"],
             subject="Re: Inquiry",
             body="Changed service text.",
+            source_email=self._source(),
         )
         self.assertFalse(replay["created"])
         revisions = self.service.draft_revisions(first["draft"]["draft_id"])

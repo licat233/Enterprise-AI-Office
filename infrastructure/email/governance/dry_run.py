@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import sqlite3
 from typing import Any, Mapping
 
 from runtime import (
@@ -24,12 +23,15 @@ class FixtureProvider:
                 "subject": "Synthetic product inquiry",
                 "from": ["synthetic-customer@example.invalid"],
                 "to": ["pilot@example.invalid"],
-                "body": "Please provide a synthetic quotation.",
+                "body_text": "Please provide a synthetic quotation.",
+                "folder": "INBOX",
             }
         ]
 
     def get_email(self, uid: str, folder: str = "INBOX") -> dict[str, Any]:
-        return self.search_email({})[0]
+        result = self.search_email({})[0]
+        result["folder"] = folder
+        return result
 
 
 def main() -> None:
@@ -62,6 +64,7 @@ def main() -> None:
             to_addresses=["synthetic-customer@example.invalid"],
             subject="Re: Synthetic product inquiry",
             body="Thank you for the synthetic inquiry. A human operator must review this draft.",
+            source_email=message,
         )
         replay = service.prepare_reply_draft(
             actor,
@@ -70,6 +73,7 @@ def main() -> None:
             to_addresses=["synthetic-customer@example.invalid"],
             subject="Re: Synthetic product inquiry",
             body="This changed body must not overwrite the existing draft.",
+            source_email=message,
         )
         human = Actor("human", "human:operator-001")
         service.prepare_reply_draft(

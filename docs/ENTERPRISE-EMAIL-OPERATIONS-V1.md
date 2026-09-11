@@ -61,3 +61,38 @@ Use the synthetic dry run and offline tests with the managed Hermes Python
 environment. They prove schema, authorization, idempotency, immutability, and
 surface-boundary behavior only. They do not prove live provider acceptance,
 delivery, reboot recovery, or company deployment.
+
+## Threat model — Indirect Prompt Injection
+
+Email is attacker-controlled external content. Security does not depend on
+the LLM reliably refusing jailbreak instructions.
+
+The primary protection layers are:
+
+1. deterministic authorization;
+2. least privilege;
+3. explicit separation of provider metadata from
+   UNTRUSTED_EMAIL_CONTENT;
+4. source-bound envelope integrity;
+5. no email-driven active retrieval or execution;
+6. human approval before customer-facing send; and
+7. append-oriented audit evidence.
+
+The deterministic pattern screen is supplemental defense in depth. It can have
+false positives and false negatives and does not make prompt injection
+impossible. A flagged source email produces ESCALATE and no automated
+customer reply DraftReply.
+
+Provider results carry trust_class=UNTRUSTED_EMAIL_CONTENT and
+instruction_authority=NONE. Instructions appearing in email have zero
+authority over system, security, Skill, tool, approval, or authorization
+policy. HTML scripts, styles, and comments are excluded from visible text;
+links are recorded as untrusted data and never followed by this workflow.
+Requests for credentials, system prompts, private employee/authentication data,
+internal-only instructions, arbitrary Vault contents, or unshareable internal
+commercial information are escalated rather than answered by retrieval.
+
+For Hermes Agent v0.21.1, the native Cron scheduler supports per-job
+enabled_toolsets and layers the global disabled-toolset denylist on top. A
+future operator-created job may therefore bind only the governed Email MCP
+surface. No production job or live binding is created in Phase 1.1.
