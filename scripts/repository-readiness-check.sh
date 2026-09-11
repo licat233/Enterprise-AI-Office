@@ -63,6 +63,11 @@ for path in \
   README.zh-CN.md \
   AGENTS.md \
   REPRODUCE.md \
+  VALIDATE.md \
+  validation/FRESH-AGENT-TASK.md \
+  validation/scorecard.yaml \
+  validation/REPORT.template.md \
+  scripts/validate-fresh-agent-kit.py \
   config/eao-manifest.yaml \
   docs/CAPABILITY-REUSE-PASS.md \
   docs/DEPLOYMENT-PRACTICES.md \
