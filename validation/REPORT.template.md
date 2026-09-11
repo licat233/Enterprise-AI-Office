@@ -36,6 +36,7 @@ Any undocumented hint must be treated as evidence of a possible repository gap.
 - `python3 scripts/check-repository-links.py`: PASS / FAIL
 - `python3 scripts/check-declarative-paths.py`: PASS / FAIL
 - `python3 scripts/check-capability-acceptance.py`: PASS / FAIL
+- `python3 scripts/check-capability-selectors.py`: PASS / FAIL
 - `python3 scripts/check-validated-stack-consistency.py`: PASS / FAIL
 - `python3 scripts/check-public-repository-hygiene.py`: PASS / FAIL
 - `python3 scripts/check-frozen-baselines.py`: PASS / FAIL
