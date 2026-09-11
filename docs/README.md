@@ -59,6 +59,7 @@ These describe how EAO is intended to work now.
 | `OPERATIONS.md` | Operating procedures |
 | `UPGRADE.md` | Version-change and upgrade rules |
 | `CAPABILITY-REUSE-PASS.md` | Mandatory reuse-before-build decision gate |
+| `REPOSITORY-GOVERNANCE.md` | Branch, PR, CI, frozen-history, and repository authority rules |
 
 These should normally be read before specialized or historical files.
 
@@ -163,6 +164,7 @@ Use this shortcut:
 | Validate a fresh Agent | `VALIDATE.md` |
 | Add a capability | `CAPABILITY-REUSE-PASS.md` → `config/capabilities.yaml` |
 | Change architecture | `AGENTS.md` → `ARCHITECTURE.md` → `SECURITY.md` |
+| Maintain repository / GitHub workflow | `REPOSITORY-GOVERNANCE.md` |
 | Work with knowledge | `KNOWLEDGE.md` |
 | Change Profiles | `PROFILE-STANDARD.md` |
 | Change employee access | `CLIENT-RBAC.md` / `EAO-RBAC-BASELINE.md` |
