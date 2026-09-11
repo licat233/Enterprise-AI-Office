@@ -145,6 +145,15 @@ state/DEPLOYMENT-STATE.md
 
 Do not treat the historical demo as the current Mac Studio runtime truth.
 
+Fresh deployments must start their real operational state record from:
+
+```text
+state/DEPLOYMENT-STATE.template.md
+```
+
+Copy that template to protected deployment storage. Do not turn the historical
+demo record or sanitized public status file into the private runtime state store.
+
 Material deployment history is recorded in:
 
 ```text
