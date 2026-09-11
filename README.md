@@ -36,6 +36,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Hermes Skills Migration v1.0 | ✅ Closed |
 | Enterprise Web Research v1.0 | ✅ Closed / Frozen / PASS |
 | Operations employee RBAC v1 | ✅ Closed / Frozen / PASS |
+| Media Transcription optional capability | ✅ Validated / enabled in ARMOR reference; not Core default |
 | Blueprint Validation | ⏳ Not yet opened |
 | Release Ready | ⏳ Not yet opened |
 | Public real-deployment gate | ⛔ Inactive by default; sanitized ARMOR reference deployment exists |
