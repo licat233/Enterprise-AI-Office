@@ -55,6 +55,22 @@ It reads every `frozen_commit` declared in `config/eao-manifest.yaml`, verifies 
 
 GitHub Repository Readiness uses a full-history checkout specifically so this gate is meaningful.
 
+## `check-capability-acceptance.py`
+
+Dependency-free structural validation for capability acceptance references.
+
+Run:
+
+```sh
+python3 scripts/check-capability-acceptance.py
+```
+
+It reads the `acceptance.document` plus `section` / `sections` references
+declared in `config/capabilities.yaml` and requires each referenced Markdown
+heading to exist. It catches renamed/misspelled acceptance anchors but does not
+decide whether an older stage is semantically sufficient; final-stage selection
+still requires architecture/capability review.
+
 ## `check-public-repository-hygiene.py`
 
 High-confidence public Git hygiene check.
