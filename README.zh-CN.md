@@ -15,7 +15,7 @@
 5. [`DEPLOY.md`](DEPLOY.md) —— 部署 Golden Path。
 6. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) —— 当前 ARMOR 真实参考部署的脱敏状态。
 
-提出任何新组件之前，必须先执行 [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md)。文档层级与权威顺序请查看 [文档权威地图](docs/README.md)。
+提出任何新组件之前，必须先执行 [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md)。文档层级与权威顺序请查看 [文档权威地图](docs/README.md)。 维护者与 AI 工程 Agent 还应遵循 [仓库治理规范](docs/REPOSITORY-GOVERNANCE.md)。
 
 ## 项目进度一眼看懂
 
