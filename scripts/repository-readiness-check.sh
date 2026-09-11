@@ -96,6 +96,7 @@ for path in \
   scripts/check-repository-links.py \
   scripts/check-declarative-paths.py \
   scripts/check-public-repository-hygiene.py \
+  scripts/check-frozen-baselines.py \
   scripts/run-public-offline-tests.sh \
   config/eao-manifest.yaml \
   docs/CAPABILITY-REUSE-PASS.md \
@@ -252,6 +253,7 @@ require_text config/README.md 'A fresh deployment must recompute' 'Config guide 
 require_text .github/workflows/repository-readiness.yml 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4' 'Repository CI pins checkout action'
 require_text .github/workflows/repository-readiness.yml 'persist-credentials: false' 'Repository CI does not persist checkout credentials'
 require_text .github/workflows/repository-readiness.yml 'runs-on: ubuntu-24.04' 'Repository CI pins runner image family'
+require_text .github/workflows/repository-readiness.yml 'fetch-depth: 0' 'Repository CI fetches full history for frozen baselines'
 require_text .github/workflows/repository-readiness.yml 'contents: read' 'Repository CI keeps read-only contents permission'
 
 require_no_text config/README.md 'limited to its existing' 'Config guide has no obsolete WeKnora-only Operations claim'

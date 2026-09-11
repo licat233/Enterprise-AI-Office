@@ -25,6 +25,10 @@ gates:
     pass_requires:
       - repository_readiness_pass
       - validation_kit_static_check_pass
+      - markdown_link_integrity_pass
+      - declarative_path_integrity_pass
+      - public_repository_hygiene_pass
+      - frozen_baseline_history_pass
       - public_offline_tests_pass
 
   comprehension:

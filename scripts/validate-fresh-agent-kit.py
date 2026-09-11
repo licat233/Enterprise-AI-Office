@@ -167,6 +167,37 @@ def main() -> int:
         "Reproduction contract points to current public reference status",
     )
 
+    require_text(
+        "VALIDATE.md",
+        "python3 scripts/check-repository-links.py",
+        "Gate 0 includes Markdown link integrity",
+    )
+    require_text(
+        "VALIDATE.md",
+        "python3 scripts/check-declarative-paths.py",
+        "Gate 0 includes declarative path integrity",
+    )
+    require_text(
+        "VALIDATE.md",
+        "python3 scripts/check-public-repository-hygiene.py",
+        "Gate 0 includes public repository hygiene",
+    )
+    require_text(
+        "VALIDATE.md",
+        "python3 scripts/check-frozen-baselines.py",
+        "Gate 0 includes frozen baseline history",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "frozen_baseline_history_pass",
+        "Scorecard requires frozen baseline history",
+    )
+    require_text(
+        "validation/REPORT.template.md",
+        "python3 scripts/check-frozen-baselines.py",
+        "Report records frozen baseline history result",
+    )
+
     for rel in [
         "README.md",
         "README.zh-CN.md",
