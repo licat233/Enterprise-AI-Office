@@ -411,6 +411,11 @@ require_text docs/V2-INSTALLATION-DESIGN-REVIEW.md 'INSTALLATION DESIGN FINAL RE
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
+require_text REPRODUCE.md 'infrastructure/weknora/PROVISIONING.md' 'Reproduction Stage B uses WeKnora provisioning contract'
+require_text REPRODUCE.md 'infrastructure/hermes/PROVISIONING.md' 'Reproduction Stage C uses Hermes provisioning contract'
+require_text REPRODUCE.md 'infrastructure/open-webui/PROVISIONING.md' 'Reproduction Stage D uses Open WebUI provisioning contract'
+require_text REPRODUCE.md 'state/DEPLOYMENT-STATE.template.md' 'Reproduction contract includes protected deployment-state template'
+require_text AGENTS.md 'the `core_provisioning` map in `config/eao-manifest.yaml`' 'Agent contract requires manifest Core provisioning map'
 require_text REPRODUCE.md '### Stage F — resolve enabled conditional capabilities' 'Reproduction contract separates conditional capabilities'
 require_text REPRODUCE.md 'If a capability is not enabled for the target, do not install it merely because the' 'Reproduction contract blocks reference-driven over-installation'
 require_text config/eao-manifest.yaml 'reference_presence_does_not_imply_enablement: true' 'Manifest blocks reference capability inheritance'
