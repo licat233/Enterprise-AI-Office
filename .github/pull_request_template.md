@@ -13,8 +13,7 @@ Describe the concrete Enterprise AI Office requirement this change addresses.
 
 ## Architecture / authority impact
 
-- [ ] No source-of-truth boundary changes.
-- [ ] No source-of-truth boundary changes are claimed; OR the change is explicitly documented and approved.
+- [ ] No source-of-truth boundary changes; OR any authority change is explicitly documented and approved.
 - [ ] Employee least-privilege boundaries are preserved.
 - [ ] No real credentials, employee secrets, or private network identifiers are committed.
 
