@@ -1,0 +1,162 @@
+schema_version: 1
+project:
+  name: Enterprise AI Office
+  short_name: EAO
+  repository_role: agent_readable_system_and_installation_blueprint
+  reference_implementation: ARMOR
+  primary_goal: >-
+    Allow a fresh capable AI engineering agent, without hidden chat context, to
+    understand, reproduce, validate, operate, and safely extend Enterprise AI Office
+    using repository evidence plus explicitly supplied private deployment inputs.
+
+entrypoints:
+  human:
+    english: README.md
+    chinese: README.zh-CN.md
+  ai_agent:
+    operating_contract: AGENTS.md
+    reproduction_contract: REPRODUCE.md
+    deployment_golden_path: DEPLOY.md
+  machine:
+    lifecycle: state/PROJECT-PHASE.yaml
+    capabilities: config/capabilities.yaml
+    validated_stack: config/validated-stack.yaml
+    project_manifest: config/eao-manifest.yaml
+  reference_runtime:
+    current_public_status: state/REAL-DEPLOYMENT-STATUS.md
+    historical_demo_state: state/DEPLOYMENT-STATE.md
+    deployment_change_log: state/CHANGELOG.md
+
+architecture:
+  employee_surface: Open WebUI
+  agent_runtime: Hermes Agent
+  enterprise_knowledge: WeKnora
+  integration_boundary: MCP
+  durable_business_authority: approved Vault Router contracts where enabled
+  scheduling: Hermes Cron
+  durable_agent_work: Hermes Kanban
+  employee_long_term_memory_default: disabled
+  generic_shell_for_employees: prohibited
+  generic_browser_for_employees: prohibited
+  generic_smtp_for_employees: prohibited
+
+validated_core_stack:
+  source: config/validated-stack.yaml
+  host_reference: macOS arm64
+  container_runtime: OrbStack/Docker compatible
+  weknora: v0.8.0
+  hermes_agent: 0.21.0
+  open_webui: v0.11.3
+
+normative_docs:
+  architecture: docs/ARCHITECTURE.md
+  security: docs/SECURITY.md
+  knowledge: docs/KNOWLEDGE.md
+  profile_standard: docs/PROFILE-STANDARD.md
+  client_rbac: docs/CLIENT-RBAC.md
+  operations: docs/OPERATIONS.md
+  deployment_detail: docs/DEPLOYMENT.md
+  deployment_practices: docs/DEPLOYMENT-PRACTICES.md
+  completeness: docs/COMPLETENESS.md
+  acceptance: docs/ACCEPTANCE-TESTS.md
+  backup_restore: docs/BACKUP-RESTORE.md
+  upgrade: docs/UPGRADE.md
+  capability_reuse: docs/CAPABILITY-REUSE-PASS.md
+
+frozen_reference_baselines:
+  enterprise_operations_v1:
+    status: closed_frozen_pass
+    evidence: docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md
+  hermes_skills_migration_v1:
+    status: closed
+    frozen_commit: 6ee5034811681d40ac1ce61cef315aac8551fdb5
+  enterprise_web_research_v1:
+    status: closed_frozen_pass
+    frozen_commit: 8d232285b68ed85aca146b81f3ca946f2502c357
+    evidence: docs/ENTERPRISE-WEB-RESEARCH-V1.md
+  operations_employee_rbac_v1:
+    status: closed_frozen_pass
+    frozen_commit: 6848d89877db08c57d3b8c128efe7410f9c49ccb
+    evidence:
+      - docs/EAO-RBAC-BASELINE.md
+      - docs/OPERATIONS-EMPLOYEE-RBAC-AUDIT.md
+  media_transcription:
+    status: validated
+    path: infrastructure/media-transcription
+  governed_email:
+    status: repository_capability_present
+    boundary: human_approval_required_for_external_send
+    evidence: docs/ENTERPRISE-EMAIL-OPERATIONS-V1.md
+
+reference_employee_paths:
+  general:
+    path:
+      - Employee
+      - Open WebUI General Assistant
+      - Hermes /p/general
+      - WeKnora
+      - Company Knowledge
+  operations:
+    path:
+      - Operations Employee
+      - Open WebUI Operations Assistant
+      - Hermes /p/operations
+      - operations-weknora
+      - Company Knowledge
+    open_webui_native_knowledge_records: 0
+    knowledge_boundary:
+      full_access: false
+      capabilities:
+        - retrieve
+
+reconstruction_sequence:
+  - repository_preflight
+  - resolve_public_and_private_inputs
+  - deploy_weknora
+  - deploy_hermes
+  - deploy_open_webui
+  - configure_knowledge_route
+  - configure_rbac
+  - install_only_enabled_approved_skills
+  - enable_optional_capabilities_from_registry
+  - run_acceptance
+  - validate_restart_and_recovery
+  - record_sanitized_state_and_exact_commit
+
+mandatory_before_new_capability:
+  contract: docs/CAPABILITY-REUSE-PASS.md
+  order:
+    - existing_eao_capability
+    - hermes_native_capability
+    - installed_or_frozen_skills
+    - open_webui_native_capability
+    - weknora_native_capability
+    - existing_email_or_governance_capability
+    - official_upstream_integration
+    - thin_adapter
+    - new_infrastructure_only_with_explicit_justification
+
+security_invariants:
+  - no_real_secrets_in_git
+  - no_employee_admin_workspace_grants_by_default
+  - no_company_facts_in_agent_memory_as_authority
+  - provider_credentials_do_not_equal_human_authority
+  - unknown_external_send_outcome_must_not_be_blindly_retried
+  - runtime_acceptance_must_test_employee_visible_behavior
+  - historical_migration_documents_are_not_current_runtime_authority
+
+private_inputs_never_committed:
+  - model_provider_credentials
+  - weknora_service_credentials
+  - employee_identifiers_and_passwords
+  - mailbox_credentials
+  - private_network_addresses_or_device_identity_material
+  - provider_tokens
+  - protected_company_configuration
+
+maturity:
+  repository_documentation: mature_baseline
+  agent_reproducibility_contract: present
+  reference_real_deployment: present
+  blueprint_validation_phase: not_automatically_advanced
+  release_ready: requires_explicit_lifecycle_decision
