@@ -158,6 +158,13 @@ Do not combine an embedding migration with unrelated large infrastructure change
 Before upgrading Hermes:
 
 - inspect Profile/multiplex/Gateway changes;
+- re-verify the provisioning behavior against the selected commit's
+  `hermes_cli/subcommands/profile.py`, `hermes_cli/profiles.py`,
+  `gateway/config.py`, and `gateway/platforms/api_server.py`;
+- confirm `--no-skills` opt-out marker semantics still prevent unintended
+  bundled-Skill expansion;
+- confirm `/p/<profile>/` routing, Profile-scoped `API_SERVER_KEY`
+  resolution/fail-closed behavior, and Profile model-ID advertisement;
 - inspect API server changes;
 - inspect Skills sync behavior;
 - inspect Cron/Kanban changes;
