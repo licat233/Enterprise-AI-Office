@@ -70,7 +70,7 @@ Employee
 → grounded company answer + source
 ```
 
-The active protected company configuration now enables the Core employee path plus the validated `media_transcription` optional capability. All currently enabled capabilities have passed their applicable acceptance boundary, so `CONFIGURED READY — PASS` remains valid.
+The active protected company configuration now enables the Core employee path, the frozen ARMOR Operations specialist lane, Enterprise Web Research through the approved Operations boundary, and the validated `media_transcription` optional capability. All currently enabled capabilities have passed their applicable acceptance boundary, so `CONFIGURED READY — PASS` remains valid.
 
 ## Current production status
 
@@ -96,6 +96,10 @@ be accompanied by explicit changelog/upgrade evidence.
 | Signup | ✅ Disabled |
 | Employee groups / baseline ACL | ✅ Reconciled |
 | General Assistant | ✅ Configured |
+| Operations Profile / Assistant | ✅ Deployed / frozen reference |
+| Operations employee ACL | ✅ `Operations Employees` READ → Operations Assistant |
+| Enterprise Web Research v1.0 | ✅ Deployed / CLOSED / FROZEN / PASS |
+| Raw Firecrawl / Obscura / CloakBrowser employee exposure | ✅ Not exposed directly |
 | System Prompt editing | ✅ Disabled for ordinary employee |
 | Advanced Parameters editing | ✅ Disabled for ordinary employee |
 | Conversation history | ✅ Persists across refresh and re-login |
@@ -290,6 +294,8 @@ The public repository must not contain passwords, API keys, OAuth/bearer tokens,
 Currently enabled employee/business capabilities:
 
 - Core employee knowledge path;
+- ARMOR Operations specialist lane, including the frozen migrated department Skills;
+- Enterprise Web Research v1.0 through the approved bounded Operations path;
 - Media Transcription / audio-video transcription, with manual knowledge-publication review.
 
 Other optional capabilities remain disabled unless explicitly selected later, including:
@@ -308,7 +314,7 @@ Optional capabilities should be added only when explicitly selected and accepted
 
 ## Public repository synchronization note
 
-The protected deployment state and the public reusable implementation are now aligned for Media Transcription. The reusable capability contract, implementation, acceptance specification, backup coverage, and production-hardened backup/restore script updates were merged into `main` through PR #3. Runtime-specific private configuration and evidence remain protected outside Git.
+The protected deployment state and public reusable implementation are aligned for the current sanitized reference capability set: Core, the frozen ARMOR Operations lane, Enterprise Web Research v1.0, and Media Transcription. Their reusable contracts, acceptance evidence, RBAC/tool boundaries, and recovery implications are represented in the current `main` branch. Runtime-specific private configuration and evidence remain protected outside Git.
 
 ## Reference demo vs current deployment
 
@@ -318,7 +324,7 @@ Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMEN
 
 ## Next deployment direction
 
-The system is usable at `CONFIGURED READY — PASS`, including the currently enabled media-transcription capability, and all Production Ready acceptance work that does not depend on external backup hardware has passed.
+The system is usable at `CONFIGURED READY — PASS`, including the currently enabled ARMOR Operations, Enterprise Web Research, and Media Transcription capabilities, and all Production Ready acceptance work that does not depend on external backup hardware has passed.
 
 After an approved independent encrypted backup destination and policy are provided, complete the off-primary backup copy, retention/freshness evidence, and final external restore acceptance. If those pass, the deployment may advance to:
 
