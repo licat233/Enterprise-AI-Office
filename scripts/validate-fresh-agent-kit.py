@@ -180,6 +180,16 @@ def main() -> int:
         "Manifest delegates Core version truth",
     )
     require_text(
+        "DEPLOY.md",
+        "current reproducible Core version/commit authority is `config/validated-stack.yaml`",
+        "Fresh Agent uses validated-stack as current Core version authority",
+    )
+    require_text(
+        "docs/OPERATIONS.md",
+        "not the live operational state store",
+        "Fresh Agent keeps operational state authority protected",
+    )
+    require_text(
         "config/eao-manifest.yaml",
         "deployment_state_template: state/DEPLOYMENT-STATE.template.md",
         "Manifest exposes protected deployment-state template",
