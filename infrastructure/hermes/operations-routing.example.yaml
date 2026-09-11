@@ -1,8 +1,9 @@
 # Enterprise AI Office Operations Profile routing overlay.
 #
 # This is a non-secret deployment source for the existing Operations Profile;
-# it does not create another Profile. Merge it with the protected
-# /Users/armor/.hermes/profiles/operations/config.yaml during deployment.
+# it does not create another Profile. Merge it with the target deployment's
+# protected Operations Profile config (normally under the runtime user's
+# supported Hermes Profile directory). Do not assume an ARMOR username/path.
 #
 # The two settings below are required when Operations is served by the shared
 # Hermes multiplex gateway.

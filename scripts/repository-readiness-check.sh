@@ -51,6 +51,19 @@ require_text() {
   fi
 }
 
+require_no_text() {
+  rel="$1"
+  text="$2"
+  label="$3"
+  if [ ! -f "$ROOT/$rel" ]; then
+    fail "$label" "$rel missing"
+  elif grep -F "$text" "$ROOT/$rel" >/dev/null 2>&1; then
+    fail "$label" "forbidden reference found in $rel"
+  else
+    pass "$label"
+  fi
+}
+
 require_absent() {
   rel="$1"
   label="$2"
@@ -223,6 +236,10 @@ require_text docs/REPOSITORY-GOVERNANCE.md 'require a pull request before merge'
 
 require_text scripts/README.md 'EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh' 'Scripts README documents portable readiness mode'
 require_text scripts/repository-readiness-check.sh 'Fresh clones and other-company blueprint work must use repository-only mode.' 'Readiness script documents reference-specific full mode'
+
+require_no_text config/.env.example '/Users/armor' 'Generic env template has no ARMOR home path'
+require_no_text infrastructure/web-research/adapter.py '/Users/armor' 'Web Research adapter has portable path defaults'
+require_no_text infrastructure/hermes/operations-routing.example.yaml '/Users/armor' 'Operations routing example has no ARMOR home path'
 
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
 require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'

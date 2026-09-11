@@ -96,6 +96,8 @@ Live acceptance through the Enterprise adapter passed:
 - loopback, cloud-metadata, and `file://` URLs: `SECURITY_REJECTED` before an
   upstream call.
 
+> **Reference-path note:** absolute `/Users/armor/...` paths below are sanitized ARMOR reference-deployment acceptance evidence, not portable installation defaults. Fresh deployments resolve their own runtime paths through `config/.env.example` and the adapter's current-user/repository-derived defaults.
+
 ## Stage 2 history and corrected scope
 
 Commit `5741664fd320e19566c264d15b2584d7e90809ef` completed the original Stage
