@@ -37,6 +37,44 @@ Environment:
 <known limitations / follow-up>
 ```
 
+## 2026-09-11 - Enable private-LAN Open WebUI employee access
+
+Component: Open WebUI employee network boundary and protected deployment configuration
+Environment: authorized Mac Studio deployment target; private host/network identifiers omitted
+
+### Before
+
+- Open WebUI was published only on loopback at `127.0.0.1:3000`.
+- The protected `WEBUI_URL` represented the loopback endpoint.
+- The active private company configuration did not enable the remote/private access capability.
+
+### After
+
+- Enabled the configured `private LAN only` access method for the employee `open-webui` surface.
+- Reconciled the active protected Compose source to publish only on the current Mac Studio Wi-Fi LAN address at TCP 3000.
+- Reconciled protected `WEBUI_URL` to the employee-facing LAN endpoint.
+- Preserved Open WebUI v0.11.3, persistent data, authentication, RBAC, employee permissions, and all internal/admin service bindings.
+
+### Reason
+
+Allow employees on the trusted office LAN to use Open WebUI while preserving the existing least-privilege boundary for WeKnora internals, PostgreSQL, Redis, DocReader, Hermes privileged routes, and administrative surfaces.
+
+### Validation
+
+- Compose validation and reconciliation passed; `eaio-open-webui` is healthy.
+- Docker publication and host listener show the LAN-bound TCP 3000 endpoint.
+- Separate LAN-client browser loaded the login page; authenticated synthetic employee use of General Assistant returned grounded Company Knowledge evidence and survived reload.
+- Unauthenticated `/api/v1/models` returned HTTP 401.
+- LAN-client probes to known internal/admin ports remained closed; no non-Open-WebUI container was changed.
+
+### Rollback
+
+Restore the protected pre-change snapshot from the deployment backup directory, then reconcile the same Compose project.
+
+### Notes
+
+The current Wi-Fi address is DHCP-assigned. Configure a router reservation or update the protected binding and `WEBUI_URL` together if the address changes.
+
 ## 2026-09-09 — Enterprise Global Rule v1.1 Root-Cause Persistence
 
 Component: Hermes Enterprise Global Rule
