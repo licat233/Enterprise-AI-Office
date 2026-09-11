@@ -387,7 +387,7 @@ PRODUCTION READY
 | Durable Agent tasks | Hermes Kanban when enabled |
 | Scheduled work | Hermes Cron when enabled |
 | Desired deployment | company-private active configuration |
-| Actual deployment | runtime + deployment state |
+| Actual deployment | actual runtime + protected operational state created from `state/DEPLOYMENT-STATE.template.md`; public status/history files are evidence only |
 
 ## Core design rules
 
