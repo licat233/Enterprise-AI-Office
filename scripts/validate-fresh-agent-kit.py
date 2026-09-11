@@ -179,6 +179,11 @@ def main() -> int:
         "Manifest delegates Core version truth",
     )
     require_text(
+        "config/validated-stack.yaml",
+        "does_not_claim_new_clean_host_validation: true",
+        "Validated stack does not confuse runtime confirmation with clean-host validation",
+    )
+    require_text(
         "reference/armor/reference-index.yaml",
         "deployable_company_config: false",
         "ARMOR reference index remains non-deployable",

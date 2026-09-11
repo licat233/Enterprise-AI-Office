@@ -238,6 +238,16 @@ Human-facing documentation may summarize the current baseline when useful, but
 must identify `config/validated-stack.yaml` as the authoritative source and
 must not be treated as a second version policy.
 
+The stack file separates two dates:
+
+- `first_validated_on` — when the baseline first completed reference
+  qualification;
+- `reference_runtime_last_confirmed_on` — when the same versions were last
+  observed in the current sanitized reference runtime.
+
+The second date is **not** a substitute for a new clean-host qualification.
+Upgrade/requalification remains governed by `docs/UPGRADE.md`.
+
 
 This records the first validated core stack and baseline feature flags in machine-readable form.
 

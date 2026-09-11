@@ -1,6 +1,13 @@
 schema_version: 1
-validated_on: 2026-09-06
-status: first-reference-validated
+status: current-reference-baseline
+first_validated_on: 2026-09-06
+reference_runtime_last_confirmed_on: 2026-09-11
+reference_runtime_confirmation_source: state/REAL-DEPLOYMENT-STATUS.md
+qualification_semantics:
+  first_validated_on: clean_reference_qualification_date
+  reference_runtime_last_confirmed_on: same_versions_observed_in_current_reference_runtime
+  does_not_claim_new_clean_host_validation: true
+upgrade_policy: docs/UPGRADE.md
 
 target:
   host_os: macos
