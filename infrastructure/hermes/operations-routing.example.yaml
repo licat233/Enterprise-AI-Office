@@ -1,0 +1,33 @@
+# Enterprise AI Office Operations Profile routing overlay.
+#
+# This is a non-secret deployment source for the existing Operations Profile;
+# it does not create another Profile. Merge it with the protected
+# /Users/armor/.hermes/profiles/operations/config.yaml during deployment.
+#
+# The two settings below are required when Operations is served by the shared
+# Hermes multiplex gateway.
+
+platforms:
+  api_server:
+    # Secondary Profiles use the shared gateway listener.
+    enabled: false
+
+mcp_servers:
+  # The unique name prevents same-process MCP registry collision with general.
+  operations-weknora:
+    command: "<HERMES_PYTHON>"
+    args:
+      - "<WEKNORA_MCP_SERVER>"
+    env:
+      WEKNORA_API_KEY: "<PROTECTED_WEKNORA_SECRET_REF>"
+      WEKNORA_BASE_URL: "<PROTECTED_WEKNORA_BASE_URL_REF>"
+    tools:
+      include:
+        - list_knowledge_bases
+        - get_knowledge_base
+        - hybrid_search
+        - list_knowledge
+        - get_knowledge
+        - list_chunks
+      resources: false
+      prompts: false

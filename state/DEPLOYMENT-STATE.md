@@ -416,3 +416,28 @@ historical demo record above.
 - Vault and WeKnora were not modified. Department Skills were not modified.
 - Rollback backup: protected v1.1 pre-change Global Rule backup retained
   outside Git.
+
+## 2026-09-11 — EAO Operations RBAC v1 closure
+
+- Target: armor@MacStudio.local.
+- Status: CLOSED / FROZEN / PASS.
+- Open WebUI: v0.11.3; published as 0.0.0.0:13000 -> 8080.
+- All Employees has READ access to General Assistant.
+- Operations Employees has READ access to Operations Assistant.
+- Employee defaults retain basic chat and approved productivity features;
+  workspace management, sharing, access grants, API keys, native web search,
+  image generation, code interpreter, memories, controls, and valves remain
+  denied.
+- Open WebUI Knowledge records = 0 is intentional.
+- Company Knowledge access is retrieve-only through the Hermes Operations
+  Profile and operations-weknora MCP namespace; WeKnora scope is the Company
+  Knowledge tenant with full_access=false and capabilities=["retrieve"].
+- The secondary Operations API-server binding is disabled so the Profile uses
+  the shared Hermes multiplex gateway; no secondary port is created.
+- The non-secret checked-in routing source is
+  infrastructure/hermes/operations-routing.example.yaml.
+- Sanitized before/after RBAC snapshots are retained under docs/rbac/snapshots.
+- Production health, employee knowledge retrieval, admin/employee boundaries,
+  LAN/Tailscale access, HTTP 401 unauthenticated denial, and restart
+  persistence were verified.
+- Future changes require a new explicit task and baseline version.

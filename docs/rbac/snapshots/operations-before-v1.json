@@ -1,0 +1,323 @@
+{
+  "acl_rows_sanitized": [
+    {
+      "permission": "read",
+      "principal": "All Employees",
+      "principal_type": "group",
+      "resource_id": "general",
+      "resource_type": "model"
+    },
+    {
+      "permission": "read",
+      "principal": "Operations Employees",
+      "principal_type": "group",
+      "resource_id": "operations",
+      "resource_type": "model"
+    }
+  ],
+  "captured_at_epoch": 1789114132,
+  "default_group_id": "\"d05f2b36-1c9d-4a8a-b17e-b9df3f2dd44a\"",
+  "default_permissions": {
+    "access_grants": {
+      "allow_groups": true,
+      "allow_users": true
+    },
+    "chat": {
+      "call": true,
+      "continue_response": true,
+      "controls": true,
+      "delete": true,
+      "delete_message": true,
+      "edit": true,
+      "export": true,
+      "file_upload": true,
+      "import": true,
+      "multiple_models": true,
+      "params": false,
+      "rate_response": true,
+      "regenerate_response": true,
+      "share": true,
+      "stt": true,
+      "system_prompt": false,
+      "temporary": true,
+      "temporary_enforced": false,
+      "tts": true,
+      "valves": true,
+      "web_upload": true
+    },
+    "features": {
+      "api_keys": false,
+      "automations": false,
+      "calendar": true,
+      "channels": true,
+      "code_interpreter": true,
+      "direct_tool_servers": false,
+      "folders": true,
+      "image_generation": true,
+      "memories": true,
+      "notes": true,
+      "web_search": true,
+      "webhooks": false
+    },
+    "settings": {
+      "interface": true
+    },
+    "sharing": {
+      "folders": false,
+      "knowledge": false,
+      "models": false,
+      "notes": false,
+      "open_chats": false,
+      "prompts": false,
+      "public_calendars": false,
+      "public_chats": false,
+      "public_knowledge": false,
+      "public_models": false,
+      "public_notes": false,
+      "public_prompts": false,
+      "public_skills": false,
+      "public_tools": false,
+      "skills": false,
+      "tools": false
+    },
+    "workspace": {
+      "knowledge": false,
+      "models": false,
+      "models_export": false,
+      "models_import": false,
+      "prompts": false,
+      "prompts_export": false,
+      "prompts_import": false,
+      "skills": false,
+      "skills_export": false,
+      "skills_import": false,
+      "tools": false,
+      "tools_export": false,
+      "tools_import": false
+    }
+  },
+  "effective_permissions_representative": {
+    "access_grants": {
+      "allow_groups": true,
+      "allow_users": true
+    },
+    "chat": {
+      "call": true,
+      "continue_response": true,
+      "controls": true,
+      "delete": true,
+      "delete_message": true,
+      "edit": true,
+      "export": true,
+      "file_upload": true,
+      "import": true,
+      "multiple_models": true,
+      "params": false,
+      "rate_response": true,
+      "regenerate_response": true,
+      "share": true,
+      "stt": true,
+      "system_prompt": false,
+      "temporary": true,
+      "temporary_enforced": false,
+      "tts": true,
+      "valves": true,
+      "web_upload": true
+    },
+    "features": {
+      "api_keys": false,
+      "automations": false,
+      "calendar": true,
+      "channels": true,
+      "code_interpreter": true,
+      "direct_tool_servers": false,
+      "folders": true,
+      "image_generation": true,
+      "memories": true,
+      "notes": true,
+      "web_search": true,
+      "webhooks": false
+    },
+    "settings": {
+      "interface": true
+    },
+    "sharing": {
+      "folders": false,
+      "knowledge": false,
+      "models": false,
+      "notes": false,
+      "open_chats": false,
+      "prompts": false,
+      "public_calendars": false,
+      "public_chats": false,
+      "public_knowledge": false,
+      "public_models": false,
+      "public_notes": false,
+      "public_prompts": false,
+      "public_skills": false,
+      "public_tools": false,
+      "skills": false,
+      "tools": false
+    },
+    "workspace": {
+      "knowledge": false,
+      "models": false,
+      "models_export": false,
+      "models_import": false,
+      "prompts": false,
+      "prompts_export": false,
+      "prompts_import": false,
+      "skills": false,
+      "skills_export": false,
+      "skills_import": false,
+      "tools": false,
+      "tools_export": false,
+      "tools_import": false
+    }
+  },
+  "employee_effective_permission_basis": [
+    "default_permissions",
+    "All Employees group permissions",
+    "Operations Employees group permissions"
+  ],
+  "groups": [
+    {
+      "id": "d05f2b36-1c9d-4a8a-b17e-b9df3f2dd44a",
+      "member_count": 1,
+      "name": "All Employees",
+      "permissions": {}
+    },
+    {
+      "id": "f5add226-e41d-4924-ab0c-4e7b7e3c14b5",
+      "member_count": 2,
+      "name": "Operations Employees",
+      "permissions": {
+        "access_grants": {
+          "allow_groups": true,
+          "allow_users": true
+        },
+        "chat": {
+          "call": true,
+          "continue_response": true,
+          "controls": true,
+          "delete": true,
+          "delete_message": true,
+          "edit": true,
+          "export": true,
+          "file_upload": true,
+          "import": true,
+          "multiple_models": true,
+          "params": false,
+          "rate_response": true,
+          "regenerate_response": true,
+          "share": true,
+          "stt": true,
+          "system_prompt": false,
+          "temporary": true,
+          "temporary_enforced": false,
+          "tts": true,
+          "valves": true,
+          "web_upload": true
+        },
+        "features": {
+          "api_keys": false,
+          "automations": false,
+          "calendar": true,
+          "channels": true,
+          "code_interpreter": true,
+          "direct_tool_servers": false,
+          "folders": true,
+          "image_generation": true,
+          "memories": true,
+          "notes": true,
+          "web_search": true,
+          "webhooks": false
+        },
+        "settings": {
+          "interface": true
+        },
+        "sharing": {
+          "folders": false,
+          "knowledge": false,
+          "models": false,
+          "notes": false,
+          "open_chats": false,
+          "prompts": false,
+          "public_calendars": false,
+          "public_chats": false,
+          "public_knowledge": false,
+          "public_models": false,
+          "public_notes": false,
+          "public_prompts": false,
+          "public_skills": false,
+          "public_tools": false,
+          "skills": false,
+          "tools": false
+        },
+        "workspace": {
+          "knowledge": false,
+          "models": false,
+          "models_export": false,
+          "models_import": false,
+          "prompts": false,
+          "prompts_export": false,
+          "prompts_import": false,
+          "skills": false,
+          "skills_export": false,
+          "skills_import": false,
+          "tools": false,
+          "tools_export": false,
+          "tools_import": false
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "acl": [
+        {
+          "permission": "read",
+          "principal": "All Employees",
+          "principal_type": "group"
+        }
+      ],
+      "id": "general",
+      "is_active": true,
+      "name": "General Assistant"
+    },
+    {
+      "acl": [
+        {
+          "permission": "read",
+          "principal": "Operations Employees",
+          "principal_type": "group"
+        }
+      ],
+      "id": "operations",
+      "is_active": true,
+      "name": "Operations Assistant"
+    }
+  ],
+  "open_webui_version": "v0.11.3",
+  "production_target": "armor@MacStudio.local",
+  "resource_counts": {
+    "access_grant": 2,
+    "document": 0,
+    "file": 1,
+    "folder": 0,
+    "function": 0,
+    "knowledge": 0,
+    "note": 0,
+    "prompt": 0,
+    "skill": 0,
+    "tool": 0
+  },
+  "schema": "EAO Operations Employees Permission Baseline v1",
+  "scope": {
+    "group": "Operations Employees",
+    "group_id": "f5add226-e41d-4924-ab0c-4e7b7e3c14b5",
+    "member_count": 2
+  },
+  "secrets_excluded": true,
+  "snapshot": "before"
+}

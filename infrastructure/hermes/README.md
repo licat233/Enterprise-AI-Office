@@ -14,6 +14,7 @@ infrastructure/hermes/
 ├── default.env.example
 ├── general.config.example.yaml
 ├── general.env.example
+├── operations-routing.example.yaml
 ├── specialist.config.example.yaml
 ├── specialist.env.example
 └── features/
@@ -31,6 +32,9 @@ The first four artifacts encode the baseline:
 - API tool exposure restricted to the approved read-only WeKnora surface.
 
 The specialist templates are generic starting points only when company configuration enables a real specialist Profile. They are not a list of Profiles to provision.
+The checked-in operations-routing example records the two profile-local
+settings required for the existing Operations Profile to coexist with the
+shared Hermes multiplex gateway; it contains no credentials.
 
 `features/README.md` covers the optional native Hermes Kanban, Cron, and messaging capabilities selected through the capability registry.
 
