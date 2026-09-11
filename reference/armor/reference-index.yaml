@@ -63,11 +63,14 @@ reference_capabilities:
       - config/mcp-registry.yaml
 
   media_transcription:
-    status: validated_optional_capability
+    status: deployed_validated_reference
     generic_default: false
+    enabled_in_current_ARMOR_reference: true
     authority:
       - infrastructure/media-transcription/README.md
+      - docs/ACCEPTANCE-TESTS.md
       - config/capabilities.yaml
+      - state/REAL-DEPLOYMENT-STATUS.md
 
   governed_email:
     status: repository_capability_present

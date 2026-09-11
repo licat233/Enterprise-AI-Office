@@ -311,6 +311,10 @@ require_no_text config/eao-manifest.yaml 'open_webui: v0.11.3' 'Manifest does no
 require_text reference/armor/reference-index.yaml 'normative: false' 'ARMOR reference index is non-normative'
 require_text reference/armor/reference-index.yaml 'deployable_company_config: false' 'ARMOR reference index is non-deployable'
 require_text reference/armor/reference-index.yaml 'status: deployed_frozen_reference' 'ARMOR reference index records Operations reference lane'
+require_text reference/armor/reference-index.yaml 'status: deployed_validated_reference' 'ARMOR reference records deployed Media Transcription'
+require_text reference/armor/reference-index.yaml 'enabled_in_current_ARMOR_reference: true' 'ARMOR reference distinguishes deployed optional Media Transcription'
+require_text README.md 'Media Transcription optional capability' 'English README surfaces current Media Transcription status'
+require_text README.zh-CN.md 'Media Transcription 可选能力' 'Chinese README surfaces current Media Transcription status'
 require_text reference/armor/reference-index.yaml 'live_mailbox_deployment_claim: false' 'ARMOR reference index does not claim live mailbox deployment'
 require_text reference/armor/reference-index.yaml 'Do not infer Operations as a generic EAO default.' 'ARMOR reference index blocks generic Operations inheritance'
 
