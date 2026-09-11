@@ -28,6 +28,10 @@ components:
       runtime_version_env:
         name: WEKNORA_VERSION
         value: "0.8.0"
+    runtime_identity:
+      source_commit_required: true
+      container_name: WeKnora-app
+      container_image: wechatopenai/weknora-app:0.8.0
     deployment: upstream-compose-plus-thin-adapter
   hermes_agent:
     version: 0.21.0
@@ -41,6 +45,11 @@ components:
       installer_url_template: "https://raw.githubusercontent.com/NousResearch/hermes-agent/{commit}/scripts/install.sh"
       commit_flag: --commit
       eao_configuration_mode: install_runtime_then_apply_repository_managed_config
+    runtime_identity:
+      version_command: hermes --version
+      expected_version: "0.21.0"
+      source_commit_required: true
+      source_dir_must_be_resolved_from_actual_install: true
     deployment: host-native
   open_webui:
     version: v0.11.3
@@ -53,6 +62,9 @@ components:
       method: official_container_image_via_eao_compose
       image: ghcr.io/open-webui/open-webui:v0.11.3
       adapter: infrastructure/open-webui/docker-compose.yml
+    runtime_identity:
+      container_name: eaio-open-webui
+      container_image: ghcr.io/open-webui/open-webui:v0.11.3
     deployment: docker-compose
 
 baseline:
