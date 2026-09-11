@@ -194,6 +194,21 @@ def main() -> int:
         "Fresh Agent must prove Core runtime identity",
     )
     require_text(
+        "DEPLOY.md",
+        "infrastructure/hermes/PROVISIONING.md",
+        "Fresh Agent uses Hermes Core provisioning contract",
+    )
+    require_text(
+        "infrastructure/hermes/PROVISIONING.md",
+        "hermes profile create general --no-skills --no-alias",
+        "Fresh Agent preserves General Profile least privilege at creation",
+    )
+    require_text(
+        "config/eao-manifest.yaml",
+        "hermes: infrastructure/hermes/PROVISIONING.md",
+        "Manifest exposes Hermes Core provisioning",
+    )
+    require_text(
         "config/validated-stack.yaml",
         "https://github.com/Tencent/WeKnora.git",
         "Fresh Agent can resolve WeKnora upstream",
