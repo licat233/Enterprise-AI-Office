@@ -119,6 +119,18 @@ capabilities:
       automatic_publication: false
       authenticated_browsing: false
       binary_download: false
+    records:
+      - selected adapter version/commit
+      - enabled employee Profiles
+      - protected Firecrawl credential reference/class, never secret value
+      - Firecrawl endpoint mode
+      - Obscura runtime version/path and health
+      - CloakBrowser runtime version/path and health
+      - employee-facing tool names
+      - raw backend non-exposure result
+      - SSRF/redirect safety acceptance result
+      - fallback acceptance result
+      - final Web Research acceptance result
 
   mcp_control_plane_inventory:
     kind: control_plane
@@ -141,6 +153,7 @@ capabilities:
       - infrastructure/weknora/README.md
       - infrastructure/weknora/PROVISIONING.md
       - infrastructure/hermes/README.md
+      - infrastructure/hermes/PROVISIONING.md
       - infrastructure/open-webui/README.md
       - infrastructure/open-webui/PROVISIONING.md
     acceptance:
