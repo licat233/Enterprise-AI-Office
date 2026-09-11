@@ -29,7 +29,7 @@ The public Compose blueprint uses OPEN_WEBUI_BRANDING_DIR:-./branding. The prote
 
 ~~~sh
 cd /Users/Shared/enterprise-ai-office/runtime/OpenWebUI
-/Users/armor/.orbstack/bin/docker compose -f docker-compose.bootstrap.yml up -d --force-recreate --no-deps open-webui
+/Users/armor/.orbstack/bin/docker compose -p eaio-openwebui -f docker-compose.bootstrap.yml up -d --force-recreate --no-deps open-webui
 ~~~
 
 Do not run down -v; preserve the named data volume. After an asset change, verify /static/ URLs and use a hard refresh/private window if a browser cache shows the previous logo. If the pinned Open WebUI version changes, re-check its static paths and startup-copy behavior before reusing these mounts.
