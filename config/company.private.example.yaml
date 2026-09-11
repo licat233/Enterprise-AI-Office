@@ -28,41 +28,6 @@ core_provisioning:
       password_ref: weknora-owner-password
     intended_workspace_name: Example Company
     runtime_secret_refs:
-  weknora-owner-password:
-    class: weknora-owner-provisioning-credentials
-    consumer: weknora-provisioning
-    native_binding: WeKnora auth request password field
-
-  weknora-db-password:
-    class: weknora-runtime-secrets
-    consumer: weknora-runtime+postgres
-    native_binding: DB_PASSWORD
-
-  weknora-redis-password:
-    class: weknora-runtime-secrets
-    consumer: weknora-runtime+redis
-    native_binding: REDIS_PASSWORD
-
-  weknora-jwt-secret:
-    class: weknora-runtime-secrets
-    consumer: weknora-app
-    native_binding: JWT_SECRET
-
-  hermes-default-api-key:
-    class: hermes-profile-api-keys
-    consumer: hermes-default-profile
-    native_binding: API_SERVER_KEY
-
-  hermes-general-api-key:
-    class: hermes-profile-api-keys
-    consumer: hermes-general-profile
-    native_binding: API_SERVER_KEY
-
-  openwebui-admin-password:
-    class: open-webui-admin-credentials
-    consumer: open-webui-provisioning
-    native_binding: OPEN_WEBUI_ADMIN_PASSWORD
-
       db_password: weknora-db-password
       redis_password: weknora-redis-password
       jwt_secret: weknora-jwt-secret
@@ -167,6 +132,41 @@ email_governance:
 # Symbolic references only. The values themselves belong in protected storage.
 # No universal secret backend is assumed by this blueprint.
 secret_refs:
+  weknora-owner-password:
+    class: weknora-owner-provisioning-credentials
+    consumer: weknora-provisioning
+    native_binding: WeKnora auth request password field
+
+  weknora-db-password:
+    class: weknora-runtime-secrets
+    consumer: weknora-runtime+postgres
+    native_binding: DB_PASSWORD
+
+  weknora-redis-password:
+    class: weknora-runtime-secrets
+    consumer: weknora-runtime+redis
+    native_binding: REDIS_PASSWORD
+
+  weknora-jwt-secret:
+    class: weknora-runtime-secrets
+    consumer: weknora-app
+    native_binding: JWT_SECRET
+
+  hermes-default-api-key:
+    class: hermes-profile-api-keys
+    consumer: hermes-default-profile
+    native_binding: API_SERVER_KEY
+
+  hermes-general-api-key:
+    class: hermes-profile-api-keys
+    consumer: hermes-general-profile
+    native_binding: API_SERVER_KEY
+
+  openwebui-admin-password:
+    class: open-webui-admin-credentials
+    consumer: open-webui-provisioning
+    native_binding: OPEN_WEBUI_ADMIN_PASSWORD
+
   email-sales-mailbox-client-password:
     class: email-mailbox-client-credential
     consumer: eao-email-governance
