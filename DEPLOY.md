@@ -98,6 +98,8 @@ For the current baseline:
 #### WeKnora
 
 ```sh
+: "${RUNTIME_ROOT:?set RUNTIME_ROOT to the approved deployment runtime root}"
+mkdir -p "${RUNTIME_ROOT}/upstream"
 git clone https://github.com/Tencent/WeKnora.git "${RUNTIME_ROOT}/upstream/WeKnora"
 git -C "${RUNTIME_ROOT}/upstream/WeKnora" checkout --detach 1edcd54b43606d9079bb36650efe3f68707a79ea
 git -C "${RUNTIME_ROOT}/upstream/WeKnora" rev-parse HEAD
