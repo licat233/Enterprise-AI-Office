@@ -100,6 +100,13 @@ firecrawl-mcp:
 
 The upstream Firecrawl package may exist on the reference host without granting its raw MCP tools to an employee Profile. Runtime availability and employee exposure are separate dimensions.
 
+The raw `firecrawl-mcp` entry may therefore report `BLOCKED_CREDENTIAL` for its own
+direct health probe while `enterprise-web-research` is `HEALTHY`. That raw blocker
+does **not** mean employee Web Research is broken: the approved adapter has its own
+protected `FIRECRAWL_API_KEY` binding and separate acceptance evidence. The registry
+records this distinction with `scope: raw_firecrawl_mcp_entry_only` and
+`does_not_apply_to: [enterprise-web-research]`.
+
 The deterministic Phase 6 checker verifies that the real Operations Profile does not bind firecrawl-mcp, Obscura, or CloakBrowser directly.
 
 ## 4. Internal browser backends
