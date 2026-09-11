@@ -55,6 +55,7 @@ Run:
 ```sh
 EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
 python3 scripts/validate-fresh-agent-kit.py
+sh scripts/check-yaml-syntax.sh
 python3 scripts/check-repository-links.py
 python3 scripts/check-declarative-paths.py
 python3 scripts/check-capability-acceptance.py
