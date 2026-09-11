@@ -71,6 +71,21 @@ heading to exist. It catches renamed/misspelled acceptance anchors but does not
 decide whether an older stage is semantically sufficient; final-stage selection
 still requires architecture/capability review.
 
+## `check-validated-stack-consistency.py`
+
+Dependency-free cross-file check for derived Core runtime pins.
+
+Run:
+
+```sh
+python3 scripts/check-validated-stack-consistency.py
+```
+
+It reads the authoritative versions from `config/validated-stack.yaml` and
+verifies the derived Open WebUI image tag plus the WeKnora/Hermes reference
+adapter markers remain synchronized. Historical RBAC snapshots are excluded
+because they are immutable evidence rather than current deployment pins.
+
 ## `check-public-repository-hygiene.py`
 
 High-confidence public Git hygiene check.
