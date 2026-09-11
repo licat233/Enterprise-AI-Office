@@ -98,6 +98,7 @@ def main() -> int:
         "config/eao-manifest.yaml",
         "state/PROJECT-PHASE.yaml",
         "state/REAL-DEPLOYMENT-STATUS.md",
+        "reference/armor/reference-index.yaml",
     ]:
         require_file(rel)
 
@@ -165,6 +166,22 @@ def main() -> int:
         "REPRODUCE.md",
         "state/REAL-DEPLOYMENT-STATUS.md",
         "Reproduction contract points to current public reference status",
+    )
+
+    require_text(
+        "config/eao-manifest.yaml",
+        "machine_readable_index: reference/armor/reference-index.yaml",
+        "Manifest exposes sanitized ARMOR reference index",
+    )
+    require_text(
+        "reference/armor/reference-index.yaml",
+        "deployable_company_config: false",
+        "ARMOR reference index remains non-deployable",
+    )
+    require_text(
+        "reference/armor/reference-index.yaml",
+        "live_mailbox_deployment_claim: false",
+        "ARMOR reference index does not invent live mailbox state",
     )
 
     require_text(
