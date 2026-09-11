@@ -55,6 +55,7 @@ Run:
 ```sh
 EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
 python3 scripts/validate-fresh-agent-kit.py
+sh scripts/run-public-offline-tests.sh
 ```
 
 Expected:
