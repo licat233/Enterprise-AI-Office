@@ -4,6 +4,18 @@
 
 **[English README](./README.md)**
 
+## AI Agent 从这里开始
+
+如果你是一个没有任何历史聊天上下文的新 AI 工程 Agent，不要根据目录名或旧会话猜测系统结构。按以下顺序开始：
+
+1. [`AGENTS.md`](AGENTS.md) —— 仓库级 Agent 操作合同。
+2. [`REPRODUCE.md`](REPRODUCE.md) —— 从零复建 EAO 的完整合同。
+3. [`config/eao-manifest.yaml`](config/eao-manifest.yaml) —— 机器可读的系统总清单。
+4. [`DEPLOY.md`](DEPLOY.md) —— 部署 Golden Path。
+5. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) —— 当前 ARMOR 真实参考部署的脱敏状态。
+
+提出任何新组件之前，必须先执行 [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md)。
+
 ## 项目进度一眼看懂
 
 | 里程碑 / 能力 | 状态 |
@@ -21,9 +33,11 @@
 | Installation Design Final Review | ✅ PASS |
 | Enterprise Operations Capability Baseline v1.0 | ✅ 已冻结 |
 | Hermes Skills Migration v1.0 | ✅ 已关闭 |
+| Enterprise Web Research v1.0 | ✅ 已关闭 / 冻结 / PASS |
+| Operations 员工 RBAC v1 | ✅ 已关闭 / 冻结 / PASS |
 | Blueprint Validation | ⏳ 尚未开启 |
 | Release Ready | ⏳ 尚未开启 |
-| 真实企业部署任务 | ⛔ 未激活 |
+| Public Real Deployment Gate | ⛔ 默认未激活；已有 ARMOR 脱敏真实参考部署 |
 
 > **重要说明：** 本 README 中的“已经实现”，是指仓库已经具备相应的系统设计、安装合同、参考适配器/脚本、Schema 或已验证的核心资产；并不代表 v2 邮件能力已经连接真实企业邮箱并投入生产。
 
