@@ -190,6 +190,11 @@ def main() -> int:
         "Fresh Agent has Core secret-reference contract",
     )
     require_text(
+        "config/README.md",
+        "### Runtime binding taxonomy",
+        "Fresh Agent distinguishes provisioning aliases from native env",
+    )
+    require_text(
         "DEPLOY.md",
         "current reproducible Core version/commit authority is `config/validated-stack.yaml`",
         "Fresh Agent uses validated-stack as current Core version authority",

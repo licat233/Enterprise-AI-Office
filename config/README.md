@@ -134,6 +134,29 @@ bootstrap admin password provisioning input.
 secret authority: values must be resolved from the active symbolic refs /
 protected storage.
 
+### Runtime binding taxonomy
+
+Do not assume every variable shown in `config/.env.example` is read directly
+by an upstream component.
+
+The template intentionally contains four classes:
+
+| Class | Examples | Consumer / meaning |
+| --- | --- | --- |
+| EAO/operator metadata | `EAIO_ENVIRONMENT`, `EAIO_COMPANY_ID`, `EAIO_TIMEZONE` | Selected EAO/operator tooling only; not universal upstream env |
+| EAO helper inputs | `OPEN_WEBUI_HEALTH_URL`, `EAIO_BACKUP_SUCCESS_MARKER` | Repository scripts such as `scripts/health-check.sh` |
+| Provisioning convenience aliases | `OPEN_WEBUI_ADMIN_PASSWORD`, `HERMES_DEFAULT_API_KEY`, `HERMES_GENERAL_API_KEY` | Inputs to the EAO provisioning/operator flow; must be translated to the component's real API/request/Profile binding |
+| Upstream/adapter-native env | WeKnora `DB_PASSWORD` / `REDIS_PASSWORD` / `JWT_SECRET`, Open WebUI OIDC vars, enabled capability-specific vars | Exact names consumed by the selected pinned upstream/runtime or EAO adapter |
+
+For Hermes specifically, the upstream runtime consumes Profile-local
+`API_SERVER_KEY`; `HERMES_DEFAULT_API_KEY` and
+`HERMES_GENERAL_API_KEY` are not Hermes-native variable names.
+
+The generic Open WebUI health URL uses the checked-in loopback Compose default
+(`127.0.0.1:3000`). A reference deployment may deliberately publish another
+approved private host port. Health tooling must use observed target runtime
+state, not inherit a reference deployment's port.
+
 The private overlay is reconciled by stable logical IDs for named resources such as Profiles, groups, mailboxes, and grants; do not blindly concatenate arrays.
 
 ---
