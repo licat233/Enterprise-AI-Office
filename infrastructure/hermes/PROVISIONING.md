@@ -99,6 +99,45 @@ deployment, inspect and reconcile it in place.
 Never delete/recreate an existing Profile merely to obtain a clean state. That
 can destroy sessions, state, cron jobs, Skills, memory, and local configuration.
 
+### 3.1 Pinned Hermes behavior provenance
+
+The provisioning behaviors below were verified against the validated Hermes
+Agent source commit recorded in `config/validated-stack.yaml`:
+
+```text
+NousResearch/hermes-agent
+commit: f1ccf436a27522c1bb5d36383a6f13b950676338
+package version at commit: 0.21.0
+```
+
+Source files used for behavior verification:
+
+```text
+hermes_cli/subcommands/profile.py
+hermes_cli/profiles.py
+gateway/config.py
+gateway/platforms/api_server.py
+```
+
+At that commit:
+
+- `hermes profile create --no-skills` is a supported upstream CLI option;
+- `profiles.py` writes `.no-bundled-skills` and future bundled-Skill sync
+  honors the opt-out marker;
+- `gateway.multiplex_profiles` and
+  `gateway.multiplex_profile_allowlist` are supported config keys;
+- the API server mirrors native routes under `/p/<profile>/...` when
+  multiplexing is enabled;
+- named Profile requests resolve that Profile's own `API_SERVER_KEY` and fail
+  closed rather than inheriting the default/owner key;
+- `GET /p/<profile>/v1/models` advertises the active Profile name as the
+  primary model ID unless an explicit override is configured.
+
+These behaviors are version-specific implementation contracts. On a Hermes
+upgrade, re-read the selected commit's Profile/config/API-server implementation
+and rerun Profile creation, multiplex routing, credential-isolation, model-ID,
+tool-boundary, and restart acceptance before inheriting this playbook.
+
 ## 4. Create the baseline employee Profile only when absent
 
 Hermes Profiles are native upstream state directories. Use the upstream command;
