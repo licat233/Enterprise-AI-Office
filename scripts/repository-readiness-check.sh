@@ -96,6 +96,7 @@ for path in \
   scripts/check-repository-links.py \
   scripts/check-declarative-paths.py \
   scripts/check-capability-acceptance.py \
+  scripts/check-validated-stack-consistency.py \
   scripts/check-public-repository-hygiene.py \
   scripts/check-frozen-baselines.py \
   scripts/run-public-offline-tests.sh \
@@ -247,6 +248,10 @@ require_text config/validated-stack.yaml 'first_validated_on: 2026-09-06' 'Valid
 require_text config/validated-stack.yaml 'reference_runtime_last_confirmed_on: 2026-09-11' 'Validated stack records current reference runtime confirmation'
 require_text config/validated-stack.yaml 'does_not_claim_new_clean_host_validation: true' 'Runtime confirmation does not impersonate clean-host validation'
 require_text config/validated-stack.yaml 'upgrade_policy: docs/UPGRADE.md' 'Validated stack delegates upgrades to upgrade policy'
+require_text infrastructure/open-webui/docker-compose.yml 'Derived pin: config/validated-stack.yaml -> Open WebUI' 'Open WebUI compose identifies validated-stack derived pin'
+require_text infrastructure/weknora/docker-compose.demo.override.yml 'Derived pin: config/validated-stack.yaml -> WeKnora' 'WeKnora override identifies validated-stack derived pin'
+require_text infrastructure/hermes/default.config.example.yaml 'Derived schema pin: config/validated-stack.yaml -> Hermes Agent' 'Hermes default example identifies validated-stack derived pin'
+require_text infrastructure/hermes/general.config.example.yaml 'Derived schema pin: config/validated-stack.yaml -> Hermes Agent' 'Hermes general example identifies validated-stack derived pin'
 require_no_text config/eao-manifest.yaml 'weknora: v0.8.0' 'Manifest does not duplicate WeKnora version'
 require_no_text config/eao-manifest.yaml 'hermes_agent: 0.21.0' 'Manifest does not duplicate Hermes version'
 require_no_text config/eao-manifest.yaml 'open_webui: v0.11.3' 'Manifest does not duplicate Open WebUI version'
