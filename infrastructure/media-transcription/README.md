@@ -19,6 +19,16 @@ The capability reuses already installed local tools:
 - FunASR SenseVoiceSmall for Chinese and Cantonese;
 - ffmpeg/ffprobe for media inspection and video audio extraction.
 
+SenseVoice provenance is split deliberately:
+
+- source/reference upstream: `QwenAudio/SenseVoice`;
+- runtime model identifier: `iic/SenseVoiceSmall`;
+- source code and model weights are separate licensing surfaces.
+
+Do not infer model-weight redistribution rights from the source-code license.
+Consult `THIRD_PARTY_NOTICES.md` and the exact selected model card/artifact
+before redistribution or commercial packaging.
+
 The deployment must provide a Python interpreter with the selected local ASR
 packages. The repository does not install models or dependencies. Use
 EAIO_MEDIA_TRANSCRIPTION_PYTHON with scripts/transcribe when the packages are
