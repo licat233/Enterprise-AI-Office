@@ -1,6 +1,6 @@
 # Enterprise AI Office Deployment State
 
-> Fresh-deployment template. Copy to the deployment's protected/operational state record and replace placeholders with observed runtime truth. Do not copy role/capability values from another reference instance.
+> Fresh-deployment template. Copy this file to the deployment's protected/operational storage and replace placeholders with observed runtime truth. Do **not** overwrite the repository's historical `state/DEPLOYMENT-STATE.md`. Do not copy role/capability values from another reference instance, and never commit a real operational copy when it contains company-private runtime identifiers or state.
 
 Last updated: `<ISO_DATE>`
 Company / environment: `<COMPANY> / <ENVIRONMENT>`
