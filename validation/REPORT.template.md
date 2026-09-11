@@ -33,6 +33,10 @@ Any undocumented hint must be treated as evidence of a possible repository gap.
 
 - `EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh`: PASS / FAIL
 - `python3 scripts/validate-fresh-agent-kit.py`: PASS / FAIL
+- `python3 scripts/check-repository-links.py`: PASS / FAIL
+- `python3 scripts/check-declarative-paths.py`: PASS / FAIL
+- `python3 scripts/check-public-repository-hygiene.py`: PASS / FAIL
+- `python3 scripts/check-frozen-baselines.py`: PASS / FAIL
 - `sh scripts/run-public-offline-tests.sh`: PASS / FAIL
 
 Evidence:
