@@ -386,7 +386,7 @@ PRODUCTION READY
 | Durable Agent Tasks | Hermes Kanban（启用时） |
 | Scheduled Work | Hermes Cron（启用时） |
 | Desired Deployment | 企业私有配置 |
-| Actual Deployment | Runtime + Deployment State |
+| Actual Deployment | 实际 Runtime + 由 `state/DEPLOYMENT-STATE.template.md` 创建的受保护 operational state；公开状态/历史文件仅作为 evidence |
 
 ## 关键设计原则
 
