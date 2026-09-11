@@ -1,8 +1,10 @@
 #!/bin/sh
 set -u
 
-# Enterprise AI Office read-only health check.
+# Enterprise AI Office read-only liveness/health check.
 # Configure optional endpoints/thresholds via environment variables.
+# This does not prove the exact validated component identity/version/commit.
+# Use DEPLOY.md §4.2 and docs/ACCEPTANCE-TESTS.md for Core identity assertions.
 
 PASS=0
 WARN=0
