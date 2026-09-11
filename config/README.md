@@ -227,6 +227,18 @@ Do not predeclare or enable generic CRM/ERP/workflow integration merely for theo
 
 ## 5. `config/validated-stack.yaml`
 
+### Single machine-readable Core version authority
+
+`config/validated-stack.yaml` is the only machine-readable authority for the
+validated Core host baseline, component versions, upstream commits, and
+deployment mode. Other machine-readable files may point to it, but must not
+copy those version/host/runtime values.
+
+Human-facing documentation may summarize the current baseline when useful, but
+must identify `config/validated-stack.yaml` as the authoritative source and
+must not be treated as a second version policy.
+
+
 This records the first validated core stack and baseline feature flags in machine-readable form.
 
 It is a reproducibility baseline, not a permanent version policy. Use `docs/UPGRADE.md` when qualifying newer versions.

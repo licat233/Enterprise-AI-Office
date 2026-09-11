@@ -174,6 +174,11 @@ def main() -> int:
         "Manifest exposes sanitized ARMOR reference index",
     )
     require_text(
+        "config/eao-manifest.yaml",
+        "authority: config/validated-stack.yaml",
+        "Manifest delegates Core version truth",
+    )
+    require_text(
         "reference/armor/reference-index.yaml",
         "deployable_company_config: false",
         "ARMOR reference index remains non-deployable",
