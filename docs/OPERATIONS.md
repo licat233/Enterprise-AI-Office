@@ -37,12 +37,20 @@ Use this order:
 Before maintenance, compare:
 
 ```text
-state/DEPLOYMENT-STATE.md
+protected operational state
+(created from state/DEPLOYMENT-STATE.template.md)
 +
 actual host/runtime state
 ```
 
-If they differ, actual runtime is evidence of what is running, but the discrepancy must be reconciled and documented.
+The repository's `state/DEPLOYMENT-STATE.md` is historical sanitized demo
+evidence, not the live operational state store. The sanitized
+`state/REAL-DEPLOYMENT-STATUS.md` is also not a substitute for protected
+runtime state.
+
+If protected state and actual runtime differ, actual runtime is evidence of what
+is running, but the discrepancy must be reconciled, accepted/repaired, and
+recorded in the protected operational state before the next material change.
 
 ## 3. Routine cadence
 
@@ -305,9 +313,11 @@ A backup incident is operationally significant if:
 
 ### 13.1 Validated local demo commands
 
-The current MacBook demo uses the deployment-specific helpers below. Inspect
-`state/DEPLOYMENT-STATE.md` and confirm the live container names before running
-them; do not point them at an inferred or broad path.
+The historical MacBook demo used the deployment-specific helpers below. Its
+sanitized evidence remains in `state/DEPLOYMENT-STATE.md`. For any current
+deployment, inspect the protected operational state and confirm the live
+container names before running them; do not point them at an inferred or broad
+path.
 
 ```sh
 ./scripts/backup.sh \
@@ -368,8 +378,11 @@ Do not log every harmless UI click.
 ## 16. Host reboot recovery rehearsal
 
 A real host reboot is an acceptance test, not something to infer from a healthy
-pre-reboot process. On the current MacBook demo, prepare the exact post-reboot
-continuation below and record the result in `state/DEPLOYMENT-STATE.md`:
+pre-reboot process. For a current deployment, prepare the exact post-reboot
+continuation for that target and record the result in its protected operational
+state. The command block below is retained as historical MacBook demo evidence;
+do not update the public historical `state/DEPLOYMENT-STATE.md` as a live
+runtime record:
 
 ```sh
 OPEN_WEBUI_HEALTH_URL=http://127.0.0.1:3000 \
