@@ -55,6 +55,10 @@ Run:
 ```sh
 EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
 python3 scripts/validate-fresh-agent-kit.py
+python3 scripts/check-repository-links.py
+python3 scripts/check-declarative-paths.py
+python3 scripts/check-public-repository-hygiene.py
+python3 scripts/check-frozen-baselines.py
 sh scripts/run-public-offline-tests.sh
 ```
 
