@@ -36,6 +36,7 @@
 | Hermes Skills Migration v1.0 | ✅ 已关闭 |
 | Enterprise Web Research v1.0 | ✅ 已关闭 / 冻结 / PASS |
 | Operations 员工 RBAC v1 | ✅ 已关闭 / 冻结 / PASS |
+| Media Transcription 可选能力 | ✅ 已验证 / ARMOR Reference 已启用；非 Core 默认能力 |
 | Blueprint Validation | ⏳ 尚未开启 |
 | Release Ready | ⏳ 尚未开启 |
 | Public Real Deployment Gate | ⛔ 默认未激活；已有 ARMOR 脱敏真实参考部署 |
