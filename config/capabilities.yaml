@@ -24,7 +24,12 @@ readiness_levels:
 capabilities:
   mic_product_information_optimization:
     kind: conditional
-    enabled_when: company explicitly enables the ARMOR MIC product-information workflow
+    enabled_when: company explicitly adopts the ARMOR-specific MIC product-information workflow
+    selection:
+      scope: ARMOR_reference_specific
+      reference_authority: reference/armor/reference-index.yaml
+      generic_company_schema_field: none
+      requires_explicit_adoption_outside_ARMOR: true
     implementation:
       - skills/shared/department/armor-mic-product-optimization/SKILL.md
       - skills/shared/department/armor-memory/scripts/armor-route.py
@@ -42,7 +47,12 @@ capabilities:
 
   armor_product_visual:
     kind: conditional
-    enabled_when: company explicitly enables the ARMOR Product Visual preparation workflow
+    enabled_when: company explicitly adopts the ARMOR-specific Product Visual preparation workflow
+    selection:
+      scope: ARMOR_reference_specific
+      reference_authority: reference/armor/reference-index.yaml
+      generic_company_schema_field: none
+      requires_explicit_adoption_outside_ARMOR: true
     implementation:
       - skills/shared/department/armor-product-visual/SKILL.md
       - skills/shared/department/armor-memory/scripts/armor-route.py
@@ -62,7 +72,11 @@ capabilities:
 
   enterprise_web_research:
     kind: conditional
-    enabled_when: company explicitly enables bounded employee-facing Web Research
+    enabled_when: capabilities.enterprise_web_research.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.enterprise_web_research.enabled
+      required_value: true
     implementation:
       - infrastructure/web-research/adapter.py
       - infrastructure/web-research/test_adapter.py
@@ -70,7 +84,7 @@ capabilities:
       - docs/ENTERPRISE-WEB-RESEARCH-V1.md
     acceptance:
       document: docs/ENTERPRISE-WEB-RESEARCH-V1.md
-      section: Stage 1 acceptance
+      section: Stage 3 — Final Acceptance & Freeze
     upstream:
       - Firecrawl Search API
       - Firecrawl Scrape API
