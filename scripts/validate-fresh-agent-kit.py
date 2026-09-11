@@ -196,6 +196,11 @@ def main() -> int:
     )
     require_text(
         "VALIDATE.md",
+        "python3 scripts/check-capability-acceptance.py",
+        "Gate 0 includes capability acceptance integrity",
+    )
+    require_text(
+        "VALIDATE.md",
         "python3 scripts/check-public-repository-hygiene.py",
         "Gate 0 includes public repository hygiene",
     )
@@ -203,6 +208,11 @@ def main() -> int:
         "VALIDATE.md",
         "python3 scripts/check-frozen-baselines.py",
         "Gate 0 includes frozen baseline history",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "capability_acceptance_integrity_pass",
+        "Scorecard requires capability acceptance integrity",
     )
     require_text(
         "validation/scorecard.yaml",
