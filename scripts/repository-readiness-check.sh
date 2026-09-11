@@ -275,7 +275,7 @@ require_text docs/V2-RECOVERY-CLEAN-HOST.md 'protected operational state created
 require_text docs/V2-RECOVERY-CLEAN-HOST.md 'not an allowed live Email runtime-state store' 'v2 Email recovery rejects public historical state as live store'
 require_text docs/V2-DESIGN-REVIEW.md 'protected operational state created from DEPLOYMENT-STATE.template' 'v2 design review uses protected observed-state authority'
 require_text docs/V2-IMPLEMENTATION-PLAN.md 'protected operational state created from state/DEPLOYMENT-STATE.template.md' 'v2 implementation plan uses protected observed-state authority'
-require_text docs/V2-CONFIG-PROTECTED-INPUTS.md 'historical `state/DEPLOYMENT-STATE.md` is not the live state store' 'v2 protected-input contract separates historical and live state'
+require_text docs/V2-CONFIG-PROTECTED-INPUTS.md '`state/DEPLOYMENT-STATE.md` is not the live state store.' 'v2 protected-input contract separates historical and live state'
 require_no_text docs/V2-RECOVERY-CLEAN-HOST.md '`state/DEPLOYMENT-STATE.md` or the protected equivalent records non-secret truth' 'v2 recovery no longer permits public historical state as live evidence'
 require_text docs/CLIENT-RBAC.md 'do not use the historical sanitized `state/DEPLOYMENT-STATE.md` as the live RBAC evidence store' 'RBAC evidence stays out of public historical state'
 require_no_text docs/ARCHITECTURE.md '| Current deployment state | `state/DEPLOYMENT-STATE.md` + real runtime |' 'Architecture does not revive public historical state as live authority'
