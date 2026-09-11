@@ -11,8 +11,9 @@
 1. [`AGENTS.md`](AGENTS.md) —— 仓库级 Agent 操作合同。
 2. [`REPRODUCE.md`](REPRODUCE.md) —— 从零复建 EAO 的完整合同。
 3. [`config/eao-manifest.yaml`](config/eao-manifest.yaml) —— 机器可读的系统总清单。
-4. [`DEPLOY.md`](DEPLOY.md) —— 部署 Golden Path。
-5. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) —— 当前 ARMOR 真实参考部署的脱敏状态。
+4. [`VALIDATE.md`](VALIDATE.md) —— Fresh-Agent 验证合同。
+5. [`DEPLOY.md`](DEPLOY.md) —— 部署 Golden Path。
+6. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) —— 当前 ARMOR 真实参考部署的脱敏状态。
 
 提出任何新组件之前，必须先执行 [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md)。
 
