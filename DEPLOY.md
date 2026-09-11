@@ -411,6 +411,11 @@ For a fresh deployment, copy `state/DEPLOYMENT-STATE.template.md` into the
 deployment's **protected operational storage** and record actual runtime truth
 there.
 
+The reference backup/restore path expects the protected operational copy at
+`${EAIO_RUNTIME_DIR}/state/deployment-state.md`. If the deployment deliberately
+stores it elsewhere, set `EAIO_DEPLOYMENT_STATE_FILE` for backup operations and
+record that non-secret location/boundary in the operational state.
+
 Do **not** overwrite the repository's `state/DEPLOYMENT-STATE.md`: that file is
 the historical sanitized demo record. Do not put private runtime IDs, network
 identity, credentials, employee data, or company-private configuration into the
