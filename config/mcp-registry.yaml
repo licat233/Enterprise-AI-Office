@@ -1,6 +1,18 @@
 schema_version: 2
 registry: enterprise-mcp-control-plane
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
+
+scope:
+  definition_layer: reusable_enterprise_control_plane
+  runtime_state_scope: sanitized_ARMOR_reference_snapshot
+  reference_implementation: ARMOR
+  runtime_snapshot_as_of: 2026-09-10
+  fresh_deployment_rule: recompute_runtime_and_health_do_not_inherit_reference_flags
+  note: >-
+    Transport, classification, boundary, and exposure contracts are reusable.
+    runtime/health values record the sanitized ARMOR reference implementation
+    at the review date. A fresh deployment must resolve its own installed,
+    configured, enabled, and health state from the target host.
 
 # Inventory and acceptance contract. Runtime state is recorded separately from
 # registration, configuration, profile exposure, and health. Secret values are
@@ -70,13 +82,12 @@ servers:
       required_environment:
         - FIRECRAWL_API_KEY
     exposure:
-      allowed_profiles:
-        - operations
+      allowed_profiles: []
       reserved_profiles:
         - admin
         - future-privileged-research
       default_enabled: false
-      operations_exposure: true
+      operations_exposure: false
     boundary:
       risk: mixed
       native_tool_filtering: true
