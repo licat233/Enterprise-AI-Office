@@ -46,6 +46,8 @@ profiles[]
 mcp_control_plane.profile_allowlists
 models.hermes.provider
 models.hermes.default_model
+core_provisioning.hermes.default_api_key_ref
+core_provisioning.hermes.profile_api_key_refs
 ```
 
 For the reusable baseline, the required employee Profile is:
@@ -54,11 +56,15 @@ For the reusable baseline, the required employee Profile is:
 general
 ```
 
+Resolve the symbolic API-key refs through `secret_refs` and protected storage.
+Both the default/admin and named Profile bindings use Hermes' native
+`API_SERVER_KEY`, but they must resolve to distinct values.
+
 From protected deployment input:
 
 ```text
-default/admin API_SERVER_KEY
-general API_SERVER_KEY
+secret value referenced by core_provisioning.hermes.default_api_key_ref
+secret value referenced by core_provisioning.hermes.profile_api_key_refs.general
 trusted shared API bind address and port
 selected Hermes model-provider credential(s)
 general WeKnora retrieve-only API key

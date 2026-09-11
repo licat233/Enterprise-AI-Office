@@ -35,6 +35,10 @@ jobs:
           bash -n scripts/backup.sh
           bash -n scripts/restore.sh
           sh -n scripts/run-public-offline-tests.sh
+          sh -n scripts/check-yaml-syntax.sh
+
+      - name: Check YAML syntax
+        run: sh scripts/check-yaml-syntax.sh
 
       - name: Check repository Markdown links
         run: python3 scripts/check-repository-links.py

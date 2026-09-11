@@ -74,22 +74,30 @@ employee_access.web.groups:
   company logical group ID
   intended display_name
 
+core_provisioning.open_webui.admin_identity:
+  email
+  display_name
+  password_ref
+
 for each enabled employee Profile:
   Profile ID
   employee-facing display name
   allowed company logical group IDs
 ```
 
+The administrator email/display name are private non-secret desired state.
+Resolve `admin_identity.password_ref` through `secret_refs` and protected
+storage; the provisioning binding is `OPEN_WEBUI_ADMIN_PASSWORD`.
+
 From protected deployment input:
 
 ```text
 OPEN_WEBUI_URL
-OPEN_WEBUI_ADMIN_EMAIL
-OPEN_WEBUI_ADMIN_PASSWORD
+secret value referenced by core_provisioning.open_webui.admin_identity.password_ref
 
 for each enabled employee Profile:
   Hermes OpenAI-compatible base URL
-  Profile API key
+  Profile API key resolved from the Profile's symbolic credential ref
 ```
 
 Baseline mapping:

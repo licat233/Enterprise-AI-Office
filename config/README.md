@@ -67,6 +67,7 @@ Schema v2 describes reusable deployment intent, including:
 
 - company identity/language/timezone;
 - target readiness (`core-ready`, `configured-ready`, or `production-ready`);
+- Core provisioning bootstrap identities and symbolic secret-reference slots;
 - Knowledge Base structure;
 - Hermes Profiles;
 - employee groups/permissions;
@@ -122,6 +123,16 @@ symbolic secret references
 ```
 
 Do not place actual secret values in the private overlay.
+
+For Core, the private overlay also resolves the non-secret bootstrap identity
+and stable symbolic secret refs under `core_provisioning`. The current
+validated bindings include WeKnora `DB_PASSWORD`, `REDIS_PASSWORD`, and
+`JWT_SECRET`; Hermes Profile-local `API_SERVER_KEY`; and the Open WebUI
+bootstrap admin password provisioning input.
+
+`config/.env.example` is only a runtime binding shape. It is not a competing
+secret authority: values must be resolved from the active symbolic refs /
+protected storage.
 
 The private overlay is reconciled by stable logical IDs for named resources such as Profiles, groups, mailboxes, and grants; do not blindly concatenate arrays.
 

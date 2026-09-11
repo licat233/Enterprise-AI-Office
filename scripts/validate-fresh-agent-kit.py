@@ -180,6 +180,16 @@ def main() -> int:
         "Manifest delegates Core version truth",
     )
     require_text(
+        "config/company.example.yaml",
+        "core_provisioning:",
+        "Fresh Agent sees Core protected-input symbolic refs",
+    )
+    require_text(
+        "docs/V2-CONFIG-PROTECTED-INPUTS.md",
+        "### 6.1 Core provisioning secret-reference baseline",
+        "Fresh Agent has Core secret-reference contract",
+    )
+    require_text(
         "DEPLOY.md",
         "current reproducible Core version/commit authority is `config/validated-stack.yaml`",
         "Fresh Agent uses validated-stack as current Core version authority",
@@ -337,6 +347,11 @@ def main() -> int:
 
     require_text(
         "VALIDATE.md",
+        "sh scripts/check-yaml-syntax.sh",
+        "Gate 0 includes YAML syntax integrity",
+    )
+    require_text(
+        "VALIDATE.md",
         "python3 scripts/check-repository-links.py",
         "Gate 0 includes Markdown link integrity",
     )
@@ -369,6 +384,11 @@ def main() -> int:
         "VALIDATE.md",
         "python3 scripts/check-frozen-baselines.py",
         "Gate 0 includes frozen baseline history",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "yaml_syntax_pass",
+        "Scorecard requires YAML syntax integrity",
     )
     require_text(
         "validation/scorecard.yaml",

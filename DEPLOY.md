@@ -122,8 +122,23 @@ git -C "${RUNTIME_ROOT}/upstream/WeKnora" rev-parse HEAD
 The checkout must resolve exactly to the component `commit` in
 `config/validated-stack.yaml`. Its tag `v0.8.0` is verified to point to that
 commit. For the upstream Compose runtime set `WEKNORA_VERSION=0.8.0` in the
-protected/runtime WeKnora environment, then apply the repository WeKnora
-adapter and provisioning contract. Do not use `latest`.
+protected/runtime WeKnora environment.
+
+Before starting the standard runtime, resolve the active private company's
+`core_provisioning.weknora.runtime_secret_refs` through `secret_refs` and
+protected storage, then bind the values to the upstream v0.8.0 native names:
+
+```text
+db_password    → DB_PASSWORD
+redis_password → REDIS_PASSWORD
+jwt_secret     → JWT_SECRET
+```
+
+Do not reuse the upstream example passwords or `weknora-jwt-secret`, and do
+not invent alternate variable names such as `WEKNORA_DB_PASSWORD`.
+
+Then apply the repository WeKnora adapter and provisioning contract. Do not use
+`latest`.
 
 #### Hermes Agent
 

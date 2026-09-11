@@ -93,6 +93,7 @@ for path in \
   validation/scorecard.yaml \
   validation/REPORT.template.md \
   scripts/validate-fresh-agent-kit.py \
+  scripts/check-yaml-syntax.sh \
   scripts/check-repository-links.py \
   scripts/check-declarative-paths.py \
   scripts/check-capability-acceptance.py \
@@ -437,6 +438,22 @@ require_text config/company.example.yaml 'send_requires_human_approval: true' 'E
 require_text config/company.example.yaml 'forwarder_credential_ref:' 'Company config exposes trusted-forwarder credential reference'
 require_text config/company.private.example.yaml 'client_credential_ref:' 'Private overlay uses symbolic email credential reference'
 require_text config/company.private.example.yaml 'openwebui-governance-forwarder-token' 'Private overlay uses symbolic governance forwarder credential'
+require_text config/company.example.yaml 'core_provisioning:' 'Company schema declares Core provisioning protected-input slots'
+require_text config/company.example.yaml 'weknora-owner-provisioning-credentials' 'Company schema declares WeKnora owner provisioning secret class'
+require_text config/company.private.example.yaml 'weknora-owner-password:' 'Private example declares WeKnora owner symbolic secret ref'
+require_text config/company.private.example.yaml 'weknora-db-password:' 'Private example declares WeKnora DB symbolic secret ref'
+require_text config/company.private.example.yaml 'weknora-jwt-secret:' 'Private example declares WeKnora JWT symbolic secret ref'
+require_text config/company.private.example.yaml 'hermes-default-api-key:' 'Private example declares Hermes default symbolic secret ref'
+require_text config/company.private.example.yaml 'hermes-general-api-key:' 'Private example declares Hermes general symbolic secret ref'
+require_text config/company.private.example.yaml 'openwebui-admin-password:' 'Private example declares Open WebUI admin symbolic secret ref'
+require_text config/.env.example 'DB_PASSWORD=<GENERATE_STRONG_SECRET>' 'Core env uses native WeKnora DB_PASSWORD binding'
+require_text config/.env.example 'REDIS_PASSWORD=<GENERATE_STRONG_SECRET>' 'Core env uses native WeKnora REDIS_PASSWORD binding'
+require_text config/.env.example 'JWT_SECRET=<GENERATE_STRONG_SECRET>' 'Core env requires strong WeKnora JWT secret'
+require_no_text config/.env.example 'WEKNORA_DB_PASSWORD=' 'Core env does not invent unsupported WeKnora DB variable'
+require_text docs/V2-CONFIG-PROTECTED-INPUTS.md '### 6.1 Core provisioning secret-reference baseline' 'Protected-input contract defines Core symbolic refs'
+require_text infrastructure/weknora/PROVISIONING.md 'core_provisioning.weknora.runtime_secret_refs' 'WeKnora provisioning consumes Core symbolic refs'
+require_text infrastructure/hermes/PROVISIONING.md 'core_provisioning.hermes.default_api_key_ref' 'Hermes provisioning consumes Core symbolic refs'
+require_text infrastructure/open-webui/PROVISIONING.md 'core_provisioning.open_webui.admin_identity' 'Open WebUI provisioning consumes Core symbolic refs'
 require_text config/company.private.example.yaml 'email.send' 'Private overlay demonstrates operation-scoped mailbox grants'
 require_text config/.env.example 'EAIO_GOVERNANCE_URL' 'Runtime bindings expose private Governance URL'
 require_text config/.env.example 'EAIO_GOVERNANCE_STATE_DB' 'Runtime bindings expose Governance SQLite state path'
