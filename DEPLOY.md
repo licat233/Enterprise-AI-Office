@@ -90,7 +90,7 @@ OrbStack-provided Docker/Compose. Another Docker-compatible runtime is a compati
 target, not an already-qualified equivalent. Before inheriting Core Ready evidence,
 revalidate at least:
 
-- `host.docker.internal` reachability from Open WebUI to host-native Hermes;
+- `host.docker.internal` reachability from the Open WebUI backend to host-native Hermes, proven by backend model enumeration rather than only host-side curl;
 - Compose semantics and persistent-volume behavior;
 - bind-mount/file-permission behavior;
 - restart/startup recovery on that host runtime.

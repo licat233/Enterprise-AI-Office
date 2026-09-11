@@ -28,6 +28,8 @@ Runtime evidence from a specific deployment belongs in the protected operational
 [ ] Hermes source checkout commit matches the validated commit
 [ ] `hermes --version` reports the validated package version
 [ ] Open WebUI running container image matches the validated image
+[ ] Open WebUI backend can reach the configured host-native Hermes Profile route from inside the container runtime
+[ ] Open WebUI backend model enumeration returns the expected `general` upstream model ID
 ```
 
 ## 2. WeKnora infrastructure
