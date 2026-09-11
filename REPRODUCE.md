@@ -325,8 +325,15 @@ For `production-ready`, also close the production controls in
 `config/capabilities.yaml`, including backup/restore, startup recovery,
 security/access review, and operations health.
 
-Record the resulting sanitized state and exact baseline commit. A deployment is not
-frozen until its acceptance record can be traced to repository evidence.
+Create/update the deployment's protected operational state from
+`state/DEPLOYMENT-STATE.template.md`, including the Core runtime handoff mappings
+and exact baseline commit. Do not overwrite the repository's historical
+`state/DEPLOYMENT-STATE.md`.
+
+Publish a sanitized public summary only when that reference-deployment activity
+is explicitly authorized. A deployment is not frozen until its protected
+acceptance/state record can be traced to repository evidence without exposing
+company-private runtime state.
 
 ## 8. Reference implementation facts that matter to reproduction
 

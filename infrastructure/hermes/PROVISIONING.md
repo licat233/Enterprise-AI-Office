@@ -452,6 +452,14 @@ mechanisms, then re-run effective tool acceptance.
 
 ## 16. Completion evidence
 
+Consume the WeKnora logical/runtime KB mapping and retrieval credential record
+metadata from the protected operational state created from
+`state/DEPLOYMENT-STATE.template.md`. Resolve secret **values** only from the
+protected secret store/Profile `.env`.
+
+After reconciliation, write the Hermes route/model/served-set handoff back to
+that same protected operational record for Open WebUI provisioning.
+
 Record without secrets:
 
 ```text
@@ -465,9 +473,11 @@ effective multiplex allowlist
 shared API bind host/port at non-secret level
 employee Profile IDs
 Profile → API route mapping
-Profile → non-secret credential identifier/fingerprint if policy allows
+Profile → advertised model ID
+Profile → non-secret credential reference name/identifier
 Profile → MCP server names
 Profile → Knowledge Base logical scopes
+Profile → resolved WeKnora runtime KB IDs
 effective employee tool boundary
 memory policy
 credential isolation result

@@ -1,6 +1,6 @@
 # Enterprise AI Office Deployment State
 
-> Fresh-deployment template. Copy to the deployment's protected/operational state record and replace placeholders with observed runtime truth. Do not copy role/capability values from another reference instance.
+> Fresh-deployment template. Copy this file to the deployment's protected/operational storage and replace placeholders with observed runtime truth. Do **not** overwrite the repository's historical `state/DEPLOYMENT-STATE.md`. Do not copy role/capability values from another reference instance, and never commit a real operational copy when it contains company-private runtime identifiers or state.
 
 Last updated: `<ISO_DATE>`
 Company / environment: `<COMPANY> / <ENVIRONMENT>`
@@ -41,9 +41,27 @@ Do not record API keys/secrets here.
 
 ## Knowledge
 
-| Knowledge Base | Purpose | Allowed groups/Profiles | State |
-| --- | --- | --- | --- |
-| `<configured KB>` | `<...>` | `<...>` | `<...>` |
+| Company logical KB ID | Runtime WeKnora KB ID | Purpose | Allowed Profiles | State |
+| --- | --- | --- | --- | --- |
+| `<company-general>` | `<runtime UUID>` | `<...>` | `<general>` | `<...>` |
+
+Record the logical-ID → runtime-ID mapping generated/adopted by
+`infrastructure/weknora/PROVISIONING.md`. Runtime UUIDs belong here (or in the
+protected operational copy), not in generic company configuration.
+
+Also record:
+
+```text
+WeKnora tenant/workspace runtime ID:
+Embedding runtime model ID:
+Embedding dimension:
+Profile → retrieval-key record ID/name/scope:
+Profile → protected retrieval-token reference name:
+Official MCP server source/path/version:
+```
+
+The retrieval-token **value** remains only in protected secret storage/Profile
+`.env`; the state record stores only its non-secret reference/record identity.
 
 Document source/corpus location at a non-secret level where operationally useful.
 
@@ -60,11 +78,30 @@ Document source/corpus location at a non-secret level where operationally useful
 ### general
 
 - Purpose: baseline employee Assistant.
-- Employee groups: `<...>`.
-- Knowledge scope: `<...>`.
+- Employee groups: `<company logical group IDs>`.
+- Knowledge scope: `<company logical KB IDs + resolved runtime KB IDs>`.
 - Effective tool scope: `<...>`.
-- API credential: distinct/protected; value omitted.
+- API route: `<shared gateway base>/p/general/v1`.
+- Advertised model ID: `general`.
+- API credential record/reference: `<non-secret identifier>`; value omitted.
+- WeKnora retrieval credential record/reference: `<non-secret identifier>`; value omitted.
 - Memory policy: `<disabled or validated mechanism>`.
+
+### Hermes served-set / route handoff
+
+```text
+Shared gateway owner Profile: default
+Shared listener host/port:
+Effective multiplex allowlist:
+Profile → API route:
+Profile → advertised model ID:
+Profile → API credential non-secret reference:
+Profile → logical KB scope:
+Profile → WeKnora runtime KB IDs:
+```
+
+This is the handoff consumed by Open WebUI provisioning. Do not copy plaintext
+Profile API keys into this record.
 
 ### Enabled specialist Profiles
 
@@ -91,12 +128,36 @@ Do not add template Profiles that were not enabled.
 | Employee URL/access method | `<...>` |
 | Authentication | `<local / SSO / ...>` |
 | Signup policy | `<...>` |
-| Baseline groups | `<...>` |
-| Assistant mappings | `<...>` |
 | System Prompt editing | `<enabled/disabled>` |
 | Advanced Parameters | `<enabled/disabled>` |
 | File Upload | `<enabled/disabled>` |
 | Conversation history | `<enabled/disabled>` |
+
+### Group runtime mappings
+
+| Company logical group ID | Display name | Open WebUI runtime UUID |
+| --- | --- | --- |
+| `all-employees` | `All Employees` | `<runtime UUID>` |
+| `ai-admins` | `AI Administrators` | `<runtime UUID>` |
+
+Add only groups selected by active company configuration.
+
+### Assistant / connection runtime mappings
+
+| Hermes Profile | Hermes API route | Advertised model ID | Open WebUI Model ID | Allowed logical groups | Runtime group UUID grants |
+| --- | --- | --- | --- | --- | --- |
+| `general` | `<...>/p/general/v1` | `general` | `general` | `all-employees` | `<runtime UUID>` |
+
+Also record, without secrets:
+
+```text
+Profile → Open WebUI connection index/identifier if stable and useful:
+Profile → protected Profile-API-key reference name:
+EAO-managed native Open WebUI company Knowledge attachment: absent
+```
+
+The Open WebUI mapping consumes the Hermes route/model identity and company group
+mapping; it must not invent a second Profile or Knowledge authority.
 
 ## Capability closure
 

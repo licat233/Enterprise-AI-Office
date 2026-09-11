@@ -407,14 +407,23 @@ Exit condition: all applicable production controls PASS and `PRODUCTION READY` c
 
 ## 14. Phase I — Record and report
 
-Update `state/DEPLOYMENT-STATE.md` with actual runtime truth:
+For a fresh deployment, copy `state/DEPLOYMENT-STATE.template.md` into the
+deployment's **protected operational storage** and record actual runtime truth
+there.
+
+Do **not** overwrite the repository's `state/DEPLOYMENT-STATE.md`: that file is
+the historical sanitized demo record. Do not put private runtime IDs, network
+identity, credentials, employee data, or company-private configuration into the
+public repository merely to satisfy state recording.
+
+The protected operational state should record:
 
 - requested and achieved readiness;
-- component versions/commits;
+- component versions/commits and exact runtime identity;
 - paths/storage;
-- enabled Knowledge Bases;
-- enabled Profiles;
-- groups/Assistant mappings;
+- WeKnora logical-ID → runtime-ID mappings and non-secret retrieval-key record metadata;
+- Hermes served Profile set, Profile → API route/model ID, logical KB scopes, and non-secret credential reference names;
+- Open WebUI logical group ID → display name → runtime UUID mappings and Profile/model ACL mappings;
 - model/provider roles;
 - capability enablement table;
 - memory state;
@@ -423,7 +432,13 @@ Update `state/DEPLOYMENT-STATE.md` with actual runtime truth:
 - acceptance results;
 - known limitations.
 
-Record material changes in `state/CHANGELOG.md` when operating an existing deployment.
+When an explicitly authorized reference deployment needs a public status update,
+publish only a sanitized summary through the existing public status/evidence
+contract. Never treat the public summary as the protected runtime state store.
+
+Record material reusable repository changes in `state/CHANGELOG.md` when
+operating an existing deployment; keep company-private runtime-only changes in
+the protected operational record.
 
 Report one of:
 

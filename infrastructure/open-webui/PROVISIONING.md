@@ -442,6 +442,14 @@ SSO changes how a human identity enters Open WebUI; it does not remove Assistant
 
 ## 15. Completion evidence
 
+Consume Hermes Profile → API route/model identity and company group logical IDs
+from the protected operational state created from
+`state/DEPLOYMENT-STATE.template.md`. Resolve Profile API-key **values** only
+from protected secret storage.
+
+After reconciliation, write the logical-group/runtime-UUID and
+Profile/model/ACL mappings back to that same protected operational record.
+
 Record, without secrets:
 
 ```text
