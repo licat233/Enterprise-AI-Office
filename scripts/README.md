@@ -81,12 +81,12 @@ Run:
 python3 scripts/check-validated-stack-consistency.py
 ```
 
-It reads the authoritative versions, upstream provenance, and acquisition
-metadata from `config/validated-stack.yaml`. It verifies the derived Open WebUI
-image tag, WeKnora/Hermes reference markers, and the deterministic Core
-acquisition procedure in `DEPLOY.md` remain synchronized. Historical RBAC
-snapshots are excluded because they are immutable evidence rather than current
-deployment pins.
+It reads the authoritative versions, upstream provenance, acquisition metadata,
+and runtime-identity expectations from `config/validated-stack.yaml`. It
+verifies the derived Open WebUI image tag, WeKnora/Hermes reference markers,
+and the deterministic Core acquisition + post-acquisition identity assertions
+in `DEPLOY.md` remain synchronized. Historical RBAC snapshots are excluded
+because they are immutable evidence rather than current deployment pins.
 
 ## `check-public-repository-hygiene.py`
 

@@ -22,6 +22,12 @@ Runtime evidence from a specific deployment belongs in `state/DEPLOYMENT-STATE.m
 [ ] Container runtime state recorded
 [ ] Existing runtime/Hermes state inspected before mutation
 [ ] Exact deployed core component versions recorded
+[ ] Core runtime identity matches `config/validated-stack.yaml`, not only service health
+[ ] WeKnora source checkout commit matches the validated commit
+[ ] WeKnora app container image matches the validated runtime image
+[ ] Hermes source checkout commit matches the validated commit
+[ ] `hermes --version` reports the validated package version
+[ ] Open WebUI running container image matches the validated image
 ```
 
 ## 2. WeKnora infrastructure
