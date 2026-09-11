@@ -23,6 +23,7 @@ entrypoints:
     capabilities: config/capabilities.yaml
     mcp_registry: config/mcp-registry.yaml
     validated_stack: config/validated-stack.yaml
+    deployment_state_template: state/DEPLOYMENT-STATE.template.md
     project_manifest: config/eao-manifest.yaml
   reference_runtime:
     machine_readable_index: reference/armor/reference-index.yaml
