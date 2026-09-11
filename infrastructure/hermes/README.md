@@ -2,6 +2,10 @@
 
 Hermes Agent is the primary Agent runtime for Enterprise AI Office.
 
+Validated upstream identity and the commit-pinned official-installer method are
+defined in `config/validated-stack.yaml` and `DEPLOY.md §4.1`. Do not infer a
+version tag for Hermes `0.21.0`; this baseline is pinned by commit.
+
 For deployment execution, follow `DEPLOY.md`, the active company configuration, and `config/capabilities.yaml` first.
 
 ## Baseline configuration artifacts
