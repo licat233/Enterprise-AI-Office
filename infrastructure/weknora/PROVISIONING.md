@@ -51,14 +51,30 @@ company-defined Knowledge Bases
 Profile → Knowledge Base mappings
 selected WeKnora embedding provider/model/dimension
 optional rerank configuration, only when enabled
+core_provisioning.weknora.owner_identity
+core_provisioning.weknora.intended_workspace_name
+core_provisioning.weknora.runtime_secret_refs
+```
+
+The `owner_identity.password_ref` and each `runtime_secret_refs.*` value are
+symbolic references only. Resolve their secret values from protected storage
+using the corresponding `secret_refs` metadata; never place the values in
+company YAML.
+
+For the validated v0.8.0 standard runtime, the native startup bindings are:
+
+```text
+runtime_secret_refs.db_password    → DB_PASSWORD
+runtime_secret_refs.redis_password → REDIS_PASSWORD
+runtime_secret_refs.jwt_secret     → JWT_SECRET
 ```
 
 From protected deployment input/secret storage:
 
 ```text
 WeKnora API base URL
-existing WeKnora owner/admin login OR explicitly authorized fresh-owner bootstrap identity
-protected owner/bootstrap password secret
+secret value referenced by owner_identity.password_ref when password auth is selected
+secret values referenced by runtime_secret_refs.* for the started runtime
 selected authentication policy when the deployment is not local self-serve
 selected model-provider credential(s)
 provider-specific endpoint/config only when the selected provider requires it
