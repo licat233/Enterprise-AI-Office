@@ -70,7 +70,7 @@ def normalize_target(raw: str) -> str | None:
     if target.startswith("<") and ">" in target:
         target = target[1 : target.index(">")]
     else:
-        match = re.match(r'^(.*?)(?:\\s+["\\'][^"\\']*["\\'])$', target)
+        match = re.match(r"^(.*?)(?:\\s+['\"][^'\"]*['\"])$", target)
         if match:
             target = match.group(1).strip()
 
