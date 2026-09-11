@@ -51,6 +51,7 @@ validated_core_stack:
 
 normative_docs:
   documentation_map: docs/README.md
+  repository_governance: docs/REPOSITORY-GOVERNANCE.md
   architecture: docs/ARCHITECTURE.md
   security: docs/SECURITY.md
   knowledge: docs/KNOWLEDGE.md

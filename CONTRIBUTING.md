@@ -14,10 +14,11 @@ Before a material change, read:
 4. `VALIDATE.md` when reproducibility/validation is affected
 5. `config/eao-manifest.yaml`
 6. `docs/README.md` to identify the correct authority layer
-7. `DEPLOY.md` when deployment behavior is affected
-8. `docs/COMPLETENESS.md`
-9. `config/capabilities.yaml` when the change affects a deployable capability
-10. the current standards/adapters for the area being changed.
+7. `docs/REPOSITORY-GOVERNANCE.md` for branch/PR/CI/frozen-history rules
+8. `DEPLOY.md` when deployment behavior is affected
+9. `docs/COMPLETENESS.md`
+10. `config/capabilities.yaml` when the change affects a deployable capability
+11. the current standards/adapters for the area being changed.
 
 ## Mandatory Capability Reuse Pass
 

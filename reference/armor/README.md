@@ -10,6 +10,9 @@ The generic deployment contract is defined by:
 
 ```text
 AGENTS.md
+REPRODUCE.md
+VALIDATE.md
+config/eao-manifest.yaml
 DEPLOY.md
 docs/COMPLETENESS.md
 config/capabilities.yaml
@@ -18,7 +21,7 @@ current generic standards/adapters
 
 ARMOR reference material is non-normative. It must not override the generic contract for another company or the active private configuration of an ARMOR deployment.
 
-The older ARMOR v1 design document remains at the repository root for reference/backward-compatible linking:
+The older ARMOR v1 design document remains at the repository root only for historical reference and backward-compatible linking. Its own front matter is explicitly marked `historical-reference`:
 
 - [`ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md`](../../ARMOR%20Enterprise%20AI%20Office%20v1%20%E2%80%94%20%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84%E3%80%81%E9%83%A8%E7%BD%B2%E8%93%9D%E5%9B%BE%E4%B8%8E%E9%95%BF%E6%9C%9F%E8%BF%90%E7%BB%B4%E8%A7%84%E8%8C%83.md)
 
