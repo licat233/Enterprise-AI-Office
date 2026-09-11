@@ -309,17 +309,17 @@ Exit condition: WeKnora is healthy and retrieval returns the seeded source. A se
 
 ## 9. Phase D — Deploy Hermes
 
-1. Install/configure the pinned Hermes release using its supported upstream method.
-2. Preserve privileged default/admin as control-plane only.
-3. Create `general` from the repository SOUL/config templates.
+1. Install the pinned Hermes release through §4.1 and prove runtime identity through §4.2.
+2. Reconcile the privileged default/admin control plane plus baseline `general` Profile through `infrastructure/hermes/PROVISIONING.md`.
+3. On a fresh target create `general` using upstream Profile management with bundled-Skill opt-out; on an existing target reconcile it in place.
 4. Create specialist Profiles only when selected by company configuration, using the generic specialist template plus the selected role SOUL.
-5. Register WeKnora through supported MCP/API integration.
-6. Give normal employee Profiles least-privilege retrieval tools unless their declared work requires more.
-7. Use a distinct API credential for every employee-facing Profile.
+5. Register only the approved WeKnora MCP/API surface for each knowledge-enabled employee Profile.
+6. Give normal employee Profiles least-privilege tools unless their declared work requires more.
+7. Use a distinct API credential for every employee-facing Profile and prove pairwise isolation.
 8. Keep employee long-term memory disabled unless the configured memory capability passes its isolation gate.
-9. Configure explicit served-Profile allowlisting when supported by the selected release.
+9. Keep the shared API listener owned by the default Profile in the multiplex baseline and serve only the explicit Profile allowlist.
 
-Exit condition: every enabled employee Profile responds through its supported API with its intended capability boundary; `general` answers a grounded company query with source evidence.
+Exit condition: every enabled employee Profile responds through its supported API with its intended capability boundary; the served set matches desired state; `general` answers a grounded company query with source evidence.
 
 ## 10. Phase E — Deploy Open WebUI and baseline RBAC
 
