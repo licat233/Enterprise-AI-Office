@@ -62,10 +62,11 @@ Before making a material change, read the documents relevant to the task in this
 19. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
 20. `docs/UPGRADE.md` when versions change
 21. `docs/ACCEPTANCE-TESTS.md`
-22. `state/REAL-DEPLOYMENT-STATUS.md` when learning from the current sanitized ARMOR reference deployment
-23. `state/DEPLOYMENT-STATE.md` only as historical local/demo validation evidence
-24. `state/CHANGELOG.md` when changing an existing deployment
-25. the relevant company/reference material under `reference/` when useful
+22. `state/DEPLOYMENT-STATE.template.md` for the protected operational state shape when deployment/validation work is authorized
+23. `state/REAL-DEPLOYMENT-STATUS.md` when learning from the current sanitized ARMOR reference deployment
+24. `state/DEPLOYMENT-STATE.md` only as historical local/demo validation evidence
+25. `state/CHANGELOG.md` when changing an existing deployment
+26. the relevant company/reference material under `reference/` when useful
 
 ### Blueprint lifecycle and real-deployment gate — interpret before acting
 
