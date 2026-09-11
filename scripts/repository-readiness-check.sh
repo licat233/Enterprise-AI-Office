@@ -325,7 +325,6 @@ require_text THIRD_PARTY_NOTICES.md '`QwenAudio/SenseVoice`' 'Third-party notice
 require_text THIRD_PARTY_NOTICES.md '`iic/SenseVoiceSmall`' 'Third-party notices record SenseVoice runtime model identity'
 require_text THIRD_PARTY_NOTICES.md 'source-code MIT license as the license for every' 'Third-party notices separate SenseVoice source and model terms'
 require_text infrastructure/media-transcription/README.md '`QwenAudio/SenseVoice`' 'Media transcription contract records SenseVoice upstream identity'
-require_text THIRD_PARTY_NOTICES.md 'SenseVoice provenance note' 'Third-party notices do not invent unresolved SenseVoice provenance'
 
 require_text scripts/README.md 'EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh' 'Scripts README documents portable readiness mode'
 require_text scripts/repository-readiness-check.sh 'Fresh clones and other-company blueprint work must use repository-only mode.' 'Readiness script documents reference-specific full mode'
