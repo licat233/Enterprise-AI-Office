@@ -25,6 +25,7 @@ gates:
     pass_requires:
       - repository_readiness_pass
       - validation_kit_static_check_pass
+      - public_offline_tests_pass
 
   comprehension:
     required: true
