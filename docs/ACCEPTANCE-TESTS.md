@@ -10,7 +10,7 @@ Use it with `DEPLOY.md`, `docs/COMPLETENESS.md`, the active company configuratio
 
 Do not instantiate optional features merely to satisfy a test. Do not skip the test for an enabled capability.
 
-Runtime evidence from a specific deployment belongs in `state/DEPLOYMENT-STATE.md`, not in this normative specification.
+Runtime evidence from a specific deployment belongs in the protected operational record created from `state/DEPLOYMENT-STATE.template.md`, not in this normative specification or the repository's historical sanitized `state/DEPLOYMENT-STATE.md`.
 
 # Part A — Core Ready
 
@@ -494,7 +494,7 @@ Record `PRODUCTION READY` only when:
 
 - `CONFIGURED READY` remains PASS;
 - all applicable Part C tests pass;
-- actual recovery/security/operations boundaries are recorded in `state/DEPLOYMENT-STATE.md`.
+- actual recovery/security/operations boundaries are recorded in the protected operational deployment state created from `state/DEPLOYMENT-STATE.template.md`.
 
 Final status must be one of:
 
