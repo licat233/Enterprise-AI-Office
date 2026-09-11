@@ -35,6 +35,9 @@ jobs:
       - name: Check repository Markdown links
         run: python3 scripts/check-repository-links.py
 
+      - name: Check declarative repository paths
+        run: python3 scripts/check-declarative-paths.py
+
       - name: Run public offline tests
         run: sh scripts/run-public-offline-tests.sh
 

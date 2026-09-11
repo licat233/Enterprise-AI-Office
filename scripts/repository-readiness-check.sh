@@ -94,6 +94,7 @@ for path in \
   validation/REPORT.template.md \
   scripts/validate-fresh-agent-kit.py \
   scripts/check-repository-links.py \
+  scripts/check-declarative-paths.py \
   scripts/run-public-offline-tests.sh \
   config/eao-manifest.yaml \
   docs/CAPABILITY-REUSE-PASS.md \
