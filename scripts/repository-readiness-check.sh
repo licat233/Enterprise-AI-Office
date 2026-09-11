@@ -254,6 +254,10 @@ require_text .github/workflows/repository-readiness.yml 'persist-credentials: fa
 require_text .github/workflows/repository-readiness.yml 'runs-on: ubuntu-24.04' 'Repository CI pins runner image family'
 require_text .github/workflows/repository-readiness.yml 'contents: read' 'Repository CI keeps read-only contents permission'
 
+require_no_text config/README.md 'limited to its existing' 'Config guide has no obsolete WeKnora-only Operations claim'
+require_text config/README.md 'The reusable baseline does not require an `operations` Profile at all.' 'Config guide distinguishes ARMOR Operations reference exposure'
+require_text docs/OPERATIONS.md 'For the ARMOR reference implementation it is closed/frozen' 'Operations manual records current Web Research reference state'
+
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
 require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'
 require_text state/PROJECT-PHASE.yaml 'current_phase: installation_design' 'Current blueprint phase remains installation design'
