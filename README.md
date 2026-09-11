@@ -4,6 +4,18 @@
 
 **[简体中文 README](./README.zh-CN.md)**
 
+## AI Agent start here
+
+If you are a fresh AI engineering agent, do not infer the system from directory names or old chat context. Start with:
+
+1. [`AGENTS.md`](AGENTS.md) — repository operating contract.
+2. [`REPRODUCE.md`](REPRODUCE.md) — end-to-end fresh-agent reconstruction contract.
+3. [`config/eao-manifest.yaml`](config/eao-manifest.yaml) — machine-readable system map.
+4. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
+5. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) — sanitized current ARMOR reference-deployment status.
+
+Before proposing any new component, run the mandatory [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md).
+
 ## Project status at a glance
 
 | Milestone / capability | Status |
@@ -21,9 +33,11 @@
 | Installation Design Final Review | ✅ PASS |
 | Enterprise Operations Capability Baseline v1.0 | ✅ Frozen |
 | Hermes Skills Migration v1.0 | ✅ Closed |
+| Enterprise Web Research v1.0 | ✅ Closed / Frozen / PASS |
+| Operations employee RBAC v1 | ✅ Closed / Frozen / PASS |
 | Blueprint Validation | ⏳ Not yet opened |
 | Release Ready | ⏳ Not yet opened |
-| Real company deployment task | ⛔ Inactive |
+| Public real-deployment gate | ⛔ Inactive by default; sanitized ARMOR reference deployment exists |
 
 > **Important:** “implemented” in this README means the repository contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox.
 
