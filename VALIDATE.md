@@ -58,6 +58,7 @@ python3 scripts/validate-fresh-agent-kit.py
 python3 scripts/check-repository-links.py
 python3 scripts/check-declarative-paths.py
 python3 scripts/check-capability-acceptance.py
+python3 scripts/check-capability-selectors.py
 python3 scripts/check-validated-stack-consistency.py
 python3 scripts/check-public-repository-hygiene.py
 python3 scripts/check-frozen-baselines.py
