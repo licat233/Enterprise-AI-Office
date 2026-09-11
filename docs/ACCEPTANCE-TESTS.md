@@ -143,6 +143,8 @@ Use the actual Open WebUI employee UI, not backend APIs alone.
 [ ] Login succeeds
 [ ] Only permitted Assistants visible
 [ ] General Assistant normal chat succeeds
+[ ] General Assistant authoritative company knowledge resolves through Hermes → WeKnora
+[ ] No EAO-managed duplicate Open WebUI native company Knowledge is attached to General Assistant
 [ ] Company question returns grounded answer
 [ ] Source evidence readable
 [ ] Follow-up retains conversation context
