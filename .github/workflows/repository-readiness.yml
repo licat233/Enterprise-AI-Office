@@ -30,9 +30,10 @@ jobs:
           sh -n scripts/repository-readiness-check.sh
           bash -n scripts/backup.sh
           bash -n scripts/restore.sh
+          sh -n scripts/run-public-offline-tests.sh
 
-      - name: Run Web Research unit tests
-        run: python3 infrastructure/web-research/test_adapter.py
+      - name: Run public offline tests
+        run: sh scripts/run-public-offline-tests.sh
 
       - name: Compile Python sources
         run: |
