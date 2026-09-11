@@ -129,6 +129,38 @@ reconstruction_sequence:
   - validate_restart_and_recovery
   - record_sanitized_state_and_exact_commit
 
+reconstruction_policy:
+  core_mandatory:
+    - repository_preflight
+    - resolve_public_and_private_inputs
+    - deploy_weknora
+    - deploy_hermes
+    - deploy_open_webui
+    - configure_knowledge_route
+    - configure_core_rbac
+  conditional:
+    source: config/capabilities.yaml
+    rule: instantiate_only_capabilities_explicitly_enabled_for_target
+    reference_presence_does_not_imply_enablement: true
+    examples:
+      - specialist_profiles
+      - enterprise_web_research
+      - media_transcription
+      - email_tencent_exmail
+      - cron
+      - kanban
+      - messaging
+      - sso
+      - remote_access
+      - coding_delegation
+      - hermes_webui
+      - employee_long_term_memory
+  finalization:
+    - run_core_acceptance
+    - run_acceptance_for_each_enabled_capability
+    - validate_restart_and_requested_recovery_level
+    - record_sanitized_state_and_exact_commit
+
 mandatory_before_new_capability:
   contract: docs/CAPABILITY-REUSE-PASS.md
   order:

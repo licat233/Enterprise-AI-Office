@@ -200,9 +200,31 @@ Operations Assistant
 -> Company Knowledge
 ```
 
-### Stage F — Operations Skills
+### Stage F — resolve enabled conditional capabilities
 
-Install only the accepted/frozen Skills and preserve their authority boundaries. The current ARMOR Operations capability baseline includes canonical entry points for:
+Before adding any specialist Profile, Skill bundle, MCP runtime, scheduler, messaging
+surface, browser/research backend, transcription engine, Email integration, or remote
+access layer, resolve the active target against `config/capabilities.yaml`.
+
+The rule is:
+
+```text
+active company configuration
++ capability registry
+→ only explicitly enabled conditional capabilities
+```
+
+If a capability is not enabled for the target, do not install it merely because the
+ARMOR reference implementation contains it.
+
+#### Stage F.1 — ARMOR Operations reference bundle, when selected
+
+The ARMOR Operations bundle is a validated reference capability, not universal EAO
+Core. Reproduce it only when the target explicitly selects the corresponding
+specialist workflow boundary.
+
+Install only the accepted/frozen Skills and preserve their authority boundaries. The
+current ARMOR Operations capability baseline includes canonical entry points for:
 
 - website article production;
 - website product materials;
@@ -211,19 +233,34 @@ Install only the accepted/frozen Skills and preserve their authority boundaries.
 - product-visual preparation;
 - AI-writing audit and supporting approved department Skills.
 
-Use the acceptance/migration documents under `docs/PHASE4*`, `docs/PHASE5*`, and `docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md` for exact disposition and evidence. Do not re-enable triaged legacy Skills merely because files exist in historical inventories.
+Use `docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md` as the current frozen
+capability authority. Use `docs/PHASE4*` and `docs/PHASE5*` only as migration
+provenance/evidence. Do not re-enable triaged legacy Skills merely because files
+exist in historical inventories.
 
-### Stage G — Enterprise Web Research
+#### Stage F.2 — Enterprise Web Research, when enabled
 
-Use the already-approved Enterprise Web Research capability before adding another browser/search stack. Validate the adapter and its accepted runtime path using `docs/ENTERPRISE-WEB-RESEARCH-V1.md` and repository checks.
+Use the already-approved Enterprise Web Research capability before adding another
+browser/search stack. Validate the adapter and selected upstream runtime path using
+`docs/ENTERPRISE-WEB-RESEARCH-V1.md`, `config/mcp-registry.yaml`, and the
+repository checks.
 
-### Stage H — Media transcription
+Do not install Firecrawl, Obscura, CloakBrowser, or another browser backend for a
+target that has not enabled this capability.
 
-Use `infrastructure/media-transcription/` and `scripts/transcribe` for the validated host-native transcription capability. Do not introduce a separate transcription service unless the approved capability is proven insufficient.
+#### Stage F.3 — Media transcription, when enabled
 
-### Stage I — Email Operations
+Use `infrastructure/media-transcription/` and `scripts/transcribe` for the
+validated host-native transcription capability. Do not introduce a separate
+transcription service unless the approved capability is proven insufficient.
 
-Email is a governed side-effect capability and must remain narrower than generic IMAP/SMTP access.
+A target that does not enable media transcription does not need Whisper, SenseVoice,
+or ffmpeg for EAO Core.
+
+#### Stage F.4 — Governed Email Operations, when enabled
+
+Email is a governed side-effect capability and must remain narrower than generic
+IMAP/SMTP access.
 
 Reproduce the repository-defined flow:
 
@@ -237,29 +274,58 @@ read/search
 -> reconciliation if ambiguous
 ```
 
-Use the governance SQLite schema/runtime and provider adapters under `infrastructure/email/`. Do not expose unrestricted send credentials to employee-facing Agents.
+Use the governance SQLite schema/runtime and provider adapters under
+`infrastructure/email/`. Do not expose unrestricted send credentials to
+employee-facing Agents.
 
-### Stage J — network access
+#### Stage F.5 — all other conditional capabilities
 
-The employee web surface may be published to the approved LAN interface and/or accessed through the already-approved private network layer. Do not create a new VPN/reverse-proxy architecture without a demonstrated need.
+For Hermes WebUI, coding delegation, Kanban, Cron, messaging, SSO, remote access,
+employee long-term Memory, or later registered capabilities, follow the exact
+`implementation`, required-input, security-boundary, and `acceptance` entries in
+`config/capabilities.yaml`.
 
-### Stage K — acceptance and freeze
+Do not infer enablement from repository file presence. Employee long-term Memory
+remains OFF unless its exact isolation gate is explicitly enabled and passes.
 
-Run:
+### Stage G — network and access boundary
 
-- repository readiness checks;
-- component health checks;
+Expose only the surfaces selected by the target configuration.
+
+Core requires an employee-reachable Open WebUI surface, but it does not require a
+specific remote-access product. LAN-only access, an already-approved private network
+layer, or an explicitly enabled `remote_access` capability are separate deployment
+choices.
+
+Do not create a new VPN, reverse proxy, SSO system, or public ingress architecture
+without a demonstrated requirement and Capability Reuse Pass.
+
+### Stage H — acceptance and freeze
+
+Run the Core checks for every deployment:
+
+- repository integrity/readiness;
+- selected component health;
 - direct and employee-path knowledge tests;
 - Open WebUI RBAC tests;
-- Hermes Skill/runtime checks;
-- Enterprise Web Research checks;
-- email-governance tests when enabled;
-- media-transcription smoke tests when enabled;
-- restart persistence tests;
-- backup + isolated restore tests;
-- unauthenticated-access denial checks.
+- restart persistence;
+- unauthenticated-access denial;
+- the recovery checks required by the requested readiness level.
 
-Record the resulting sanitized state and exact baseline commit. A deployment is not frozen until its acceptance record can be traced to repository evidence.
+Then run acceptance only for capabilities actually enabled on that target, for example:
+
+- Operations Skill/runtime checks;
+- Enterprise Web Research checks;
+- Email governance/provider checks;
+- media-transcription smoke tests;
+- Cron/Kanban/messaging/SSO/remote-access checks where selected.
+
+For `production-ready`, also close the production controls in
+`config/capabilities.yaml`, including backup/restore, startup recovery,
+security/access review, and operations health.
+
+Record the resulting sanitized state and exact baseline commit. A deployment is not
+frozen until its acceptance record can be traced to repository evidence.
 
 ## 8. Reference implementation facts that matter to reproduction
 
