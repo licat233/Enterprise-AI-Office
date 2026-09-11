@@ -38,7 +38,9 @@ capabilities:
       - docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md
     acceptance:
       document: docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md
-      section: MIC E2E acceptance
+      sections:
+        - Acceptance Fixture
+        - Validation and Delivery
     boundary:
       live_listing_edit: false
       external_publication: false
@@ -61,7 +63,10 @@ capabilities:
       - docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md
     acceptance:
       document: docs/PHASE5E-ARMOR-PRODUCT-VISUAL-MIGRATION.md
-      section: Acceptance Fixture
+      sections:
+        - Acceptance fixture
+        - Regressions and acceptance commands
+        - Final status block
     boundary:
       image_generation: false
       binary_asset_upload: false
@@ -123,8 +128,8 @@ capabilities:
       - docs/MCP-CONTROL-PLANE.md
       - docs/PHASE4A-ARMOR-MIGRATION.md
     acceptance:
-      document: docs/ACCEPTANCE-TESTS.md
-      section: ARMOR Phase 4A — Article and MCP migration
+      document: docs/MCP-CONTROL-PLANE.md
+      section: 10. Acceptance
     notes: Inventory only; no employee exposure is implied.
 
   core.employee_path:
