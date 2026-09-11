@@ -122,6 +122,18 @@ Allowed behavior remains bounded:
 
 Absolute /Users/armor/... paths in the frozen Web Research acceptance record are ARMOR deployment evidence only. The reusable adapter and config/.env.example now resolve target-host-specific paths.
 
+### Upstream provenance
+
+The ARMOR reference runtime records exact upstream identities for the external
+local runtimes that participate in the current bounded Operations capability:
+
+- Obscura `v0.2.2` → `h4ckf0r0day/obscura` (Apache-2.0 observed at the validated release).
+- ToolScout `v1.0.0` → `licat233/toolscout` (MIT observed at the validated release).
+
+Those identities are recorded in `config/mcp-registry.yaml`. A fresh
+deployment must still resolve and accept its selected versions rather than
+treating ARMOR runtime flags as universal defaults.
+
 ## 5. ToolScout boundary
 
 ToolScout is approved shared Agent infrastructure in the ARMOR Operations reference profile.

@@ -18,6 +18,35 @@ This file is informational and should be rechecked against the exact versions us
 | Claude Code | Anthropic distribution / `anthropics/claude-code` project resources | Governed by Anthropic's applicable software/service terms; do not assume the Enterprise AI Office Apache-2.0 license applies | Specialized coding execution |
 | Model Context Protocol | MCP ecosystem/specification and selected implementations | Depends on the specific MCP package/server used | Tool/integration protocol |
 
+## Reference capability dependencies
+
+The current ARMOR reference implementation also uses or validates the following
+upstream projects for optional capabilities. Their presence in this table does
+not make them mandatory for every Enterprise AI Office deployment.
+
+| Project | Upstream | License / terms observed | EAO role / boundary |
+| --- | --- | --- | --- |
+| ToolScout v1.0.0 | `licat233/toolscout` | MIT | Shared Agent tool-selection/runtime infrastructure; enabled only where the active capability contract allows it |
+| Obscura v0.2.2 | `h4ckf0r0day/obscura` | Apache License 2.0 | Internal bounded Web Research fallback; not an employee generic browser |
+| Firecrawl MCP | `firecrawl/firecrawl-mcp-server` | MIT for the MCP server repository; Firecrawl hosted API use is also subject to Firecrawl service terms | Internal Web Research acquisition backend; raw/action-capable tools are not exposed to ordinary Operations users |
+| CloakBrowser | `CloakHQ/CloakBrowser` | MIT for the public repository/wrapper observed during review; signed browser binaries, license keys, hosted/commercial features, or product terms may impose additional conditions | Internal hardened Web Research fallback only |
+| PaddleOCR | `PaddlePaddle/PaddleOCR` | Apache License 2.0 for the project repository; model assets and third-party dependencies must be checked for the selected deployment | Optional local OCR runtime; not required for ordinary non-OCR workflows |
+| OpenAI Whisper | `openai/whisper` | MIT for the project repository | Local media transcription engine for English and other selected non-Chinese languages |
+| FFmpeg | `FFmpeg/FFmpeg` | FFmpeg licensing depends on the exact build/configuration; upstream includes LGPL-licensed code and may include GPL components when built with corresponding options | Local media inspection/audio extraction for transcription |
+
+### SenseVoice provenance note
+
+The media-transcription capability also uses SenseVoiceSmall through the
+selected local FunASR/ModelScope installation path. The public EAO repository
+currently records the runtime model identifier (`iic/SenseVoiceSmall`) but does
+not yet freeze a single canonical GitHub source repository/license path for that
+installation.
+
+Do not guess or silently substitute a repository. A deployment or future
+reference-baseline refresh should record the actual package/model provenance and
+applicable license/terms observed on the host before distribution or commercial
+redistribution decisions are made.
+
 ## WeKnora
 
 At the time this project baseline was created, WeKnora's upstream `LICENSE` states that the project is licensed under MIT except for listed third-party components governed by their respective licenses.
