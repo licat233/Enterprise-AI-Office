@@ -218,7 +218,7 @@ Do not guess.
 1. Read the required repository documents from `AGENTS.md`.
 2. Run `scripts/preflight.sh` and inspect any existing installation before changing it.
 3. Record OS, architecture, memory, disk, container runtime, Git, existing Hermes state, and runtime directories.
-4. Reconcile an existing deployment with `state/DEPLOYMENT-STATE.md` before mutation.
+4. Reconcile an existing deployment against its protected operational state created from `state/DEPLOYMENT-STATE.template.md` before mutation. Use public historical/reference state only as evidence, never as the live target state.
 
 Exit condition: the target host and existing state are understood.
 
