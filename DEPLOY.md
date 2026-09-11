@@ -153,6 +153,44 @@ If any resolved upstream ref, package version, image tag, or checkout differs
 from `config/validated-stack.yaml`, stop as version drift. Do not silently
 continue with a nearby release.
 
+### 4.2 Post-acquisition Core identity assertions
+
+Liveness is not identity. Before configuration is treated as a reproduction of
+the validated Core, prove the acquired/running runtime matches
+`config/validated-stack.yaml`.
+
+#### WeKnora
+
+```sh
+: "${RUNTIME_ROOT:?set RUNTIME_ROOT to the approved deployment runtime root}"
+WEKNORA_DIR="${RUNTIME_ROOT}/upstream/WeKnora"
+
+test "$(git -C "${WEKNORA_DIR}" rev-parse HEAD)" = "1edcd54b43606d9079bb36650efe3f68707a79ea"
+test "$(docker inspect -f '{{.Config.Image}}' WeKnora-app)" = "wechatopenai/weknora-app:0.8.0"
+```
+
+#### Hermes Agent
+
+Resolve the actual installed source checkout; do not assume a path when the
+installer used an explicit directory or an FHS/root layout.
+
+```sh
+: "${HERMES_SOURCE_DIR:?set HERMES_SOURCE_DIR to the actual Hermes source checkout}"
+
+test "$(git -C "${HERMES_SOURCE_DIR}" rev-parse HEAD)" = "f1ccf436a27522c1bb5d36383a6f13b950676338"
+hermes --version | grep -F "0.21.0"
+```
+
+#### Open WebUI
+
+```sh
+test "$(docker inspect -f '{{.Config.Image}}' eaio-open-webui)" = "ghcr.io/open-webui/open-webui:v0.11.3"
+```
+
+A failed assertion is a version/runtime-identity failure, even if the service
+returns HTTP 200. Resolve the mismatch or perform an explicit upgrade
+qualification; do not waive the assertion as "close enough."
+
 ## 5. Required inputs
 
 Before mutation, resolve from the company configuration or protected operator input:
