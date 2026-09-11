@@ -46,6 +46,13 @@ capabilities:
       external_publication: false
       generic_file_access: false
       legacy_memory_migration: false
+    records:
+      - repository commit containing the approved Skill/runtime
+      - enabled employee Profile(s)
+      - approved Vault Router/tool scope
+      - live-listing-edit denial boundary
+      - external-publication denial boundary
+      - acceptance fixture/result
 
   armor_product_visual:
     kind: conditional
@@ -74,6 +81,13 @@ capabilities:
       generic_file_access: false
       agent_delegate: false
       legacy_memory_migration: false
+    records:
+      - repository commit containing the approved Skill/runtime
+      - enabled employee Profile(s)
+      - approved Vault Router/tool scope
+      - preparation-only boundary
+      - image-generation and publication denial result
+      - acceptance fixture/result
 
   enterprise_web_research:
     kind: conditional
@@ -142,6 +156,13 @@ capabilities:
     acceptance:
       document: docs/MCP-CONTROL-PLANE.md
       section: 10. Acceptance
+    records:
+      - repository/registry revision
+      - registered MCP entry names
+      - Profile allowlists and effective employee exposure
+      - health status by registered entry
+      - unresolved blockers with scope
+      - acceptance result
     notes: Inventory only; no employee exposure is implied.
 
   core.employee_path:

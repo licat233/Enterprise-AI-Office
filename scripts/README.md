@@ -91,7 +91,8 @@ still requires architecture/capability review.
 
 ## `check-capability-selectors.py`
 
-Dependency-free integrity check for conditional capability selection metadata.
+Dependency-free integrity check for conditional capability selection and
+deployment-record metadata.
 
 Run:
 
@@ -99,11 +100,16 @@ Run:
 python3 scripts/check-capability-selectors.py
 ```
 
-It requires every `kind: conditional` capability to declare selection
-metadata. Generic selectors must use `source: company_configuration`, and every
-declared selector path must exist in `config/company.example.yaml`.
-ARMOR-reference-specific workflows remain explicit exceptions and are not
-forced into the generic company schema.
+It requires every `kind: conditional` capability to declare both:
+
+- selection metadata;
+- `records` metadata describing the non-secret operational evidence/state that
+  must be preserved after deployment.
+
+Generic selectors must use `source: company_configuration`, and every declared
+selector path must exist in `config/company.example.yaml`.
+ARMOR-reference-specific workflows remain explicit selection exceptions and are
+not forced into the generic company schema; they still must declare records.
 
 ## `check-validated-stack-consistency.py`
 

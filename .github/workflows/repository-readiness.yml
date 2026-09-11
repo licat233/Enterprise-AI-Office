@@ -49,7 +49,7 @@ jobs:
       - name: Check capability acceptance sections
         run: python3 scripts/check-capability-acceptance.py
 
-      - name: Check capability selectors
+      - name: Check capability selectors and records
         run: python3 scripts/check-capability-selectors.py
 
       - name: Check validated stack consistency
