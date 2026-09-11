@@ -93,7 +93,7 @@ Before mutation record/inspect:
 
 Run `scripts/preflight.sh` first.
 
-For an existing deployment, reconcile runtime reality with `state/DEPLOYMENT-STATE.md` before changing it.
+For an existing deployment, reconcile runtime reality with its protected operational state created from `state/DEPLOYMENT-STATE.template.md` before changing it. Treat the repository's `state/DEPLOYMENT-STATE.md` only as historical sanitized evidence.
 
 ## 4. Runtime layout
 
