@@ -59,7 +59,13 @@ printf '%s\n' '----------------------------------------'
 # Agent contract, blueprint lifecycle authority, and declarative inputs.
 for path in \
   README.md \
+  README.zh-CN.md \
   AGENTS.md \
+  REPRODUCE.md \
+  config/eao-manifest.yaml \
+  docs/CAPABILITY-REUSE-PASS.md \
+  docs/DEPLOYMENT-PRACTICES.md \
+  state/REAL-DEPLOYMENT-STATUS.md \
   state/PROJECT-PHASE.yaml \
   DEPLOY.md \
   docs/COMPLETENESS.md \
