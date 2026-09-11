@@ -8,6 +8,12 @@ version tag for Hermes `0.21.0`; this baseline is pinned by commit.
 
 For deployment execution, follow `DEPLOY.md`, the active company configuration, and `config/capabilities.yaml` first.
 
+For deterministic Core reconciliation of the default/admin control plane and
+baseline `general` employee Profile, use
+[`PROVISIONING.md`](PROVISIONING.md). It uses upstream Hermes Profile/Gateway
+capabilities and the checked-in EAO templates; it is not a second Hermes
+implementation.
+
 ## Baseline configuration artifacts
 
 For the validated core path:
