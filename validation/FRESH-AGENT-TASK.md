@@ -52,6 +52,7 @@ Before writing an installation plan, answer all of these from repository evidenc
 18. Which documents are the primary execution and acceptance contracts?
 19. Which evidence is historical and should not silently override the current contracts?
 20. What would make you stop with a repository defect rather than improvise?
+21. Why is a primary-disk backup plus primary-disk isolated restore insufficient for `PRODUCTION READY`, and what additional off-primary evidence is required?
 
 Do not proceed until you can answer these with repository paths.
 
@@ -75,8 +76,9 @@ Produce:
 10. least-privilege tool plan;
 11. acceptance sequence;
 12. restart/backup/restore sequence;
-13. rollback principles;
-14. all blockers, classified as one of:
+13. Production Ready backup evidence boundary, including the distinction between primary-disk recovery-path validation and final off-primary restore evidence;
+14. rollback principles;
+15. all blockers, classified as one of:
 
 ```text
 REPOSITORY_DEFECT

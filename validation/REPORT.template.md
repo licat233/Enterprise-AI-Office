@@ -130,6 +130,8 @@ Acceptance evidence:
 - Controlled restart:
 - Employee-visible persistence:
 - Backup:
+- Off-primary copy / post-transfer integrity / freshness evidence (Production Ready):
+- Isolated restore source:
 - Isolated restore:
 - Second-run convergence:
 - Privilege regression:

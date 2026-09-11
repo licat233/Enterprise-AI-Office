@@ -317,8 +317,13 @@ Complete when `production-ready` is requested.
 Schedule:
 Retention:
 Off-primary-disk destination/boundary:
-Last successful backup:
-Last isolated restore test:
+Latest local/source backup generation:
+Latest successful off-primary copy generation/timestamp:
+Off-primary post-transfer checksum/integrity result:
+Off-primary freshness/retention result:
+Last isolated restore source (must identify off-primary copy for Production Ready):
+Last isolated restore result/date:
+Restored Core handoff-mapping verification:
 Governance SQLite snapshot method/result when Email enabled:
 Unresolved-send preservation after restore when applicable:
 Secrets recovery method (non-secret description):

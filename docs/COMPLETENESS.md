@@ -148,7 +148,7 @@ Examples:
 - a Cron entry is not enough; the harmless acceptance job must actually run;
 - a Kanban board is not enough; a worker lifecycle must execute;
 - a coding-agent binary is not enough; delegation must modify/verify a disposable repository;
-- backup files are not enough; an isolated restore must work for Production Ready.
+- backup files are not enough; for Production Ready an approved off-primary copy must exist, its transferred integrity/freshness must be evidenced, and an isolated restore must succeed **from that independent copy**. A primary-disk backup plus primary-disk restore only validates recovery mechanics.
 
 ## 9. Final statuses
 

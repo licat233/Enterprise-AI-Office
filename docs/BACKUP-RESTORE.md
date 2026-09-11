@@ -129,6 +129,24 @@ Examples:
 
 The exact target depends on company policy.
 
+For `PRODUCTION READY`, evidence must distinguish a local/primary-disk
+validation generation from the approved independent production copy. Record at
+least:
+
+```text
+backup generation ID/timestamp
+approved off-primary destination/boundary
+off-primary copy completion timestamp
+integrity/checksum verification after transfer
+freshness/retention result
+restore source generation/location
+final isolated restore result
+```
+
+A backup generated on the primary disk and an isolated restore from that same
+primary-disk generation are useful recovery-path validation, but they do **not**
+prove independence from host/disk loss.
+
 ## 5. Frequency
 
 Default small-company starting policy:
@@ -272,6 +290,12 @@ checks before relying on a newly restored target.
 
 A restore is successful only when at least these checks pass:
 
+For final `PRODUCTION READY` acceptance, the isolated restore must be sourced
+from the approved off-primary backup copy (or an equivalent independently
+stored generation), not merely from a generation that still resides on the
+primary host disk. Verify the copied generation's checksums/integrity before
+restore.
+
 ```text
 [ ] WeKnora database starts
 [ ] Knowledge Bases/documents are present
@@ -389,10 +413,11 @@ The default daily policy is a starting point, not a universal compliance answer.
 [ ] Hermes production state backed up
 [ ] Protected operational deployment-state/handoff record backed up
 [ ] Secrets have a secure recovery path
-[ ] At least one copy is off the primary disk
-[ ] Retention configured
+[ ] At least one approved copy is off the primary disk
+[ ] Off-primary copy integrity/checksum verified after transfer
+[ ] Retention and freshness against the off-primary destination verified
 [ ] Backup failures visible
-[ ] Restore tested
+[ ] Isolated restore tested from the approved off-primary copy for Production Ready
 [ ] Restored deployment-state/handoff mappings validated against restored resources
 [ ] Last restore-test date recorded in protected deployment state
 ```
