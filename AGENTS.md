@@ -43,8 +43,10 @@ Before making a material change, read the documents relevant to the task in this
 
 1. `README.md`
 2. `AGENTS.md`
-3. `state/PROJECT-PHASE.yaml`
-4. `DEPLOY.md` for installation-blueprint design or an explicitly activated real deployment task
+3. `REPRODUCE.md`
+4. `config/eao-manifest.yaml`
+5. `state/PROJECT-PHASE.yaml`
+6. `DEPLOY.md` for installation-blueprint design or an explicitly activated real deployment task
 5. `docs/COMPLETENESS.md` for readiness/completion semantics
 6. `config/company.example.yaml` or the real company-private configuration when a deployment task exists
 7. `config/capabilities.yaml` for capability closure
@@ -148,6 +150,24 @@ For an explicitly activated real deployment, `DEPLOY.md` becomes the execution c
 The root-level ARMOR v1 design document and content under `reference/` are non-normative reference material. They must not override `AGENTS.md`, `state/PROJECT-PHASE.yaml`, `DEPLOY.md`, current generic standards, the adopting company's active configuration, or actual runtime state.
 
 If a referenced installation artifact is missing while designing the installation blueprint, treat that as a blueprint completeness defect. If it is missing for an enabled capability during a real deployment, treat that as a deployment-blocking repository defect. Do not silently invent a different architecture.
+
+## Capability Reuse Pass
+
+Before adding or proposing a new component, service, database, Skill, MCP server, scheduler, workflow engine, browser stack, memory layer, or external integration, read and execute `docs/CAPABILITY-REUSE-PASS.md`.
+
+The mandatory preference order is:
+
+```text
+existing EAO capability
+→ Hermes native capability
+→ installed/frozen Skill
+→ Open WebUI / WeKnora native capability
+→ official upstream integration
+→ thin adapter
+→ new infrastructure only as last resort
+```
+
+Do not claim that EAO lacks a capability before checking the existing repository, Hermes native features, installed/frozen Skills, and the selected upstream components. This rule is part of the architecture contract, not an optional optimization.
 
 ## 3. Frozen architecture intent
 
