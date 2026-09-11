@@ -30,8 +30,8 @@ jobs:
       - name: Check shell syntax
         run: |
           sh -n scripts/repository-readiness-check.sh
-          sh -n scripts/backup.sh
-          sh -n scripts/restore.sh
+          bash -n scripts/backup.sh
+          bash -n scripts/restore.sh
 
       - name: Compile Python sources
         run: |
