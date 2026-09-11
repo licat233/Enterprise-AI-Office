@@ -42,9 +42,10 @@ A fresh agent MUST read these files before changing architecture or deploying:
 15. `docs/ENTERPRISE-EMAIL-OPERATIONS-V1.md` — email Operations boundary.
 16. `docs/BACKUP-RESTORE.md` and `docs/OPERATIONS.md` — runbook and recovery.
 17. `docs/ACCEPTANCE-TESTS.md` — final acceptance contract.
-18. `state/REAL-DEPLOYMENT-STATUS.md` — sanitized current ARMOR reference-deployment status.
-19. `state/DEPLOYMENT-STATE.md` — historical local/demo validation evidence, not current ARMOR runtime truth.
-20. `state/CHANGELOG.md` — deployment change history.
+18. `state/DEPLOYMENT-STATE.template.md` — protected operational state/handoff template for a real or validation deployment.
+19. `state/REAL-DEPLOYMENT-STATUS.md` — sanitized current ARMOR reference-deployment status.
+20. `state/DEPLOYMENT-STATE.md` — historical local/demo validation evidence, not current ARMOR runtime truth.
+21. `state/CHANGELOG.md` — deployment change history.
 
 Historical migration and design documents are evidence, not the first installation instructions. Prefer the current normative files above.
 
@@ -138,11 +139,11 @@ Use `config/.env.example`, `config/company.example.yaml`, and `config/company.pr
 
 ### Stage B — WeKnora
 
-1. Install the validated upstream WeKnora baseline using the repository deployment contract.
-2. Create/configure the approved company Knowledge Base(s).
-3. Provision the least-privilege retrieval credential used by Hermes.
-4. Verify listing/search/retrieval before connecting employee Assistants.
-5. Keep Open WebUI native Knowledge empty when the selected architecture routes company knowledge through Hermes → WeKnora. `Open WebUI Knowledge records = 0` can be intentional.
+1. Install the validated upstream WeKnora baseline through `DEPLOY.md §4.1` and prove runtime identity through §4.2.
+2. Reconcile tenant/owner bootstrap, embedding model, company Knowledge Base(s), retrieval credentials, and official MCP bridge through `infrastructure/weknora/PROVISIONING.md`.
+3. Record the resulting non-secret logical-ID → runtime-ID mappings and retrieval-key record metadata in the protected operational state created from `state/DEPLOYMENT-STATE.template.md`.
+4. Verify direct listing/search/retrieval, source evidence, credential denial, and cross-KB scoping before connecting Hermes.
+5. Do not create duplicate company knowledge in Open WebUI native Knowledge when the selected architecture routes company facts through Hermes → WeKnora.
 
 ### Stage C — Hermes Agent
 
@@ -158,13 +159,14 @@ Use `config/.env.example`, `config/company.example.yaml`, and `config/company.pr
 
 ### Stage D — Open WebUI
 
-1. Deploy the validated Open WebUI container configuration.
-2. Preserve persistent data volumes.
-3. Create employee groups and Assistant/model resources.
-4. Apply default employee permission restrictions.
+1. Deploy the validated Open WebUI container through `DEPLOY.md §4.1` and prove runtime identity through §4.2.
+2. Reconcile groups, Hermes Profile connections, employee-visible Model/Assistant ACL resources, and feature permissions through `infrastructure/open-webui/PROVISIONING.md`.
+3. Consume the Hermes Profile route/model handoff and company logical group mappings from the protected operational state; resolve API-key values only from protected secret storage.
+4. Preserve persistent data and unrelated legitimate administrator-owned resources.
 5. Grant resource READ ACLs rather than workspace management rights.
-6. Route each Assistant to the correct Hermes profile/API path.
-7. Validate login, chat history, file upload, reload persistence, and unauthenticated denial.
+6. Preserve WeKnora as the company-knowledge authority; do not attach a duplicate EAO-managed native Open WebUI company Knowledge corpus.
+7. Validate login, backend-to-Hermes connectivity, employee model visibility, chat history, file upload, reload persistence, unauthorized model denial, and unauthenticated denial.
+8. Record logical group ID → display name → runtime UUID and Profile/model ACL mappings back into the protected operational state.
 
 Frozen reference pattern:
 
