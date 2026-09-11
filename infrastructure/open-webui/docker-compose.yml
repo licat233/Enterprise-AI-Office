@@ -11,6 +11,7 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       WEBUI_URL: http://127.0.0.1:3000
+      WEBUI_NAME: Enterprise AI Office
 
       # v0.11.3 can create the first admin non-interactively when the user DB is empty.
       # Open WebUI disables signup after that admin is created.
@@ -33,6 +34,16 @@ services:
       BYPASS_MODEL_ACCESS_CONTROL: "false"
       ENABLE_OPENAI_API_PASSTHROUGH: "false"
     volumes:
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/favicon.ico:/app/build/static/favicon.ico:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/favicon.svg:/app/build/static/favicon.svg:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/favicon.png:/app/build/static/favicon.png:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/favicon-dark.png:/app/build/static/favicon-dark.png:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/favicon-96x96.png:/app/build/static/favicon-96x96.png:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/logo.png:/app/build/static/logo.png:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/splash.png:/app/build/static/splash.png:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/splash-dark.png:/app/build/static/splash-dark.png:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/web-app-manifest-192x192.png:/app/build/static/web-app-manifest-192x192.png:ro"
+      - "${OPEN_WEBUI_BRANDING_DIR:-./branding}/web-app-manifest-512x512.png:/app/build/static/web-app-manifest-512x512.png:ro"
       - open-webui-data:/app/backend/data
     restart: unless-stopped
 
