@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Validate machine-readable capability selector paths against company schema.
+"""Validate capability selectors and required deployment-record metadata.
 
-This is intentionally dependency-free and checks only the stable selector
-metadata declared in config/capabilities.yaml.
+This is intentionally dependency-free and checks stable selector paths against
+the company schema plus the rule that every conditional capability declares
+what non-secret operational evidence must be recorded after deployment.
 """
 
 from __future__ import annotations
@@ -100,6 +101,20 @@ def conditional_capabilities(text: str) -> set[str]:
     return result
 
 
+def recorded_capabilities(text: str) -> set[str]:
+    lines = text.splitlines()
+    current = ""
+    result: set[str] = set()
+    for line in lines:
+        cap = CAP_RE.match(line)
+        if cap:
+            current = cap.group(1)
+            continue
+        if current and line == "    records:":
+            result.add(current)
+    return result
+
+
 def main() -> int:
     if not CAPS.is_file() or not COMPANY.is_file():
         print("FAIL required config file missing")
@@ -111,12 +126,15 @@ def main() -> int:
     schema_paths = company_paths(company_text)
     selectors = selector_blocks(caps_text)
     conditional = conditional_capabilities(caps_text)
+    recorded = recorded_capabilities(caps_text)
     failures: list[str] = []
     selected_names = {name for name, _, _, _ in selectors}
 
     for capability in sorted(conditional):
         if capability not in selected_names:
             failures.append(f"{capability}: conditional capability has no selection metadata")
+        if capability not in recorded:
+            failures.append(f"{capability}: conditional capability has no records metadata")
 
     checked_paths = 0
     for capability, source, paths, scope in selectors:
@@ -148,6 +166,7 @@ def main() -> int:
     print("------------------------------------------------")
     print(f"Conditional capabilities: {len(conditional)}")
     print(f"Selector blocks: {len(selectors)}")
+    print(f"Conditional record blocks: {len(conditional & recorded)}")
     print(f"Company selector paths checked: {checked_paths}")
 
     if failures:
@@ -156,8 +175,8 @@ def main() -> int:
             print(f"FAIL {failure}")
         return 2
 
-    print("Selector failures: 0")
-    print("CAPABILITY SELECTOR INTEGRITY: PASS")
+    print("Selector/record failures: 0")
+    print("CAPABILITY SELECTOR / RECORD INTEGRITY: PASS")
     return 0
 
 
