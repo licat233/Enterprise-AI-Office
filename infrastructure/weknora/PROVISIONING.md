@@ -2,14 +2,21 @@
 
 This playbook turns the Enterprise AI Office company configuration into a reconciled WeKnora runtime without requiring an operator to click through the WeKnora UI.
 
-It is written against the first validated core baseline:
+It is written against the current validated Core baseline whose machine-readable
+authority is `config/validated-stack.yaml`:
 
 ```text
 Tencent/WeKnora v0.8.0
 commit 1edcd54b43606d9079bb36650efe3f68707a79ea
 ```
 
-Use the exact selected release. If a deployment deliberately upgrades WeKnora, verify the affected routes and payloads against that release before reusing this contract.
+Before using this provisioning contract, acquire the exact selected WeKnora
+runtime through `DEPLOY.md §4.1` and prove its source/container identity through
+`DEPLOY.md §4.2`.
+
+Use the exact selected release. If a deployment deliberately upgrades WeKnora,
+verify the affected routes, payloads, API-key capability semantics, and
+Knowledge Base scoping against that release before reusing this contract.
 
 This file is an execution contract, not a second WeKnora implementation. Prefer WeKnora's supported REST API and official MCP server. Do not write directly to its database.
 
