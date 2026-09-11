@@ -23,6 +23,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run repository readiness check
+        env:
+          EAO_REPOSITORY_ONLY: "1"
         run: sh scripts/repository-readiness-check.sh
 
       - name: Check shell syntax
