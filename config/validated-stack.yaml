@@ -14,6 +14,15 @@ target:
   host_os: macos
   architecture: arm64
   container_runtime: orbstack-docker
+  host_qualification:
+    exact_reference_family: apple_silicon_macos_with_orbstack_docker_compose
+    docker_compatible_alternative_allowed: true
+    alternative_inherits_reference_qualification: false
+    revalidate_on_alternative:
+      - host_docker_internal_reachability_from_open_webui
+      - compose_and_volume_behavior
+      - bind_mount_and_file_permissions
+      - restart_and_startup_recovery
 
 components:
   weknora:
