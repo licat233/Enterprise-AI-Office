@@ -32,20 +32,23 @@ not make them mandatory for every Enterprise AI Office deployment.
 | CloakBrowser | `CloakHQ/CloakBrowser` | MIT for the public repository/wrapper observed during review; signed browser binaries, license keys, hosted/commercial features, or product terms may impose additional conditions | Internal hardened Web Research fallback only |
 | PaddleOCR | `PaddlePaddle/PaddleOCR` | Apache License 2.0 for the project repository; model assets and third-party dependencies must be checked for the selected deployment | Optional local OCR runtime; not required for ordinary non-OCR workflows |
 | OpenAI Whisper | `openai/whisper` | MIT for the project repository | Local media transcription engine for English and other selected non-Chinese languages |
+| SenseVoice source | `QwenAudio/SenseVoice` | MIT for source code in the repository | Source/reference implementation for the SenseVoice family used by the local media-transcription path |
+| SenseVoiceSmall model | `iic/SenseVoiceSmall` | Model weights are distributed separately; apply the license/terms shown by the exact model card/artifact selected at deployment time | Local ASR model for the validated Chinese/Cantonese-oriented transcription path |
 | FFmpeg | `FFmpeg/FFmpeg` | FFmpeg licensing depends on the exact build/configuration; upstream includes LGPL-licensed code and may include GPL components when built with corresponding options | Local media inspection/audio extraction for transcription |
 
-### SenseVoice provenance note
+### SenseVoice source / model license boundary
 
-The media-transcription capability also uses SenseVoiceSmall through the
-selected local FunASR/ModelScope installation path. The public EAO repository
-currently records the runtime model identifier (`iic/SenseVoiceSmall`) but does
-not yet freeze a single canonical GitHub source repository/license path for that
-installation.
+Do not treat the SenseVoice source-code MIT license as the license for every
+SenseVoiceSmall model artifact.
 
-Do not guess or silently substitute a repository. A deployment or future
-reference-baseline refresh should record the actual package/model provenance and
-applicable license/terms observed on the host before distribution or commercial
-redistribution decisions are made.
+The current upstream source identity is `QwenAudio/SenseVoice`, whose
+repository license is MIT. The EAO runtime model identifier is
+`iic/SenseVoiceSmall`. Model weights are separate distribution artifacts and
+must follow the terms on the exact selected model card/release.
+
+Before commercial redistribution, packaging, or mirroring of weights, record
+the actual model artifact/version and its applicable model terms. A source-code
+license alone is not sufficient evidence for weight redistribution rights.
 
 ## WeKnora
 
