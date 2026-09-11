@@ -14,6 +14,31 @@ import adapter  # noqa: E402
 PUBLIC_RESOLVER = lambda host, port: ["93.184.216.34"]
 
 
+class PortablePathDefaultsTests(unittest.TestCase):
+    def test_portable_defaults_do_not_pin_armor_home(self):
+        values = [
+            adapter.DEFAULT_OBSCURA_BIN,
+            adapter.DEFAULT_OBSCURA_STORAGE_DIR,
+            adapter.DEFAULT_CLOAKBROWSER_PYTHON,
+            adapter.DEFAULT_CLOAKBROWSER_WORKER,
+            adapter.DEFAULT_CLOAKBROWSER_STORAGE_DIR,
+            *adapter.APPROVED_CLOAKBROWSER_ROOTS,
+        ]
+        for value in values:
+            with self.subTest(value=value):
+                self.assertNotIn("/Users/armor", value)
+
+    def test_default_worker_tracks_checked_out_repository(self):
+        expected = ROOT / "infrastructure" / "web-research" / "cloakbrowser_worker.py"
+        self.assertEqual(
+            Path(adapter.DEFAULT_CLOAKBROWSER_WORKER).resolve(),
+            expected.resolve(),
+        )
+
+    def test_approved_roots_include_checked_out_repository(self):
+        self.assertIn(str(ROOT.resolve()), adapter.APPROVED_CLOAKBROWSER_ROOTS)
+
+
 class StubFirecrawl:
     def __init__(self, *, search=None, fetch=None, fetch_error=None):
         self.search_response = search or {"web": []}
