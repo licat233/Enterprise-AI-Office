@@ -6,6 +6,13 @@ set -eu
 # real deployment task, or prove a runtime deployment works. It verifies that
 # the repository still contains the contracts/adapters/playbooks and lifecycle
 # gates required for safe AI-agent behavior.
+#
+# Portable/public use:
+#   EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
+#
+# The default non-repository-only mode is retained for the ARMOR reference
+# runtime lineage and may expect protected private/department-profile evidence.
+# Fresh clones and other-company blueprint work must use repository-only mode.
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PASS=0
@@ -56,6 +63,11 @@ require_absent() {
 
 printf '%s\n' 'Enterprise AI Office Repository Readiness'
 printf '%s\n' '----------------------------------------'
+if [ "$REPOSITORY_ONLY" = "1" ]; then
+  printf '%s\n' 'Mode: public repository-only'
+else
+  printf '%s\n' 'Mode: reference/runtime-inclusive (protected ARMOR profile evidence may be required)'
+fi
 
 # Agent contract, blueprint lifecycle authority, and declarative inputs.
 for path in \
@@ -208,6 +220,9 @@ require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与�
 require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md' 'Historical reference only — not the current execution contract.' 'Legacy ARMOR v1 document does not claim current authority'
 require_text docs/REPOSITORY-GOVERNANCE.md '`main` is the canonical public blueprint state' 'Repository governance defines main authority'
 require_text docs/REPOSITORY-GOVERNANCE.md 'require a pull request before merge' 'Repository governance defines PR protection target'
+
+require_text scripts/README.md 'EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh' 'Scripts README documents portable readiness mode'
+require_text scripts/repository-readiness-check.sh 'Fresh clones and other-company blueprint work must use repository-only mode.' 'Readiness script documents reference-specific full mode'
 
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
 require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'
