@@ -54,6 +54,7 @@ protected operational copy), not in generic company configuration.
 Also record:
 
 ```text
+WeKnora auth registration mode/bootstrap method:
 WeKnora tenant/workspace runtime ID:
 Embedding runtime model ID:
 Embedding dimension:
