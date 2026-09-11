@@ -36,7 +36,7 @@ for each enabled employee Profile:
   employee-facing display name
   Hermes OpenAI-compatible base URL
   Profile API key
-  allowed Open WebUI group IDs/names
+  allowed Open WebUI company logical group ID → Open WebUI display name → runtime group UUID
 ```
 
 Baseline:
@@ -107,14 +107,34 @@ for subsequent admin API calls.
 
 ## 5. Reconcile groups idempotently
 
+Open WebUI owns a runtime UUID and a display name; the EAO company configuration
+owns the stable logical group ID. Keep these identities distinct:
+
+```text
+company logical ID
+→ intended Open WebUI display name
+→ deployment-generated Open WebUI group UUID
+```
+
+Generic baseline:
+
+| Company logical ID | Open WebUI display name |
+| --- | --- |
+| `all-employees` | `All Employees` |
+| `ai-admins` | `AI Administrators` |
+
 Do not blindly create duplicate groups.
 
 For every group declared by company configuration:
 
-1. `GET /api/v1/groups/`;
-2. match by intended name or previously recorded group ID;
-3. create only when absent;
-4. record the resulting stable group ID in deployment state/protected provisioning state.
+1. read the company logical ID + intended `display_name` from active configuration;
+2. `GET /api/v1/groups/`;
+3. prefer the previously recorded logical-ID → runtime-UUID mapping when it still resolves to the intended resource;
+4. otherwise match the intended Open WebUI display name;
+5. if exactly one match exists, adopt it and record the mapping;
+6. if none exists, create it;
+7. if multiple plausible matches exist, stop with `BLOCKED — AMBIGUOUS STATE` rather than guessing;
+8. record logical ID → display name → runtime UUID in deployment/protected provisioning state.
 
 Create body:
 
