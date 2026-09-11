@@ -171,8 +171,18 @@ exposure remains forbidden.
 
 The registry is not a secret store and is not a request to start a server.
 Actual Profile exposure remains controlled by the Profile configuration and
-must be explicitly allowlisted. `operations` is limited to its existing
-read-only WeKnora surface unless a later capability contract is approved.
+must be explicitly allowlisted.
+
+The reusable baseline does not require an `operations` Profile at all. In the
+sanitized ARMOR reference implementation, Operations has later approved/frozen
+capabilities beyond WeKnora retrieval: the bounded Enterprise Web Research
+adapter, ToolScout, and the scoped ARMOR Vault Router. That reference allowlist
+is recorded in `config/mcp-registry.yaml` and
+`docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md`.
+
+A fresh deployment must derive its own Operations/specialist exposure from the
+active company configuration and enabled capability contracts. It must not copy
+the ARMOR reference allowlist merely because those runtime flags exist in Git.
 
 An enabled capability must be implemented and accepted before `CONFIGURED READY` can be claimed. A disabled capability must not be instantiated merely because its playbook exists and does not require unused conditional secrets.
 

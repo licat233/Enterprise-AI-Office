@@ -10,12 +10,16 @@ This manual remains the general service, recovery, and troubleshooting guide;
 the acceptance record is the current capability and permission authority for
 the v1.0 Operations bundle.
 
-The optional Enterprise Web Research Stage 1 contract is recorded in
-[`docs/ENTERPRISE-WEB-RESEARCH-V1.md`](./ENTERPRISE-WEB-RESEARCH-V1.md). When
-explicitly enabled, Operations receives only `web_search` and `web_fetch`;
-Firecrawl remains an internal read-only backend and fetched pages are
-`UNTRUSTED_WEB_CONTENT`. The protected Enterprise `FIRECRAWL_API_KEY` is
-provisioned outside Git and the Stage 1 Search/Fetch acceptance is closed.
+The bounded Enterprise Web Research v1.0 contract and acceptance record is
+[`docs/ENTERPRISE-WEB-RESEARCH-V1.md`](./ENTERPRISE-WEB-RESEARCH-V1.md).
+For the ARMOR reference implementation it is closed/frozen and Operations
+receives only `web_search` and `web_fetch`; Firecrawl, Obscura, and
+CloakBrowser remain internal acquisition backends rather than employee browser
+tools. Fetched pages are `UNTRUSTED_WEB_CONTENT`, and protected provider
+credentials remain outside Git.
+
+For a fresh deployment, Web Research remains conditional: enable and accept it
+only when the active company configuration selects that capability.
 
 ## 1. Operational priorities
 
