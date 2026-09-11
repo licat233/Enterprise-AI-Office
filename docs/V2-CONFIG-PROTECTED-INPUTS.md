@@ -312,6 +312,65 @@ another approved enterprise secret store
 
 Choose the smallest mechanism appropriate to the selected runtime. Do not add Vault/another secret platform merely because v2 has credentials.
 
+### 6.1 Core provisioning secret-reference baseline
+
+Core uses the same symbolic-reference model as optional capabilities. The
+reusable schema declares the reference slots under `core_provisioning`; the
+private overlay selects stable symbolic names; the actual values remain in
+protected storage.
+
+Reference shape:
+
+```yaml
+core_provisioning:
+  weknora:
+    owner_identity:
+      email: knowledge-owner@example.invalid
+      display_name: Example Knowledge Owner
+      password_ref: weknora-owner-password
+    intended_workspace_name: Example Company
+    runtime_secret_refs:
+      db_password: weknora-db-password
+      redis_password: weknora-redis-password
+      jwt_secret: weknora-jwt-secret
+
+  hermes:
+    default_api_key_ref: hermes-default-api-key
+    profile_api_key_refs:
+      general: hermes-general-api-key
+
+  open_webui:
+    admin_identity:
+      email: ai-admin@example.invalid
+      display_name: AI Administrator
+      password_ref: openwebui-admin-password
+```
+
+The baseline native bindings are:
+
+| Symbolic purpose | Validated native/provisioning binding |
+| --- | --- |
+| WeKnora database password | `DB_PASSWORD` |
+| WeKnora Redis password | `REDIS_PASSWORD` |
+| WeKnora JWT signing secret | `JWT_SECRET` |
+| Hermes default Profile API key | default Profile `API_SERVER_KEY` |
+| Hermes general Profile API key | general Profile `API_SERVER_KEY` |
+| Open WebUI bootstrap admin password | `OPEN_WEBUI_ADMIN_PASSWORD` provisioning input |
+| WeKnora owner/bootstrap password | WeKnora `/auth/register` / `/auth/login` password field |
+
+A `native_binding` is the concrete input expected by the selected runtime or
+provisioning call. It does not imply every secret must be a process environment
+variable.
+
+For the validated WeKnora `v0.8.0` standard Compose runtime,
+`DB_PASSWORD`, `REDIS_PASSWORD`, and `JWT_SECRET` must be resolved to
+strong protected values before service start. The upstream example values are
+not production credentials.
+
+The WeKnora owner/bootstrap identity is private non-secret configuration. Its
+password is a protected provisioning credential and must not be copied into a
+Hermes Profile, deployment-state record, or public evidence.
+
 ---
 
 ## 7. v2 email private desired-state contract
