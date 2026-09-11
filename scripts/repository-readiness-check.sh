@@ -104,6 +104,7 @@ for path in \
   docs/REPOSITORY-GOVERNANCE.md \
   docs/DEPLOYMENT-PRACTICES.md \
   state/REAL-DEPLOYMENT-STATUS.md \
+  reference/armor/reference-index.yaml \
   state/PROJECT-PHASE.yaml \
   DEPLOY.md \
   docs/COMPLETENESS.md \
@@ -237,6 +238,13 @@ done
 require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md' 'status: historical-reference' 'Legacy ARMOR v1 document is historical'
 require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md' 'Historical reference only — not the current execution contract.' 'Legacy ARMOR v1 document does not claim current authority'
 require_text docs/REPOSITORY-GOVERNANCE.md '`main` is the canonical public blueprint state' 'Repository governance defines main authority'
+require_text config/eao-manifest.yaml 'machine_readable_index: reference/armor/reference-index.yaml' 'Project manifest exposes ARMOR reference index'
+require_text reference/armor/reference-index.yaml 'normative: false' 'ARMOR reference index is non-normative'
+require_text reference/armor/reference-index.yaml 'deployable_company_config: false' 'ARMOR reference index is non-deployable'
+require_text reference/armor/reference-index.yaml 'status: deployed_frozen_reference' 'ARMOR reference index records Operations reference lane'
+require_text reference/armor/reference-index.yaml 'live_mailbox_deployment_claim: false' 'ARMOR reference index does not claim live mailbox deployment'
+require_text reference/armor/reference-index.yaml 'Do not infer Operations as a generic EAO default.' 'ARMOR reference index blocks generic Operations inheritance'
+
 require_text docs/REPOSITORY-GOVERNANCE.md 'require a pull request before merge' 'Repository governance defines PR protection target'
 require_text THIRD_PARTY_NOTICES.md '`licat233/toolscout`' 'Third-party notices include current ToolScout provenance'
 require_text THIRD_PARTY_NOTICES.md '`h4ckf0r0day/obscura`' 'Third-party notices include current Obscura provenance'
