@@ -322,6 +322,14 @@ historical demo record above.
   checkout details are intentionally omitted.
 - Hermes runtime: `0.21.1`; active global source is the protected Hermes
   global SOUL source.
+
+> Version-authority note: `0.21.1` is retained here as the phase-specific
+> runtime observation recorded on 2026-09-09. It is not the current
+> reconstruction baseline. As of 2026-09-11, `config/validated-stack.yaml`
+> and `state/REAL-DEPLOYMENT-STATUS.md` identify Hermes `0.21.0` as the
+> current validated/reference runtime. The public history does not establish
+> the exact transition between these observations, so do not infer an
+> upgrade/downgrade procedure from this historical line.
 - Enterprise Global Rule v1.0 Frozen Baseline is active, with the approved
   communication baseline at the top of the editable target SOUL.
 - Global and General long-term Memory are OFF. No legacy Memory was read or
