@@ -48,7 +48,10 @@
 
 ![Enterprise AI Office v2 中文架构图](./enterprise-ai-office-architecture.zh-CN.svg)
 
-整个架构刻意让已经验证过的 v1 General 路径与新增的 v2 Communication 路径相互隔离：
+这张 SVG 是 v2 系统设计视图，重点表达 Core General 路径与受治理 Communication/Email 路径的隔离关系；它**不是 ARMOR 当前参考部署全部能力的完整快照**。
+
+已经验证的 Core General 路径与新增的 v2 Communication 路径刻意相互隔离：
+
 
 ```text
 Employee
@@ -74,6 +77,16 @@ v2 Email 即使故障，也不能破坏：
 ```text
 Open WebUI → General Assistant → Hermes general → WeKnora
 ```
+
+当前员工能力路径应这样理解：
+
+| 路径 | 状态 | 含义 |
+| --- | --- | --- |
+| **General** | Core / 已验证 | 可复用基础路径：Open WebUI → Hermes `general` → WeKnora |
+| **Operations** | ARMOR Reference / 已冻结 | 已部署的最小权限部门能力，使用已批准 Skills、`operations-weknora`、Web Research、ToolScout 与受限 Vault Router |
+| **Communication** | v2 受治理能力资产 | 仓库已经具备 Governed Email 设计与 runtime 资产；这不代表真实企业邮箱已经接入，也不代表允许自动发送 |
+
+ARMOR 当前脱敏运行状态以 [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) 为准。其它公司部署时应依据 [`config/capabilities.yaml`](config/capabilities.yaml) 选择能力，而不是复制 ARMOR 的完整 lane 集合。
 
 ## 当前已经实现了哪些功能
 

@@ -48,7 +48,10 @@ Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.
 
 ![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
 
-The validated v1 employee path is intentionally independent from the governed v2 communication path:
+The SVG is a v2 system-design view focused on the separation between the Core General path and governed Communication/Email. It is **not an exhaustive snapshot of every capability currently enabled in the ARMOR reference deployment**.
+
+The validated Core employee path is intentionally independent from the governed v2 communication path:
+
 
 ```text
 Employee
@@ -74,6 +77,16 @@ A v2 Email failure must not break:
 ```text
 Open WebUI → General Assistant → Hermes general → WeKnora
 ```
+
+Current employee-lane interpretation:
+
+| Lane | Status | Meaning |
+| --- | --- | --- |
+| **General** | Core / validated | Reusable baseline: Open WebUI → Hermes `general` → WeKnora |
+| **Operations** | ARMOR reference / frozen | Deployed least-privilege department capability using approved Skills, `operations-weknora`, Web Research, ToolScout, and scoped Vault Router boundaries |
+| **Communication** | v2 governed capability assets | Governed Email design/runtime assets exist in the repository; this does not imply a real company mailbox is already connected or autonomous send is enabled |
+
+For the current sanitized ARMOR runtime, see [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md). For reusable capability enablement, use [`config/capabilities.yaml`](config/capabilities.yaml) rather than copying the ARMOR lane set.
 
 ## What this repository already implements
 
