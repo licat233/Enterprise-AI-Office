@@ -245,6 +245,12 @@ For the Core path, prefer retrieval/read operations over a WeKnora-native Ask/Ch
 
 Use `infrastructure/hermes/` and the selected pinned Hermes release.
 
+Core Profile/Gateway reconciliation is defined in
+`infrastructure/hermes/PROVISIONING.md`. It covers fresh-profile creation,
+existing-profile reconciliation, bundled-Skill opt-out for the baseline
+`general` Profile, shared multiplex Gateway ownership, Profile-scoped API
+credentials, effective tool checks, and the Hermes → WeKnora seed retrieval.
+
 Baseline:
 
 - default/admin retained as privileged control plane;
