@@ -33,8 +33,9 @@ def normalize_heading(value: str) -> str:
     value = unquote(value.strip())
     value = value.replace(chr(96), "")
     value = re.sub(r"[*_]", "", value)
+    value = re.sub(r"^\d+(?:\.\d+)*[.)]?\s+", "", value)
     value = re.sub(r"\s+", " ", value)
-    return value.strip()
+    return value.strip().casefold()
 
 
 def parse_acceptance_blocks(text: str) -> list[tuple[str, str, list[str]]]:
