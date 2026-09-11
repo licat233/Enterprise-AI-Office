@@ -57,7 +57,9 @@ From protected deployment input/secret storage:
 
 ```text
 WeKnora API base URL
-WeKnora owner/admin login needed for provisioning
+existing WeKnora owner/admin login OR explicitly authorized fresh-owner bootstrap identity
+protected owner/bootstrap password secret
+selected authentication policy when the deployment is not local self-serve
 selected model-provider credential(s)
 provider-specific endpoint/config only when the selected provider requires it
 protected destination for generated Hermes retrieval keys
@@ -81,6 +83,8 @@ The validated v0.8.0 source exposes the following supported routes under `/api/v
 
 ```text
 Authentication
+GET  /auth/config
+POST /auth/register
 POST /auth/login
 GET  /auth/me
 GET  /tenants
@@ -165,9 +169,74 @@ BASE='http://127.0.0.1:18080/api/v1'
 
 The exact host/port belongs to the deployment.
 
-### 4.2 Obtain an Owner/admin bearer token
+### 4.2 Resolve the authentication/bootstrap policy
 
-For a standard server deployment, use the protected WeKnora owner/admin account supplied for the company deployment:
+First read the deployed server's public authentication policy:
+
+```http
+GET <BASE>/auth/config
+```
+
+For the validated v0.8.0 release this returns, among other fields:
+
+```json
+{
+  "registration_mode": "self_serve | invite_only",
+  "complex_password_enabled": false
+}
+```
+
+Do not change this policy merely to simplify provisioning.
+
+The upstream v0.8.0 defaults are `self_serve` registration and
+`create_personal` tenant provisioning unless the deployment deliberately
+changes them. However, the effective deployed policy is authoritative.
+
+Use this decision path:
+
+```text
+existing authorized owner/admin identity
+→ log in; do not create a duplicate account
+
+fresh deployment + registration_mode=self_serve
++ explicitly authorized protected bootstrap identity/secret
+→ POST /auth/register
+→ inspect returned/active tenant membership
+→ require intended workspace + Owner authority before continuing
+
+registration_mode=invite_only
+→ use the selected invitation/system-admin/enterprise-identity bootstrap path
+→ do not flip the server to self_serve just for automation
+
+registration produces a tenantless identity or no intended Owner workspace
+→ resolve the selected tenant policy / invitation / workspace creation authority
+→ BLOCKED if that real business/identity choice is unavailable
+```
+
+A local self-serve bootstrap request is:
+
+```http
+POST <BASE>/auth/register
+Content-Type: application/json
+
+{
+  "email": "<AUTHORIZED_OWNER_EMAIL_FROM_PROTECTED_INPUT>",
+  "password": "<OWNER_PASSWORD_FROM_PROTECTED_SECRET_INPUT>",
+  "username": "<AUTHORIZED_OWNER_DISPLAY_NAME>"
+}
+```
+
+The exact request body must follow the pinned release's auth schema and active
+password-complexity policy. The bootstrap email/display identity is private
+deployment configuration; the password is a secret. Neither belongs in the
+public repository.
+
+The v0.8.0 `/auth/auto-setup` path is Lite-edition-specific. Do not use it as
+the generic server bootstrap path.
+
+### 4.3 Obtain an Owner/admin bearer token
+
+Use the authorized WeKnora owner/admin account resolved above:
 
 ```http
 POST <BASE>/auth/login
@@ -179,19 +248,19 @@ Content-Type: application/json
 }
 ```
 
-Capture the returned bearer `token` in process memory/protected temporary state and use:
+Capture the returned bearer `token` in process memory/protected temporary
+state and use:
 
 ```text
 Authorization: Bearer <OWNER_TOKEN>
 ```
 
-for provisioning calls that require human/Owner authority, especially API-key management.
+for provisioning calls that require human/Owner authority, especially API-key
+management.
 
 Do not print the token, commit it, or persist it in Hermes.
 
-The v0.8.0 `/auth/auto-setup` path is Lite-edition-specific. Do not use it as the generic server bootstrap path. If a fresh standard deployment has no authorized owner/admin identity yet, creation/authorization of that identity is a genuine bootstrap input and must follow the selected upstream deployment policy.
-
-### 4.3 Resolve the target tenant/workspace
+### 4.4 Resolve the target tenant/workspace
 
 Use the tenant returned by login and/or:
 
@@ -551,6 +620,7 @@ Record at least:
 
 ```text
 WeKnora version + commit
+effective auth registration mode + bootstrap method (non-secret)
 API/admin access boundary
 runtime tenant/workspace ID
 logical KB ID → runtime KB ID mapping
@@ -585,6 +655,9 @@ WeKnora provisioning passes only when all applicable checks below are true:
 ```text
 [ ] exact selected WeKnora version/commit recorded
 [ ] required services healthy and internal dependencies privately exposed
+[ ] effective auth registration policy inspected
+[ ] fresh-owner bootstrap used only when permitted by the deployed auth policy
+[ ] intended workspace + Owner authority confirmed
 [ ] owner/admin provisioning authentication succeeds
 [ ] target tenant/workspace unambiguous
 [ ] required provider/model reconciled without duplicate creation

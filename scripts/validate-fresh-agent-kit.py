@@ -275,6 +275,11 @@ def main() -> int:
         "Fresh Agent preserves General Profile least privilege at creation",
     )
     require_text(
+        "infrastructure/weknora/PROVISIONING.md",
+        "GET <BASE>/auth/config",
+        "Fresh Agent can bootstrap WeKnora without bypassing auth policy",
+    )
+    require_text(
         "DEPLOY.md",
         "company logical ID → display name → runtime group UUID",
         "Fresh Agent distinguishes group logical IDs from runtime identity",
