@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Callable, Iterable
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -32,16 +33,28 @@ MAX_OBSCURA_MARKDOWN_CHARS = 1_000_000
 MAX_CLOAKBROWSER_MARKDOWN_CHARS = 1_000_000
 OBSCURA_TIMEOUT_SECONDS = 45
 CLOAKBROWSER_TIMEOUT_SECONDS = 90
-DEFAULT_OBSCURA_BIN = "/Users/armor/.local/bin/obscura"
-DEFAULT_OBSCURA_STORAGE_DIR = "/Users/armor/.local/share/enterprise-mcp/obscura"
-DEFAULT_CLOAKBROWSER_PYTHON = "/Users/armor/.local/share/enterprise-mcp/cloakbrowser-runtime/bin/python"
-DEFAULT_CLOAKBROWSER_WORKER = "/Users/armor/Enterprise-AI-Office/infrastructure/web-research/cloakbrowser_worker.py"
-DEFAULT_CLOAKBROWSER_STORAGE_DIR = "/Users/armor/.local/share/enterprise-mcp/cloakbrowser"
+DEFAULT_USER_HOME = os.path.expanduser("~")
+DEFAULT_REPO_ROOT = str(Path(__file__).resolve().parents[2])
+DEFAULT_ENTERPRISE_MCP_ROOT = os.path.join(
+    DEFAULT_USER_HOME, ".local", "share", "enterprise-mcp"
+)
+DEFAULT_OBSCURA_BIN = os.path.join(DEFAULT_USER_HOME, ".local", "bin", "obscura")
+DEFAULT_OBSCURA_STORAGE_DIR = os.path.join(DEFAULT_ENTERPRISE_MCP_ROOT, "obscura")
+DEFAULT_CLOAKBROWSER_PYTHON = os.path.join(
+    DEFAULT_ENTERPRISE_MCP_ROOT, "cloakbrowser-runtime", "bin", "python"
+)
+DEFAULT_CLOAKBROWSER_WORKER = str(Path(__file__).resolve().with_name("cloakbrowser_worker.py"))
+DEFAULT_CLOAKBROWSER_STORAGE_DIR = os.path.join(
+    DEFAULT_ENTERPRISE_MCP_ROOT, "cloakbrowser"
+)
 DEFAULT_CLOAKBROWSER_VERSION = "145.0.7632.109.2"
-APPROVED_CLOAKBROWSER_ROOTS = (
-    "/Users/armor/.local/share/enterprise-mcp",
-    "/Users/armor/.local/share/uv",
-    "/Users/armor/Enterprise-AI-Office",
+APPROVED_CLOAKBROWSER_ROOTS = tuple(
+    os.path.realpath(path)
+    for path in (
+        DEFAULT_ENTERPRISE_MCP_ROOT,
+        os.path.join(DEFAULT_USER_HOME, ".local", "share", "uv"),
+        DEFAULT_REPO_ROOT,
+    )
 )
 OBSCURA_PROTOCOL_VERSION = "2024-11-05"
 TRUST_CLASS = "UNTRUSTED_WEB_CONTENT"
@@ -165,7 +178,7 @@ class ObscuraClient:
         if not os.path.isdir(self.storage_dir):
             raise ObscuraError("BLOCKED", "Obscura Enterprise storage is unavailable")
         approved_root = os.path.realpath(
-            os.environ.get("EAIO_OBSCURA_STORAGE_ROOT") or "/Users/armor/.local/share/enterprise-mcp"
+            os.environ.get("EAIO_OBSCURA_STORAGE_ROOT") or DEFAULT_ENTERPRISE_MCP_ROOT
         )
         resolved = os.path.realpath(self.storage_dir)
         try:
