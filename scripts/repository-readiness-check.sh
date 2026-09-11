@@ -149,6 +149,7 @@ done
 for path in \
   infrastructure/weknora/README.md \
   infrastructure/weknora/PROVISIONING.md \
+  infrastructure/hermes/PROVISIONING.md \
   infrastructure/hermes/README.md \
   infrastructure/hermes/default.config.example.yaml \
   infrastructure/hermes/default.env.example \
@@ -254,6 +255,11 @@ require_text config/validated-stack.yaml 'source_ref_type: commit_only_no_versio
 require_text config/validated-stack.yaml 'upstream_repository: https://github.com/open-webui/open-webui.git' 'Validated stack records Open WebUI upstream provenance'
 require_text DEPLOY.md '### 4.1 Deterministic Core acquisition' 'Golden Path defines deterministic Core acquisition'
 require_text DEPLOY.md '### 4.2 Post-acquisition Core identity assertions' 'Golden Path distinguishes liveness from runtime identity'
+require_text DEPLOY.md 'infrastructure/hermes/PROVISIONING.md' 'Golden Path uses Hermes provisioning contract'
+require_text infrastructure/hermes/PROVISIONING.md 'hermes profile create general --no-skills --no-alias' 'Hermes provisioning creates narrow General Profile without bundled Skills'
+require_text infrastructure/hermes/PROVISIONING.md 'Do **not** set `API_SERVER_ENABLED=true` on `general`' 'Hermes provisioning keeps shared listener on default Profile'
+require_text infrastructure/hermes/PROVISIONING.md 'default/admin key → /p/general/...                  DENY' 'Hermes provisioning requires Profile credential isolation'
+require_text infrastructure/hermes/PROVISIONING.md 'GET /p/general/v1/models' 'Hermes provisioning validates named Profile model identity'
 require_text docs/ACCEPTANCE-TESTS.md 'Core runtime identity matches `config/validated-stack.yaml`' 'Core acceptance requires exact runtime identity'
 require_text scripts/health-check.sh 'does not prove the exact validated component identity/version/commit' 'Health check does not impersonate identity verification'
 require_text DEPLOY.md 'Do not infer upstream repositories or installation methods from product names.' 'Golden Path blocks upstream guessing'

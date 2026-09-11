@@ -63,6 +63,12 @@ These describe how EAO is intended to work now.
 
 These should normally be read before specialized or historical files.
 
+Machine-oriented Core provisioning contracts live with their component adapters:
+
+- `../infrastructure/weknora/PROVISIONING.md` — WeKnora model/KB/credential reconciliation.
+- `../infrastructure/hermes/PROVISIONING.md` — Hermes default/general Profile and shared-Gateway reconciliation.
+- `../infrastructure/open-webui/PROVISIONING.md` — Open WebUI groups/connections/model ACL reconciliation.
+
 ## Tier 2 — Frozen/current capability baselines
 
 These record accepted capability boundaries and evidence.

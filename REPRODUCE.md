@@ -146,14 +146,15 @@ Use `config/.env.example`, `config/company.example.yaml`, and `config/company.pr
 
 ### Stage C — Hermes Agent
 
-1. Install the validated host-native Hermes version.
-2. Create/control the privileged/default profile.
-3. Configure the `general` employee profile.
-4. Configure specialist profiles only when an explicit capability boundary requires them.
-5. Install repository-approved shared department Skills.
+1. Install the validated host-native Hermes version through `DEPLOY.md §4.1` and prove runtime identity through §4.2.
+2. Reconcile the privileged/default control plane plus baseline `general` employee Profile through `infrastructure/hermes/PROVISIONING.md`.
+3. On a fresh target create `general` through upstream Profile management with bundled-Skill opt-out; on an existing target reconcile it in place.
+4. Configure specialist Profiles only when an explicit capability boundary requires them.
+5. Install only repository-approved Skills required by the selected Profile/capability boundary.
 6. Configure profile-local MCP names so shared-gateway registrations do not collide.
 7. Keep employee/Profile memory disabled unless a later approved baseline explicitly changes it.
-8. Enable only the narrow tools required by the profile; generic shell/filesystem/browser/code execution must not be exposed merely for convenience.
+8. Enable only the narrow tools required by the Profile; generic shell/filesystem/browser/code execution must not be exposed merely for convenience.
+9. Prove the shared Gateway serves exactly the intended Profile set and that Profile-scoped API credentials fail closed across routes.
 
 ### Stage D — Open WebUI
 
