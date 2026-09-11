@@ -60,7 +60,7 @@ Control plane
 
 Employee plane
 ├── Open WebUI
-├── All-Employees group
+├── company group `all-employees` (display: `All Employees`)
 ├── General Assistant
 └── Hermes `general` Profile
 
@@ -326,7 +326,7 @@ Exit condition: every enabled employee Profile responds through its supported AP
 1. Deploy the pinned Open WebUI release with persistent state.
 2. Provision the administrator using the validated bootstrap mechanism.
 3. Keep open self-signup disabled unless company policy explicitly enables it.
-4. Create baseline groups `All-Employees` and `AI-Admins`.
+4. Reconcile Open WebUI groups from `employee_access.web.groups`, preserving the company logical ID → display name → runtime group UUID mapping. The generic baseline is `all-employees` → `All Employees` and `ai-admins` → `AI Administrators`.
 5. Create server-side employee Assistant connections to the matching Hermes employee Profiles.
 6. Never expose Hermes default/admin as an ordinary employee Assistant.
 7. Apply the configured ordinary employee permissions. The validated baseline is:

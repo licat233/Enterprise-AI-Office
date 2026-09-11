@@ -45,7 +45,7 @@ Baseline:
 
 ```text
 ordinary employee
-→ All-Employees
+→ company group `all-employees` / Open WebUI `All Employees`
 → General Assistant
 → `general`
 ```
@@ -54,12 +54,15 @@ Additional mappings come from company configuration.
 
 ## 3. Baseline groups
 
-The generic baseline is:
+The generic baseline has stable company logical IDs and human-facing Open WebUI names:
 
-```text
-All-Employees
-AI-Admins
-```
+| Company logical ID | Open WebUI display name |
+| --- | --- |
+| `all-employees` | `All Employees` |
+| `ai-admins` | `AI Administrators` |
+
+The runtime Open WebUI group UUID is deployment-generated state and must be
+recorded as a mapping rather than copied into generic configuration.
 
 Create additional groups only when a real authorization boundary requires them.
 
@@ -98,7 +101,9 @@ Every Hermes-backed employee Assistant should be private/restricted and explicit
 Baseline:
 
 ```text
-All-Employees → General Assistant → Hermes `general`
+all-employees (display: All Employees)
+→ General Assistant
+→ Hermes `general`
 ```
 
 Do not rely on UI visibility alone as the security control. Verify unauthorized direct resource/API access is rejected.
@@ -229,7 +234,7 @@ Use supported routing, allowlists/pairing, and platform identity controls.
 
 ```text
 [ ] Admin account/access secured
-[ ] Baseline All-Employees and AI-Admins boundaries configured
+[ ] Baseline `all-employees` / `ai-admins` logical groups map to the intended Open WebUI runtime groups
 [ ] Default employee permissions minimal
 [ ] General Assistant private/restricted to intended employees
 [ ] Hermes default/admin not employee-exposed

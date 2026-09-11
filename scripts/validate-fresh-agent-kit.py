@@ -204,6 +204,16 @@ def main() -> int:
         "Fresh Agent preserves General Profile least privilege at creation",
     )
     require_text(
+        "DEPLOY.md",
+        "company logical ID → display name → runtime group UUID",
+        "Fresh Agent distinguishes group logical IDs from runtime identity",
+    )
+    require_text(
+        "infrastructure/open-webui/PROVISIONING.md",
+        "BLOCKED — AMBIGUOUS STATE",
+        "Fresh Agent fails closed on ambiguous Open WebUI groups",
+    )
+    require_text(
         "config/eao-manifest.yaml",
         "hermes: infrastructure/hermes/PROVISIONING.md",
         "Manifest exposes Hermes Core provisioning",
