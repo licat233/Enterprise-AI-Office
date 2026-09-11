@@ -41,6 +41,18 @@ company config → target_readiness
 
 A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
 
+## `check-declarative-paths.py`
+
+Machine-readable contract path integrity check for `config/eao-manifest.yaml` and `config/capabilities.yaml`.
+
+Run:
+
+```sh
+python3 scripts/check-declarative-paths.py
+```
+
+It verifies repository-relative implementation, acceptance, evidence, contract, and entrypoint paths that are declared in those YAML files. It intentionally uses no YAML package and only recognizes unambiguous repository path prefixes/root contract filenames.
+
 ## `check-repository-links.py`
 
 Repository-wide, network-free Markdown link integrity check.
