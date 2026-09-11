@@ -120,8 +120,14 @@ blueprint_lifecycle:
 
   blueprint_validation:
     status: not_opened
+    preparation_status: ready
+    validation_entrypoint: VALIDATE.md
+    fresh_agent_task: validation/FRESH-AGENT-TASK.md
+    scorecard: validation/scorecard.yaml
+    report_template: validation/REPORT.template.md
+    static_check: scripts/validate-fresh-agent-kit.py
     purpose: prove that a fresh capable AI agent can understand the repository and reproduce the designed system on an explicitly approved clean validation target
-    note: validation targets must be explicitly authorized and may be synthetic, isolated, or a designated test host; this phase does not imply production deployment
+    note: validation materials are prepared, but the phase is not opened; validation targets must be explicitly authorized and may be synthetic, isolated, or a designated test host; this phase does not imply production deployment
 
   release_ready:
     status: not_opened
@@ -193,4 +199,4 @@ interpretation_rules:
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
   - Missing real credentials are never blockers for blueprint development because credentials belong to a real deployment or explicitly approved validation task.
 
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-11
