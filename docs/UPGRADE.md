@@ -169,6 +169,11 @@ Before upgrading Open WebUI:
 - inspect database/schema changes;
 - inspect authentication/RBAC changes;
 - inspect OpenAI connection configuration changes;
+- re-verify the provisioning routes against the selected commit's
+  `backend/open_webui/main.py` plus `routers/auths.py`, `groups.py`,
+  `openai.py`, and `models.py`;
+- inspect request/response schema changes for the exact admin/group/model
+  reconciliation calls used by `infrastructure/open-webui/PROVISIONING.md`;
 - inspect dynamic-header support used for Hermes session scoping;
 - back up persistent state.
 
