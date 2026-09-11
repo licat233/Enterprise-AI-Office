@@ -206,7 +206,7 @@ done
 
 require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md' 'status: historical-reference' 'Legacy ARMOR v1 document is historical'
 require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md' 'Historical reference only — not the current execution contract.' 'Legacy ARMOR v1 document does not claim current authority'
-require_text docs/REPOSITORY-GOVERNANCE.md 'main is the canonical public blueprint state' 'Repository governance defines main authority'
+require_text docs/REPOSITORY-GOVERNANCE.md '`main` is the canonical public blueprint state' 'Repository governance defines main authority'
 require_text docs/REPOSITORY-GOVERNANCE.md 'require a pull request before merge' 'Repository governance defines PR protection target'
 
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
