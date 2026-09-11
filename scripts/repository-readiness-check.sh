@@ -242,6 +242,10 @@ require_no_text config/.env.example '/Users/armor' 'Generic env template has no 
 require_no_text infrastructure/web-research/adapter.py '/Users/armor' 'Web Research adapter has portable path defaults'
 require_no_text infrastructure/hermes/operations-routing.example.yaml '/Users/armor' 'Operations routing example has no ARMOR home path'
 
+require_text config/mcp-registry.yaml 'runtime_state_scope: sanitized_ARMOR_reference_snapshot' 'MCP registry marks reference runtime snapshot'
+require_text config/mcp-registry.yaml 'fresh_deployment_rule: recompute_runtime_and_health_do_not_inherit_reference_flags' 'MCP registry blocks reference runtime inheritance'
+require_text config/README.md 'A fresh deployment must recompute' 'Config guide explains MCP runtime recomputation'
+
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
 require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'
 require_text state/PROJECT-PHASE.yaml 'current_phase: installation_design' 'Current blueprint phase remains installation design'
