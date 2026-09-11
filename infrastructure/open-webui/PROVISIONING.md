@@ -142,6 +142,43 @@ All modifying operations below require an authenticated administrator token.
 
 Do not write directly to Open WebUI's SQLite/PostgreSQL tables for normal provisioning.
 
+### 3.1 Pinned API-route provenance
+
+The provisioning routes in this playbook were verified against the validated
+Open WebUI source commit recorded in `config/validated-stack.yaml`:
+
+```text
+open-webui/open-webui
+commit: 2a960a59fe1dbbd35282f0556b3666d81102e781
+tag: v0.11.3
+```
+
+Source files used for route verification:
+
+```text
+backend/open_webui/main.py
+backend/open_webui/routers/auths.py
+backend/open_webui/routers/groups.py
+backend/open_webui/routers/openai.py
+backend/open_webui/routers/models.py
+```
+
+At that commit, `main.py` mounts the relevant routers at:
+
+```text
+auths   → /api/v1/auths
+groups  → /api/v1/groups
+models  → /api/v1/models
+openai  → /openai
+```
+
+The endpoint list above is a version-specific provisioning contract, not a
+timeless Open WebUI API promise.
+
+When Open WebUI is upgraded, re-read those router files at the selected commit,
+verify the exact request bodies/response semantics used by this playbook, and
+update this contract only after focused provisioning/RBAC acceptance passes.
+
 ## 4. Authenticate the administrator
 
 Sign in with the protected bootstrap administrator:
