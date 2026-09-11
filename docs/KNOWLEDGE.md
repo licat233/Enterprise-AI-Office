@@ -358,6 +358,21 @@ Before ingesting confidential/restricted information, review:
 
 ## 20. Hermes integration
 
+### Open WebUI is not a second company Knowledge authority
+
+Open WebUI may accept conversation attachments and it has its own optional
+native Knowledge features, but the Enterprise AI Office Core architecture does
+not use those features as a second durable company-knowledge authority.
+
+Provisioning therefore must not duplicate governed company documents into an
+EAO-managed Open WebUI Knowledge workspace merely for convenience. Employee
+Assistants should obtain authoritative company facts through their approved
+Hermes → WeKnora path.
+
+Existing unrelated Open WebUI native Knowledge resources are not automatically
+deleted. Treat unintended duplicate attachment to an EAO employee Assistant as
+authority drift and reconcile it deliberately.
+
 Hermes accesses WeKnora through supported MCP/API interfaces.
 
 Normal employee Profiles should receive a least-privilege read-oriented retrieval surface.
