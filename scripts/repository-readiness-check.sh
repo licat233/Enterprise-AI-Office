@@ -238,6 +238,9 @@ require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与�
 require_text 'ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范.md' 'Historical reference only — not the current execution contract.' 'Legacy ARMOR v1 document does not claim current authority'
 require_text docs/REPOSITORY-GOVERNANCE.md '`main` is the canonical public blueprint state' 'Repository governance defines main authority'
 require_text docs/REPOSITORY-GOVERNANCE.md 'require a pull request before merge' 'Repository governance defines PR protection target'
+require_text THIRD_PARTY_NOTICES.md '`licat233/toolscout`' 'Third-party notices include current ToolScout provenance'
+require_text THIRD_PARTY_NOTICES.md '`h4ckf0r0day/obscura`' 'Third-party notices include current Obscura provenance'
+require_text THIRD_PARTY_NOTICES.md 'SenseVoice provenance note' 'Third-party notices do not invent unresolved SenseVoice provenance'
 
 require_text scripts/README.md 'EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh' 'Scripts README documents portable readiness mode'
 require_text scripts/repository-readiness-check.sh 'Fresh clones and other-company blueprint work must use repository-only mode.' 'Readiness script documents reference-specific full mode'
