@@ -6,6 +6,13 @@ set -eu
 # real deployment task, or prove a runtime deployment works. It verifies that
 # the repository still contains the contracts/adapters/playbooks and lifecycle
 # gates required for safe AI-agent behavior.
+#
+# Portable/public use:
+#   EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
+#
+# The default non-repository-only mode is retained for the ARMOR reference
+# runtime lineage and may expect protected private/department-profile evidence.
+# Fresh clones and other-company blueprint work must use repository-only mode.
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PASS=0
@@ -56,6 +63,11 @@ require_absent() {
 
 printf '%s\n' 'Enterprise AI Office Repository Readiness'
 printf '%s\n' '----------------------------------------'
+if [ "$REPOSITORY_ONLY" = "1" ]; then
+  printf '%s\n' 'Mode: public repository-only'
+else
+  printf '%s\n' 'Mode: reference/runtime-inclusive (protected ARMOR profile evidence may be required)'
+fi
 
 # Agent contract, blueprint lifecycle authority, and declarative inputs.
 for path in \
