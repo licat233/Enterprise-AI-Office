@@ -1,5 +1,6 @@
 # Enterprise AI Office validated Open WebUI reference adapter.
-# Tested with Open WebUI v0.11.3; review against the pinned release before reuse.
+# Derived pin: config/validated-stack.yaml -> Open WebUI v0.11.3.
+# Review upgrades through docs/UPGRADE.md; do not change this tag independently.
 # Keep this as a dedicated Compose project separate from WeKnora.
 services:
   open-webui:

@@ -1,5 +1,5 @@
 # Enterprise AI Office baseline Hermes `general` employee Profile
-# Validated schema family: Hermes Agent 0.21.0 reference commit recorded in config/validated-stack.yaml.
+# Derived schema pin: config/validated-stack.yaml -> Hermes Agent 0.21.0.
 # Copy/adapt into ~/.hermes/profiles/general/config.yaml.
 # Secrets belong in the Profile's protected .env, not in this file.
 

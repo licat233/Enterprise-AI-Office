@@ -211,6 +211,11 @@ def main() -> int:
     )
     require_text(
         "VALIDATE.md",
+        "python3 scripts/check-validated-stack-consistency.py",
+        "Gate 0 includes validated stack consistency",
+    )
+    require_text(
+        "VALIDATE.md",
         "python3 scripts/check-public-repository-hygiene.py",
         "Gate 0 includes public repository hygiene",
     )
@@ -223,6 +228,11 @@ def main() -> int:
         "validation/scorecard.yaml",
         "capability_acceptance_integrity_pass",
         "Scorecard requires capability acceptance integrity",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "validated_stack_consistency_pass",
+        "Scorecard requires validated stack consistency",
     )
     require_text(
         "validation/scorecard.yaml",
