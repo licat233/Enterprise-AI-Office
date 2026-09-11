@@ -184,6 +184,43 @@ def main() -> int:
         failures,
     )
 
+    require_equal(
+        "WeKnora runtime identity container",
+        field(weknora, "container_name"),
+        "WeKnora-app",
+        failures,
+    )
+    require_equal(
+        "WeKnora runtime identity image",
+        field(weknora, "container_image"),
+        f"wechatopenai/weknora-app:{versions['weknora'].removeprefix('v')}",
+        failures,
+    )
+    require_equal(
+        "Hermes runtime version command",
+        field(hermes, "version_command"),
+        "hermes --version",
+        failures,
+    )
+    require_equal(
+        "Hermes runtime expected version",
+        field(hermes, "expected_version"),
+        versions["hermes_agent"],
+        failures,
+    )
+    require_equal(
+        "Open WebUI runtime identity container",
+        field(open_webui, "container_name"),
+        "eaio-open-webui",
+        failures,
+    )
+    require_equal(
+        "Open WebUI runtime identity image",
+        field(open_webui, "container_image"),
+        open_webui_image,
+        failures,
+    )
+
     require_contains(
         "infrastructure/open-webui/docker-compose.yml",
         f"image: {open_webui_image}",
@@ -215,6 +252,10 @@ def main() -> int:
     require_contains("DEPLOY.md", commits["hermes_agent"], failures)
     require_contains("DEPLOY.md", open_webui_image, failures)
     require_contains("DEPLOY.md", commits["open_webui"], failures)
+    require_contains("DEPLOY.md", "### 4.2 Post-acquisition Core identity assertions", failures)
+    require_contains("DEPLOY.md", f"wechatopenai/weknora-app:{versions['weknora'].removeprefix('v')}", failures)
+    require_contains("DEPLOY.md", "hermes --version | grep -F", failures)
+    require_contains("DEPLOY.md", "docker inspect -f '{{.Config.Image}}' eaio-open-webui", failures)
 
     print("Enterprise AI Office Validated Stack Consistency")
     print("-----------------------------------------------")
