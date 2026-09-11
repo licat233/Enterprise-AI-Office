@@ -41,6 +41,20 @@ company config → target_readiness
 
 A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
 
+## `check-public-repository-hygiene.py`
+
+High-confidence public Git hygiene check.
+
+Run:
+
+```sh
+python3 scripts/check-public-repository-hygiene.py
+```
+
+It rejects tracked protected/local directories, production `.env`/credential/private-key file classes, private-key blocks, a small set of high-confidence token signatures, and sensitive uppercase environment assignments whose values are not obvious placeholders/test fixtures.
+
+This is intentionally narrower than a full secret-scanning product. It avoids treating sanitized historical host paths, public company names, or arbitrary prose as secret leakage.
+
 ## `check-declarative-paths.py`
 
 Machine-readable contract path integrity check for `config/eao-manifest.yaml` and `config/capabilities.yaml`.
