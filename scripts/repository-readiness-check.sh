@@ -433,7 +433,7 @@ require_text scripts/test_phase5b2_mic_authority_dedup.py 'not_embedded_sop' 'MI
 require_text scripts/phase5a_social_runtime_check.py 'publication_performed: false' 'Social acceptance fixture forbids publication'
 require_text config/mcp-registry.yaml 'employee_exposure_default: disabled' 'Phase 4A registry defaults employee exposure off'
 require_text config/mcp-registry.yaml 'operations_allowlist:' 'Phase 4A registry declares Operations allowlist'
-require_text docs/MCP-CONTROL-PLANE.md 'inventory and acceptance contract' 'Phase 4A MCP control-plane contract exists'
+require_text docs/MCP-CONTROL-PLANE.md 'The machine-readable authority is' 'Current MCP control-plane interpretation exists'
 require_text docs/PHASE4A-ARMOR-MIGRATION.md 'one Codex Final Editorial Pass' 'Phase 4A Article lifecycle is documented'
 require_text skills/shared/department/armor-website-article-pipeline/SKILL.md '02-Projects/Workspaces/Website/Articles/' 'Article Skill declares Router source target'
 require_text skills/shared/department/armor-website-article-pipeline/SKILL.md 'ai-writing-audit v0.3.1' 'Article Skill pins audit version'
