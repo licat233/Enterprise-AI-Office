@@ -103,7 +103,7 @@ Communication Assistant / tool-connection reconstruction metadata
 symbolic secret references
 ```
 
-Protected secret **values** remain in the selected secret-recovery mechanism, not inside public deployment state.
+Protected secret **values** remain in the selected secret-recovery mechanism and never belong in any deployment-state record. The protected operational state may contain only non-secret reference names/metadata needed for recovery.
 
 Provider mailbox content remains provider-owned and is not mirrored merely for disaster recovery.
 
@@ -531,7 +531,7 @@ At least one clean/synthetic rehearsal must prove:
 
 ## 19. Deployment-state evidence
 
-When an actual validation/deployment target enables v2 Email, `state/DEPLOYMENT-STATE.md` or the protected equivalent records non-secret truth including:
+When an actual validation/deployment target enables v2 Email, the protected operational state created from `state/DEPLOYMENT-STATE.template.md` records non-secret truth including:
 
 ```text
 Governance service version/contract
@@ -553,6 +553,8 @@ known limitations
 ```
 
 Do not copy Draft bodies, mailbox passwords, forwarder tokens, or provider credentials into deployment state.
+
+The repository's historical `state/DEPLOYMENT-STATE.md` is not an allowed live Email runtime-state store.
 
 ---
 
