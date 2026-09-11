@@ -87,6 +87,69 @@ For a deployment intended to reproduce this path, use the tested versions unless
 
 Optional components not present in the first reference deployment require their own compatibility check and exact version/commit recording when enabled.
 
+### 4.1 Deterministic Core acquisition
+
+Do not infer upstream repositories or installation methods from product names.
+Read `config/validated-stack.yaml` and acquire the exact validated component
+commit/runtime before configuration.
+
+For the current baseline:
+
+#### WeKnora
+
+```sh
+git clone https://github.com/Tencent/WeKnora.git "${RUNTIME_ROOT}/upstream/WeKnora"
+git -C "${RUNTIME_ROOT}/upstream/WeKnora" checkout --detach 1edcd54b43606d9079bb36650efe3f68707a79ea
+git -C "${RUNTIME_ROOT}/upstream/WeKnora" rev-parse HEAD
+```
+
+The checkout must resolve exactly to the component `commit` in
+`config/validated-stack.yaml`. Its tag `v0.8.0` is verified to point to that
+commit. For the upstream Compose runtime set `WEKNORA_VERSION=0.8.0` in the
+protected/runtime WeKnora environment, then apply the repository WeKnora
+adapter and provisioning contract. Do not use `latest`.
+
+#### Hermes Agent
+
+Hermes `0.21.0` is the package version at the validated commit; the upstream
+repository has no validated `v0.21.0` tag for this baseline. Pin by commit.
+
+Use the official installer **from the same pinned commit** rather than the
+moving installer on `main`:
+
+```sh
+HERMES_COMMIT=f1ccf436a27522c1bb5d36383a6f13b950676338
+curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES_COMMIT}/scripts/install.sh" \
+  | bash -s -- --commit "${HERMES_COMMIT}" --skip-setup
+```
+
+After installation, verify the installed checkout resolves to
+`HERMES_COMMIT`, then apply the repository-managed default/general Profile
+configuration. Do not run `hermes update` during the same reproduction task.
+
+#### Open WebUI
+
+Open WebUI does not require an upstream source checkout for the validated
+runtime. The repository Compose adapter already pins the official image:
+
+```text
+ghcr.io/open-webui/open-webui:v0.11.3
+```
+
+The upstream tag `v0.11.3` is verified to point to the component commit in
+`config/validated-stack.yaml`.
+
+Provide the required protected administrator environment values, then use:
+
+```sh
+docker compose -f infrastructure/open-webui/docker-compose.yml pull
+docker compose -f infrastructure/open-webui/docker-compose.yml up -d
+```
+
+If any resolved upstream ref, package version, image tag, or checkout differs
+from `config/validated-stack.yaml`, stop as version drift. Do not silently
+continue with a nearby release.
+
 ## 5. Required inputs
 
 Before mutation, resolve from the company configuration or protected operator input:
