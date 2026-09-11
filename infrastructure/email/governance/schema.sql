@@ -36,6 +36,29 @@ ON draft_replies(source_message_id);
 CREATE INDEX IF NOT EXISTS idx_draft_replies_mailbox
 ON draft_replies(sender_mailbox_id);
 
+-- Deterministic scheduled-runtime request identity. This is a mapping to an
+-- immutable DraftReply revision, not a second draft or mailbox cache.
+CREATE TABLE IF NOT EXISTS draft_request_idempotency (
+    request_key TEXT PRIMARY KEY,
+    workflow_version TEXT NOT NULL,
+    sender_mailbox_id TEXT NOT NULL,
+    source_message_id TEXT NOT NULL,
+    draft_id TEXT NOT NULL,
+    draft_revision INTEGER NOT NULL,
+    draft_content_hash TEXT NOT NULL,
+    actor_type TEXT NOT NULL CHECK (actor_type IN ('human', 'service')),
+    actor_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (draft_id, draft_revision, draft_content_hash)
+        REFERENCES draft_replies(draft_id, revision, content_hash)
+        ON UPDATE RESTRICT
+        ON DELETE RESTRICT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_draft_request_source_workflow
+ON draft_request_idempotency(workflow_version, sender_mailbox_id, source_message_id)
+WHERE actor_type = 'service';
+
 -- Server-side review binding used by the deterministic Open WebUI approval
 -- Action. It is governance evidence/correlation state, not a new Email Ontology
 -- business object and not approval authority by itself.
@@ -99,6 +122,9 @@ CREATE TABLE IF NOT EXISTS governance_audit_events (
     occurred_at TEXT NOT NULL,
     human_actor_id TEXT,
     human_group_ids_json TEXT NOT NULL DEFAULT '[]',
+    actor_type TEXT NOT NULL DEFAULT 'human'
+        CHECK (actor_type IN ('human', 'service')),
+    actor_id TEXT,
     assistant_id TEXT,
     profile_context TEXT,
     operation TEXT NOT NULL,

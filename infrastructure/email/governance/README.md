@@ -94,6 +94,12 @@ Do not give Open WebUI, Hermes, an employee browser, or a provider adapter direc
 
 Do not turn this database into a mailbox cache or CRM.
 
+## Phase 1 scheduled drafting runtime
+
+The Phase 1 runtime in runtime.py is the bounded GovernanceService for a future scheduled draft workflow. It reuses the DraftReply schema and existing read-only Tencent adapter, adds only deterministic scheduled-request mapping and explicit service-actor audit fields, and exposes search_email, get_email, and prepare_reply_draft over a fixed MCP stdio surface (and a local health/HTTP surface for operator integration). ServiceActor service:hermes-cron:operations is limited to email.read and email.draft; approval and send remain human/control-plane operations.
+
+Use the synthetic dry run and test_phase1_runtime.py with the managed Hermes Python environment. No production Cron job is created by these checks.
+
 ## ID-5 offline schema contract
 
 `test_schema.py` intentionally uses only Python stdlib and in-memory SQLite. It validates the repository-level Draft/Approval contract without provider credentials or a real target:
