@@ -294,6 +294,10 @@ require_text docs/V2-INSTALLATION-DESIGN-REVIEW.md 'INSTALLATION DESIGN FINAL RE
 
 # Guard against high-impact deployment/capability contract drift.
 require_text DEPLOY.md 'config/capabilities.yaml' 'Golden Path uses capability registry'
+require_text REPRODUCE.md '### Stage F — resolve enabled conditional capabilities' 'Reproduction contract separates conditional capabilities'
+require_text REPRODUCE.md 'If a capability is not enabled for the target, do not install it merely because the' 'Reproduction contract blocks reference-driven over-installation'
+require_text config/eao-manifest.yaml 'reference_presence_does_not_imply_enablement: true' 'Manifest blocks reference capability inheritance'
+require_text config/eao-manifest.yaml 'instantiate_only_capabilities_explicitly_enabled_for_target' 'Manifest encodes conditional capability rule'
 require_text DEPLOY.md 'PRODUCTION READY' 'Golden Path reaches Production Ready'
 require_text AGENTS.md 'CONFIGURED READY' 'Agent contract knows Configured Ready'
 require_text docs/ACCEPTANCE-TESTS.md 'Configured Ready result' 'Acceptance has Configured Ready gate'
