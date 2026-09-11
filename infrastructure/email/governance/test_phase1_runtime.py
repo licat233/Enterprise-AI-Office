@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Offline Phase 1 runtime contract tests; no mailbox or network access."""
+"""Offline Phase 1 runtime contract tests; no mailbox or network access.
+
+The core tests are portable. One ARMOR reference-Profile closure regression runs
+only when the protected department Profile evidence exists on the target host.
+"""
 
 from __future__ import annotations
 
@@ -247,9 +251,12 @@ class Phase1RuntimeTests(unittest.TestCase):
             self.policy.authenticate_service_actor("wrong-secret")
 
     def test_operations_high_risk_boundary_and_skills_remain_closed(self):
-        config = (ROOT / "private/department-profile/config.yaml").read_text(
-            encoding="utf-8"
-        )
+        config_path = ROOT / "private/department-profile/config.yaml"
+        enabled_path = ROOT / "private/department-profile/enabled-skills.csv"
+        if not config_path.is_file() or not enabled_path.is_file():
+            self.skipTest("requires protected ARMOR department Profile evidence")
+
+        config = config_path.read_text(encoding="utf-8")
         for toolset in (
             "web",
             "browser",
@@ -263,9 +270,7 @@ class Phase1RuntimeTests(unittest.TestCase):
             "image_gen",
         ):
             self.assertIn(f"    - {toolset}", config)
-        enabled = (
-            ROOT / "private/department-profile/enabled-skills.csv"
-        ).read_text(encoding="utf-8")
+        enabled = enabled_path.read_text(encoding="utf-8")
         self.assertIn("sales-discovery-coach", enabled)
         self.assertIn("sales-coach", enabled)
         self.assertIn("product-marketing", enabled)
