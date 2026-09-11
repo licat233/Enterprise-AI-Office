@@ -37,6 +37,44 @@ Environment:
 <known limitations / follow-up>
 ```
 
+## 2026-09-11 — Finalize trusted private-LAN Open WebUI exposure
+
+Component: Open WebUI employee network boundary and protected deployment configuration
+Environment: authorized Mac Studio deployment target; private host/network identifiers omitted
+
+### Before
+
+- The real employee deployment used a protected private-LAN publication on host TCP 3000.
+- The protected `WEBUI_URL` represented the prior employee endpoint.
+
+### After
+
+- Finalized the protected deployment on a dedicated host port: all IPv4 host interfaces at TCP 13000 to the Open WebUI container at TCP 8080.
+- Reconciled the protected `WEBUI_URL` to the reserved office-LAN employee endpoint; the private address is intentionally omitted here.
+- Preserved trusted private-LAN access, Open WebUI authentication, signup-disabled behavior, ordinary RBAC, General Assistant routing, employee memory policy, and the internal/admin boundary.
+- Kept the public reference Compose loopback-only; the real deployment-specific network override remains protected.
+- The all-IPv4 bind is compatible with a later Tailscale path without changing Docker publication. Tailscale was not enabled or configured by this change.
+
+### Reason
+
+Move the real employee surface from the temporary host port to the long-term trusted office-LAN baseline while retaining the existing application and service boundaries.
+
+### Validation
+
+- Protected Compose validation and reconciliation passed; Open WebUI v0.11.3 remained healthy with its persistent data volume.
+- Separate LAN-client browser reached the login page; the synthetic employee authenticated, used General Assistant, received grounded Company Knowledge evidence, and retained the conversation through reload.
+- Unauthenticated API access returned HTTP 401.
+- LAN probes to the prior host port and internal/admin ports failed closed.
+- Final health check: 5 PASS, 2 WARN, 0 FAIL; warnings are documented known limitations and not caused by this change.
+
+### Rollback
+
+Restore the protected pre-change snapshot from the deployment backup directory, then reconcile the same Compose project.
+
+### Notes
+
+No private IP, secret, credential, host identifier, or router-specific detail is recorded in public Git. No unrelated service or network configuration was changed.
+
 ## 2026-09-11 - Enable private-LAN Open WebUI employee access
 
 Component: Open WebUI employee network boundary and protected deployment configuration
