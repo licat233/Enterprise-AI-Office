@@ -88,6 +88,8 @@ def check_repository(failures: list[str]) -> None:
     check(firecrawl.get("runtime", {}).get("version") == "3.24.0", "Firecrawl version remains 3.24.0", failures)
     check(firecrawl_boundary.get("adapter_required") is True, "Firecrawl direct exposure requires the adapter", failures)
     check(firecrawl_boundary.get("raw_tools_exposed_to_operations") is False, "raw Firecrawl tools are not Operations-exposed", failures)
+    check(firecrawl.get("exposure", {}).get("allowed_profiles") == [], "raw Firecrawl Profile allowlist is empty", failures)
+    check(firecrawl.get("exposure", {}).get("operations_exposure") is False, "raw Firecrawl exposure flag is false", failures)
     denied = set(firecrawl_boundary.get("excluded_action_capable_tools", [])) | set(adapter_boundary.get("denied_tools", []))
     check(FORBIDDEN_RAW <= denied, "dangerous Firecrawl lanes remain denied", failures, f"missing={sorted(FORBIDDEN_RAW - denied)}")
     check(set(policy.get("operations_allowlist", [])) == EXPECTED_RUNTIME_MCPS, "registry Operations allowlist is bounded", failures)

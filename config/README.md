@@ -157,8 +157,17 @@ exact target state
 This is the Enterprise control-plane inventory for MCP definitions. It records
 transport, runtime rebinding requirements, logical environment names, risk
 classification, profile scope, default exposure, and health-check strategy.
+
+Its **definition/boundary layer is reusable**, while the current `runtime` and
+`health` fields are a sanitized snapshot of the ARMOR reference implementation
+at the recorded review date. A fresh deployment must recompute `installed`,
+`configured`, `enabled`, and health from the target host; it must not inherit
+those reference flags merely because they are present in Git.
+
 Definitions may exist in the inventory while their runtime and employee
-exposure remain disabled.
+exposure remain disabled. Runtime availability and Profile exposure are separate
+dimensions; for example, an upstream package may be installed while raw employee
+exposure remains forbidden.
 
 The registry is not a secret store and is not a request to start a server.
 Actual Profile exposure remains controlled by the Profile configuration and

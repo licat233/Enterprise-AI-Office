@@ -21,12 +21,14 @@ entrypoints:
   machine:
     lifecycle: state/PROJECT-PHASE.yaml
     capabilities: config/capabilities.yaml
+    mcp_registry: config/mcp-registry.yaml
     validated_stack: config/validated-stack.yaml
     project_manifest: config/eao-manifest.yaml
   reference_runtime:
     current_public_status: state/REAL-DEPLOYMENT-STATUS.md
     historical_demo_state: state/DEPLOYMENT-STATE.md
     deployment_change_log: state/CHANGELOG.md
+    mcp_runtime_state: sanitized_ARMOR_reference_snapshot
 
 architecture:
   employee_surface: Open WebUI
