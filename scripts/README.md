@@ -41,6 +41,20 @@ company config → target_readiness
 
 A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
 
+## `check-frozen-baselines.py`
+
+Frozen local evidence-history check.
+
+Run from a checkout with full Git history:
+
+```sh
+python3 scripts/check-frozen-baselines.py
+```
+
+It reads every `frozen_commit` declared in `config/eao-manifest.yaml`, verifies the commit object is present, and requires that commit to remain an ancestor of the checked HEAD. It validates EAO repository evidence SHAs only; upstream component commits are outside its scope.
+
+GitHub Repository Readiness uses a full-history checkout specifically so this gate is meaningful.
+
 ## `check-public-repository-hygiene.py`
 
 High-confidence public Git hygiene check.
