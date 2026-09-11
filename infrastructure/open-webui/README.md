@@ -35,6 +35,11 @@ Specialist groups and Assistant resources are added only when the adopting compa
 
 The tested manifest is [`docker-compose.yml`](docker-compose.yml).
 
+Its image pin is derived from `config/validated-stack.yaml`; the current
+upstream source identity is `https://github.com/open-webui/open-webui.git`.
+Use `DEPLOY.md §4.1` for deterministic acquisition/startup and do not replace
+the image tag with `latest`.
+
 The first validated local demo used:
 
 - Open WebUI `v0.11.3`;

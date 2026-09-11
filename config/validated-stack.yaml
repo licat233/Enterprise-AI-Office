@@ -8,6 +8,7 @@ qualification_semantics:
   reference_runtime_last_confirmed_on: same_versions_observed_in_current_reference_runtime
   does_not_claim_new_clean_host_validation: true
 upgrade_policy: docs/UPGRADE.md
+provenance_verified_on: 2026-09-11
 
 target:
   host_os: macos
@@ -18,14 +19,40 @@ components:
   weknora:
     version: v0.8.0
     commit: 1edcd54b43606d9079bb36650efe3f68707a79ea
+    upstream_repository: https://github.com/Tencent/WeKnora.git
+    source_ref: v0.8.0
+    source_ref_type: tag
+    source_ref_matches_commit: true
+    acquisition:
+      method: git_clone_then_checkout_component_commit
+      runtime_version_env:
+        name: WEKNORA_VERSION
+        value: "0.8.0"
     deployment: upstream-compose-plus-thin-adapter
   hermes_agent:
     version: 0.21.0
     commit: f1ccf436a27522c1bb5d36383a6f13b950676338
+    upstream_repository: https://github.com/NousResearch/hermes-agent.git
+    source_ref: commit
+    source_ref_type: commit_only_no_version_tag
+    version_source: pyproject.toml_at_component_commit
+    acquisition:
+      method: official_installer_from_component_commit
+      installer_url_template: "https://raw.githubusercontent.com/NousResearch/hermes-agent/{commit}/scripts/install.sh"
+      commit_flag: --commit
+      eao_configuration_mode: install_runtime_then_apply_repository_managed_config
     deployment: host-native
   open_webui:
     version: v0.11.3
     commit: 2a960a59fe1dbbd35282f0556b3666d81102e781
+    upstream_repository: https://github.com/open-webui/open-webui.git
+    source_ref: v0.11.3
+    source_ref_type: tag
+    source_ref_matches_commit: true
+    acquisition:
+      method: official_container_image_via_eao_compose
+      image: ghcr.io/open-webui/open-webui:v0.11.3
+      adapter: infrastructure/open-webui/docker-compose.yml
     deployment: docker-compose
 
 baseline:

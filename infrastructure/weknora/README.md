@@ -8,6 +8,10 @@ For deployment execution, follow `DEPLOY.md` first. For non-interactive model/Kn
 
 The first validated local deployment used WeKnora `v0.8.0` at commit `1edcd54b43606d9079bb36650efe3f68707a79ea`.
 
+Validated upstream: `https://github.com/Tencent/WeKnora.git`. The authoritative
+repo/ref/commit/acquisition metadata lives in `config/validated-stack.yaml`;
+follow `DEPLOY.md §4.1` before using this adapter.
+
 This is a tested reproducibility baseline, not a permanent version requirement. Do not silently substitute a newer release during an ordinary deployment; treat an upgrade as a separate compatibility decision.
 
 ## Deployment posture

@@ -184,6 +184,26 @@ def main() -> int:
         "Validated stack does not confuse runtime confirmation with clean-host validation",
     )
     require_text(
+        "DEPLOY.md",
+        "### 4.1 Deterministic Core acquisition",
+        "Fresh Agent has deterministic Core acquisition",
+    )
+    require_text(
+        "config/validated-stack.yaml",
+        "https://github.com/Tencent/WeKnora.git",
+        "Fresh Agent can resolve WeKnora upstream",
+    )
+    require_text(
+        "config/validated-stack.yaml",
+        "https://github.com/NousResearch/hermes-agent.git",
+        "Fresh Agent can resolve Hermes upstream",
+    )
+    require_text(
+        "config/validated-stack.yaml",
+        "https://github.com/open-webui/open-webui.git",
+        "Fresh Agent can resolve Open WebUI upstream",
+    )
+    require_text(
         "reference/armor/reference-index.yaml",
         "deployable_company_config: false",
         "ARMOR reference index remains non-deployable",

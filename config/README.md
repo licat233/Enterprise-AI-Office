@@ -248,6 +248,21 @@ The stack file separates two dates:
 The second date is **not** a substitute for a new clean-host qualification.
 Upgrade/requalification remains governed by `docs/UPGRADE.md`.
 
+Each Core component also records its validated upstream repository and
+acquisition method. These fields answer a separate reproducibility question:
+"where does a fresh Agent obtain this exact runtime?" They are part of the
+validated-stack authority, not convenience links.
+
+The current baseline deliberately distinguishes:
+
+- tag-backed components (WeKnora and Open WebUI), whose tag→commit mapping was
+  verified;
+- Hermes Agent, whose `0.21.0` package version is verified in
+  `pyproject.toml` at the pinned commit and is installed through the official
+  installer fetched from that same commit.
+
+See `DEPLOY.md §4.1` for the deterministic acquisition procedure.
+
 
 This records the first validated core stack and baseline feature flags in machine-readable form.
 

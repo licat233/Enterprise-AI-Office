@@ -73,6 +73,11 @@ These are tested core reference versions, not permanent requirements. Do not sil
 
 Optional components not present in the first reference demo require version-specific upstream verification when enabled.
 
+Core upstream identity and acquisition method are machine-readable in
+`config/validated-stack.yaml`. Use the deterministic acquisition procedure in
+`DEPLOY.md §4.1`; do not substitute a GitHub search result, moving `main`,
+`latest` image, or similarly named fork.
+
 ## 3. Pre-deployment inventory
 
 Before mutation record/inspect:
