@@ -255,6 +255,11 @@ def main() -> int:
         "Fresh Agent preflight enforces Core container prerequisites",
     )
     require_text(
+        "infrastructure/open-webui/PROVISIONING.md",
+        "container → host Hermes bridge acceptance",
+        "Fresh Agent validates the container-to-host Hermes bridge",
+    )
+    require_text(
         "DEPLOY.md",
         "### 4.2 Post-acquisition Core identity assertions",
         "Fresh Agent must prove Core runtime identity",
