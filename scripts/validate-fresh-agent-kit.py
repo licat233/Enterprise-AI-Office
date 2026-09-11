@@ -214,6 +214,11 @@ def main() -> int:
         "Fresh Agent fails closed on ambiguous Open WebUI groups",
     )
     require_text(
+        "docs/KNOWLEDGE.md",
+        "Open WebUI is not a second company Knowledge authority",
+        "Fresh Agent does not duplicate company knowledge in Open WebUI",
+    )
+    require_text(
         "config/eao-manifest.yaml",
         "hermes: infrastructure/hermes/PROVISIONING.md",
         "Manifest exposes Hermes Core provisioning",
