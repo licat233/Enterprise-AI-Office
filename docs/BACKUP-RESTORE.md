@@ -75,6 +75,30 @@ Version-controlled non-secret Skills/config belong in the company's ops reposito
 
 Back up runtime-only local data as well.
 
+### Protected operational deployment state
+
+Back up the deployment's protected operational copy created from
+`state/DEPLOYMENT-STATE.template.md`.
+
+This state is small but operationally important because it carries the
+non-secret identity handoffs needed to reconcile restored resources without
+guessing, including:
+
+- WeKnora logical Knowledge Base ID → runtime UUID mappings;
+- retrieval-key record/reference metadata without plaintext tokens;
+- Hermes served Profile set, Profile routes, advertised model IDs, and
+  non-secret credential reference names;
+- Open WebUI logical group ID → display name → runtime UUID mappings;
+- Profile/model/group ACL mappings;
+- acceptance/recovery evidence.
+
+The public historical `state/DEPLOYMENT-STATE.md` and sanitized public status
+are **not** substitutes for this protected operational state.
+
+The reference scripts use
+`EAIO_DEPLOYMENT_STATE_FILE` when explicitly set, otherwise
+`${EAIO_RUNTIME_DIR}/state/deployment-state.md`.
+
 ### Secrets
 
 Back up production secrets separately using an encrypted/secure method.
@@ -294,14 +318,15 @@ A typical full-host recovery sequence:
 5. Restore WeKnora file storage
 6. Restore Open WebUI persistent state
 7. Restore Hermes state/Profiles
-8. Restore protected secrets
-9. Start internal services
-10. Verify knowledge retrieval
-11. Verify Hermes Profile APIs/MCP
-12. Verify employee RBAC
-13. Verify Cron/Kanban
-14. Re-enable messaging/remote access
-15. Run acceptance smoke tests
+8. Restore protected operational deployment-state/handoff record
+9. Restore protected secrets
+10. Start internal services
+11. Verify knowledge retrieval
+12. Verify Hermes Profile APIs/MCP
+13. Verify employee RBAC and runtime ID mappings
+14. Verify Cron/Kanban
+15. Re-enable messaging/remote access
+16. Run acceptance smoke tests and update recovery evidence
 ```
 
 Do not expose employee access before core restore validation.
@@ -362,10 +387,12 @@ The default daily policy is a starting point, not a universal compliance answer.
 [ ] File storage backup automated
 [ ] Open WebUI state backed up
 [ ] Hermes production state backed up
+[ ] Protected operational deployment-state/handoff record backed up
 [ ] Secrets have a secure recovery path
 [ ] At least one copy is off the primary disk
 [ ] Retention configured
 [ ] Backup failures visible
 [ ] Restore tested
-[ ] Last restore-test date recorded in deployment state
+[ ] Restored deployment-state/handoff mappings validated against restored resources
+[ ] Last restore-test date recorded in protected deployment state
 ```

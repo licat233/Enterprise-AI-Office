@@ -91,6 +91,7 @@ WEKNORA_DIR="${EAIO_WEKNORA_RUNTIME_DIR:-$(resolve_dir "" \
   "$EAIO_RUNTIME_DIR/WeKnora" "$EAIO_RUNTIME_DIR/weknora")}"
 WEKNORA_ENV_FILE="$WEKNORA_DIR/.env"
 BACKUP_ROOT="${EAIO_BACKUP_ROOT:-${EAIO_RUNTIME_DIR}/backups}"
+DEPLOYMENT_STATE_FILE="${EAIO_DEPLOYMENT_STATE_FILE:-${EAIO_RUNTIME_DIR}/state/deployment-state.md}"
 POSTGRES_CONTAINER="${WEKNORA_POSTGRES_CONTAINER:-}"
 WEKNORA_APP_CONTAINER="${WEKNORA_APP_CONTAINER:-}"
 OPENWEBUI_CONTAINER="${OPENWEBUI_CONTAINER:-}"
@@ -103,6 +104,7 @@ LAUNCH_AGENT_MANIFEST_LINE="- Hermes LaunchAgent definition: not present in back
 CREDENTIALS_MANIFEST_LINE="not separately configured; re-enter from protected stores"
 OPENWEBUI_ENV_MANIFEST_LINE="- Open WebUI protected runtime environment: not present in backup source"
 MEDIA_TRANSCRIPTION_MANIFEST_LINE="- Media transcription reviewed transcripts: not enabled / state absent"
+DEPLOYMENT_STATE_MANIFEST_LINE="- Protected operational deployment state: not present in backup source"
 
 OPENWEBUI_COMPOSE_FILE="${EAIO_OPENWEBUI_COMPOSE_FILE:-}"
 if [ -z "$OPENWEBUI_COMPOSE_FILE" ]; then
@@ -264,8 +266,8 @@ COMPOSE_VERSION="$(docker compose version --short)"
 
 [ ! -e "$DEST" ] || fail "destination" "already exists: $DEST"
 mkdir -p "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" \
-  "$DEST/governance" "$DEST/config"
-chmod 700 "$DEST" "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" "$DEST/governance"
+  "$DEST/governance" "$DEST/config" "$DEST/state"
+chmod 700 "$DEST" "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" "$DEST/governance" "$DEST/state"
 pass "destination" "$DEST"
 
 # PostgreSQL is backed up logically, rather than by copying a live database
@@ -320,6 +322,14 @@ if [ -f "$COMPANY_CONFIG" ]; then
   pass "Company configuration" "protected active config archived"
 else
   warn "Company configuration" "not present: $COMPANY_CONFIG"
+fi
+
+if [ -f "$DEPLOYMENT_STATE_FILE" ]; then
+  cp "$DEPLOYMENT_STATE_FILE" "$DEST/state/deployment-state.md"
+  DEPLOYMENT_STATE_MANIFEST_LINE="- Protected operational deployment state: state/deployment-state.md"
+  pass "Deployment state" "protected operational handoff/evidence state archived"
+else
+  warn "Deployment state" "not present: $DEPLOYMENT_STATE_FILE"
 fi
 
 # Hermes archive includes every present employee Profile, gateway configuration,
@@ -411,6 +421,7 @@ $OPENWEBUI_ENV_MANIFEST_LINE
 $LAUNCH_AGENT_MANIFEST_LINE
 - Protected runtime credentials: $CREDENTIALS_MANIFEST_LINE
 $COMPANY_CONFIG_MANIFEST_LINE
+$DEPLOYMENT_STATE_MANIFEST_LINE
 $MEDIA_TRANSCRIPTION_MANIFEST_LINE
 $GOVERNANCE_MANIFEST_LINE
 Discovered Docker volumes:

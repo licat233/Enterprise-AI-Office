@@ -441,10 +441,12 @@ According to `docs/BACKUP-RESTORE.md`:
 
 ```text
 [ ] required data/config backed up
+[ ] protected operational deployment-state/handoff record backed up
 [ ] secret recovery method protected/documented
 [ ] backup integrity verified
 [ ] required off-primary-disk copy exists when configured
 [ ] isolated restore tested
+[ ] restored deployment-state mappings match restored WeKnora/Hermes/Open WebUI resources
 [ ] restored employee knowledge/access path works
 ```
 

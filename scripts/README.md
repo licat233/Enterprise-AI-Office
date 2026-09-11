@@ -200,7 +200,13 @@ Configure URLs/thresholds through the protected deployment environment; see `con
 
 ## `backup.sh`
 
-Backup helper derived from the validated MacBook/OrbStack reference runtime. It discovers the inspected WeKnora/Open WebUI/Hermes state and creates the tested classes of backup material, including PostgreSQL dump, persistent-data archives, runtime configuration, Hermes state, protected credential recovery material, manifest, and checksums.
+Backup helper derived from the validated MacBook/OrbStack reference runtime. It discovers the inspected WeKnora/Open WebUI/Hermes state and creates the tested classes of backup material, including PostgreSQL dump, persistent-data archives, runtime configuration, Hermes state, the protected operational deployment-state/handoff record when present, protected credential recovery material, manifest, and checksums.
+
+The deployment-state source defaults to
+`${EAIO_RUNTIME_DIR}/state/deployment-state.md`. Set
+`EAIO_DEPLOYMENT_STATE_FILE` when the protected operational copy lives
+elsewhere. The script never uses the repository's historical
+`state/DEPLOYMENT-STATE.md` as the real runtime state source.
 
 Use only after reconciling it with the actual selected component/storage layout:
 
