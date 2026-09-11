@@ -15,7 +15,7 @@ If you are a fresh AI engineering agent, do not infer the system from directory 
 5. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
 6. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) — sanitized current ARMOR reference-deployment status.
 
-Before proposing any new component, run the mandatory [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md).
+Before proposing any new component, run the mandatory [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md). For the documentation hierarchy, use the [Documentation authority map](docs/README.md).
 
 ## Project status at a glance
 
