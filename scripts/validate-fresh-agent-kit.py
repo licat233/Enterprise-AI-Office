@@ -205,6 +205,21 @@ def main() -> int:
         "Fresh Agent knows protected state is recoverable",
     )
     require_text(
+        "docs/BACKUP-RESTORE.md",
+        "restore must be sourced",
+        "Fresh Agent distinguishes local restore from Production Ready evidence",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "off_primary_restore_evidence_when_production_ready",
+        "Scorecard requires off-primary restore evidence for Production Ready",
+    )
+    require_text(
+        "validation/FRESH-AGENT-TASK.md",
+        "primary-disk backup plus primary-disk isolated restore insufficient",
+        "Fresh Agent comprehension tests independent backup evidence",
+    )
+    require_text(
         "REPRODUCE.md",
         "Do not overwrite the repository's historical",
         "Fresh Agent preserves public historical deployment evidence",
