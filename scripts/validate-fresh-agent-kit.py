@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""Static validation for the EAO Fresh-Agent Validation Kit.
+
+This script deliberately uses only the Python standard library. It validates
+public repository contracts; it does not open Blueprint Validation, authorize
+a deployment, inspect private runtime state, or prove runtime reproduction.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+PASS = 0
+FAIL = 0
+
+
+def ok(label: str) -> None:
+    global PASS
+    PASS += 1
+    print(f"{label:<62} PASS")
+
+
+def bad(label: str, reason: str) -> None:
+    global FAIL
+    FAIL += 1
+    print(f"{label:<62} FAIL - {reason}")
+
+
+def require_file(rel: str) -> None:
+    path = ROOT / rel
+    if path.is_file():
+        ok(rel)
+    else:
+        bad(rel, "missing")
+
+
+def require_text(rel: str, needle: str, label: str) -> None:
+    path = ROOT / rel
+    if not path.is_file():
+        bad(label, f"{rel} missing")
+        return
+    text = path.read_text(encoding="utf-8")
+    if needle in text:
+        ok(label)
+    else:
+        bad(label, f"expected text not found in {rel}: {needle!r}")
+
+
+def check_markdown_links(rel: str) -> None:
+    path = ROOT / rel
+    if not path.is_file():
+        bad(f"{rel} local links", "file missing")
+        return
+
+    text = path.read_text(encoding="utf-8")
+    links = re.findall(r"\[[^\]]+\]\(([^)]+)\)", text)
+    missing: list[str] = []
+
+    for target in links:
+        target = target.strip()
+        if not target or target.startswith(("http://", "https://", "mailto:", "#")):
+            continue
+        target = target.split("#", 1)[0].split("?", 1)[0]
+        if not target:
+            continue
+        resolved = (path.parent / target).resolve()
+        try:
+            resolved.relative_to(ROOT.resolve())
+        except ValueError:
+            missing.append(target + " (escapes repository)")
+            continue
+        if not resolved.exists():
+            missing.append(target)
+
+    if missing:
+        bad(f"{rel} local links", ", ".join(missing))
+    else:
+        ok(f"{rel} local links")
+
+
+def main() -> int:
+    print("Enterprise AI Office Fresh-Agent Validation Kit")
+    print("------------------------------------------------")
+
+    for rel in [
+        "VALIDATE.md",
+        "validation/FRESH-AGENT-TASK.md",
+        "validation/scorecard.yaml",
+        "validation/REPORT.template.md",
+        "REPRODUCE.md",
+        "AGENTS.md",
+        "DEPLOY.md",
+        "docs/ACCEPTANCE-TESTS.md",
+        "docs/CAPABILITY-REUSE-PASS.md",
+        "config/eao-manifest.yaml",
+        "state/PROJECT-PHASE.yaml",
+        "state/REAL-DEPLOYMENT-STATUS.md",
+    ]:
+        require_file(rel)
+
+    require_text(
+        "state/PROJECT-PHASE.yaml",
+        "current_phase: installation_design",
+        "Validation kit does not silently advance blueprint phase",
+    )
+    require_text(
+        "state/PROJECT-PHASE.yaml",
+        "status: not_opened",
+        "Blueprint Validation remains not opened",
+    )
+    require_text(
+        "VALIDATE.md",
+        "Creating or improving this validation kit **does not open Blueprint Validation**",
+        "Validation entrypoint preserves lifecycle gate",
+    )
+    require_text(
+        "VALIDATE.md",
+        "REPOSITORY_DEFECT",
+        "Validation entrypoint defines defect taxonomy",
+    )
+    require_text(
+        "validation/FRESH-AGENT-TASK.md",
+        "Perform the Capability Reuse Pass",
+        "Fresh Agent task requires capability reuse",
+    )
+    require_text(
+        "validation/FRESH-AGENT-TASK.md",
+        "Do not perform this stage unless the human explicitly authorizes Blueprint Validation",
+        "Fresh Agent task blocks unauthorized runtime reproduction",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "any_critical_failure_fails_comprehension_gate: true",
+        "Scorecard has fail-closed critical-failure rule",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "minimum_score_percent: 90",
+        "Scorecard has explicit comprehension threshold",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "checks_hermes_cron_before_new_scheduler",
+        "Scorecard tests scheduler reuse behavior",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "checks_weknora_before_second_vector_database",
+        "Scorecard tests knowledge reuse behavior",
+    )
+    require_text(
+        "validation/REPORT.template.md",
+        "Additional human hints given after test start",
+        "Report records hidden-hint contamination",
+    )
+    require_text(
+        "config/eao-manifest.yaml",
+        "validation_entrypoint: VALIDATE.md",
+        "Manifest exposes validation entrypoint",
+    )
+    require_text(
+        "REPRODUCE.md",
+        "state/REAL-DEPLOYMENT-STATUS.md",
+        "Reproduction contract points to current public reference status",
+    )
+
+    for rel in [
+        "README.md",
+        "README.zh-CN.md",
+        "VALIDATE.md",
+        "REPRODUCE.md",
+        "validation/FRESH-AGENT-TASK.md",
+    ]:
+        check_markdown_links(rel)
+
+    print("------------------------------------------------")
+    print(f"Summary: {PASS} PASS, {FAIL} FAIL")
+    print(
+        "Static PASS proves the public validation contract is internally present; "
+        "it does not prove Fresh-Agent runtime reproduction."
+    )
+    return 2 if FAIL else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

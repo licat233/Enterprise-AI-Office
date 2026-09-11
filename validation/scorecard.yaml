@@ -1,0 +1,120 @@
+schema_version: 1
+name: EAO Fresh-Agent Validation Scorecard
+purpose: >-
+  Evaluate whether a fresh capable AI engineering agent can understand and
+  reproduce Enterprise AI Office from repository evidence without hidden chat context.
+
+critical_failure_policy:
+  any_critical_failure_fails_comprehension_gate: true
+  critical_failures:
+    - replaces_weknora_hermes_openwebui_architecture_without_proven_gap
+    - treats_profile_as_employee_identity
+    - treats_agent_memory_as_company_knowledge_authority
+    - treats_provider_credential_as_human_approval
+    - enables_employee_long_term_memory_by_default
+    - exposes_generic_shell_browser_or_smtp_to_ordinary_employees
+    - blindly_retries_unknown_email_send_outcome
+    - assumes_openwebui_native_knowledge_must_store_company_knowledge
+    - ignores_capability_reuse_pass
+    - treats_historical_migration_evidence_as_current_runtime_authority
+    - claims_no_reference_deployment_exists_only_because_public_deployment_gate_is_inactive
+
+gates:
+  repository_integrity:
+    required: true
+    pass_requires:
+      - repository_readiness_pass
+      - validation_kit_static_check_pass
+
+  comprehension:
+    required: true
+    minimum_score_percent: 90
+    zero_critical_failures: true
+    criteria:
+      - id: mission
+        weight: 4
+        evidence: identifies EAO as governed self-hosted enterprise AI workspace and reproducible blueprint
+      - id: authority_map
+        weight: 10
+        evidence: correctly maps Open WebUI, Hermes, WeKnora, Cron, Kanban, and Email governance responsibilities
+      - id: stack_versions
+        weight: 6
+        evidence: identifies validated core versions from config/validated-stack.yaml
+      - id: conceptual_boundaries
+        weight: 10
+        evidence: correctly explains Profile/user, Knowledge/Memory, credential/authority, blueprint/deployment distinctions
+      - id: lifecycle_vs_reference
+        weight: 8
+        evidence: distinguishes default deployment gate from existing ARMOR reference implementation
+      - id: employee_paths
+        weight: 8
+        evidence: correctly states General and Operations paths
+      - id: knowledge_boundary
+        weight: 8
+        evidence: explains retrieve-only WeKnora path and intentional Open WebUI Knowledge zero state
+      - id: memory_policy
+        weight: 5
+        evidence: employee/Profile long-term Memory is OFF in frozen baseline
+      - id: capability_reuse
+        weight: 8
+        evidence: uses required reuse order before proposing infrastructure
+      - id: security
+        weight: 8
+        evidence: preserves least privilege, private secrets, and side-effect governance
+      - id: email_safety
+        weight: 6
+        evidence: unknown send outcome requires reconciliation and no blind retry
+      - id: evidence_authority
+        weight: 5
+        evidence: distinguishes normative docs, current sanitized state, and historical evidence
+      - id: execution_contracts
+        weight: 6
+        evidence: identifies DEPLOY.md and docs/ACCEPTANCE-TESTS.md as primary execution/acceptance contracts
+      - id: defect_behavior
+        weight: 8
+        evidence: reports missing repository closure as defect rather than inventing architecture
+
+  dry_run:
+    required: true
+    criteria:
+      - public_private_input_separation
+      - dependency_order
+      - readiness_resolution
+      - capability_closure
+      - profile_group_assistant_mapping
+      - knowledge_route
+      - least_privilege
+      - acceptance_sequence
+      - restart_recovery
+      - backup_restore
+      - rollback
+      - explicit_failure_taxonomy
+
+  capability_reuse_challenge:
+    required: true
+    criteria:
+      - checks_hermes_cron_before_new_scheduler
+      - checks_weknora_before_second_vector_database
+      - records_gap_before_new_infrastructure
+      - prefers_no_new_component_when_existing_capability_suffices
+
+  runtime_reproduction:
+    required_only_when_blueprint_validation_is_explicitly_opened: true
+    criteria:
+      - core_employee_path
+      - enabled_optional_capability_acceptance
+      - restart_persistence
+      - backup_restore_when_required_by_target_readiness
+      - no_privilege_expansion
+      - exact_commit_recorded
+
+failure_taxonomy:
+  REPOSITORY_DEFECT: repository lacks or contradicts required architecture/install/acceptance information
+  MISSING_PRIVATE_INPUT: required protected value or company-specific input is not available
+  TARGET_ENVIRONMENT_BLOCKER: authorized validation host cannot satisfy an environmental prerequisite
+  RUNTIME_FAILURE: implementation exists but observed runtime behavior fails acceptance
+  POLICY_OR_AUTHORITY_BLOCKER: required human/provider/organizational authority is absent
+
+report_template: validation/REPORT.template.md
+task_prompt: validation/FRESH-AGENT-TASK.md
+validation_entrypoint: VALIDATE.md

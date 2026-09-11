@@ -44,25 +44,27 @@ Before making a material change, read the documents relevant to the task in this
 1. `README.md`
 2. `AGENTS.md`
 3. `REPRODUCE.md`
-4. `config/eao-manifest.yaml`
-5. `state/PROJECT-PHASE.yaml`
-6. `DEPLOY.md` for installation-blueprint design or an explicitly activated real deployment task
-5. `docs/COMPLETENESS.md` for readiness/completion semantics
-6. `config/company.example.yaml` or the real company-private configuration when a deployment task exists
-7. `config/capabilities.yaml` for capability closure
-8. `config/validated-stack.yaml` for the reproducibility baseline
-9. `docs/ARCHITECTURE.md`
-10. `docs/DEPLOYMENT.md`
-11. `docs/SECURITY.md`
-12. `docs/PROFILE-STANDARD.md`
-13. `docs/KNOWLEDGE.md`
-14. `docs/CLIENT-RBAC.md`
-15. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
-16. `docs/UPGRADE.md` when versions change
-17. `docs/ACCEPTANCE-TESTS.md`
-18. `state/DEPLOYMENT-STATE.md` when operating an existing deployment
-19. `state/CHANGELOG.md` when changing an existing deployment
-20. the relevant company/reference material under `reference/` when useful
+4. `VALIDATE.md` when validating repository reproducibility or preparing Blueprint Validation
+5. `config/eao-manifest.yaml`
+6. `state/PROJECT-PHASE.yaml`
+7. `DEPLOY.md` for installation-blueprint design or an explicitly activated real deployment task
+8. `docs/COMPLETENESS.md` for readiness/completion semantics
+9. `config/company.example.yaml` or the real company-private configuration when a deployment task exists
+10. `config/capabilities.yaml` for capability closure
+11. `config/validated-stack.yaml` for the reproducibility baseline
+12. `docs/ARCHITECTURE.md`
+13. `docs/DEPLOYMENT.md`
+14. `docs/SECURITY.md`
+15. `docs/PROFILE-STANDARD.md`
+16. `docs/KNOWLEDGE.md`
+17. `docs/CLIENT-RBAC.md`
+18. `docs/BACKUP-RESTORE.md` when production/recovery is in scope
+19. `docs/UPGRADE.md` when versions change
+20. `docs/ACCEPTANCE-TESTS.md`
+21. `state/REAL-DEPLOYMENT-STATUS.md` when learning from the current sanitized ARMOR reference deployment
+22. `state/DEPLOYMENT-STATE.md` only as historical local/demo validation evidence
+23. `state/CHANGELOG.md` when changing an existing deployment
+24. the relevant company/reference material under `reference/` when useful
 
 ### Blueprint lifecycle and real-deployment gate — interpret before acting
 

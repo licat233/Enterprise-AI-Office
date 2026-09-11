@@ -28,21 +28,23 @@ A fresh agent MUST read these files before changing architecture or deploying:
 1. `AGENTS.md` — repository-local agent operating contract.
 2. `state/PROJECT-PHASE.yaml` — lifecycle and real-deployment gate.
 3. `config/eao-manifest.yaml` — machine-readable project map and reconstruction sequence.
-4. `config/validated-stack.yaml` — validated upstream versions.
-5. `config/capabilities.yaml` — capability registry and closure.
-6. `DEPLOY.md` — Golden Path installation contract.
-7. `docs/ARCHITECTURE.md` — component responsibilities and boundaries.
-8. `docs/SECURITY.md` — security model and least-privilege rules.
-9. `docs/CLIENT-RBAC.md` and `docs/EAO-RBAC-BASELINE.md` — employee/client permission model.
-10. `docs/KNOWLEDGE.md` — WeKnora authority and retrieval model.
-11. `docs/PROFILE-STANDARD.md` — Hermes Profile conventions.
-12. `docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md` — frozen Operations capability baseline.
-13. `docs/ENTERPRISE-WEB-RESEARCH-V1.md` — approved research capability.
-14. `docs/ENTERPRISE-EMAIL-OPERATIONS-V1.md` — email Operations boundary.
-15. `docs/BACKUP-RESTORE.md` and `docs/OPERATIONS.md` — runbook and recovery.
-16. `docs/ACCEPTANCE-TESTS.md` — final acceptance contract.
-17. `state/DEPLOYMENT-STATE.md` — sanitized current reference-deployment state when operating the reference installation.
-18. `state/CHANGELOG.md` — deployment change history.
+4. `VALIDATE.md` — Fresh-Agent validation contract and lifecycle-safe validation gates.
+5. `config/validated-stack.yaml` — validated upstream versions.
+6. `config/capabilities.yaml` — capability registry and closure.
+7. `DEPLOY.md` — Golden Path installation contract.
+8. `docs/ARCHITECTURE.md` — component responsibilities and boundaries.
+9. `docs/SECURITY.md` — security model and least-privilege rules.
+10. `docs/CLIENT-RBAC.md` and `docs/EAO-RBAC-BASELINE.md` — employee/client permission model.
+11. `docs/KNOWLEDGE.md` — WeKnora authority and retrieval model.
+12. `docs/PROFILE-STANDARD.md` — Hermes Profile conventions.
+13. `docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md` — frozen Operations capability baseline.
+14. `docs/ENTERPRISE-WEB-RESEARCH-V1.md` — approved research capability.
+15. `docs/ENTERPRISE-EMAIL-OPERATIONS-V1.md` — email Operations boundary.
+16. `docs/BACKUP-RESTORE.md` and `docs/OPERATIONS.md` — runbook and recovery.
+17. `docs/ACCEPTANCE-TESTS.md` — final acceptance contract.
+18. `state/REAL-DEPLOYMENT-STATUS.md` — sanitized current ARMOR reference-deployment status.
+19. `state/DEPLOYMENT-STATE.md` — historical local/demo validation evidence, not current ARMOR runtime truth.
+20. `state/CHANGELOG.md` — deployment change history.
 
 Historical migration and design documents are evidence, not the first installation instructions. Prefer the current normative files above.
 

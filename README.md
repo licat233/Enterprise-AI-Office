@@ -11,8 +11,9 @@ If you are a fresh AI engineering agent, do not infer the system from directory 
 1. [`AGENTS.md`](AGENTS.md) — repository operating contract.
 2. [`REPRODUCE.md`](REPRODUCE.md) — end-to-end fresh-agent reconstruction contract.
 3. [`config/eao-manifest.yaml`](config/eao-manifest.yaml) — machine-readable system map.
-4. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
-5. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) — sanitized current ARMOR reference-deployment status.
+4. [`VALIDATE.md`](VALIDATE.md) — Fresh-Agent validation contract.
+5. [`DEPLOY.md`](DEPLOY.md) — deployment Golden Path.
+6. [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) — sanitized current ARMOR reference-deployment status.
 
 Before proposing any new component, run the mandatory [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md).
 
