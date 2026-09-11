@@ -85,6 +85,14 @@ The active protected company configuration now enables the Core employee path pl
 | Hermes employee long-term memory | ✅ Disabled |
 | Hermes network bind | ✅ Loopback-only baseline |
 | Open WebUI v0.11.3 | ✅ Running |
+
+The current table above is the later 2026-09-11 sanitized runtime truth. The
+historical 2026-09-09 Phase 2 section in `state/DEPLOYMENT-STATE.md` records a
+phase-local Hermes `0.21.1` observation. That older observation is preserved
+for audit history but does not override `config/validated-stack.yaml` or this
+current status. The public repository does not contain a complete
+0.21.1→0.21.0 transition record; future reference-runtime version changes must
+be accompanied by explicit changelog/upgrade evidence.
 | Signup | ✅ Disabled |
 | Employee groups / baseline ACL | ✅ Reconciled |
 | General Assistant | ✅ Configured |
