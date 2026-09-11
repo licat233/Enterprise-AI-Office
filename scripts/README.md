@@ -55,6 +55,24 @@ It reads every `frozen_commit` declared in `config/eao-manifest.yaml`, verifies 
 
 GitHub Repository Readiness uses a full-history checkout specifically so this gate is meaningful.
 
+## `check-yaml-syntax.sh`
+
+Public YAML syntax gate for repository configuration/contracts.
+
+Run:
+
+```sh
+sh scripts/check-yaml-syntax.sh
+```
+
+It uses Ruby/Psych's parser to parse YAML ASTs under the public configuration,
+infrastructure, reference, state, validation, workflow, Profile, and Skill
+trees. It does not deserialize application objects and does not claim schema or
+business-policy correctness.
+
+The gate exists to catch malformed YAML before higher-level text/path checks can
+produce a false PASS.
+
 ## `check-capability-acceptance.py`
 
 Dependency-free structural validation for capability acceptance references.
