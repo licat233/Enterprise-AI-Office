@@ -173,6 +173,12 @@ The registry is not a secret store and is not a request to start a server.
 Actual Profile exposure remains controlled by the Profile configuration and
 must be explicitly allowlisted.
 
+Company desired state uses `mcp_control_plane.profile_allowlists`, keyed by an
+actually declared Profile ID. The reusable baseline therefore contains only
+`general: [weknora]`; a private communication example contains
+`communication: [weknora]`. Do not predeclare an `operations` allowlist when
+no Operations Profile exists in the active company configuration.
+
 The reusable baseline does not require an `operations` Profile at all. In the
 sanitized ARMOR reference implementation, Operations has later approved/frozen
 capabilities beyond WeKnora retrieval: the bounded Enterprise Web Research
