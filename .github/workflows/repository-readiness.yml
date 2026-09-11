@@ -36,6 +36,9 @@ jobs:
           bash -n scripts/backup.sh
           bash -n scripts/restore.sh
 
+      - name: Run Web Research unit tests
+        run: python3 infrastructure/web-research/test_adapter.py
+
       - name: Compile Python sources
         run: |
           python3 -m compileall -q scripts infrastructure skills
