@@ -164,6 +164,7 @@ For the requested readiness level, verify applicable:
 - employee-visible behavior after restart;
 - backup generation;
 - isolated restore;
+- when `production-ready` is requested: approved off-primary copy, post-transfer integrity/freshness evidence, and final isolated restore sourced from that independent copy;
 - second-run/idempotent reconciliation;
 - no privilege expansion after recovery.
 
