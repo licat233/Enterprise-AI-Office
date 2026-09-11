@@ -248,4 +248,4 @@ Use supported routing, allowlists/pairing, and platform identity controls.
 [ ] Remote-access boundary tested if enabled
 ```
 
-Specific validation results from an individual deployment belong in `state/DEPLOYMENT-STATE.md` and `state/CHANGELOG.md`.
+Specific runtime validation results from an individual deployment belong in its protected operational state created from `state/DEPLOYMENT-STATE.template.md`. Record only reusable/public repository changes in `state/CHANGELOG.md`; do not use the historical sanitized `state/DEPLOYMENT-STATE.md` as the live RBAC evidence store.
