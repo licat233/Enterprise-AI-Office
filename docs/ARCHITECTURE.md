@@ -97,7 +97,8 @@ Owns deployment intent, standards, reusable templates/adapters, acceptance rules
 | Employee Web identity and access | Open WebUI |
 | Durable agent tasks | Hermes Kanban when enabled |
 | Scheduled routines | Hermes Cron when enabled |
-| Current deployment state | `state/DEPLOYMENT-STATE.md` + real runtime |
+| Current deployment state | protected operational copy created from `state/DEPLOYMENT-STATE.template.md` + real runtime |
+| Historical sanitized deployment evidence | `state/DEPLOYMENT-STATE.md` |
 | Architecture intent | `AGENTS.md` + this document |
 | Persistent error correction | The authoritative owning layer, not Memory |
 

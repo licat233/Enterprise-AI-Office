@@ -29,7 +29,7 @@ Core Ready is a functional milestone. It does not prove that every company-confi
 2. every capability enabled by the company configuration has a closed implementation path;
 3. every enabled capability passes its applicable acceptance test;
 4. no enabled capability is left as `TODO`, `not configured`, or an undocumented manual follow-up;
-5. the actual enabled/disabled capability set is recorded in `state/DEPLOYMENT-STATE.md`.
+5. the actual enabled/disabled capability set is recorded in the protected operational deployment state created from `state/DEPLOYMENT-STATE.template.md`.
 
 An optional capability that is disabled does not block Configured Ready.
 

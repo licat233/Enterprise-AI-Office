@@ -86,7 +86,7 @@ Upstream:
 
 The `nesquena/hermes-webui` project used by the current reference architecture contains an MIT License at the time of this baseline.
 
-Because multiple projects may use similar `hermes-webui` names, deployments must record the exact repository and commit/version in `state/DEPLOYMENT-STATE.md`.
+Because multiple projects may use similar `hermes-webui` names, deployments must record the exact repository and commit/version in the protected operational deployment state created from `state/DEPLOYMENT-STATE.template.md`. The repository's `state/DEPLOYMENT-STATE.md` remains historical sanitized evidence.
 
 Upstream:
 
