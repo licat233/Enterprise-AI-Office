@@ -2,9 +2,14 @@
 
 This playbook turns the Enterprise AI Office company configuration into Open WebUI users/groups, Hermes-backed model resources, and access grants without requiring a deployment operator to click through the UI manually.
 
-It is pinned conceptually to the first validated Open WebUI core version (`v0.11.3`, commit recorded in `config/validated-stack.yaml`). Before using it with another release, verify the exact routes/forms against that selected upstream version.
+The authoritative Open WebUI version, upstream provenance, acquisition method,
+and runtime identity live in `config/validated-stack.yaml`. Use this contract
+only after `DEPLOY.md §4.1–4.2` has acquired and verified that selected
+runtime. If an upgrade is intentionally selected, re-qualify the version-specific
+routes/forms before reusing this contract.
 
-Use this after the Open WebUI container is healthy and the Hermes employee Profile APIs are reachable from the Open WebUI container.
+Use this after the Open WebUI container is healthy and the Hermes employee
+Profile APIs are reachable from the Open WebUI container.
 
 ## 1. Security model
 
@@ -22,9 +27,22 @@ For the validated Open WebUI version, ordinary users do not automatically receiv
 
 This means the deployment should not rely on UI hiding or connection naming as authorization.
 
-## 2. Required protected inputs
+## 2. Required inputs
 
-Resolve without printing or committing:
+From the active company configuration:
+
+```text
+employee_access.web.groups:
+  company logical group ID
+  intended display_name
+
+for each enabled employee Profile:
+  Profile ID
+  employee-facing display name
+  allowed company logical group IDs
+```
+
+From protected deployment input:
 
 ```text
 OPEN_WEBUI_URL
@@ -32,23 +50,28 @@ OPEN_WEBUI_ADMIN_EMAIL
 OPEN_WEBUI_ADMIN_PASSWORD
 
 for each enabled employee Profile:
-  Profile ID
-  employee-facing display name
   Hermes OpenAI-compatible base URL
   Profile API key
-  allowed Open WebUI company logical group ID → Open WebUI display name → runtime group UUID
 ```
 
-Baseline:
+Baseline mapping:
 
 ```text
 Profile ID: general
 Display name: General Assistant
-Allowed group: All Employees
+Allowed company group: all-employees
+Open WebUI group display name: All Employees
 Hermes URL: http://host.docker.internal:8642/p/general/v1
 ```
 
 Exact host/port may differ by deployment.
+
+Do not print or commit protected values. If a required protected credential,
+target Profile route, or company group mapping is unresolved, stop with:
+
+```text
+BLOCKED — REQUIRED INPUT: <specific item>
+```
 
 ## 3. Use the native admin API
 
@@ -149,12 +172,9 @@ Create body:
 
 Group permissions are additive. Keep group permissions minimal and rely on explicit Model resource grants for Assistant visibility.
 
-Baseline groups:
-
-```text
-All Employees
-AI Administrators
-```
+The two baseline display names above are derived from the generic company
+configuration. Do not create a second group whose name is a transformed logical
+ID such as `All-Employees` or `AI-Admins`.
 
 Specialist groups are created only from active company configuration.
 
