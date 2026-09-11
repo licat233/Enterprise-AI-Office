@@ -136,8 +136,9 @@ runtime. The repository Compose adapter already pins the official image:
 ghcr.io/open-webui/open-webui:v0.11.3
 ```
 
-The upstream tag `v0.11.3` is verified to point to the component commit in
-`config/validated-stack.yaml`.
+The upstream tag `v0.11.3` is verified to point to source commit
+`2a960a59fe1dbbd35282f0556b3666d81102e781`, matching the component commit
+in `config/validated-stack.yaml`.
 
 Provide the required protected administrator environment values, then use:
 
