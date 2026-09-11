@@ -327,6 +327,10 @@ Use a real ordinary employee account and Part A of `docs/ACCEPTANCE-TESTS.md`.
 
 Backend health is not enough. Validate actual login, Assistant visibility, grounded answer/source, follow-up, history, file upload when enabled, admin non-exposure, and dangerous-tool denial.
 
+Likewise, service liveness is not runtime identity. Before `CORE READY`, run
+the post-acquisition identity assertions in `DEPLOY.md §4.2` so WeKnora,
+Hermes, and Open WebUI are proven to match `config/validated-stack.yaml`.
+
 When Part A passes, `CORE READY` may be recorded.
 
 If target readiness is higher, continue.
