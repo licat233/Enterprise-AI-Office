@@ -134,3 +134,18 @@ Repository maturity means a fresh capable Agent can determine:
 7. which information must remain private.
 
 More GitHub features do not automatically make the repository more mature. Add repository machinery only when it strengthens one of these properties.
+
+
+## 11. CI supply-chain posture
+
+Repository validation workflows should remain reproducible and least-privilege:
+
+- grant only the GitHub token permissions the job actually needs;
+- prefer read-only permissions for validation jobs;
+- pin third-party GitHub Actions to an exact reviewed commit SHA, retaining a comment for the human-readable release family;
+- disable checkout credential persistence when the job does not push;
+- pin the runner image family instead of relying on a floating `latest` label when the checked workflow does not require that drift;
+- do not use `pull_request_target` to execute untrusted pull-request code;
+- do not expose repository or deployment secrets to public validation jobs.
+
+The Repository Readiness workflow is expected to be a clean-checkout, read-only validation path. Deployment credentials and company-private runtime state do not belong in this workflow.
