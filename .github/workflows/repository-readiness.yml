@@ -38,6 +38,9 @@ jobs:
       - name: Check declarative repository paths
         run: python3 scripts/check-declarative-paths.py
 
+      - name: Check public repository hygiene
+        run: python3 scripts/check-public-repository-hygiene.py
+
       - name: Run public offline tests
         run: sh scripts/run-public-offline-tests.sh
 
