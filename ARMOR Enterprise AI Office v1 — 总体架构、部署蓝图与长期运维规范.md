@@ -2,7 +2,13 @@
 title: ARMOR Enterprise AI Office v1 — 总体架构、部署蓝图与长期运维规范
 version: 1.0
 created: 2026-09-05
-status: approved-design
+status: historical-reference
+superseded_by:
+  - AGENTS.md
+  - REPRODUCE.md
+  - DEPLOY.md
+  - VALIDATE.md
+  - config/eao-manifest.yaml
 scope: enterprise-ai-office
 deployment_target: Mac Studio
 knowledge_platform: WeKnora
@@ -11,6 +17,13 @@ employee_web_client: Open WebUI
 admin_client: hermes-webui
 coding_agents: [Codex, Claude Code]
 ---
+
+> [!WARNING]
+> **Historical reference only — not the current execution contract.**
+>
+> This document records the ARMOR v1 design state from 2026-09-05. Current AI Agents must follow `AGENTS.md`, `REPRODUCE.md`, `config/eao-manifest.yaml`, `DEPLOY.md`, `VALIDATE.md`, and the current normative documents under `docs/`.
+>
+> If this historical document conflicts with a current normative contract, the current contract wins.
 
 # ARMOR Enterprise AI Office v1
 
@@ -44,7 +57,7 @@ coding_agents: [Codex, Claude Code]
 - 其他 AI Agent；
 - 人类系统管理员；
 
-执行部署、升级、维护或排障，都必须首先阅读本文档。
+执行部署、升级、维护或排障时，**当前要求已经由仓库级 Agent 合同取代**：必须优先阅读 `AGENTS.md`、`REPRODUCE.md`、`config/eao-manifest.yaml`、`DEPLOY.md` 与 `VALIDATE.md`。本文档仅作为 v1 历史设计参考。
 
 本文档的目标是：
 
