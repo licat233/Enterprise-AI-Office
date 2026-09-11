@@ -10,11 +10,32 @@ Before a material change, read:
 
 1. `README.md`
 2. `AGENTS.md`
-3. `DEPLOY.md`
-4. `docs/COMPLETENESS.md`
-5. `config/capabilities.yaml` when the change affects a deployable capability
-6. `docs/ARCHITECTURE.md`
-7. the standards/adapters for the area being changed.
+3. `REPRODUCE.md`
+4. `VALIDATE.md` when reproducibility/validation is affected
+5. `config/eao-manifest.yaml`
+6. `docs/README.md` to identify the correct authority layer
+7. `DEPLOY.md` when deployment behavior is affected
+8. `docs/COMPLETENESS.md`
+9. `config/capabilities.yaml` when the change affects a deployable capability
+10. the current standards/adapters for the area being changed.
+
+## Mandatory Capability Reuse Pass
+
+Before adding a component, service, Skill, MCP server, scheduler, workflow engine, database, browser stack, memory layer, or external integration, execute `docs/CAPABILITY-REUSE-PASS.md`.
+
+A contribution must prefer:
+
+```text
+existing EAO capability
+→ Hermes native capability
+→ installed/frozen Skill
+→ Open WebUI / WeKnora native capability
+→ official upstream integration
+→ thin adapter
+→ new infrastructure only as last resort
+```
+
+Do not add infrastructure merely because it is familiar or convenient.
 
 ## Preserve capability closure
 
@@ -35,11 +56,14 @@ Do not add a capability selector that has no implementation/acceptance path.
 
 Do not remove or rename an implementation artifact without updating the registry and dependent documentation.
 
-Run the static check after relevant changes:
+Run the public repository checks after relevant changes:
 
 ```sh
-sh scripts/repository-readiness-check.sh
+EAO_REPOSITORY_ONLY=1 sh scripts/repository-readiness-check.sh
+python3 scripts/validate-fresh-agent-kit.py
 ```
+
+Use the full runtime/deployment acceptance path only on the appropriate authorized target.
 
 A static PASS does not replace runtime acceptance.
 
