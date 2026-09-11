@@ -302,6 +302,25 @@ Each Hermes Profile connection uses its own Profile API key. Do not connect the 
 
 After updating, verify the administrator can see the expected upstream model IDs through `/openai/models` or `/api/models`.
 
+This is also the required **container → host Hermes bridge acceptance** for the
+selected container runtime. The request is resolved by the Open WebUI backend
+using the configured Hermes connection URL (for the reference path,
+`host.docker.internal`), so a successful host-side `curl` to Hermes is not a
+substitute.
+
+Require at least:
+
+```text
+Open WebUI backend
+→ configured Hermes Profile URL
+→ /p/general/v1
+→ advertised model ID general
+```
+
+If Open WebUI is healthy but this enumeration fails, treat the container-runtime
+bridge as incompatible/unresolved. Do not create the employee Model ACL record
+until the backend connection succeeds.
+
 ## 8. Create the employee-visible Model/Assistant ACL record
 
 For Open WebUI v0.11.3, a raw upstream model without a corresponding Models DB entry is admin-only when model access control is enforced.
