@@ -57,7 +57,9 @@ From protected deployment input/secret storage:
 
 ```text
 WeKnora API base URL
-WeKnora owner/admin login needed for provisioning
+existing WeKnora owner/admin login OR explicitly authorized fresh-owner bootstrap identity
+protected owner/bootstrap password secret
+selected authentication policy when the deployment is not local self-serve
 selected model-provider credential(s)
 provider-specific endpoint/config only when the selected provider requires it
 protected destination for generated Hermes retrieval keys
@@ -618,6 +620,7 @@ Record at least:
 
 ```text
 WeKnora version + commit
+effective auth registration mode + bootstrap method (non-secret)
 API/admin access boundary
 runtime tenant/workspace ID
 logical KB ID → runtime KB ID mapping
