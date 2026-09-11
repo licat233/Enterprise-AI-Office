@@ -444,8 +444,11 @@ According to `docs/BACKUP-RESTORE.md`:
 [ ] protected operational deployment-state/handoff record backed up
 [ ] secret recovery method protected/documented
 [ ] backup integrity verified
-[ ] required off-primary-disk copy exists when configured
+[ ] approved off-primary-disk copy exists for Production Ready
+[ ] off-primary copy checksum/integrity verified after transfer
+[ ] off-primary freshness/retention evidence recorded
 [ ] isolated restore tested
+[ ] for Production Ready, final isolated restore source is the approved off-primary copy
 [ ] restored deployment-state mappings match restored WeKnora/Hermes/Open WebUI resources
 [ ] restored employee knowledge/access path works
 ```
