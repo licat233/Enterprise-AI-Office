@@ -40,7 +40,13 @@ Optional coding workers: Codex + Claude Code
 Host target: company-managed machine
 ```
 
-Which optional capabilities and specialist Profiles ARMOR actually enables must come from its current private deployment configuration and real operating needs.
+Private deployment configuration remains authoritative for private desired-state values and secrets.
+
+For public, sanitized reference topology/status, use
+[`reference-index.yaml`](reference-index.yaml). It is a machine-readable index
+that points to the existing current runtime, MCP, RBAC, and frozen acceptance
+authorities. It deliberately does not duplicate private company configuration or
+claim that every repository capability is live.
 
 ## Current controlled expansion
 

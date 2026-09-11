@@ -1,0 +1,102 @@
+schema_version: 1
+kind: sanitized-reference-index
+reference_implementation: ARMOR
+normative: false
+deployable_company_config: false
+
+purpose: >-
+  Give a fresh human or AI agent one machine-readable index for the sanitized
+  ARMOR reference implementation without duplicating private company desired
+  state, secrets, or current runtime authority.
+
+authority:
+  lifecycle_and_deployment_gate: state/PROJECT-PHASE.yaml
+  current_sanitized_runtime_status: state/REAL-DEPLOYMENT-STATUS.md
+  current_mcp_reference_snapshot: config/mcp-registry.yaml
+  project_and_reconstruction_map: config/eao-manifest.yaml
+  operations_capability_baseline: docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md
+  operations_rbac_baseline: docs/EAO-RBAC-BASELINE.md
+  operations_rbac_audit: docs/OPERATIONS-EMPLOYEE-RBAC-AUDIT.md
+  web_research_baseline: docs/ENTERPRISE-WEB-RESEARCH-V1.md
+  governed_email_boundary: docs/ENTERPRISE-EMAIL-OPERATIONS-V1.md
+  media_transcription_contract: infrastructure/media-transcription/README.md
+
+employee_lanes:
+  general:
+    status: deployed_reference
+    role: reusable_core_reference
+    generic_default: true
+    authority:
+      - state/REAL-DEPLOYMENT-STATUS.md
+      - config/eao-manifest.yaml
+
+  operations:
+    status: deployed_frozen_reference
+    role: ARMOR_specialist_reference
+    generic_default: false
+    authority:
+      - docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md
+      - docs/EAO-RBAC-BASELINE.md
+      - docs/OPERATIONS-EMPLOYEE-RBAC-AUDIT.md
+      - config/mcp-registry.yaml
+      - state/REAL-DEPLOYMENT-STATUS.md
+
+  communication_email:
+    status: repository_capability_present
+    live_mailbox_deployment_claim: false
+    role: governed_capability_assets_and_installation_contract
+    generic_default: false
+    authority:
+      - docs/ENTERPRISE-EMAIL-OPERATIONS-V1.md
+      - config/capabilities.yaml
+      - docs/V2-STAGE-CONTRACTS.md
+
+reference_capabilities:
+  enterprise_operations_v1:
+    status: deployed_frozen_pass
+    authority: docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md
+
+  enterprise_web_research_v1:
+    status: deployed_frozen_pass
+    authority:
+      - docs/ENTERPRISE-WEB-RESEARCH-V1.md
+      - config/mcp-registry.yaml
+
+  media_transcription:
+    status: validated_optional_capability
+    generic_default: false
+    authority:
+      - infrastructure/media-transcription/README.md
+      - config/capabilities.yaml
+
+  governed_email:
+    status: repository_capability_present
+    live_mailbox_deployment_claim: false
+    generic_default: false
+    authority:
+      - docs/ENTERPRISE-EMAIL-OPERATIONS-V1.md
+      - config/capabilities.yaml
+
+reference_access:
+  private_network_access_observed: true
+  product_specific_network_identity_in_git: false
+  authority: state/REAL-DEPLOYMENT-STATUS.md
+
+privacy_boundary:
+  intentionally_omitted:
+    - real_employee_identifiers
+    - real_mailbox_addresses
+    - mailbox_credentials
+    - provider_tokens
+    - private_network_addresses
+    - device_identity_material
+    - private_company_configuration
+    - secret_values
+
+fresh_agent_rules:
+  - This file is an index, not company desired state.
+  - Follow each authority path for the actual contract or evidence.
+  - Do not copy ARMOR runtime flags into another deployment.
+  - Do not infer a live mailbox deployment from governed Email repository assets.
+  - Do not infer Operations as a generic EAO default.
+  - Recompute target runtime state from the authorized host and active company configuration.

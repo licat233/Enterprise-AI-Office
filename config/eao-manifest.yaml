@@ -25,6 +25,7 @@ entrypoints:
     validated_stack: config/validated-stack.yaml
     project_manifest: config/eao-manifest.yaml
   reference_runtime:
+    machine_readable_index: reference/armor/reference-index.yaml
     current_public_status: state/REAL-DEPLOYMENT-STATUS.md
     historical_demo_state: state/DEPLOYMENT-STATE.md
     deployment_change_log: state/CHANGELOG.md

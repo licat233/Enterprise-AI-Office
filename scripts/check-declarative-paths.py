@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DECLARATIVE_FILES = (
     ROOT / "config" / "eao-manifest.yaml",
     ROOT / "config" / "capabilities.yaml",
+    ROOT / "reference" / "armor" / "reference-index.yaml",
 )
 
 PATH_PREFIXES = (

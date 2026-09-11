@@ -149,6 +149,15 @@ Protected real runtime state remains outside public Git when it contains private
 
 ## Reference material
 
+The sanitized machine-readable ARMOR reference index is:
+
+```text
+reference/armor/reference-index.yaml
+```
+
+It points to existing runtime/RBAC/capability authorities and is deliberately
+non-normative and non-deployable as company configuration.
+
 The `reference/` directory and the root ARMOR v1 architecture document are reference evidence.
 
 They may provide company context or historical rationale, but they are non-normative unless a current contract explicitly incorporates them.

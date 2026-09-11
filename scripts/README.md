@@ -71,7 +71,7 @@ This is intentionally narrower than a full secret-scanning product. It avoids tr
 
 ## `check-declarative-paths.py`
 
-Machine-readable contract path integrity check for `config/eao-manifest.yaml` and `config/capabilities.yaml`.
+Machine-readable contract path integrity check for `config/eao-manifest.yaml`, `config/capabilities.yaml`, and the sanitized ARMOR `reference/armor/reference-index.yaml`.
 
 Run:
 
