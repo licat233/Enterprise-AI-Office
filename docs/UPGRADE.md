@@ -127,6 +127,11 @@ Before upgrading WeKnora:
 - inspect database migration notes;
 - inspect storage changes;
 - inspect model/retrieval compatibility;
+- re-verify the provisioning API surface against the selected commit's
+  `internal/router/router.go`, `routes_auth_tenant.go`,
+  `routes_knowledge.go`, and `routes_infra.go`;
+- re-check tenant API-key capability semantics and Knowledge Base allow-list
+  enforcement used by the employee retrieval boundary;
 - back up DB and uploaded files;
 - verify parser/DocReader compatibility;
 - rerun representative knowledge queries after upgrade.
