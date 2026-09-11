@@ -265,6 +265,8 @@ require_text config/validated-stack.yaml 'upstream_repository: https://github.co
 require_text DEPLOY.md '### 4.1 Deterministic Core acquisition' 'Golden Path defines deterministic Core acquisition'
 require_text DEPLOY.md '### 4.2 Post-acquisition Core identity assertions' 'Golden Path distinguishes liveness from runtime identity'
 require_text DEPLOY.md 'state/DEPLOYMENT-STATE.template.md' 'Golden Path uses protected deployment-state template'
+require_text DEPLOY.md '${EAIO_RUNTIME_DIR}/state/deployment-state.md' 'Golden Path aligns protected state with backup default'
+require_text DEPLOY.md 'EAIO_DEPLOYMENT_STATE_FILE' 'Golden Path documents protected state backup override'
 require_no_text DEPLOY.md 'Update `state/DEPLOYMENT-STATE.md` with actual runtime truth' 'Golden Path never writes real runtime truth into historical public state'
 require_text state/DEPLOYMENT-STATE.template.md 'Do **not** overwrite the repository' 'Deployment-state template protects historical public state'
 require_text docs/ARCHITECTURE.md 'protected operational copy created from `state/DEPLOYMENT-STATE.template.md` + real runtime' 'Architecture points live state to protected operational record'

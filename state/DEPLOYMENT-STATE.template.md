@@ -6,6 +6,8 @@ Last updated: `<ISO_DATE>`
 Company / environment: `<COMPANY> / <ENVIRONMENT>`
 Requested readiness: `<core-ready | configured-ready | production-ready>`
 Achieved readiness: `<CORE READY | CONFIGURED READY | PRODUCTION READY | BLOCKED | FAIL>`
+Operational state path: `<protected path; recommended ${EAIO_RUNTIME_DIR}/state/deployment-state.md>`
+Backup state source: `<default path or EAIO_DEPLOYMENT_STATE_FILE override>`
 
 ## Host
 
