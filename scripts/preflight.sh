@@ -12,21 +12,32 @@ pass() { PASS=$((PASS + 1)); printf '%-28s PASS%s\n' "$1" "${2:+ - $2}"; }
 warn() { WARN=$((WARN + 1)); printf '%-28s WARN%s\n' "$1" "${2:+ - $2}"; }
 fail() { FAIL=$((FAIL + 1)); printf '%-28s FAIL%s\n' "$1" "${2:+ - $2}"; }
 
-check_cmd() {
+check_required_cmd() {
   label="$1"
   cmd="$2"
   if command -v "$cmd" >/dev/null 2>&1; then
     path=$(command -v "$cmd")
     pass "$label" "$path"
   else
-    warn "$label" "not found"
+    fail "$label" "required for EAO Core; not found"
+  fi
+}
+
+check_optional_cmd() {
+  label="$1"
+  cmd="$2"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    path=$(command -v "$cmd")
+    pass "$label" "$path"
+  else
+    warn "$label" "optional capability/operator tool not found"
   fi
 }
 
 printf '%s\n' 'Enterprise AI Office Preflight'
 printf '%s\n' '-----------------------------'
 
-# OS
+# Host qualification
 os_name=$(uname -s 2>/dev/null || echo unknown)
 os_arch=$(uname -m 2>/dev/null || echo unknown)
 pass "OS" "$os_name / $os_arch"
@@ -34,6 +45,12 @@ pass "OS" "$os_name / $os_arch"
 if [ "$os_name" = "Darwin" ]; then
   mac_ver=$(sw_vers -productVersion 2>/dev/null || true)
   [ -n "$mac_ver" ] && pass "macOS version" "$mac_ver" || warn "macOS version" "unknown"
+fi
+
+if [ "$os_name" = "Darwin" ] && [ "$os_arch" = "arm64" ]; then
+  pass "Reference host family" "Apple Silicon macOS"
+else
+  warn "Reference host family" "not the exact validated macOS arm64 family; compatibility revalidation required"
 fi
 
 # Hostname
@@ -67,23 +84,35 @@ else
   warn "Memory" "unable to inspect"
 fi
 
-check_cmd "Git" git
-check_cmd "Docker CLI" docker
-check_cmd "Python" python3
-check_cmd "Node" node
-check_cmd "npm" npm
-check_cmd "Hermes" hermes
-check_cmd "Codex" codex
-check_cmd "Claude Code" claude
-check_cmd "GitHub CLI" gh
-check_cmd "curl" curl
+# EAO Core prerequisites.
+check_required_cmd "Git" git
+check_required_cmd "Docker CLI" docker
+check_required_cmd "Python" python3
+check_required_cmd "curl" curl
+check_required_cmd "bash" bash
 
-# Docker daemon
+# Optional/current-installation discovery. These are not Core prerequisites.
+check_optional_cmd "Node" node
+check_optional_cmd "npm" npm
+check_optional_cmd "Hermes" hermes
+check_optional_cmd "OrbStack CLI" orb
+check_optional_cmd "Codex" codex
+check_optional_cmd "Claude Code" claude
+check_optional_cmd "GitHub CLI" gh
+
+# Docker daemon and Compose plugin are Core prerequisites.
 if command -v docker >/dev/null 2>&1; then
   if docker info >/dev/null 2>&1; then
     pass "Docker daemon" "reachable"
   else
-    warn "Docker daemon" "CLI found, daemon not reachable"
+    fail "Docker daemon" "Core container runtime is not reachable"
+  fi
+
+  if docker compose version >/dev/null 2>&1; then
+    compose_ver=$(docker compose version --short 2>/dev/null || docker compose version 2>/dev/null || true)
+    pass "Docker Compose" "${compose_ver:-available}"
+  else
+    fail "Docker Compose" "docker compose plugin is required for EAO Core"
   fi
 fi
 
