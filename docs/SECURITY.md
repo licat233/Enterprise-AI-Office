@@ -133,6 +133,8 @@ This includes API keys, database/cache passwords, encryption keys, OAuth secrets
 
 Tracked examples use placeholders only. Runtime secrets belong in protected deployment storage/profile secret scopes.
 
+Public repository CI also runs `python3 scripts/check-public-repository-hygiene.py` as a high-confidence backstop against accidentally tracked private/local paths, credential file classes, private-key material, common token signatures, and real-looking sensitive environment assignments. This complements GitHub/platform secret scanning; it does not replace provider-side secret revocation when a credential has ever been exposed.
+
 ## 10. Secret generation/recovery
 
 Generate internal service credentials with cryptographically strong randomness.
