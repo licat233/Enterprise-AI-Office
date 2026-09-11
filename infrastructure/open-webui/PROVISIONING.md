@@ -27,6 +27,44 @@ For the validated Open WebUI version, ordinary users do not automatically receiv
 
 This means the deployment should not rely on UI hiding or connection naming as authorization.
 
+### Company knowledge authority
+
+Open WebUI owns employee identity, chat UX, conversation history, and
+Assistant/resource ACLs. It does **not** own authoritative EAO company
+knowledge.
+
+For the Core architecture:
+
+```text
+Open WebUI
+→ Hermes employee Profile
+→ approved WeKnora MCP/API
+→ authoritative company Knowledge Base
+```
+
+This provisioning contract must not create a second EAO-managed copy of
+company documents in Open WebUI native Knowledge or attach such a copy to the
+General Assistant merely because Open WebUI supports that feature.
+
+Conversation file upload may still be enabled as temporary chat context when
+company policy allows it. Temporary employee attachments are not durable
+company Knowledge and must not silently become the authoritative source for
+policies, product specifications, SOPs, or other governed company facts.
+
+On an existing Open WebUI deployment:
+
+- preserve unrelated legitimate native Knowledge resources;
+- do not delete them merely to make the record count zero;
+- if an EAO employee Assistant is already coupled to a duplicate native company
+  Knowledge resource, classify it as authority drift and review the dependency
+  before changing it;
+- remove/reconcile only the EAO-owned duplicate path after impact and acceptance
+  are understood.
+
+The sanitized ARMOR reference runtime currently has zero Open WebUI native
+Knowledge records. That is valid evidence for the reference deployment, not a
+requirement to destroy unrelated resources on another existing deployment.
+
 ## 2. Required inputs
 
 From the active company configuration:
@@ -374,7 +412,7 @@ Use the actual browser employee UI and verify Part A / applicable Part B of `doc
 
 - login;
 - Assistant visibility;
-- grounded answer/source;
+- grounded answer/source through Hermes → WeKnora;
 - follow-up/history;
 - file upload when enabled;
 - no System Prompt/Advanced Params editing under baseline permissions;
@@ -414,6 +452,7 @@ employee identity method
 Hermes Profile connection URLs at non-secret level
 employee-visible Model IDs/display names
 group → Model grants
+EAO-managed Open WebUI native company Knowledge attachments: none
 ordinary employee permission baseline
 acceptance result
 ```
