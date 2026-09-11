@@ -190,6 +190,15 @@ A fresh deployment must derive its own Operations/specialist exposure from the
 active company configuration and enabled capability contracts. It must not copy
 the ARMOR reference allowlist merely because those runtime flags exist in Git.
 
+Capability selection should be machine-resolvable whenever the reusable company
+schema has a typed field. For example, Enterprise Web Research is selected by
+`capabilities.enterprise_web_research.enabled == true`.
+
+ARMOR-specific workflow entries may instead declare
+`selection.scope: ARMOR_reference_specific` and point to the sanitized ARMOR
+reference index. Their presence in the capability library does not create a
+generic company-schema field or enable them for another company.
+
 An enabled capability must be implemented and accepted before `CONFIGURED READY` can be claimed. A disabled capability must not be instantiated merely because its playbook exists and does not require unused conditional secrets.
 
 ### Operational integrations

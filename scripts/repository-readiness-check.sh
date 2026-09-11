@@ -95,6 +95,7 @@ for path in \
   scripts/validate-fresh-agent-kit.py \
   scripts/check-repository-links.py \
   scripts/check-declarative-paths.py \
+  scripts/check-capability-acceptance.py \
   scripts/check-public-repository-hygiene.py \
   scripts/check-frozen-baselines.py \
   scripts/run-public-offline-tests.sh \
@@ -372,6 +373,10 @@ require_text skills/shared/department/armor-memory/scripts/armor-vault-mcp.py 'P
 require_text config/mcp-registry.yaml 'product_visual_write_scope:' 'Product Visual write boundary is registered'
 require_text config/capabilities.yaml 'armor_product_visual:' 'Product Visual capability is registered'
 require_text config/capabilities.yaml 'enterprise_web_research:' 'Enterprise Web Research capability is registered'
+require_text config/capabilities.yaml 'enabled_when: capabilities.enterprise_web_research.enabled == true' 'Web Research uses typed company selector'
+require_text config/capabilities.yaml 'section: Stage 3 — Final Acceptance & Freeze' 'Web Research closes against final frozen acceptance'
+require_text config/capabilities.yaml 'scope: ARMOR_reference_specific' 'ARMOR-specific workflow selector scope is explicit'
+require_text config/capabilities.yaml 'generic_company_schema_field: none' 'ARMOR-specific workflows do not pollute generic company schema'
 require_text config/mcp-registry.yaml 'enterprise-web-research:' 'Enterprise Web Research adapter is registered'
 require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'UNTRUSTED_WEB_CONTENT' 'Web Research trust boundary is documented'
 require_text docs/ENTERPRISE-WEB-RESEARCH-V1.md 'Stage 1 status: `CLOSED / PASS`' 'Web Research Stage 1 is closed'
