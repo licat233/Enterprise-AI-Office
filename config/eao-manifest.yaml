@@ -50,6 +50,7 @@ validated_core_stack:
   open_webui: v0.11.3
 
 normative_docs:
+  documentation_map: docs/README.md
   architecture: docs/ARCHITECTURE.md
   security: docs/SECURITY.md
   knowledge: docs/KNOWLEDGE.md
