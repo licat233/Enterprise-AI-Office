@@ -41,6 +41,18 @@ company config → target_readiness
 
 A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
 
+## `check-repository-links.py`
+
+Repository-wide, network-free Markdown link integrity check.
+
+Run:
+
+```sh
+python3 scripts/check-repository-links.py
+```
+
+It scans Git-tracked Markdown files, validates repository-local file/directory links, rejects paths that escape the repository, and ignores external URLs, document-local anchors, and site-root application routes.
+
 ## `run-public-offline-tests.sh`
 
 Portable zero-production-access regression suite for a fresh clone.
