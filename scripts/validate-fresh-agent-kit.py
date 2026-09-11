@@ -97,6 +97,7 @@ def main() -> int:
         "docs/CAPABILITY-REUSE-PASS.md",
         "config/eao-manifest.yaml",
         "state/PROJECT-PHASE.yaml",
+        "state/DEPLOYMENT-STATE.template.md",
         "state/REAL-DEPLOYMENT-STATUS.md",
         "reference/armor/reference-index.yaml",
     ]:
@@ -177,6 +178,21 @@ def main() -> int:
         "config/eao-manifest.yaml",
         "authority: config/validated-stack.yaml",
         "Manifest delegates Core version truth",
+    )
+    require_text(
+        "config/eao-manifest.yaml",
+        "deployment_state_template: state/DEPLOYMENT-STATE.template.md",
+        "Manifest exposes protected deployment-state template",
+    )
+    require_text(
+        "DEPLOY.md",
+        "protected operational storage",
+        "Fresh Agent keeps real deployment state protected",
+    )
+    require_text(
+        "REPRODUCE.md",
+        "Do not overwrite the repository's historical",
+        "Fresh Agent preserves public historical deployment evidence",
     )
     require_text(
         "config/validated-stack.yaml",
