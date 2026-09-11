@@ -76,7 +76,7 @@ The current reproducible Core version/commit authority is `config/validated-stac
 
 ```text
 Host: Apple Silicon macOS
-Container runtime: OrbStack / Docker
+Exact reference container runtime: OrbStack-provided Docker + Compose
 WeKnora: v0.8.0
 Hermes Agent: v0.21.0, host-native
 Open WebUI: v0.11.3
@@ -84,6 +84,20 @@ Employee Hermes long-term memory: disabled
 ```
 
 For a deployment intended to reproduce this path, use the tested versions unless the task explicitly includes upgrade qualification. Do not silently replace a tested version with `main`, `latest`, or a newer release during the same deployment.
+
+The exact host family validated for this reference path is Apple Silicon macOS with
+OrbStack-provided Docker/Compose. Another Docker-compatible runtime is a compatibility
+target, not an already-qualified equivalent. Before inheriting Core Ready evidence,
+revalidate at least:
+
+- `host.docker.internal` reachability from Open WebUI to host-native Hermes;
+- Compose semantics and persistent-volume behavior;
+- bind-mount/file-permission behavior;
+- restart/startup recovery on that host runtime.
+
+Do not install OrbStack merely as branding or architecture policy when an approved
+compatible runtime already satisfies the target; the requirement is the validated
+container/network/storage behavior, with explicit requalification when the runtime differs.
 
 Optional components not present in the first reference deployment require their own compatibility check and exact version/commit recording when enabled.
 

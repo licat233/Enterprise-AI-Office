@@ -245,6 +245,16 @@ def main() -> int:
         "Fresh Agent has deterministic Core acquisition",
     )
     require_text(
+        "config/validated-stack.yaml",
+        "alternative_inherits_reference_qualification: false",
+        "Fresh Agent distinguishes exact reference host from compatible runtime",
+    )
+    require_text(
+        "scripts/preflight.sh",
+        "docker compose plugin is required for EAO Core",
+        "Fresh Agent preflight enforces Core container prerequisites",
+    )
+    require_text(
         "DEPLOY.md",
         "### 4.2 Post-acquisition Core identity assertions",
         "Fresh Agent must prove Core runtime identity",

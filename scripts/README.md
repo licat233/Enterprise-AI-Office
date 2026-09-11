@@ -198,9 +198,19 @@ A validator PASS means the current YAML is structurally self-consistent accordin
 
 ## `preflight.sh`
 
-Read-only host inventory before installation/change. It inspects OS/architecture, resources, common tools, Docker availability, existing Hermes state/runtime directories, and repository status.
+Read-only host inventory before installation/change. It inspects OS/architecture,
+resources, Core prerequisites, optional/operator tools, Docker availability,
+existing Hermes state/runtime directories, and repository status.
 
-Warnings are expected for optional components and should be interpreted against active company configuration.
+Core prerequisites are Git, Docker CLI + reachable daemon, Docker Compose,
+Python 3, curl, and bash. Missing Core prerequisites produce FAIL. Optional or
+pre-existing tools such as Node/npm, Hermes, OrbStack CLI, Codex, Claude Code,
+and GitHub CLI produce WARN when absent because they are not universal Core
+requirements.
+
+A non-macOS-arm64 host is also a compatibility WARN rather than an automatic
+architecture rejection; it must not inherit the exact reference-host
+qualification without revalidation.
 
 ## `health-check.sh`
 
