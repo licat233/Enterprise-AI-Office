@@ -25,6 +25,7 @@ gates:
     pass_requires:
       - repository_readiness_pass
       - validation_kit_static_check_pass
+      - yaml_syntax_pass
       - markdown_link_integrity_pass
       - declarative_path_integrity_pass
       - capability_acceptance_integrity_pass
