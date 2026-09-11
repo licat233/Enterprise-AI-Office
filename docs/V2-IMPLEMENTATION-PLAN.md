@@ -115,7 +115,7 @@ C. Secrets / credentials
    → protected secret storage and native runtime bindings
 
 D. Observed runtime state
-   → actual runtime + deployment state record
+   → actual runtime + protected operational state created from state/DEPLOYMENT-STATE.template.md
 ```
 
 Missing required input:

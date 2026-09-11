@@ -538,9 +538,13 @@ If a tool/API response reveals a secret unexpectedly, do not reproduce it in sub
 
 ---
 
-## 13. Runtime/deployment-state recording
+## 13. Runtime/protected deployment-state recording
 
-Deployment state may record:
+The live operational record must be a protected copy created from
+`state/DEPLOYMENT-STATE.template.md`. The repository's historical
+`state/DEPLOYMENT-STATE.md` is not the live state store.
+
+The protected deployment state may record:
 
 ```text
 mailbox logical ID/address when company policy permits

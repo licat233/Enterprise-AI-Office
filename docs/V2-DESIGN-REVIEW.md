@@ -125,7 +125,7 @@ Mailbox/messages/delivery result   → email provider
 DraftReply / SendApproval evidence → EAO governance/Ontology layer
 Simple scheduled reminder state    → Hermes Cron
 Persistent multi-step Agent work   → Hermes Kanban when actually enabled
-Actual deployment state            → runtime + DEPLOYMENT-STATE
+Actual deployment state            → runtime + protected operational state created from DEPLOYMENT-STATE.template
 ```
 
 No mailbox mirror, CRM shadow database, second scheduler, duplicate identity directory, or duplicate knowledge store is introduced.

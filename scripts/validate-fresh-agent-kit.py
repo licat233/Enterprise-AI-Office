@@ -230,6 +230,11 @@ def main() -> int:
         "Fresh Agent reads protected operational state as current authority",
     )
     require_text(
+        "docs/V2-RECOVERY-CLEAN-HOST.md",
+        "protected operational state created from `state/DEPLOYMENT-STATE.template.md`",
+        "Fresh Agent keeps v2 Email runtime evidence protected",
+    )
+    require_text(
         "config/validated-stack.yaml",
         "does_not_claim_new_clean_host_validation: true",
         "Validated stack does not confuse runtime confirmation with clean-host validation",
