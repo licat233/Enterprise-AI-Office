@@ -10,6 +10,7 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PASS=0
 FAIL=0
+REPOSITORY_ONLY=${EAO_REPOSITORY_ONLY:-0}
 
 pass() {
   PASS=$((PASS + 1))
@@ -301,12 +302,24 @@ if grep -F 'KEEP_MIGRATE' "$ROOT/docs/inventory/legacy-operations-skills-triage.
 else
   pass 'Final migration ledger has no KEEP_MIGRATE rows'
 fi
-require_text private/department-profile/.symlink_manifest 'armor-product-visual -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-product-visual' 'Profile manifest exposes Product Visual canonically'
-require_text private/department-profile/enabled-skills.csv 'armor-product-visual,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Visual entrypoint'
-require_text private/department-profile/enabled-tools.csv 'save_product_visual_package' 'Profile enables the scoped Product Visual save tool'
-require_text private/department-profile/config.yaml 'save_product_visual_package' 'Live Profile binds the scoped Product Visual save tool'
-require_text private/department-profile/config.yaml 'image_gen' 'Operations keeps image generation explicitly disabled'
-require_text private/department-profile/config.yaml 'delegation' 'Operations keeps delegation explicitly disabled'
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-product-visual -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-product-visual' 'Profile manifest exposes Product Visual canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-product-visual,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Visual entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_product_visual_package' 'Profile enables the scoped Product Visual save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_product_visual_package' 'Live Profile binds the scoped Product Visual save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'image_gen' 'Operations keeps image generation explicitly disabled'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'delegation' 'Operations keeps delegation explicitly disabled'
+fi
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'mic-product-edit-context/v1' 'MIC Skill honors current edit-page extraction'
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'BLOCKED_SOURCE' 'MIC Skill fails closed when Standard is unavailable'
 require_text skills/shared/department/armor-mic-product-optimization/SKILL.md 'MIC_AUTHORITY_REVIEW_REQUIRED' 'MIC Skill has authority review gate'
@@ -323,18 +336,42 @@ require_text skills/shared/department/armor-video-content-rules/SKILL.md 'transc
 require_absent skills/shared/department/armor-social-media-workflow 'No competing Social workflow Skill is active'
 require_text docs/PHASE5A-ARMOR-SOCIAL-MEDIA-MIGRATION.md 'authority: CANONICAL' 'Phase 5A records canonical Social authority'
 require_text docs/PHASE5A-ARMOR-SOCIAL-MEDIA-MIGRATION.md 'save_social_package' 'Phase 5A documents the scoped Social save'
-require_text private/department-profile/.symlink_manifest 'armor-social-media-pipeline -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-social-media-pipeline' 'Profile manifest exposes Social canonically'
-require_text private/department-profile/enabled-skills.csv 'armor-social-media-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Social entrypoint'
-require_text private/department-profile/enabled-tools.csv 'save_social_package' 'Profile enables the scoped Social save tool'
-require_text private/department-profile/config.yaml 'save_social_package' 'Live Profile binds the scoped Social save tool'
-require_text private/department-profile/.symlink_manifest 'armor-mic-product-optimization -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-mic-product-optimization' 'Profile manifest exposes MIC canonically'
-require_text private/department-profile/enabled-skills.csv 'armor-mic-product-optimization,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical MIC entrypoint'
-require_text private/department-profile/enabled-tools.csv 'save_mic_product_package' 'Profile enables the scoped MIC save tool'
-require_text private/department-profile/config.yaml 'save_mic_product_package' 'Live Profile binds the scoped MIC save tool'
-require_text private/department-profile/.symlink_manifest 'armor-website-product-materials -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-product-materials' 'Profile manifest exposes Product Materials canonically'
-require_text private/department-profile/enabled-skills.csv 'armor-website-product-materials,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Materials entrypoint'
-require_text private/department-profile/enabled-tools.csv 'save_website_product_materials_package' 'Profile enables the scoped Product Materials save tool'
-require_text private/department-profile/config.yaml 'save_website_product_materials_package' 'Live Profile binds the scoped Product Materials save tool'
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-social-media-pipeline -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-social-media-pipeline' 'Profile manifest exposes Social canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-social-media-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Social entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_social_package' 'Profile enables the scoped Social save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_social_package' 'Live Profile binds the scoped Social save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-mic-product-optimization -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-mic-product-optimization' 'Profile manifest exposes MIC canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-mic-product-optimization,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical MIC entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_mic_product_package' 'Profile enables the scoped MIC save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_mic_product_package' 'Live Profile binds the scoped MIC save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-website-product-materials -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-product-materials' 'Profile manifest exposes Product Materials canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-website-product-materials,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Product Materials entrypoint'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-tools.csv 'save_website_product_materials_package' 'Profile enables the scoped Product Materials save tool'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/config.yaml 'save_website_product_materials_package' 'Live Profile binds the scoped Product Materials save tool'
+fi
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'MIC authority: CANONICAL' 'Phase 5B records canonical MIC authority'
 require_text docs/PHASE5B-ARMOR-MIC-PRODUCT-OPTIMIZATION-MIGRATION.md 'Automatic MIC editing enabled: NO' 'Phase 5B records no automatic MIC editing'
 require_text scripts/test_phase5b_mic.py 'publication_performed: false' 'MIC acceptance fixture forbids publication'
@@ -353,10 +390,18 @@ require_text skills/shared/department/armor-website-article-pipeline/SKILL.md '0
 require_text skills/shared/department/armor-website-article-pipeline/SKILL.md 'ai-writing-audit v0.3.1' 'Article Skill pins audit version'
 require_file scripts/phase4b_runtime_check.py
 require_file scripts/test_phase4b_runtime_check.py
-require_text private/department-profile/.symlink_manifest 'ai-writing-audit -> /Users/armor/Enterprise-AI-Office/skills/shared/department/ai-writing-audit' 'Profile manifest exposes ai-writing-audit canonically'
-require_text private/department-profile/.symlink_manifest 'armor-website-article-pipeline -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-article-pipeline' 'Profile manifest exposes Article canonically'
-require_text private/department-profile/enabled-skills.csv 'ai-writing-audit,SAFE_BASELINE' 'Profile enables the audit dependency'
-require_text private/department-profile/enabled-skills.csv 'armor-website-article-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Article entrypoint'
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'ai-writing-audit -> /Users/armor/Enterprise-AI-Office/skills/shared/department/ai-writing-audit' 'Profile manifest exposes ai-writing-audit canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/.symlink_manifest 'armor-website-article-pipeline -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-website-article-pipeline' 'Profile manifest exposes Article canonically'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'ai-writing-audit,SAFE_BASELINE' 'Profile enables the audit dependency'
+fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  require_text private/department-profile/enabled-skills.csv 'armor-website-article-pipeline,PRIVILEGED_OR_EXTERNAL' 'Profile enables the canonical Article entrypoint'
+fi
 require_text docs/PHASE4B-ARMOR-RUNTIME-CLOSURE.md 'SCOPED_ROUTER_WRITE_BLOCKED' 'Phase 4B records the scoped Router blocker'
 require_text config/capabilities.yaml 'docs/V2-STAGE-CONTRACTS.md' 'Email capability has stage closure contract'
 require_text config/capabilities.yaml 'docs/V2-IDENTITY-AUTHORIZATION-INSTALLATION.md' 'Email capability has identity authorization contract'
@@ -428,15 +473,19 @@ require_text infrastructure/hermes/features/EMPLOYEE-MEMORY.md 'BLOCKED — REQU
 require_text config/capabilities.yaml 'technical-profile.config.example.yaml' 'Coding capability has executable Profile template'
 require_text README.md 'CONFIGURED READY' 'README explains configured completeness'
 
-phase4a_python=python3
-if [ "$phase4a_python" = python3 ] && [ -x /Users/armor/.hermes/hermes-agent/venv/bin/python ]; then
-  phase4a_python=/Users/armor/.hermes/hermes-agent/venv/bin/python
-fi
+if [ "$REPOSITORY_ONLY" != "1" ]; then
+  phase4a_python=python3
+  if [ "$phase4a_python" = python3 ] && [ -x /Users/armor/.hermes/hermes-agent/venv/bin/python ]; then
+    phase4a_python=/Users/armor/.hermes/hermes-agent/venv/bin/python
+  fi
 
-if "$phase4a_python" "$ROOT/scripts/phase4a_migration_check.py"; then
-  pass 'Phase 4A Article/MCP migration contract'
+  if "$phase4a_python" "$ROOT/scripts/phase4a_migration_check.py"; then
+    pass 'Phase 4A Article/MCP migration contract'
+  else
+    fail 'Phase 4A Article/MCP migration contract' 'offline migration checker failed'
+  fi
 else
-  fail 'Phase 4A Article/MCP migration contract' 'offline migration checker failed'
+  printf '%s\n' 'Repository-only mode: private deployment/profile checks skipped by design.'
 fi
 
 printf '%s\n' '----------------------------------------'
