@@ -217,6 +217,14 @@ if [ -f "$BACKUP_DIR/config/company.yaml" ]; then
   mkdir -p "$TARGET_ROOT/config"
   cp "$BACKUP_DIR/config/company.yaml" "$TARGET_ROOT/config/company.yaml"
 fi
+
+if [ -f "$BACKUP_DIR/state/deployment-state.md" ]; then
+  mkdir -p "$TARGET_ROOT/state"
+  cp "$BACKUP_DIR/state/deployment-state.md" "$TARGET_ROOT/state/deployment-state.md"
+  pass "Deployment state" "protected operational handoff/evidence state materialized"
+else
+  pass "Deployment state" "not present in backup; reconstruct and re-record mappings before production use"
+fi
 if [ -f "$BACKUP_DIR/hermes/ai.hermes.gateway.plist" ]; then
   cp "$BACKUP_DIR/hermes/ai.hermes.gateway.plist" "$TARGET_ROOT/hermes/ai.hermes.gateway.plist"
   pass "Hermes LaunchAgent" "supervisor definition materialized"
@@ -313,6 +321,7 @@ PostgreSQL volume: $POSTGRES_VOLUME
 WeKnora file volume: $WEKNORA_DATA_VOLUME
 Open WebUI data volume: $OPENWEBUI_VOLUME
 Governance state: $TARGET_ROOT/runtime/email-governance/state.sqlite3 (only when present in backup)
+Protected operational deployment state: $TARGET_ROOT/state/deployment-state.md (when present in backup)
 
 The live demo was not stopped or modified. To complete an isolated service
 test, create a temporary Compose project from $TARGET_ROOT/weknora/docker-compose.yml,
@@ -320,6 +329,10 @@ remove fixed container_name entries, choose unused loopback ports, and point
 Hermes Profile MCP URLs at that temporary WeKnora API. If Governance state is
 present, start a compatible Governance runtime only after inspecting unresolved
 send/reconciliation evidence; restore itself never retries or sends email.
+If the protected deployment-state artifact was absent in an older backup,
+reconstruct logical/runtime mappings from the restored resources and record them
+before treating the target as production-recoverable.
+
 Then run the acceptance checks in docs/ACCEPTANCE-TESTS.md and the applicable
 v2 acceptance contracts. Do not expose the restored target externally.
 EOF
