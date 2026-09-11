@@ -95,6 +95,7 @@ for path in \
   scripts/validate-fresh-agent-kit.py \
   scripts/check-repository-links.py \
   scripts/check-declarative-paths.py \
+  scripts/check-capability-acceptance.py \
   scripts/check-public-repository-hygiene.py \
   scripts/check-frozen-baselines.py \
   scripts/run-public-offline-tests.sh \
