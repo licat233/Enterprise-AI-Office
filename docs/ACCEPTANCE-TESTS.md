@@ -29,7 +29,10 @@ Runtime evidence from a specific deployment belongs in the protected operational
 [ ] `hermes --version` reports the validated package version
 [ ] Open WebUI running container image matches the validated image
 [ ] Open WebUI backend can reach the configured host-native Hermes Profile route from inside the container runtime
+[ ] Each intended Hermes Profile base URL occurs exactly once in Open WebUI connection configuration
+[ ] Recorded/observed Open WebUI connection index resolves to that exact intended Profile URL; no historical index is trusted by itself
 [ ] Open WebUI backend model enumeration returns the expected `general` upstream model ID
+[ ] Existing `general` Model record, when present, is compatible with the intended upstream-model ACL override and is not an unrelated custom/preset model
 ```
 
 ## 2. WeKnora infrastructure
