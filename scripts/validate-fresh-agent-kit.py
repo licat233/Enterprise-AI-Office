@@ -377,7 +377,22 @@ def main() -> int:
     require_text(
         "infrastructure/open-webui/PROVISIONING.md",
         "BLOCKED — AMBIGUOUS STATE",
-        "Fresh Agent fails closed on ambiguous Open WebUI groups",
+        "Fresh Agent fails closed on ambiguous Open WebUI runtime objects",
+    )
+    require_text(
+        "infrastructure/open-webui/PROVISIONING.md",
+        "more than one exact match exists",
+        "Fresh Agent rejects duplicate Open WebUI Profile connection URLs",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "Profile → Open WebUI exact connection URL:",
+        "Fresh Agent records Open WebUI connection identity",
+    )
+    require_text(
+        "docs/ACCEPTANCE-TESTS.md",
+        "Each intended Hermes Profile base URL occurs exactly once",
+        "Fresh Agent acceptance tests Open WebUI connection uniqueness",
     )
     require_text(
         "docs/KNOWLEDGE.md",
