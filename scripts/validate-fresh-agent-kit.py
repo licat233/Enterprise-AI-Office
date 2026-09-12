@@ -325,6 +325,21 @@ def main() -> int:
         "Fresh Agent uses Hermes Core provisioning contract",
     )
     require_text(
+        "config/company.example.yaml",
+        "core_network:",
+        "Fresh Agent resolves Core network desired state",
+    )
+    require_text(
+        "REPRODUCE.md",
+        "core_network.hermes.open_webui_backend_base_url",
+        "Fresh Agent does not infer the Open WebUI-to-Hermes route",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "## Core network",
+        "Fresh Agent records observed Core network truth",
+    )
+    require_text(
         "REPRODUCE.md",
         "infrastructure/open-webui/PROVISIONING.md",
         "Fresh Agent uses Open WebUI Core provisioning contract",
