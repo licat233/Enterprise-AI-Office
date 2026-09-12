@@ -90,6 +90,8 @@ From `general`:
 [ ] source/document context available
 [ ] unauthorized/unconfigured knowledge not silently exposed
 [ ] supported MCP/API used rather than direct database coupling
+[ ] exactly one active EAO-managed retrieval-key name exists for the Profile after reconciliation
+[ ] the resolved retrieval-key ID has full_access=false, exact intended KB allow-list, and exact intended capability set
 ```
 
 ## 6. Hermes baseline
