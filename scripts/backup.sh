@@ -45,18 +45,32 @@ company_yaml_capability_enabled() {
 MEDIA_TRANSCRIPTION_ENABLED="$(company_yaml_capability_enabled "$COMPANY_CONFIG")"
 resolve_dir() {
   local explicit="$1"
-  shift
+  local explicit_var="$2"
+  shift 2
   if [ -n "$explicit" ]; then
     printf '%s' "$explicit"
     return
   fi
+
   local candidate
+  local found=""
+  local count=0
   for candidate in "$@"; do
     if [ -d "$candidate" ]; then
-      printf '%s' "$candidate"
-      return
+      found="$candidate"
+      count=$((count + 1))
     fi
   done
+
+  if [ "$count" -eq 1 ]; then
+    printf '%s' "$found"
+    return
+  fi
+  if [ "$count" -gt 1 ]; then
+    printf 'FAIL directory discovery            multiple runtime directories match; set %s explicitly\n' "$explicit_var" >&2
+    return 1
+  fi
+
   printf '%s' "${1:-}"
 }
 
@@ -102,10 +116,10 @@ if [ -d "$EAIO_RUNTIME_DIR/runtime" ] && { [ -d "$EAIO_RUNTIME_DIR/runtime/WeKno
   EAIO_RUNTIME_DIR="$EAIO_RUNTIME_DIR/runtime"
 fi
 HERMES_HOME="${HERMES_HOME:-${HOME}/.hermes}"
-OPENWEBUI_RUNTIME_DIR="${EAIO_OPENWEBUI_RUNTIME_DIR:-$(resolve_dir "" \
-  "$EAIO_RUNTIME_DIR/OpenWebUI" "$EAIO_RUNTIME_DIR/open-webui")}"
-WEKNORA_DIR="${EAIO_WEKNORA_RUNTIME_DIR:-$(resolve_dir "" \
-  "$EAIO_RUNTIME_DIR/WeKnora" "$EAIO_RUNTIME_DIR/weknora")}"
+OPENWEBUI_RUNTIME_DIR="$(resolve_dir "${EAIO_OPENWEBUI_RUNTIME_DIR:-}" EAIO_OPENWEBUI_RUNTIME_DIR \
+  "$EAIO_RUNTIME_DIR/OpenWebUI" "$EAIO_RUNTIME_DIR/open-webui")"
+WEKNORA_DIR="$(resolve_dir "${EAIO_WEKNORA_RUNTIME_DIR:-}" EAIO_WEKNORA_RUNTIME_DIR \
+  "$EAIO_RUNTIME_DIR/WeKnora" "$EAIO_RUNTIME_DIR/weknora")"
 WEKNORA_ENV_FILE="$WEKNORA_DIR/.env"
 BACKUP_ROOT="${EAIO_BACKUP_ROOT:-${EAIO_RUNTIME_DIR}/backups}"
 DEPLOYMENT_STATE_FILE="${EAIO_DEPLOYMENT_STATE_FILE:-${EAIO_RUNTIME_DIR}/state/deployment-state.md}"
@@ -450,11 +464,15 @@ $COMPANY_CONFIG_MANIFEST_LINE
 $DEPLOYMENT_STATE_MANIFEST_LINE
 $MEDIA_TRANSCRIPTION_MANIFEST_LINE
 $GOVERNANCE_MANIFEST_LINE
+Backup source runtime paths:
+- WeKnora runtime config: $WEKNORA_DIR
+- Open WebUI runtime config: $OPENWEBUI_RUNTIME_DIR
+- Hermes home: $HERMES_HOME
 Backup source runtime containers:
 - PostgreSQL: $POSTGRES_CONTAINER
 - WeKnora app: $WEKNORA_APP_CONTAINER
 - Open WebUI: $OPENWEBUI_CONTAINER
-Source-container selection policy: explicit override or unique auto-discovery only; ambiguous candidates fail closed.
+Source selection policy: explicit override or unique auto-discovery only where discovery is supported; ambiguous candidates fail closed.
 Discovered Docker volumes:
 - PostgreSQL: $POSTGRES_VOLUME
 - WeKnora documents: $WEKNORA_DATA_VOLUME
