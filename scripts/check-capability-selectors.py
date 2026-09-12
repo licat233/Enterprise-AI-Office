@@ -322,7 +322,10 @@ def model_provider_symbolic_refs(text: str) -> set[str]:
 
     while i < len(lines):
         raw = lines[i]
-        singular = re.match(r"^(\s*)credential_ref:\s*(.*?)\s*$", raw)
+        singular = re.match(
+            r"^(\s*)(?:[A-Za-z0-9_.-]+_)?credential_ref:\s*(.*?)\s*$",
+            raw,
+        )
         if singular:
             value = singular.group(2).strip().strip("'\"")
             if value not in {"", "null", "~"}:
