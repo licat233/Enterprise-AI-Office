@@ -313,7 +313,7 @@ require_text scripts/restore.sh 'RESTORED_BLUEPRINT_COMMIT' 'Restore reads bluep
 require_text scripts/restore.sh 'manifest/state mismatch' 'Restore fails closed on blueprint provenance mismatch'
 require_text docs/BACKUP-RESTORE.md 'Backup helper repository commit' 'Backup contract separates helper checkout provenance'
 require_text docs/BACKUP-RESTORE.md 'Deployment blueprint commit' 'Backup contract records runtime blueprint authority'
-require_text docs/BACKUP-RESTORE.md 'must never be silently substituted' 'Backup helper commit cannot impersonate deployment blueprint authority'
+require_text docs/BACKUP-RESTORE.md 'silently substituted for the deployment blueprint authority' 'Backup helper commit cannot impersonate deployment blueprint authority'
 require_text scripts/backup.sh 'state/deployment-state.md' 'Backup archives protected deployment-state handoff artifact'
 require_text scripts/restore.sh 'state/deployment-state.md' 'Restore materializes protected deployment-state handoff artifact'
 require_text docs/BACKUP-RESTORE.md 'Protected operational deployment state' 'Backup contract includes protected deployment state'
