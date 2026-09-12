@@ -32,7 +32,8 @@ Runtime evidence from a specific deployment belongs in the protected operational
 [ ] Each intended Hermes Profile base URL occurs exactly once in Open WebUI connection configuration
 [ ] Recorded/observed Open WebUI connection index resolves to that exact intended Profile URL; no historical index is trusted by itself
 [ ] Open WebUI backend model enumeration returns the expected `general` upstream model ID
-[ ] The effective `general` upstream model ID is produced by exactly one enabled OpenAI-compatible connection, after existing `prefix_id` semantics are applied
+[ ] The effective model set for every enabled OpenAI-compatible connection is derived from non-empty configured `model_ids` when present, otherwise from that connection's upstream catalog, then existing `prefix_id` semantics are applied
+[ ] The effective `general` upstream model ID is produced by exactly one enabled OpenAI-compatible connection
 [ ] The merged `general` model resolves to the intended Hermes Profile connection URL/index, not merely whichever duplicate connection appears first
 [ ] Existing `general` Model record, when present, is compatible with the intended upstream-model ACL override and is not an unrelated custom/preset model
 ```
