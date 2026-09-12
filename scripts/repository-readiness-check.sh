@@ -374,6 +374,10 @@ require_text reference/armor/reference-index.yaml 'live_mailbox_deployment_claim
 require_text reference/armor/reference-index.yaml 'Do not infer Operations as a generic EAO default.' 'ARMOR reference index blocks generic Operations inheritance'
 
 require_text docs/REPOSITORY-GOVERNANCE.md 'require a pull request before merge' 'Repository governance defines PR protection target'
+require_text SECURITY.md 'Report a vulnerability' 'Root security policy gives private vulnerability-reporting path'
+require_text SECURITY.md 'A public issue is not an acceptable place for the vulnerability payload itself.' 'Security policy blocks public exploit disclosure'
+require_text SECURITY.md 'has not declared `RELEASE READY`' 'Security support scope matches lifecycle truth'
+require_text CONTRIBUTING.md 'Security vulnerabilities are not ordinary contribution traffic.' 'Contribution guide routes vulnerability reports to security policy'
 require_text THIRD_PARTY_NOTICES.md '`licat233/toolscout`' 'Third-party notices include current ToolScout provenance'
 require_text THIRD_PARTY_NOTICES.md '`h4ckf0r0day/obscura`' 'Third-party notices include current Obscura provenance'
 require_text THIRD_PARTY_NOTICES.md '`QwenAudio/SenseVoice`' 'Third-party notices resolve SenseVoice source provenance'
