@@ -79,6 +79,10 @@ core_provisioning.open_webui.admin_identity:
   display_name
   password_ref
 
+core_network.open_webui.employee_url
+core_network.open_webui.access_layer
+core_network.hermes.open_webui_backend_base_url
+
 for each enabled employee Profile:
   Profile ID
   employee-facing display name
@@ -92,13 +96,16 @@ storage; the provisioning binding is `OPEN_WEBUI_ADMIN_PASSWORD`.
 From protected deployment input:
 
 ```text
-OPEN_WEBUI_URL
 secret value referenced by core_provisioning.open_webui.admin_identity.password_ref
 
 for each enabled employee Profile:
-  Hermes OpenAI-compatible base URL
   Profile API key resolved from the Profile's symbolic credential ref
 ```
+
+Bind the provisioning client's `OPEN_WEBUI_URL` to the non-secret
+`core_network.open_webui.employee_url`. Build each Hermes Profile route from
+`core_network.hermes.open_webui_backend_base_url` plus the Profile path; do not
+guess a host bridge or port from the reference deployment.
 
 Baseline mapping:
 
@@ -107,10 +114,11 @@ Profile ID: general
 Display name: General Assistant
 Allowed company group: all-employees
 Open WebUI group display name: All Employees
-Hermes URL: http://host.docker.internal:8642/p/general/v1
+Hermes URL: <core_network.hermes.open_webui_backend_base_url>/p/general/v1
 ```
 
-Exact host/port may differ by deployment.
+The ARMOR/reference path may use `host.docker.internal`, but that is runtime
+evidence, not a universal network default.
 
 Do not print or commit protected values. If a required protected credential,
 target Profile route, or company group mapping is unresolved, stop with:
