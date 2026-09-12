@@ -444,6 +444,8 @@ require_text infrastructure/hermes/PROVISIONING.md 'Do **not** set `API_SERVER_E
 require_text infrastructure/hermes/PROVISIONING.md 'default/admin key → /p/general/...                  DENY' 'Hermes provisioning requires Profile credential isolation'
 require_text infrastructure/hermes/PROVISIONING.md 'GET /p/general/v1/models' 'Hermes provisioning validates named Profile model identity'
 require_text docs/ACCEPTANCE-TESTS.md 'Core runtime identity matches `config/validated-stack.yaml`' 'Core acceptance requires exact runtime identity'
+require_text docs/ACCEPTANCE-TESTS.md 'recovery procedure was actually exercised on the target' 'Production recovery acceptance requires observed exercise'
+require_text validation/scorecard.yaml 'observed_startup_recovery_when_production_ready' 'Fresh-Agent runtime scorecard requires observed production recovery'
 require_text scripts/health-check.sh 'does not prove the exact validated component identity/version/commit' 'Health check does not impersonate identity verification'
 require_text DEPLOY.md 'Do not infer upstream repositories or installation methods from product names.' 'Golden Path blocks upstream guessing'
 require_text infrastructure/open-webui/docker-compose.yml 'Derived pin: config/validated-stack.yaml -> Open WebUI' 'Open WebUI compose identifies validated-stack derived pin'
@@ -470,6 +472,8 @@ require_text reference/armor/reference-index.yaml 'live_mailbox_deployment_claim
 require_text reference/armor/reference-index.yaml 'Do not infer Operations as a generic EAO default.' 'ARMOR reference index blocks generic Operations inheritance'
 
 require_text docs/REPOSITORY-GOVERNANCE.md 'require a pull request before merge' 'Repository governance defines PR protection target'
+require_text docs/REPOSITORY-GOVERNANCE.md 'only long-lived branch' 'Solo-maintainer governance keeps only main long-lived'
+require_text docs/REPOSITORY-GOVERNANCE.md 'delete merged branch' 'Solo-maintainer governance deletes merged task branches'
 require_text SECURITY.md 'Report a vulnerability' 'Root security policy gives private vulnerability-reporting path'
 require_text SECURITY.md 'A public issue is not an acceptable place for the vulnerability payload itself.' 'Security policy blocks public exploit disclosure'
 require_text SECURITY.md 'has not declared `RELEASE READY`' 'Security support scope matches lifecycle truth'
