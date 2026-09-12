@@ -450,6 +450,21 @@ def main() -> int:
         "Fresh Agent renders WeKnora object identity from desired/protected state",
     )
     require_text(
+        "infrastructure/weknora/PROVISIONING.md",
+        "BLOCKED — AMBIGUOUS STATE: duplicate active WeKnora retrieval-key name",
+        "Fresh Agent fails closed on duplicate active WeKnora retrieval-key names",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "active retrieval-key deterministic-name uniqueness result",
+        "Fresh Agent records retrieval-key uniqueness evidence",
+    )
+    require_text(
+        "docs/ACCEPTANCE-TESTS.md",
+        "exactly one active EAO-managed retrieval-key name exists",
+        "Fresh Agent acceptance verifies retrieval-key uniqueness",
+    )
+    require_text(
         "DEPLOY.md",
         "company logical ID → display name → runtime group UUID",
         "Fresh Agent distinguishes group logical IDs from runtime identity",
