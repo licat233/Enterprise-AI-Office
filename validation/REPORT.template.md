@@ -86,7 +86,7 @@ Gate result: PASS / FAIL
 - Least privilege: PASS / FAIL
 - Acceptance sequence: PASS / FAIL
 - Restart/recovery: PASS / FAIL
-- Backup/restore: PASS / FAIL
+- Backup/restore: PASS / FAIL / N/A (disabled)
 - Rollback: PASS / FAIL
 - Failure taxonomy: PASS / FAIL
 
@@ -132,8 +132,9 @@ Acceptance evidence:
 
 - Controlled restart:
 - Employee-visible persistence:
+- Backup enabled: yes / no
 - Backup:
-- Off-primary copy / post-transfer integrity / freshness evidence (Production Ready):
+- Off-primary copy / post-transfer integrity / freshness evidence (when selected by backup policy):
 - Isolated restore source:
 - Isolated restore:
 - Second-run convergence:
