@@ -1,8 +1,8 @@
 # Enterprise AI Office v2 — Blueprint Status
 
-Status: installation design complete / transition-ready / real deployment task inactive
+Status: installation design complete / Blueprint Validation opened / Release Ready opened / ARMOR deployment handoff-ready
 Version: 4.0.0
-Date: 2026-09-07
+Date: 2026-09-12
 
 The authoritative machine-readable repository state is:
 
@@ -16,7 +16,7 @@ If this document conflicts with `state/PROJECT-PHASE.yaml`, the machine-readable
 
 ```text
 RELEASE TRACK: v2
-BLUEPRINT PHASE: INSTALLATION DESIGN
+BLUEPRINT PHASE: RELEASE READY
 SYSTEM DESIGN: COMPLETE
 INSTALLATION DESIGN: COMPLETE
 INSTALLATION DESIGN FINAL REVIEW: PASS
@@ -27,13 +27,15 @@ ID-4 TRUSTED IDENTITY / MAILBOX AUTHORIZATION: COMPLETE
 ID-5 DRAFT / APPROVAL GOVERNANCE RUNTIME: COMPLETE
 ID-6 GOVERNED SEND / RECONCILIATION: COMPLETE
 ID-7 RECOVERY / CLEAN-HOST ACCEPTANCE: COMPLETE
-NEXT LIFECYCLE PHASE: BLUEPRINT VALIDATION — NOT YET OPENED
-REAL DEPLOYMENT TASK: INACTIVE
+BLUEPRINT VALIDATION: OPENED
+RELEASE READY PHASE: OPENED
+FRESH-CLONE / NEW-TARGET DEPLOYMENT AUTHORIZATION DEFAULT: INACTIVE
+ARMOR REFERENCE DEPLOYMENT: ACTIVE / DEPLOYED / HANDOFF-READY
 ```
 
-The human explicitly advanced the blueprint lifecycle to `installation_design` on 2026-09-06. Installation Design completed on 2026-09-07.
+The human explicitly advanced the blueprint lifecycle to `installation_design` on 2026-09-06, and Installation Design completed on 2026-09-07. Blueprint Validation and Release Ready were subsequently opened by explicit human direction.
 
-`current_phase` intentionally remains `installation_design`. Opening `blueprint_validation` requires a separate explicit human direction; Installation Design completion itself does not change phase and does not authorize any real company deployment.
+The current phase is `release_ready`. Phase-open status is distinct from validation PASS or a final `RELEASE READY` declaration. The ARMOR reference deployment is separately authorized, installed, active, and ready for department handoff.
 
 ---
 
@@ -316,33 +318,29 @@ Actual execution evidence belongs to `blueprint_validation` or an explicitly aut
 
 ---
 
-## 10. Explicit boundary: not a real deployment
+## 10. Deployment authorization boundary
+
+The ARMOR reference deployment is already separately authorized, installed, active, and handoff-ready. Its protected runtime details remain private.
 
 ```text
-REAL COMPANY DEPLOYMENT: NOT ACTIVE
-REAL DEPLOYMENT TASK: INACTIVE
-REAL PROVIDER CREDENTIALS: NOT REQUIRED
-REAL MAILBOX ACCESS: NOT REQUIRED
-REAL EMPLOYEE IDENTITIES: NOT REQUIRED
-REAL SMTP/API SEND: NOT AUTHORIZED
-REAL MAC STUDIO MUTATION: NOT AUTHORIZED
+ARMOR REFERENCE DEPLOYMENT: ACTIVE / DEPLOYED / HANDOFF-READY
+FRESH-CLONE / NEW-TARGET DEPLOYMENT AUTHORIZATION: INACTIVE BY DEFAULT
+NEW REAL PROVIDER CREDENTIALS: REQUIRE EXPLICIT TARGET AUTHORIZATION
+NEW REAL MAILBOX ACCESS: REQUIRE EXPLICIT TARGET AUTHORIZATION
+NEW REAL EMPLOYEE IDENTITIES: REQUIRE EXPLICIT TARGET AUTHORIZATION
+NEW REAL SMTP/API SEND: REQUIRE EXPLICIT CAPABILITY AUTHORIZATION
+NEW TARGET MUTATION: NOT AUTHORIZED BY CLONING THIS REPOSITORY
 ```
 
-A real deployment remains a separate consumer activity requiring an explicit deployment request and explicit target.
+The default deployment gate protects fresh clones and new targets; it does not describe the already-running ARMOR reference deployment.
 
 ---
 
-## 11. Next lifecycle phase
+## 11. Open lifecycle phases
 
-The repository is now transition-ready for:
+`BLUEPRINT VALIDATION` is already open. It should prove on an explicitly approved clean/synthetic target that a fresh capable AI agent can reproduce the designed system from repository artifacts alone.
 
-```text
-BLUEPRINT VALIDATION
-```
-
-That phase should prove on an explicitly approved clean/synthetic target that a fresh capable AI agent can reproduce the designed system from repository artifacts alone.
-
-It is **not yet opened**.
+`RELEASE READY` is also open. Opening the phase does not itself mean the repository has passed validation or that the final `RELEASE READY` declaration has been issued.
 
 ---
 
@@ -351,8 +349,10 @@ It is **not yet opened**.
 ```text
 SYSTEM DESIGN COMPLETE        ← achieved
 INSTALLATION DESIGN COMPLETE  ← achieved
-BLUEPRINT VALIDATED           ← not yet opened
-RELEASE READY                 ← not yet opened
+BLUEPRINT VALIDATION          ← opened
+RELEASE READY PHASE           ← opened
+
+Final validation PASS and RELEASE READY declaration remain evidence-driven.
 ```
 
 Deployment-target readiness remains separate:
