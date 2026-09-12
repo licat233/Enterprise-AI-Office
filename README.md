@@ -42,7 +42,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Release Ready | ⏳ Not yet opened |
 | Public real-deployment gate | ⛔ Inactive by default; sanitized ARMOR reference deployment exists |
 
-> **Operational status:** the ARMOR reference EAO baseline is already deployed on the designated Mac Studio and is in normal employee use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. The ARMOR deployment currently targets `CONFIGURED READY`, which is already PASS. Backup/restore remains available as an optional operational hardening capability; stricter off-primary disaster-recovery evidence is required only if the company later chooses the `PRODUCTION READY` target.
+> **Operational status:** the ARMOR reference EAO baseline is already deployed on the designated Mac Studio and is in normal employee use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. The ARMOR deployment currently targets `CONFIGURED READY`, which is already PASS. The Mac Studio internal disk is the current EAO runtime and primary data storage. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
 >
 > The public blueprint lifecycle is repository-governance state, not a proxy for whether the separately authorized ARMOR deployment exists or is usable. With the baseline system deployed and `CONFIGURED READY — PASS`, ongoing EAO work should primarily be feedback-driven maintenance and bounded capability extensions rather than continued core-platform construction.
 >
