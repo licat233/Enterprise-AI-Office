@@ -11,7 +11,7 @@ release_track: v2
 # It is NOT the same thing as deploying a real company instance.
 
 blueprint_lifecycle:
-  current_phase: installation_design
+  current_phase: release_ready
   phases:
     - system_design
     - installation_design
@@ -114,12 +114,12 @@ blueprint_lifecycle:
         evidence: RECOVERY / CLEAN-HOST INSTALLATION CONTRACT FROZEN
     closure_note: >-
       ID-1 through ID-7 are complete and the Installation Design final review passed on 2026-09-07.
-      current_phase intentionally remains installation_design because opening blueprint_validation
-      requires explicit human direction. Installation Design completion does not authorize real deployment.
+      Blueprint Validation and Release Ready were later explicitly opened by human direction.
+      Installation Design completion itself did not authorize those transitions or any new deployment target.
     note: installation_design does not authorize installation onto any real company system
 
   blueprint_validation:
-    status: not_opened
+    status: opened
     preparation_status: ready
     validation_entrypoint: VALIDATE.md
     fresh_agent_task: validation/FRESH-AGENT-TASK.md
@@ -127,11 +127,12 @@ blueprint_lifecycle:
     report_template: validation/REPORT.template.md
     static_check: scripts/validate-fresh-agent-kit.py
     purpose: prove that a fresh capable AI agent can understand the repository and reproduce the designed system on an explicitly approved clean validation target
-    note: validation materials are prepared, but the phase is not opened; validation targets must be explicitly authorized and may be synthetic, isolated, or a designated test host; this phase does not imply production deployment
+    note: the phase is explicitly opened; validation targets still require explicit authorization and may be synthetic, isolated, or a designated test host; phase-open status does not imply validation PASS or production deployment
 
   release_ready:
-    status: not_opened
+    status: opened
     purpose: declare that the repository sufficiently explains both the system design and installation path for adoption
+    note: the phase is explicitly opened; opened does not itself mean RELEASE READY has been declared or passed
 
 continuation_language:
   does_not_change_blueprint_phase:
@@ -199,8 +200,8 @@ interpretation_rules:
   - The repository is a system-design and installation-blueprint product, not a live deployment record.
   - The v2 baseline System Design milestone is complete and frozen.
   - The v2 baseline Installation Design milestone is complete and transition-ready.
-  - The current blueprint phase intentionally remains installation_design until explicit human direction opens blueprint_validation.
-  - ID-1 through ID-7 are complete; the next lifecycle phase is blueprint_validation but it is not yet opened.
+  - Blueprint Validation has been explicitly opened.
+  - Release Ready has also been explicitly opened; phase-open status does not itself mean either validation PASS or RELEASE READY declaration.
   - Installation design means designing how an AI agent will install the system; it does not mean performing a real installation.
   - A real deployment task requires an explicit target and explicit human request independently of blueprint phase.
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
