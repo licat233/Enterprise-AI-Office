@@ -133,6 +133,9 @@ Any unintended cross-Profile key acceptance is a blocker.
 
 ```text
 [ ] Admin authentication works
+[ ] Fresh user DB: native `WEBUI_ADMIN_*` bootstrap creates exactly one administrator and signup remains disabled
+[ ] Existing user DB: env-driven admin creation is skipped and no user/admin resource is overwritten or duplicated
+[ ] Development fallback credentials are not used as the production/bootstrap administrator
 [ ] Normal employee authentication works
 [ ] Logged-out protected access fails
 [ ] All-Employees group exists
