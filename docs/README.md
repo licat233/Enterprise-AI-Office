@@ -18,6 +18,12 @@ A fresh Agent should begin with:
 
 Do not begin with a `PHASE*` migration document merely because it looks operational.
 
+GitHub Wiki pages, Project cards, Issues, PR descriptions/comments, and similar
+collaboration surfaces are not part of the normative documentation hierarchy.
+If they produce a durable decision, that decision must be promoted into the
+version-controlled authority chain below.
+
+
 ## Authority order
 
 When documents appear to overlap, use this precedence:

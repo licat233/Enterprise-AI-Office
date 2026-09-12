@@ -107,6 +107,30 @@ DEPLOY.md
 current normative docs/
 ```
 
+## 7.1 GitHub collaboration surfaces are non-normative
+
+GitHub-hosted collaboration surfaces may be useful, but they are not architecture
+or deployment authority.
+
+The following are **non-normative unless their content is merged into the
+repository authority chain above**:
+
+- GitHub Wiki pages;
+- GitHub Project boards/cards;
+- Issues and issue comments;
+- Pull Request descriptions/comments/reviews;
+- Discussions or other collaboration surfaces if enabled later.
+
+Use them for intake, planning, review, and coordination. Do not place the only
+copy of a current architecture decision, capability contract, runtime mapping,
+deployment procedure, or frozen acceptance result there.
+
+When collaboration produces a durable decision, promote it into the appropriate
+version-controlled repository contract/evidence through a reviewed pull request.
+
+A Fresh Agent must not override merged repository authority merely because a
+Wiki page, Project card, Issue, or PR comment appears newer.
+
 ## 8. Releases
 
 Do not publish a GitHub release that implies `release_ready` while `state/PROJECT-PHASE.yaml` says Release Ready has not been opened/passed.
