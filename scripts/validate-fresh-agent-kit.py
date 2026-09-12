@@ -295,6 +295,16 @@ def main() -> int:
         "Fresh Agent has deterministic Core acquisition",
     )
     require_text(
+        "DEPLOY.md",
+        "RUNTIME_ROOT = deployment.runtime_root",
+        "Fresh Agent binds runtime root to company desired state",
+    )
+    require_text(
+        "config/validated-stack.yaml",
+        "provenance: scripts/install.sh_at_component_commit",
+        "Fresh Agent resolves Hermes source path from pinned installer behavior",
+    )
+    require_text(
         "config/validated-stack.yaml",
         "alternative_inherits_reference_qualification: false",
         "Fresh Agent distinguishes exact reference host from compatible runtime",

@@ -145,6 +145,36 @@ def main() -> int:
     if "{commit}" not in installer_template or "NousResearch/hermes-agent" not in installer_template:
         failures.append("Hermes installer template is not commit-addressed to the validated upstream")
     require_equal("Hermes installer commit flag", field(hermes, "commit_flag"), "--commit", failures)
+    require_equal(
+        "Hermes source path provenance",
+        field(hermes, "provenance"),
+        "scripts/install.sh_at_component_commit",
+        failures,
+    )
+    require_equal(
+        "Hermes explicit install-dir env override",
+        field(hermes, "explicit_env_override"),
+        "HERMES_INSTALL_DIR",
+        failures,
+    )
+    require_equal(
+        "Hermes explicit install-dir flag override",
+        field(hermes, "explicit_flag_override"),
+        "--dir",
+        failures,
+    )
+    require_equal(
+        "Hermes non-root source default",
+        field(hermes, "non_root_default"),
+        "${HERMES_HOME:-$HOME/.hermes}/hermes-agent",
+        failures,
+    )
+    require_equal(
+        "Hermes root Linux source default",
+        field(hermes, "root_linux_default"),
+        "/usr/local/lib/hermes-agent",
+        failures,
+    )
 
     require_equal(
         "Open WebUI upstream repository",
@@ -252,6 +282,10 @@ def main() -> int:
     require_contains("DEPLOY.md", commits["hermes_agent"], failures)
     require_contains("DEPLOY.md", open_webui_image, failures)
     require_contains("DEPLOY.md", commits["open_webui"], failures)
+    require_contains("DEPLOY.md", "RUNTIME_ROOT = deployment.runtime_root", failures)
+    require_contains("DEPLOY.md", "HERMES_INSTALL_DIR", failures)
+    require_contains("DEPLOY.md", "${HERMES_HOME:-$HOME/.hermes}/hermes-agent", failures)
+    require_contains("DEPLOY.md", "/usr/local/lib/hermes-agent", failures)
     require_contains("DEPLOY.md", "### 4.2 Post-acquisition Core identity assertions", failures)
     require_contains("DEPLOY.md", f"wechatopenai/weknora-app:{versions['weknora'].removeprefix('v')}", failures)
     require_contains("DEPLOY.md", "hermes --version | grep -F", failures)

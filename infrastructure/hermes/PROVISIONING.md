@@ -96,6 +96,10 @@ BLOCKED — REQUIRED INPUT: <specific item>
 
 Confirm the installed runtime first:
 
+Resolve the Hermes source checkout using `config/validated-stack.yaml` and the
+pinned installer's path rules. Record the resolved non-secret path in protected
+operational state; do not infer it from the ARMOR host.
+
 ```sh
 hermes --version
 hermes profile list
@@ -521,6 +525,7 @@ Record without secrets:
 ```text
 Hermes package version
 Hermes source commit
+Hermes source checkout path
 default Profile path
 general Profile path
 general no-bundled-skills marker present
