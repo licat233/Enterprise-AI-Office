@@ -115,6 +115,7 @@ gates:
       - core_employee_path
       - enabled_optional_capability_acceptance
       - restart_persistence
+      - observed_startup_recovery_when_production_ready
       - backup_restore_when_explicitly_enabled
       - off_primary_restore_evidence_when_selected_by_backup_policy
       - no_privilege_expansion
