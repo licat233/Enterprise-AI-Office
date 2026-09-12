@@ -441,6 +441,11 @@ def main() -> int:
         "Fresh Agent sees explicit specialist Profile credential mapping",
     )
     require_text(
+        "config/README.md",
+        "A ref name alone is not a complete binding contract.",
+        "Fresh Agent sees Core secret consumer/binding metadata",
+    )
+    require_text(
         "VALIDATE.md",
         "python3 scripts/check-validated-stack-consistency.py",
         "Gate 0 includes validated stack consistency",
