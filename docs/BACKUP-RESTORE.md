@@ -121,6 +121,41 @@ Therefore the **entire backup generation** is confidential/secret-bearing and
 must receive the protection appropriate for production secrets. Do not put any
 of these artifacts in this public repository.
 
+### 2.1 Backup source runtime identity
+
+A backup is only useful evidence when the source runtime is identified
+unambiguously. On hosts that contain production plus test/restore Compose
+projects, Docker service labels or container-name regexes can legitimately match
+more than one running container.
+
+The repository helper therefore follows this rule:
+
+```text
+explicit WEKNORA_POSTGRES_CONTAINER / WEKNORA_APP_CONTAINER / OPENWEBUI_CONTAINER
+→ use that named running container, then validate the expected mounts/runtime
+
+otherwise exactly one discovered candidate for the required role
+→ adopt it
+
+more than one candidate
+→ FAIL — ambiguous backup source; require an explicit existing override
+
+zero candidates
+→ existing missing-container failure
+```
+
+Do not choose the first Docker result. Do not assume the container with the
+shortest/newest/reference-looking name is production.
+
+Each backup manifest records the actual PostgreSQL, WeKnora app, and Open WebUI
+source container names plus the discovered persistent volumes. Record the
+source-runtime identity/selection result in protected operational state for
+Production Ready evidence.
+
+The same fail-closed rule applies to the legacy restore compatibility path that
+tries to recover a missing PostgreSQL image from a running container: a live
+container may be used only when explicitly named or uniquely discoverable.
+
 ## 3. What is not enough
 
 The following are not complete backup strategies:
