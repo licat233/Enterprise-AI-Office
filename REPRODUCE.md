@@ -220,6 +220,11 @@ active company configuration
 If a capability is not enabled for the target, do not install it merely because the
 ARMOR reference implementation contains it.
 
+For every enabled conditional capability, treat its `records` list in
+`config/capabilities.yaml` as a mandatory completion-evidence checklist. Write
+those non-secret records into the protected operational copy created from
+`state/DEPLOYMENT-STATE.template.md`; do not scatter them across ad hoc notes.
+
 #### Stage F.1 — ARMOR Operations reference bundle, when selected
 
 The ARMOR Operations bundle is a validated reference capability, not universal EAO

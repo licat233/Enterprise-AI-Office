@@ -4,6 +4,13 @@ schema_version: 1
 # when a company enables a capability. It is a capability library, not a list of
 # things every company should install.
 
+operational_records_contract:
+  sink_template: state/DEPLOYMENT-STATE.template.md
+  runtime_copy: protected_operational_storage
+  conditional_capability_rule: record_every_declared_records_item_for_each_enabled_capability
+  dedicated_section_rule: dedicated_sections_may_hold_detail_but_generic_capability_evidence_must_reference_them
+  secret_values_in_record: forbidden
+
 readiness_levels:
   core-ready:
     requires:
