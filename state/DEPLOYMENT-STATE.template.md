@@ -408,11 +408,16 @@ Known backup exclusions/limitations:
 Startup/supervisor policy:
 Service dependency/start order:
 Supported startup/recovery procedure:
+Recovery exercise type/date:
+Observed automatic recovery steps:
+Observed operator/manual steps:
 Last restart/reboot validation:
 Hermes Profile/Gateway recovery result:
 WeKnora/Open WebUI employee-path recovery result:
+Post-recovery employee path/RBAC result:
 Enabled-capability recovery result:
 Governance restart/reconciliation result when Email enabled:
+Unattended boot-to-service recovery claimed: <yes/no>
 Known manual recovery boundary:
 ```
 
