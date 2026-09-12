@@ -248,6 +248,12 @@ qualification; do not waive the assertion as "close enough."
 
 Before mutation, resolve from the company configuration or protected operator input:
 
+- `core_network.weknora.api_base_url_for_hermes`;
+- `core_network.hermes.shared_listener.bind_host`;
+- `core_network.hermes.shared_listener.port`;
+- `core_network.hermes.open_webui_backend_base_url`;
+- `core_network.open_webui.employee_url`;
+- `core_network.open_webui.access_layer`;
 - company identity and timezone;
 - `deployment.target_readiness`;
 - model/provider credentials actually required by the selected stack; a local-only embedding path may require no cloud embedding credential;
@@ -291,6 +297,11 @@ Do not infer organization structure or optional features from repository templat
 Exit condition: there is one unambiguous target state; every enabled capability has an implementation/acceptance path; required human inputs are resolved.
 
 ## 8. Phase C — Deploy WeKnora
+
+Use `core_network.weknora.api_base_url_for_hermes` as the intended
+Hermes/MCP route. Do not derive the WeKnora API route from the reference demo
+port or URL. Direct employee exposure remains disabled unless explicitly
+authorized.
 
 1. Deploy the pinned WeKnora release using the supported upstream deployment plus the repository adapter.
 2. Keep database/cache/parser internals private.
@@ -362,6 +373,11 @@ Exit condition: WeKnora is healthy and retrieval returns the seeded source. A se
 
 ## 9. Phase D — Deploy Hermes
 
+Resolve the shared listener from `core_network.hermes.shared_listener` and the
+Open WebUI backend route from
+`core_network.hermes.open_webui_backend_base_url`. Do not copy the ARMOR
+reference bind/port/host bridge as a universal default.
+
 1. Install the pinned Hermes release through §4.1 and prove runtime identity through §4.2.
 2. Reconcile the privileged default/admin control plane plus baseline `general` Profile through `infrastructure/hermes/PROVISIONING.md`.
 3. On a fresh target create `general` using upstream Profile management with bundled-Skill opt-out; on an existing target reconcile it in place.
@@ -375,6 +391,11 @@ Exit condition: WeKnora is healthy and retrieval returns the seeded source. A se
 Exit condition: every enabled employee Profile responds through its supported API with its intended capability boundary; the served set matches desired state; `general` answers a grounded company query with source evidence.
 
 ## 10. Phase E — Deploy Open WebUI and baseline RBAC
+
+Use `core_network.open_webui.employee_url` as the intended employee surface
+and `core_network.open_webui.access_layer` as the declared access boundary.
+Open WebUI provisioning must use the configured Hermes backend base URL rather
+than inventing a host bridge.
 
 1. Deploy the pinned Open WebUI release with persistent state.
 2. Provision the administrator using the validated bootstrap mechanism.
