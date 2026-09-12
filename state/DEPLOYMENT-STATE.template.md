@@ -319,35 +319,56 @@ Complete when `production-ready` is requested.
 ```text
 Schedule:
 Retention:
-Off-primary-disk destination/boundary:
-Latest local/source backup generation:
+Latest backup generation/timestamp:
+Protected operational deployment-state artifact included: <yes/no>
+Off-primary encrypted destination/boundary:
 Latest successful off-primary copy generation/timestamp:
-Off-primary post-transfer checksum/integrity result:
-Off-primary freshness/retention result:
-Last isolated restore source (must identify off-primary copy for Production Ready):
+Checksum/integrity result:
+Independent-copy freshness/retention result:
+Last isolated restore source/generation (must identify off-primary copy for Production Ready):
 Last isolated restore result/date:
 Restored Core handoff-mapping verification:
+Restored Core employee-path acceptance result:
 Governance SQLite snapshot method/result when Email enabled:
 Unresolved-send preservation after restore when applicable:
 Secrets recovery method (non-secret description):
+Known backup exclusions/limitations:
 ```
 
 ### Startup / recovery
 
 ```text
-Policy:
+Startup/supervisor policy:
+Service dependency/start order:
 Supported startup/recovery procedure:
-Last validation:
+Last restart/reboot validation:
+Hermes Profile/Gateway recovery result:
+WeKnora/Open WebUI employee-path recovery result:
+Enabled-capability recovery result:
 Governance restart/reconciliation result when Email enabled:
-Known manual boundary:
+Known manual recovery boundary:
+```
+
+### Security / access review
+
+```text
+Review date/owner:
+Protected-secret storage/recovery boundary:
+Employee versus admin access review:
+Network exposure review:
+Company-knowledge scope review:
+Effective employee tool boundary review:
+Approved exceptions/known limitations:
 ```
 
 ### Operations / health
 
 ```text
 Operational owner:
-Health-check method:
-Review cadence:
+Health-check method/cadence:
+Last health result:
+Backup/restore monitoring method:
+Enabled-capability health ownership:
 Known alerts/limitations:
 ```
 
