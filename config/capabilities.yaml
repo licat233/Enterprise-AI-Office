@@ -189,6 +189,7 @@ capabilities:
       section: Part A — Core Ready
     records:
       - component versions
+      - model role source/auth path and symbolic provider-credential ref/native-binding metadata, never secret values
       - WeKnora runtime tenant and logical-to-runtime Knowledge Base mappings
       - WeKnora Profile retrieval-key IDs/names and scope metadata, never token values
       - knowledge bases
