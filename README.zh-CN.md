@@ -44,8 +44,8 @@
 | 仓库维护模式 | ✅ 仅保留一个长期分支：`main` |
 | Backup / Restore | ➖ 可选能力 / 当前未启用 |
 | 下一项业务能力 | ▶ 受治理的 AI 邮件营销 |
-| Blueprint Validation | ⏳ 仓库治理生命周期尚未开启；不阻塞当前 ARMOR 已部署基线 |
-| Release Ready | ⏳ 仓库治理生命周期尚未开启；不阻塞 ARMOR 正常使用 |
+| Blueprint Validation | ✅ 已开启；是否 PASS 仍以验证证据为准 |
+| Release Ready | ✅ 已开启；开启阶段本身不等于已经声明 RELEASE READY |
 | ARMOR 真实部署 | ✅ 已激活 / 已部署 / 已投入使用；运行细节保持私有，仅公开脱敏状态 |
 
 > **实际运行状态：** ARMOR 的 EAO 基线已经部署在指定 Mac Studio，并已进入正常员工使用状态。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。ARMOR 当前目标正式收敛为已经 PASS 的 `CONFIGURED READY`。Mac Studio 内置硬盘当前作为 EAO 的运行与主数据存储盘。Backup / Restore 是独立的可选能力，目前不启用；以后只有在业务需要和存储条件合适时再显式开启。
@@ -332,20 +332,20 @@ ID-7 已经补齐：
 当前准确状态：
 
 ```text
-current_phase: installation_design
+current_phase: release_ready
 installation_design.status: complete
-installation_design.transition_ready: true
-blueprint_validation.status: not_opened
+blueprint_validation.status: opened
+release_ready.status: opened
 real_deployment_task.active: false  # 仅表示 Fresh Clone / 新目标默认不自动授权真实部署
 ```
 
 这里的 `active: false` 只描述仓库默认的新部署授权 Gate。ARMOR 参考部署已经单独获得授权、完成部署并正在使用；其受保护的运行细节不会公开到仓库。
 
-## 接下来要实现什么
+## 当前已开启的生命周期工作
 
-### 下一阶段：Blueprint Validation
+### Blueprint Validation — 已开启
 
-目标是验证：
+Blueprint Validation 已经开启。目标是验证：
 
 > 一个全新的、有能力的 AI Engineering Agent，能否在不依赖当前聊天上下文的情况下，只阅读这个仓库，就在一个明确批准的干净验证目标上复现设计好的系统。
 
@@ -366,14 +366,16 @@ real_deployment_task.active: false  # 仅表示 Fresh Clone / 新目标默认不
 - v2 rollback 后 v1 是否仍正常；
 - 新 Agent 是否能从 repository evidence 正确继续工作。
 
-### 再下一阶段：Release Ready
+### Release Ready — 已开启
 
-Blueprint Validation 之后：
+Release Ready 阶段也已经开启。阶段开启不等于已经声明 `RELEASE READY`。
+
+当前需要：
 
 - 汇总验证证据；
 - 修复真正的 reproducibility blocker；
 - 只针对验证暴露的问题 harden；
-- 达到条件后声明 `RELEASE READY`。
+- 只有在所需证据满足后才正式声明 `RELEASE READY`。
 
 ### Baseline 之外的未来能力
 
@@ -395,8 +397,10 @@ Blueprint Validation 之后：
 ```text
 SYSTEM DESIGN COMPLETE          ✅
 INSTALLATION DESIGN COMPLETE    ✅
-BLUEPRINT VALIDATED             ⏳
-RELEASE READY                   ⏳
+BLUEPRINT VALIDATION OPEN       ✅
+RELEASE READY PHASE OPEN        ✅
+
+Validation PASS 与最终 RELEASE READY 声明仍以证据为准。
 ```
 
 ### Deployment-target readiness
