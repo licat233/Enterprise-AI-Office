@@ -454,8 +454,9 @@ According to `docs/BACKUP-RESTORE.md`:
 
 ```text
 [ ] required data/config backed up
-[ ] backup source PostgreSQL/WeKnora/Open WebUI runtime identities were explicit or uniquely discovered; no first-match ambiguity was accepted
-[ ] backup manifest records the actual source runtime containers used
+[ ] selected WeKnora/Open WebUI runtime config directories and Hermes home match the observed active deployment
+[ ] backup source PostgreSQL/WeKnora/Open WebUI container identities were explicit or uniquely discovered; no first-match ambiguity was accepted
+[ ] backup manifest records the actual source runtime paths and containers used
 [ ] protected operational deployment-state/handoff record backed up
 [ ] secret recovery method protected/documented
 [ ] entire backup generation treated as confidential/secret-bearing and protected/encrypted according to approved policy
