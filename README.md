@@ -49,7 +49,7 @@ Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.
 
 ![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
 
-The SVG is a v2 system-design view focused on the separation between the Core General path and governed Communication/Email. It is **not an exhaustive snapshot of every capability currently enabled in the ARMOR reference deployment**.
+The SVG is a v2 system-design view focused on the separation between the Core General path and governed Communication/Email. The Communication/Email lane is a **conditional capability**, not part of mandatory Core, and is instantiated only when the active company configuration enables it. The diagram is **not an exhaustive snapshot of every capability currently enabled in the ARMOR reference deployment**. The public/default deployment gate remains inactive while the separately authorized ARMOR reference deployment is active and reported only through sanitized evidence.
 
 The validated Core employee path is intentionally independent from the governed v2 communication path:
 

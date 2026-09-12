@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
   <title id="title">Enterprise AI Office v2 中文架构图</title>
-  <desc id="desc">展示通用助手、沟通助手、WeKnora、Hermes、EAO 邮件治理服务、邮件服务商、治理 SQLite 与当前项目生命周期状态的高层架构图。</desc>
+  <desc id="desc">展示 Core 通用路径、条件启用的受治理 Communication/Email 能力、WeKnora、Hermes，以及当前生命周期与参考部署状态的高层架构图。</desc>
   <defs>
     <style><![CDATA[
       .bg { fill: #f7fafc; }
@@ -36,7 +36,7 @@
   <rect x="1235" y="42" width="190" height="34" rx="17" fill="#dcfce7" stroke="#86efac"/>
   <text class="chip" x="1258" y="64">安装设计 ✓</text>
   <rect x="1060" y="84" width="365" height="34" rx="17" fill="#fef3c7" stroke="#fcd34d"/>
-  <text class="chip" x="1080" y="106">真实部署未激活 · 蓝图验证待开启</text>
+  <text class="chip" x="1080" y="106">默认部署 Gate 未开启 · ARMOR 参考部署已激活</text>
 
   <g class="shadow">
     <rect class="box-dark" x="60" y="180" width="200" height="100" fill="#e2e8f0"/>
@@ -85,8 +85,8 @@
 
   <g class="shadow">
     <rect class="box" x="320" y="470" width="1180" height="370" fill="#ffffff"/>
-    <text class="section" x="350" y="510">受治理的沟通路径</text>
-    <text class="small" x="350" y="537">确定性的草稿 / 审批 / 发送闭环，与 v1 通用路径隔离</text>
+    <text class="section" x="350" y="510">条件能力：受治理的沟通路径</text>
+    <text class="small" x="350" y="537">仅在启用 Email 时实例化 · 与 Core 通用路径隔离</text>
 
     <rect class="box" x="390" y="590" width="370" height="150" fill="#f8fafc"/>
     <text class="label" x="420" y="630">EAO 邮件治理服务</text>
@@ -134,9 +134,9 @@
     <text class="label" x="1210" y="338">当前进度</text>
     <text class="tiny" x="1210" y="366">• ID-1 ～ ID-7 已完成</text>
     <text class="tiny" x="1210" y="390">• 蓝图验证尚未开启</text>
-    <text class="tiny" x="1210" y="414">• 真实部署仍未激活</text>
+    <text class="tiny" x="1210" y="414">• ARMOR 参考部署：已激活</text>
   </g>
 
   <text class="tiny" x="60" y="925">本图表示 System Design 与 Installation Design 完成后的仓库蓝图架构。</text>
-  <text class="tiny" x="60" y="947">它不代表真实生产环境已经完成部署。</text>
+  <text class="tiny" x="60" y="947">默认公开部署 Gate 仍未开启；ARMOR 参考部署为独立授权并仅公开脱敏状态。</text>
 </svg>

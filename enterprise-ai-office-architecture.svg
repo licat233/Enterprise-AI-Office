@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
   <title id="title">Enterprise AI Office v2 Architecture</title>
-  <desc id="desc">High-level architecture showing General Assistant, Communication Assistant, WeKnora, Hermes, EAO Email Governance, Email Provider, Governance SQLite, and lifecycle status.</desc>
+  <desc id="desc">High-level architecture showing the Core General path, a conditional governed Communication/Email capability, WeKnora, Hermes, and lifecycle/reference-deployment status.</desc>
   <defs>
     <style><![CDATA[
       .bg { fill: #f7fafc; }
@@ -36,7 +36,7 @@
   <rect x="1235" y="42" width="190" height="34" rx="17" fill="#dcfce7" stroke="#86efac"/>
   <text class="chip" x="1258" y="64">Installation Design ✓</text>
   <rect x="1060" y="84" width="365" height="34" rx="17" fill="#fef3c7" stroke="#fcd34d"/>
-  <text class="chip" x="1080" y="106">Real Deployment Inactive · Validation Pending</text>
+  <text class="chip" x="1080" y="106">Public Gate Off · ARMOR Reference Active</text>
 
   <g class="shadow">
     <rect class="box-dark" x="60" y="180" width="200" height="100" fill="#e2e8f0"/>
@@ -85,8 +85,8 @@
 
   <g class="shadow">
     <rect class="box" x="320" y="470" width="1180" height="370" fill="#ffffff"/>
-    <text class="section" x="350" y="510">Governed Communication Path</text>
-    <text class="small" x="350" y="537">Deterministic draft / approval / send loop isolated from the v1 general path</text>
+    <text class="section" x="350" y="510">Conditional: Governed Communication Path</text>
+    <text class="small" x="350" y="537">Enabled only when Email is selected · isolated from the Core General path</text>
 
     <rect class="box" x="390" y="590" width="370" height="150" fill="#f8fafc"/>
     <text class="label" x="420" y="630">EAO Email Governance Service</text>
@@ -134,9 +134,9 @@
     <text class="label" x="1210" y="338">Current Progress</text>
     <text class="tiny" x="1210" y="366">• ID-1 to ID-7 complete</text>
     <text class="tiny" x="1210" y="390">• Validation target not yet opened</text>
-    <text class="tiny" x="1210" y="414">• Real deployment remains inactive</text>
+    <text class="tiny" x="1210" y="414">• ARMOR reference deployment: active</text>
   </g>
 
   <text class="tiny" x="60" y="925">This diagram represents the repository blueprint after System Design and Installation Design completion.</text>
-  <text class="tiny" x="60" y="947">It does not imply a live production deployment has already been performed.</text>
+  <text class="tiny" x="60" y="947">Public deployment gate remains inactive; ARMOR reference deployment is separately authorized and sanitized.</text>
 </svg>

@@ -49,7 +49,7 @@
 
 ![Enterprise AI Office v2 中文架构图](./enterprise-ai-office-architecture.zh-CN.svg)
 
-这张 SVG 是 v2 系统设计视图，重点表达 Core General 路径与受治理 Communication/Email 路径的隔离关系；它**不是 ARMOR 当前参考部署全部能力的完整快照**。
+这张 SVG 是 v2 系统设计视图，重点表达 Core General 路径与受治理 Communication/Email 路径的隔离关系。Communication/Email 是**条件能力**，不是强制 Core，只有在当前公司配置显式启用时才实例化；它**不是 ARMOR 当前参考部署全部能力的完整快照**。默认/公开 deployment gate 仍未开启，但独立授权的 ARMOR 参考部署已经激活，并且只通过脱敏证据公开状态。
 
 已经验证的 Core General 路径与新增的 v2 Communication 路径刻意相互隔离：
 
