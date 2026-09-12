@@ -183,6 +183,8 @@ pass "checksums" "$BACKUP_DIR/SHA256SUMS"
 WEKNORA_IMAGE="$(manifest_value 'WeKnora image')"
 POSTGRES_IMAGE="$(manifest_value 'PostgreSQL image')"
 OPENWEBUI_IMAGE="$(manifest_value 'Open WebUI image')"
+BACKUP_HELPER_REPO_COMMIT="$(manifest_value 'Backup helper repository commit')"
+DEPLOYMENT_BLUEPRINT_COMMIT="$(manifest_value 'Deployment blueprint commit')"
 [ -n "$WEKNORA_IMAGE" ] || fail "manifest" "WeKnora image is missing"
 [ -n "$OPENWEBUI_IMAGE" ] || fail "manifest" "Open WebUI image is missing"
 if [ -z "$POSTGRES_IMAGE" ]; then
@@ -221,6 +223,16 @@ fi
 if [ -f "$BACKUP_DIR/state/deployment-state.md" ]; then
   mkdir -p "$TARGET_ROOT/state"
   cp "$BACKUP_DIR/state/deployment-state.md" "$TARGET_ROOT/state/deployment-state.md"
+
+  RESTORED_BLUEPRINT_COMMIT="$(awk -F'`' '/^EAO blueprint commit: `/ {print $2; exit}' "$TARGET_ROOT/state/deployment-state.md")"
+  if [ -n "$DEPLOYMENT_BLUEPRINT_COMMIT" ] && [ "$DEPLOYMENT_BLUEPRINT_COMMIT" != "unavailable" ]; then
+    [ "$RESTORED_BLUEPRINT_COMMIT" = "$DEPLOYMENT_BLUEPRINT_COMMIT" ] \
+      || fail "Deployment blueprint commit" "manifest/state mismatch"
+    pass "Deployment blueprint commit" "$DEPLOYMENT_BLUEPRINT_COMMIT"
+  else
+    pass "Deployment blueprint commit" "older/incomplete backup manifest; verify protected state commit before production reuse"
+  fi
+
   pass "Deployment state" "protected operational handoff/evidence state materialized"
 else
   pass "Deployment state" "not present in backup; reconstruct and re-record mappings before production use"
@@ -322,6 +334,8 @@ WeKnora file volume: $WEKNORA_DATA_VOLUME
 Open WebUI data volume: $OPENWEBUI_VOLUME
 Governance state: $TARGET_ROOT/runtime/email-governance/state.sqlite3 (only when present in backup)
 Protected operational deployment state: $TARGET_ROOT/state/deployment-state.md (when present in backup)
+Backup helper repository commit: ${BACKUP_HELPER_REPO_COMMIT:-unavailable}
+Deployment blueprint commit: ${DEPLOYMENT_BLUEPRINT_COMMIT:-unavailable}
 
 The live demo was not stopped or modified. To complete an isolated service
 test, create a temporary Compose project from $TARGET_ROOT/weknora/docker-compose.yml,
