@@ -79,6 +79,7 @@ WeKnora tenant/workspace runtime ID:
 Embedding runtime model ID:
 Embedding dimension:
 Profile → retrieval-key record ID/name/scope:
+Profile → retrieval-key naming source: recorded-existing | enterprise-ai-office-hermes-<profile-id>
 Profile → protected retrieval-token reference name:
 Official MCP server source/path/version:
 ```
