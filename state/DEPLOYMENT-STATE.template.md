@@ -53,13 +53,15 @@ Add rows only for optional components actually enabled.
 
 ## Models / providers
 
-| Role | Provider | Model | Notes |
-| --- | --- | --- | --- |
-| Hermes default/general | `<...>` | `<...>` | `<...>` |
-| WeKnora embedding | `<...>` | `<...>` | dimension `<...>` |
-| WeKnora rerank | `<disabled or ...>` | `<...>` | `<...>` |
+| Role | Source / auth path | Provider | Model | Credential ref / native binding | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Hermes default/general | `<api-key / OAuth / keyless / ...>` | `<...>` | `<...>` | `<symbolic ref + native binding, or none>` | `<...>` |
+| WeKnora embedding | `<local / remote>` | `<... or n/a>` | `<...>` | `<symbolic ref + native binding, or none>` | dimension `<...>` |
+| WeKnora rerank | `<disabled / local / remote>` | `<...>` | `<...>` | `<symbolic ref + native binding, or none>` | `<...>` |
 
-Do not record API keys/secrets here.
+Do not record API keys/secrets here. Record only the selected non-secret auth
+mechanism and symbolic credential-ref/native-binding metadata needed to rebind
+the same model role after recovery.
 
 ## Knowledge
 
