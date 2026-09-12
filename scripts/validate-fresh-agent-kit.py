@@ -285,6 +285,16 @@ def main() -> int:
         "Fresh Agent distinguishes local restore from Production Ready evidence",
     )
     require_text(
+        "docs/BACKUP-RESTORE.md",
+        "entire backup generation",
+        "Fresh Agent treats all secret-bearing backup artifacts as confidential",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "Whole-generation confidentiality/encryption result",
+        "Fresh Agent records whole-backup protection evidence",
+    )
+    require_text(
         "validation/scorecard.yaml",
         "off_primary_restore_evidence_when_production_ready",
         "Scorecard requires off-primary restore evidence for Production Ready",

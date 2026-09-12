@@ -608,6 +608,7 @@ production_controls:
     records:
       - latest backup generation/timestamp
       - protected operational deployment-state artifact inclusion
+      - whole-generation confidentiality/encryption result
       - off-primary encrypted destination/boundary
       - checksum/integrity result
       - independent-copy freshness result

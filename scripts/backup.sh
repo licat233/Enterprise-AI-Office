@@ -437,7 +437,7 @@ Discovered Docker volumes:
 - PostgreSQL: $POSTGRES_VOLUME
 - WeKnora documents: $WEKNORA_DATA_VOLUME
 - Open WebUI data: $OPENWEBUI_VOLUME
-Security note: secret values are not recorded in this manifest. The secrets archive is restricted local backup material and must be moved to encrypted independent storage for production use.
+Security note: secret values are not recorded in this manifest. The backup generation itself is confidential/secret-bearing: WeKnora runtime config, Hermes runtime/Profile state (including provider/OAuth/Profile credentials when present), Open WebUI runtime env when present, and the optional runtime-credentials archive can contain secrets. Protect the entire generation and use encrypted/approved independent storage before it can satisfy Production Ready evidence.
 EOF
 
 : > "$DEST/SHA256SUMS"

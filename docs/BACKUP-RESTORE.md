@@ -86,9 +86,11 @@ guessing, including:
 
 - WeKnora logical Knowledge Base ID → runtime UUID mappings;
 - retrieval-key record/reference metadata without plaintext tokens;
+- model-role source/auth path plus symbolic provider-credential ref/native-binding metadata, never credential values;
 - Hermes served Profile set, Profile routes, advertised model IDs, and
   non-secret credential reference names;
 - Open WebUI logical group ID → display name → runtime UUID mappings;
+- Open WebUI Profile connection exact URL plus observed/re-discoverable connection index/runtime handle;
 - Profile/model/group ACL mappings;
 - acceptance/recovery evidence.
 
@@ -101,9 +103,23 @@ The reference scripts use
 
 ### Secrets
 
-Back up production secrets separately using an encrypted/secure method.
+Back up production secrets using an encrypted/secure method and preserve a
+documented recovery source.
 
-Do not put them in this public repository.
+Do not assume the optional `secrets/runtime-credentials.tar.gz` artifact is the
+only secret-bearing backup file. The current backup helper can also capture
+credentials inside:
+
+```text
+weknora/runtime-config.tar.gz   # protected runtime .env/config when present
+hermes/runtime.tar.gz           # .env, Profile .env, auth.json/OAuth/provider state when present
+open-webui/.env                 # protected runtime environment when present
+secrets/runtime-credentials.tar.gz  # optional separate credential inventory
+```
+
+Therefore the **entire backup generation** is confidential/secret-bearing and
+must receive the protection appropriate for production secrets. Do not put any
+of these artifacts in this public repository.
 
 ## 3. What is not enough
 
@@ -424,7 +440,14 @@ Do not use broad destructive cleanup commands against paths/volumes that have no
 
 ## 21. Encryption
 
-Encrypt backup media containing confidential company data or secrets according to company security policy.
+Treat the whole EAO backup generation as confidential/secret-bearing, not only
+the optional `secrets/` archive. Encrypt/protect it according to company
+security policy before it is accepted as an off-primary production copy.
+
+For `PRODUCTION READY`, the protected operational state must identify the
+approved encrypted off-primary destination/boundary and record the
+whole-generation confidentiality/encryption result without recording keys or
+secret values.
 
 Treat removable media as potentially losable.
 
@@ -446,6 +469,7 @@ The default daily policy is a starting point, not a universal compliance answer.
 [ ] Hermes production state backed up
 [ ] Protected operational deployment-state/handoff record backed up
 [ ] Secrets have a secure recovery path
+[ ] Entire backup generation is treated as confidential/secret-bearing and protected/encrypted accordingly
 [ ] At least one approved copy is off the primary disk
 [ ] Off-primary copy integrity/checksum verified after transfer
 [ ] Retention and freshness against the off-primary destination verified
