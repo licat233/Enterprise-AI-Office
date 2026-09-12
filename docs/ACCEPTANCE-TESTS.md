@@ -450,7 +450,10 @@ Expected:
 [ ] no secret/config disclosure
 ```
 
-## 28. Backup and restore
+## 28. Backup and restore — only when enabled
+
+Run this section only when `production.backup.enabled: true`. When backup is
+disabled, record this section as N/A; no readiness level enables it implicitly.
 
 According to `docs/BACKUP-RESTORE.md`:
 
@@ -463,11 +466,11 @@ According to `docs/BACKUP-RESTORE.md`:
 [ ] secret recovery method protected/documented
 [ ] entire backup generation treated as confidential/secret-bearing and protected/encrypted according to approved policy
 [ ] backup integrity verified
-[ ] approved off-primary-disk copy exists for Production Ready
-[ ] off-primary copy checksum/integrity verified after transfer
-[ ] off-primary freshness/retention evidence recorded
+[ ] approved off-primary-disk copy exists when selected company policy requires one
+[ ] off-primary copy checksum/integrity verified after transfer when applicable
+[ ] off-primary freshness/retention evidence recorded when applicable
 [ ] isolated restore tested
-[ ] for Production Ready, final isolated restore source is the approved off-primary copy
+[ ] final isolated restore source matches the selected backup policy
 [ ] restored deployment-state mappings match restored WeKnora/Hermes/Open WebUI resources
 [ ] restored employee knowledge/access path works
 ```
