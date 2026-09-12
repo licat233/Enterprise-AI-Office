@@ -34,7 +34,7 @@ Observed operational facts already validated in the reference deployment include
 - ordinary employee access remains least-privilege and unauthenticated access is denied;
 - LAN and the already-approved Tailscale private path can reach the employee surface;
 - restart/reboot acceptance has passed;
-- backup generation and isolated restore mechanics have passed on the primary host.
+- historical backup/isolated-restore mechanics were validated during deployment work, but backup is not currently enabled as an operating capability.
 
 Therefore the **EAO baseline construction phase is operationally complete for
 normal use at `CONFIGURED READY — PASS`**. Ongoing work should be treated as
@@ -42,11 +42,10 @@ feedback-driven maintenance, defect correction, or bounded capability extension
 rather than as evidence that the Core office platform is still unfinished.
 
 The ARMOR owner has explicitly selected `CONFIGURED READY` as the current
-delivery target. Backup/restore remains available as optional operational
-hardening rather than a blocker for the deployed office baseline. If ARMOR later
-chooses the stricter `PRODUCTION READY` target, the existing contract still
-requires independent encrypted off-primary backup plus restore evidence sourced
-from that independent copy.
+delivery target. The Mac Studio internal disk is the current EAO runtime and
+primary data storage. Backup/restore is an independent optional capability and
+is currently disabled. It may be enabled later if business requirements and
+storage conditions justify it.
 
 Governed AI email marketing is a separate follow-on business capability. Existing
 email/governance/Hermes/Cron assets should be reused through the Capability Reuse
@@ -155,10 +154,9 @@ be accompanied by explicit changelog/upgrade evidence.
 | Retrieval-only transcript → WeKnora compatibility | ✅ HTTP 201 KB create / HTTP 200 ingest + retrieval |
 | WeKnora Summary/Chat model for transcript test | ✅ Not required / not configured |
 | Configured Ready | ✅ PASS |
-| Backup/restore scripts | ✅ Reconciled with active runtime layout |
-| Temporary primary-disk backup generation | ✅ Validated |
-| Isolated restore materialization | ✅ Validated without touching production |
-| Restored employee-path acceptance | ✅ PASS |
+| Primary EAO runtime/data storage | ✅ Mac Studio internal disk |
+| Backup/restore capability | ➖ Optional / currently disabled |
+| Historical backup/restore mechanics validation | ✅ Completed during deployment work |
 | Retrieved prompt-injection source test | ✅ PASS |
 | Real Mac Studio reboot acceptance | ✅ PASS |
 | Post-reboot employee path | ✅ Grounded answer + source |
@@ -252,30 +250,28 @@ Formal Company Knowledge       unchanged
 
 This evidence confirms an important deployment rule: a WeKnora UI workflow that offers or requests a Conversation/Summary model does not imply that document ingestion and retrieval require one. For retrieval-only Knowledge Bases, the deployed WeKnora v0.8.0 path can operate with Embedding bound and `summary_model_id` unset.
 
-## Production hardening completed
+## Operational hardening and recovery evidence
 
-Production work that does not depend on an external backup destination has now been completed for the current deployment.
+The current ARMOR deployment uses the Mac Studio internal disk as its normal EAO
+runtime and primary data storage. No backup schedule, backup destination, or
+backup retention policy is currently enabled.
 
-Completed evidence includes:
+Earlier deployment work validated the repository's backup and isolated-restore
+mechanics on the primary host. That evidence is retained because it proves the
+optional capability can be activated later without redesigning EAO. It does not
+mean a backup service is currently running or required for the deployed baseline.
 
-- `scripts/backup.sh` / `scripts/restore.sh` resolve the active runtime root instead of reference/demo or company-private hard-coded paths;
-- backup coverage validated for PostgreSQL, WeKnora, Open WebUI, Hermes, configuration, manifest, and checksums;
-- temporary backup generation created on the primary disk for recovery-path validation only;
-- isolated restore materialization completed in independent directories, volumes, containers, and loopback ports without stopping or rebuilding production;
-- restored `Company Knowledge`, known fact/source retrieval, General Assistant mapping, ordinary-employee visibility, history, file upload, fail-closed behavior, and required employee path all passed;
-- all temporary restore resources were removed after acceptance;
-- retrieved prompt-injection test source was actually retrieved, but Hermes `gpt-5.6-luna` treated the source as data rather than authority;
-- the prompt-injection test did not expose configuration/credentials, execute unauthorized instructions, or invoke mutation-capable tools, while still returning the ordinary test marker and source;
-- the prompt-injection test document was removed after acceptance and the production Knowledge Base was rechecked clean;
+Other completed operational evidence remains in force:
+
 - application surfaces are loopback-only where applicable and database/cache/parser internals are not published as host ports;
-- a real Mac Studio reboot was completed and the required production path recovered successfully;
+- a real Mac Studio reboot was completed and the required employee path recovered successfully;
 - after reboot, OrbStack/Docker, WeKnora, Open WebUI, Hermes, and Ollama were healthy;
-- after reboot, `bge-m3` returned 1024-dimensional embeddings;
-- after reboot, the ordinary employee path again returned a grounded marker and source;
-- after reboot, ordinary-employee visibility, `default/admin` fail-closed behavior, history, file upload, WeKnora read/write boundary, and disabled employee memory all remained correct;
-- latest health state is 6 PASS, 0 FAIL, and 1 WARN, where the only WARN is the expected missing backup-freshness marker while no approved off-primary backup destination exists.
+- after reboot, the ordinary employee path again returned grounded company knowledge with source evidence;
+- ordinary-employee visibility, history, file upload, retrieve-only knowledge boundaries, and disabled employee memory remained correct.
 
-A primary-disk backup or temporary isolated restore is validation evidence only. It does **not** substitute for a physically independent production backup target.
+Backup/restore may be enabled later as a separate optional capability. If enabled,
+its selected storage, retention, encryption, and restore-test policy must then
+pass the dedicated backup acceptance contract.
 
 ## Reboot recovery boundary
 
@@ -289,24 +285,6 @@ The current operational recovery sequence still includes a human/operator bounda
 - the deployment has **not** been validated as fully unattended boot-to-service recovery.
 
 This is an accepted current operational limitation, not a reason to invalidate the completed reboot acceptance. If future requirements demand unattended recovery after power loss without operator login, that should be treated as a separate operational improvement rather than silently assumed from the current result.
-
-## Remaining Production Ready blocker
-
-Production Ready is intentionally not declared yet. The only remaining boundary is the independent external backup / restore evidence.
-
-### Independent encrypted backup destination and external recovery evidence
-
-No approved physically independent encrypted backup destination has been provided yet.
-
-Still required before Production Ready can pass:
-
-- an approved external/off-primary backup destination;
-- an approved retention policy and RPO/RTO target;
-- a complete production backup generation copied off the Mac Studio primary disk;
-- backup freshness/retention evidence against that destination;
-- final restore evidence from the approved external backup copy.
-
-The dedicated backup disk may be HDD or SSD. Enterprise AI Office does not require SSD. The important properties are physical independence from the Mac Studio internal disk, adequate capacity/reliability, approved encryption, and an explicit retention/recovery policy.
 
 ## Protected deployment state
 
@@ -335,6 +313,7 @@ Currently enabled employee/business capabilities:
 
 Other optional capabilities remain disabled unless explicitly selected later, including:
 
+- Backup / Restore;
 - governed Email / external send;
 - Messaging;
 - Hermes Cron;
@@ -359,10 +338,10 @@ Fresh deployments should start from [`DEPLOYMENT-STATE.template.md`](./DEPLOYMEN
 
 ## Next deployment direction
 
-The system is usable at `CONFIGURED READY — PASS`, including the currently enabled ARMOR Operations, Enterprise Web Research, and Media Transcription capabilities, and all Production Ready acceptance work that does not depend on external backup hardware has passed.
+The EAO baseline is deployed and in normal use at `CONFIGURED READY — PASS`.
+Core-platform construction is closed. Future work should be driven by real usage
+feedback, defect correction, or explicitly selected business capabilities.
 
-After an approved independent encrypted backup destination and policy are provided, complete the off-primary backup copy, retention/freshness evidence, and final external restore acceptance. If those pass, the deployment may advance to:
-
-```text
-PRODUCTION READY — PASS
-```
+The next planned business capability is governed AI email marketing. Backup/restore
+remains optional and should be revisited only when ARMOR decides the business need
+or storage conditions justify enabling it.
