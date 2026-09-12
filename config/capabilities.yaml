@@ -407,7 +407,7 @@ capabilities:
       - governance state/log path or accepted derived default
       - symbolic mailbox client-credential reference
       - protected operator/evidence path for reconciliation
-      - Governance backup/retention policy or accepted company default when production-ready is requested
+      - Governance backup/retention policy only when backup/restore is explicitly enabled
     required_secret_classes:
       - specialist-profile-credential
       - open-webui-governance-forwarder-credential
