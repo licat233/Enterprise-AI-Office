@@ -1,6 +1,6 @@
 # Enterprise AI Office
 
-> **EAO 基线：已完成 / 已部署 / 已投入使用。** Enterprise AI Office 是 ARMOR 基于 **WeKnora + Hermes Agent + Open WebUI** 搭建的自托管企业 AI 办公系统。本仓库现在同时承担两个角色：一是当前已部署参考系统的维护型权威来源；二是可供其它有能力的 AI Agent 在获得明确私有部署输入后，从零复建同类 EAO 的系统蓝图与安装蓝图。
+> **EAO 基线：已完成 / 已部署 / 已具备交付条件 / 已投入使用。** Enterprise AI Office 是 ARMOR 基于 **WeKnora + Hermes Agent + Open WebUI** 搭建的自托管企业 AI 办公系统。参考系统已经完成在指定公司 Mac Studio 上的安装与验收，员工访问条件已经准备完成，可以直接进行部门交接。本仓库现在同时承担两个角色：一是当前已部署参考系统的维护型权威来源；二是可供其它有能力的 AI Agent 在获得明确私有部署输入后，从零复建同类 EAO 的系统蓝图与安装蓝图。
 
 **[English README](./README.md)**
 
@@ -19,7 +19,7 @@
 
 ## 项目进度一眼看懂
 
-**当前项目状态：** EAO Core 基础建设已经完成。ARMOR 参考部署已经在员工日常办公中使用，并达到 `CONFIGURED READY — PASS`。后续工作以真实使用反馈驱动的维护，以及明确选择的新业务能力为主。下一项计划中的业务能力是受治理的 AI 邮件营销。
+**当前项目状态：** EAO Core 基础建设与 ARMOR 参考部署安装均已完成。当前系统已经通过现阶段验收，具备部门交付条件，员工可以通过已批准的私有访问路径使用 EAO；部门账号与访问地址已经可以进入实际交付。后续工作以真实使用反馈驱动的维护，以及明确选择的新业务能力为主。下一项计划中的业务能力是受治理的 AI 邮件营销。
 
 | 里程碑 / 能力 | 状态 |
 | --- | --- |
@@ -41,6 +41,9 @@
 | Operations 员工 RBAC v1 | ✅ 已关闭 / 冻结 / PASS |
 | Media Transcription 可选能力 | ✅ 已验证 / ARMOR Reference 已启用；非 Core 默认能力 |
 | EAO 运行基线 | ✅ 已完成 / 已部署 / 已投入使用 |
+| 部门交接准备 | ✅ 已完成 — 员工账号与私有访问资料可直接交付 |
+| 公司内部员工访问 | ✅ 已通过批准的私有网络路径验证 |
+| 公司外远程访问 | ✅ 已通过 Tailscale 私有访问验证；无需公开暴露服务 |
 | 仓库维护模式 | ✅ 仅保留一个长期分支：`main` |
 | Backup / Restore | ➖ 可选能力 / 当前未启用 |
 | 下一项业务能力 | ▶ 受治理的 AI 邮件营销 |
@@ -48,7 +51,7 @@
 | Release Ready | ✅ 已开启；开启阶段本身不等于已经声明 RELEASE READY |
 | ARMOR 真实部署 | ✅ 已激活 / 已部署 / 已投入使用；运行细节保持私有，仅公开脱敏状态 |
 
-> **实际运行状态：** ARMOR 的 EAO 基线已经部署在指定 Mac Studio，并已进入正常员工使用状态。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。ARMOR 当前目标正式收敛为已经 PASS 的 `CONFIGURED READY`。Mac Studio 内置硬盘当前作为 EAO 的运行与主数据存储盘。Backup / Restore 是独立的可选能力，目前不启用；以后只有在业务需要和存储条件合适时再显式开启。
+> **实际运行状态：** ARMOR 的 EAO 基线已经完成在指定公司 Mac Studio 上的安装，并通过现阶段验收，当前已具备部门上线交接条件。员工账号和已批准的私有访问地址可以直接交付给部门同事使用。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。访问路径已经分别验证：公司内部可通过批准的私有网络访问；公司外可通过 Tailscale 私有网络访问，因此授权员工无需把 EAO 暴露到公网也可以远程使用。Mac Studio 内置硬盘当前作为 EAO 的运行与主数据存储盘。Backup / Restore 是独立的可选能力，目前不启用；以后只有在业务需要和存储条件合适时再显式开启。
 >
 > Public Blueprint 生命周期是仓库治理状态，不等同于 ARMOR 真实部署是否存在、是否已经可用。当前基线已经达到 `CONFIGURED READY — PASS`，后续 EAO 工作应以实际使用反馈驱动的维护和边界清晰的能力扩展为主，而不是继续把 Core 平台当成未完成项目建设。
 >
@@ -128,6 +131,20 @@ Open WebUI → General Assistant → Hermes general → WeKnora
 | **Communication** | v2 受治理能力资产 | 仓库已经具备 Governed Email 设计与 runtime 资产；这不代表真实企业邮箱已经接入，也不代表允许自动发送 |
 
 ARMOR 当前脱敏运行状态以 [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) 为准。其它公司部署时应依据 [`config/capabilities.yaml`](config/capabilities.yaml) 选择能力，而不是复制 ARMOR 的完整 lane 集合。
+
+### 员工访问状态
+
+ARMOR 当前部署的员工入口保持私有：
+
+```text
+授权员工
+→ 公司内部已批准的私有网络 OR Tailscale 私有访问路径
+→ Open WebUI
+→ 已授权 Assistant / Profile
+→ EAO 服务
+```
+
+ARMOR 参考部署已经实际验证公司内部私有网络路径与 Tailscale 远程路径。这样员工即使不在公司，也可以通过 Tailscale 访问 EAO，而无需把员工入口公开暴露到互联网。真实员工账号、访问地址/IP、Tailscale 节点身份以及其它私有网络信息不会写入公开仓库。
 
 ## 当前已经实现了哪些功能
 
