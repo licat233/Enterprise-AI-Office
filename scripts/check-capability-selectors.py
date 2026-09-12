@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CAPS = ROOT / "config" / "capabilities.yaml"
 COMPANY = ROOT / "config" / "company.example.yaml"
+PRIVATE_COMPANY = ROOT / "config" / "company.private.example.yaml"
 
 CAP_RE = re.compile(r"^  ([A-Za-z0-9_.-]+):\s*$")
 KEY_RE = re.compile(r"^(\s*)([A-Za-z0-9_.-]+):(?:\s|$)")
@@ -133,13 +134,146 @@ def production_controls(text: str) -> set[str]:
     return result
 
 
+def declared_profile_ids(text: str) -> set[str]:
+    result: set[str] = set()
+    lines = text.splitlines()
+    in_profiles = False
+    base_indent = 0
+
+    for raw in lines:
+        stripped = raw.strip()
+        if not in_profiles:
+            if stripped == "profiles:" and len(raw) - len(raw.lstrip(" ")) == 0:
+                in_profiles = True
+                base_indent = 0
+            continue
+
+        if not stripped:
+            continue
+
+        indent = len(raw) - len(raw.lstrip(" "))
+        if indent <= base_indent:
+            break
+
+        match = re.match(r"^\s*-\s+id:\s*([A-Za-z0-9_.-]+)\s*$", raw)
+        if match:
+            result.add(match.group(1))
+
+    return result
+
+
+def profile_api_key_refs(text: str) -> dict[str, str]:
+    result: dict[str, str] = {}
+    lines = text.splitlines()
+    in_block = False
+    base_indent = 0
+
+    for raw in lines:
+        stripped = raw.strip()
+        if not in_block:
+            if stripped == "profile_api_key_refs:":
+                in_block = True
+                base_indent = len(raw) - len(raw.lstrip(" "))
+            continue
+
+        if not stripped:
+            continue
+
+        indent = len(raw) - len(raw.lstrip(" "))
+        if indent <= base_indent:
+            break
+
+        match = re.match(r"^\s*([A-Za-z0-9_.-]+):\s*(.*?)\s*$", raw)
+        if match:
+            value = match.group(2).strip().strip("'\"")
+            result[match.group(1)] = "" if value in {"", "null", "~"} else value
+
+    return result
+
+
+def default_api_key_ref(text: str) -> str:
+    match = re.search(r"^\s+default_api_key_ref:\s*(.*?)\s*$", text, flags=re.MULTILINE)
+    if not match:
+        return ""
+    value = match.group(1).strip().strip("'\"")
+    return "" if value in {"", "null", "~"} else value
+
+
+def secret_ref_names(text: str) -> set[str]:
+    result: set[str] = set()
+    lines = text.splitlines()
+    in_block = False
+    base_indent = 0
+
+    for raw in lines:
+        stripped = raw.strip()
+        if not in_block:
+            if stripped == "secret_refs:" and len(raw) - len(raw.lstrip(" ")) == 0:
+                # Public shape may intentionally use secret_refs: {}.
+                if raw.split(":", 1)[1].strip():
+                    return result
+                in_block = True
+                base_indent = 0
+            continue
+
+        if not stripped:
+            continue
+
+        indent = len(raw) - len(raw.lstrip(" "))
+        if indent <= base_indent:
+            break
+
+        match = re.match(r"^  ([A-Za-z0-9_.-]+):\s*$", raw)
+        if match:
+            result.add(match.group(1))
+
+    return result
+
+
+def validate_profile_credential_contract(
+    label: str,
+    text: str,
+    failures: list[str],
+) -> tuple[int, int]:
+    profiles = declared_profile_ids(text)
+    refs = profile_api_key_refs(text)
+    secrets = secret_ref_names(text)
+
+    for profile_id in sorted(profiles):
+        if profile_id not in refs:
+            failures.append(
+                f"{label}: declared Profile has no core_provisioning.hermes.profile_api_key_refs entry: {profile_id}"
+            )
+
+    checked_refs = 0
+    for profile_id, ref in sorted(refs.items()):
+        if not ref:
+            continue
+        checked_refs += 1
+        if ref not in secrets:
+            failures.append(
+                f"{label}: Profile API-key ref is not declared in secret_refs: {profile_id} -> {ref}"
+            )
+
+    default_ref = default_api_key_ref(text)
+    if default_ref:
+        checked_refs += 1
+        if default_ref not in secrets:
+            failures.append(
+                f"{label}: default Hermes API-key ref is not declared in secret_refs: {default_ref}"
+            )
+
+    return len(profiles), checked_refs
+
+
 def main() -> int:
-    if not CAPS.is_file() or not COMPANY.is_file():
+    if not CAPS.is_file() or not COMPANY.is_file() or not PRIVATE_COMPANY.is_file():
         print("FAIL required config file missing")
         return 2
 
     caps_text = CAPS.read_text(encoding="utf-8")
     company_text = COMPANY.read_text(encoding="utf-8")
+    private_company_text = PRIVATE_COMPANY.read_text(encoding="utf-8")
 
     schema_paths = company_paths(company_text)
     selectors = selector_blocks(caps_text)
@@ -157,6 +291,17 @@ def main() -> int:
     if "secret_values_in_record: forbidden" not in caps_text:
         failures.append("registry: records contract must forbid secret values")
     selected_names = {name for name, _, _, _ in selectors}
+
+    public_profile_count, public_credential_refs = validate_profile_credential_contract(
+        "config/company.example.yaml",
+        company_text,
+        failures,
+    )
+    private_profile_count, private_credential_refs = validate_profile_credential_contract(
+        "config/company.private.example.yaml",
+        private_company_text,
+        failures,
+    )
 
     for capability in sorted(conditional):
         if capability not in selected_names:
@@ -202,6 +347,11 @@ def main() -> int:
     print(f"Production controls: {len(production)}")
     print(f"Production control record blocks: {len(production & recorded)}")
     print(f"Company selector paths checked: {checked_paths}")
+    print(
+        "Profile credential mappings checked: "
+        f"{public_profile_count + private_profile_count} declared Profiles / "
+        f"{public_credential_refs + private_credential_refs} non-empty refs"
+    )
 
     if failures:
         print(f"Selector failures: {len(failures)}")

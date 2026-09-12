@@ -379,6 +379,21 @@ This records what must be resolved and where it will be injected. It never conta
 
 The blueprint does not mandate a new secret platform. Use the smallest approved native/protected mechanism appropriate to the selected deployment.
 
+For Hermes employee-facing Profiles, credential ownership is explicit:
+
+```text
+profiles[].id
+→ core_provisioning.hermes.profile_api_key_refs.<profile-id>
+→ secret_refs.<symbolic-ref>
+→ protected secret value
+→ Profile-local API_SERVER_KEY
+```
+
+Every declared employee-facing Profile must have the mapping. A specialist
+Profile must not rely on a similarly named secret ref existing somewhere else;
+the Profile→ref link is part of desired state. The plaintext key remains outside
+YAML and outside the protected operational state record.
+
 ---
 
 ## 8. Missing/conflicting input behavior
