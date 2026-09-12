@@ -91,8 +91,8 @@ still requires architecture/capability review.
 
 ## `check-capability-selectors.py`
 
-Dependency-free integrity check for conditional capability selection and
-deployment-record metadata.
+Dependency-free integrity check for conditional capability selection,
+deployment-record metadata, and Hermes Profile credential-reference closure.
 
 Run:
 
@@ -114,6 +114,13 @@ Generic selectors must use `source: company_configuration`, and every declared
 selector path must exist in `config/company.example.yaml`.
 ARMOR-reference-specific workflows remain explicit selection exceptions and are
 not forced into the generic company schema; they still must declare records.
+
+The same check also validates both public/private company examples so that every
+declared employee-facing Hermes Profile has a
+`core_provisioning.hermes.profile_api_key_refs.<profile-id>` entry. Every
+non-empty API-key ref must resolve to a declared `secret_refs` record in that
+configuration layer. This catches orphaned specialist Profile credentials before
+deployment.
 
 ## `check-validated-stack-consistency.py`
 
