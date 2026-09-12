@@ -1,6 +1,6 @@
 # Enterprise AI Office
 
-> Enterprise AI Office 是一个面向企业内部 AI 办公场景的 **系统蓝图 + 安装蓝图** 项目。它基于 **WeKnora + Hermes Agent + Open WebUI** 构建，并通过能力注册表按需扩展专业 AI 角色、Coding Agent、自动化、企业消息、身份认证，以及受治理的外部业务系统操作。
+> **EAO 基线：已完成 / 已部署 / 已投入使用。** Enterprise AI Office 是 ARMOR 基于 **WeKnora + Hermes Agent + Open WebUI** 搭建的自托管企业 AI 办公系统。本仓库现在同时承担两个角色：一是当前已部署参考系统的维护型权威来源；二是可供其它有能力的 AI Agent 在获得明确私有部署输入后，从零复建同类 EAO 的系统蓝图与安装蓝图。
 
 **[English README](./README.md)**
 
@@ -18,6 +18,8 @@
 提出任何新组件之前，必须先执行 [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md)。文档层级与权威顺序请查看 [文档权威地图](docs/README.md)。 维护者与 AI 工程 Agent 还应遵循 [仓库治理规范](docs/REPOSITORY-GOVERNANCE.md)。
 
 ## 项目进度一眼看懂
+
+**当前项目状态：** EAO Core 基础建设已经完成。ARMOR 参考部署已经在员工日常办公中使用，并达到 `CONFIGURED READY — PASS`。后续工作以真实使用反馈驱动的维护，以及明确选择的新业务能力为主。下一项计划中的业务能力是受治理的 AI 邮件营销。
 
 | 里程碑 / 能力 | 状态 |
 | --- | --- |
@@ -38,8 +40,12 @@
 | Enterprise Web Research v1.0 | ✅ 已关闭 / 冻结 / PASS |
 | Operations 员工 RBAC v1 | ✅ 已关闭 / 冻结 / PASS |
 | Media Transcription 可选能力 | ✅ 已验证 / ARMOR Reference 已启用；非 Core 默认能力 |
-| Blueprint Validation | ⏳ 尚未开启 |
-| Release Ready | ⏳ 尚未开启 |
+| EAO 运行基线 | ✅ 已完成 / 已部署 / 已投入使用 |
+| 仓库维护模式 | ✅ 仅保留一个长期分支：`main` |
+| Backup / Restore | ➖ 可选能力 / 当前未启用 |
+| 下一项业务能力 | ▶ 受治理的 AI 邮件营销 |
+| Blueprint Validation | ⏳ 仓库治理生命周期尚未开启；不阻塞当前 ARMOR 已部署基线 |
+| Release Ready | ⏳ 仓库治理生命周期尚未开启；不阻塞 ARMOR 正常使用 |
 | Public Real Deployment Gate | ⛔ 默认未激活；已有 ARMOR 脱敏真实参考部署 |
 
 > **实际运行状态：** ARMOR 的 EAO 基线已经部署在指定 Mac Studio，并已进入正常员工使用状态。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。ARMOR 当前目标正式收敛为已经 PASS 的 `CONFIGURED READY`。Mac Studio 内置硬盘当前作为 EAO 的运行与主数据存储盘。Backup / Restore 是独立的可选能力，目前不启用；以后只有在业务需要和存储条件合适时再显式开启。
@@ -49,6 +55,35 @@
 > **重要说明：** 本 README 中的“已经实现”，是指仓库已经具备相应的系统设计、安装合同、参考适配器/脚本、Schema 或已验证的核心资产；并不代表 v2 邮件能力已经连接真实企业邮箱并投入生产。受治理的 AI 邮件营销属于下一项独立业务能力。
 
 机器可读权威状态：[`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)。
+
+## 仓库维护模式
+
+EAO 采用**一人维护、单主线**模式。
+
+```text
+main
+  ↓
+短期 task branch
+  ↓
+Pull Request
+  ↓
+Repository Readiness PASS
+  ↓
+merge
+  ↓
+自动删除 head branch
+```
+
+规则：
+
+- `main` 是唯一长期分支；
+- 不长期保留 `develop`、`release/*`、`docs/*`、`fix/*`、`codex/*`、`ci/*`、`test/*` 等并行分支；
+- GitHub 的 **Automatically delete head branches** 已启用；
+- 开发历史由 Git commit 与 merged PR 保存，不再依赖长期历史分支；
+- 有实质影响的修改使用短期分支，合并后立即删除；
+- 仓库重点保持“当前可部署、可维护的 EAO 状态”，避免积累废弃的并行实现。
+
+完整规则见 [仓库治理规范](docs/REPOSITORY-GOVERNANCE.md)。
 
 ## 系统架构图
 
@@ -108,7 +143,7 @@ ARMOR 当前脱敏运行状态以 [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL
 - Hermes Profile API 隔离；
 - 员工 Profile 最小工具权限；
 - 会话历史与受控文件上传；
-- 备份与隔离恢复参考流程。
+- 可选的备份与隔离恢复参考流程；当前 ARMOR 部署未启用 Backup / Restore。
 
 核心员工工作流：
 
