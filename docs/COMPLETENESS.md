@@ -33,10 +33,10 @@ Core Ready is a functional milestone. It does not prove that every company-confi
 
 An optional capability that is disabled does not block Configured Ready.
 
-Backup/restore is **not** a Core Ready or Configured Ready requirement. A company
-may deliberately operate at `configured-ready` and defer backup/disaster-recovery
-hardening. That is an explicit target-readiness decision, not an incomplete
-Configured Ready deployment.
+Backup/restore is an **optional capability at every readiness level**. It is
+required only when the adopting company explicitly enables it in configuration.
+The primary host disk may be the EAO runtime/data disk without also being treated
+as a backup target.
 
 An enabled capability whose required credential, external approval, provider choice, or security decision is genuinely unavailable produces `BLOCKED — REQUIRED INPUT`; the agent must not silently disable it merely to reach a green status.
 
@@ -45,11 +45,11 @@ An enabled capability whose required credential, external approval, provider cho
 `PRODUCTION READY` requires:
 
 1. `CONFIGURED READY` is PASS;
-2. production backup/recovery requirements are implemented and tested;
-3. production secrets, access, and network exposure are reviewed;
-4. startup/recovery behavior is known and supported;
-5. production operational ownership/health procedures are in place;
-6. representative production knowledge and security tests pass.
+2. production secrets, access, and network exposure are reviewed;
+3. startup/recovery behavior is known and supported;
+4. production operational ownership/health procedures are in place;
+5. representative production knowledge and security tests pass;
+6. any explicitly enabled backup/restore capability passes its own acceptance contract.
 
 Production Ready is therefore a superset of Configured Ready, not a synonym for "services are running".
 
@@ -72,10 +72,9 @@ production-ready
 
 An AI deployment agent must continue until the requested target is reached, blocked on genuine required input, or fails at a specific boundary.
 
-For a small/internal deployment that does not currently require independent
-disaster recovery, `configured-ready` is a valid completion target. Selecting
-`production-ready` opts into the stricter production-control contract,
-including independent backup/recovery evidence.
+Selecting `production-ready` does not silently enable backup. Backup/restore
+remains configuration-selected; if disabled, it is N/A rather than a readiness
+blocker.
 
 It must not stop at `CORE READY` when the requested target is `configured-ready` or `production-ready`.
 
@@ -158,7 +157,7 @@ Examples:
 - a Cron entry is not enough; the harmless acceptance job must actually run;
 - a Kanban board is not enough; a worker lifecycle must execute;
 - a coding-agent binary is not enough; delegation must modify/verify a disposable repository;
-- backup files are not enough; for Production Ready an approved off-primary copy must exist, its transferred integrity/freshness must be evidenced, and an isolated restore must succeed **from that independent copy**. A primary-disk backup plus primary-disk restore only validates recovery mechanics.
+- when backup/restore is enabled, acceptance must follow the selected company policy; if that policy requires an independent/off-primary copy, a primary-disk generation does not satisfy that independence requirement.
 
 ## 9. Final statuses
 
