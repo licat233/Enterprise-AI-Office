@@ -133,6 +133,12 @@ This covers WeKnora bootstrap/runtime refs, Hermes default/Profile API keys, and
 the Open WebUI bootstrap administrator password without hard-coding secret
 names.
 
+The same checker also validates non-empty model-provider symbolic refs under
+`models`. Each such ref must resolve to `secret_refs`, use
+`class: model-provider-credentials`, and declare non-empty `consumer` and
+`native_binding` metadata. It does not invent provider env names: provisioning
+still resolves those against the pinned Hermes/WeKnora upstream contract.
+
 ## `check-validated-stack-consistency.py`
 
 Dependency-free cross-file check for derived Core runtime pins.
