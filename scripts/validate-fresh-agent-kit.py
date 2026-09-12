@@ -310,6 +310,21 @@ def main() -> int:
         "Fresh Agent treats all secret-bearing backup artifacts as confidential",
     )
     require_text(
+        "docs/BACKUP-RESTORE.md",
+        "### 2.1 Backup source runtime identity",
+        "Fresh Agent has fail-closed backup source identity contract",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "Backup source runtime identity/selection result",
+        "Fresh Agent records backup source runtime identity",
+    )
+    require_text(
+        "docs/ACCEPTANCE-TESTS.md",
+        "no first-match ambiguity was accepted",
+        "Fresh Agent acceptance rejects ambiguous backup source selection",
+    )
+    require_text(
         "state/DEPLOYMENT-STATE.template.md",
         "Whole-generation confidentiality/encryption result",
         "Fresh Agent records whole-backup protection evidence",
