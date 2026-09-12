@@ -21,6 +21,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 
 | Milestone / capability | Status |
 | --- | --- |
+| ARMOR reference EAO baseline | ✅ Deployed / in use / CONFIGURED READY — PASS |
 | v1 core employee path | ✅ Validated reference implementation |
 | v2 System Design | ✅ Complete |
 | v2 Installation Design | ✅ Complete |
@@ -41,7 +42,11 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Release Ready | ⏳ Not yet opened |
 | Public real-deployment gate | ⛔ Inactive by default; sanitized ARMOR reference deployment exists |
 
-> **Important:** “implemented” in this README means the repository contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox.
+> **Operational status:** the ARMOR reference EAO baseline is already deployed on the designated Mac Studio and is in normal employee use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. The remaining `PRODUCTION READY` blocker is independent off-primary backup/restore evidence; it does not mean the core office system is unfinished or unusable.
+>
+> The public blueprint lifecycle is repository-governance state, not a proxy for whether the separately authorized ARMOR deployment exists or is usable. With the baseline system deployed and `CONFIGURED READY — PASS`, ongoing EAO work should primarily be feedback-driven maintenance and bounded capability extensions rather than continued core-platform construction.
+>
+> **Important:** “implemented” in this README means the repository contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox. Governed AI email marketing remains a separate follow-on business capability.
 
 Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml).
 
