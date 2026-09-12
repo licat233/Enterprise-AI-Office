@@ -24,6 +24,24 @@ deployment:
     hostname: enterprise-ai-office
   runtime_root: /Users/Shared/enterprise-ai-office
 
+# Core network desired state is non-secret deployment configuration. Real
+# addresses normally belong in the protected company overlay. These fields
+# describe only the existing Core paths; they do not authorize a VPN, reverse
+# proxy, public ingress, or new network product.
+core_network:
+  weknora:
+    api_base_url_for_hermes: null
+    employee_exposed_directly: false
+  hermes:
+    shared_listener:
+      bind_host: null
+      port: null
+    open_webui_backend_base_url: null
+    employee_exposed_directly: false
+  open_webui:
+    employee_url: null
+    access_layer: private-network # examples: lan-only, private-network, explicitly-approved-ingress
+
 # Private deployments fill these non-secret bootstrap identities and symbolic
 # secret references in the protected company overlay. Values remain outside YAML.
 core_provisioning:
