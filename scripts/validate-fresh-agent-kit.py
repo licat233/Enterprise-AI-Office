@@ -320,6 +320,16 @@ def main() -> int:
         "Fresh Agent records backup source runtime identity",
     )
     require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "Hermes runtime home",
+        "Fresh Agent records the active Hermes runtime home",
+    )
+    require_text(
+        "docs/ACCEPTANCE-TESTS.md",
+        "runtime config directories and Hermes home match the observed active deployment",
+        "Fresh Agent acceptance verifies backup runtime-path identity",
+    )
+    require_text(
         "docs/ACCEPTANCE-TESTS.md",
         "no first-match ambiguity was accepted",
         "Fresh Agent acceptance rejects ambiguous backup source selection",
