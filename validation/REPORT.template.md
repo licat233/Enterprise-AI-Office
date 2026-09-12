@@ -77,6 +77,7 @@ Gate result: PASS / FAIL
 
 - Reading order: PASS / FAIL
 - Public/private input separation: PASS / FAIL
+- Model source/provider credential binding: PASS / FAIL
 - Dependency order: PASS / FAIL
 - Readiness interpretation: PASS / FAIL
 - Capability closure: PASS / FAIL
