@@ -389,13 +389,17 @@ A minimal document Knowledge Base can be created with the selected embedding mod
 
 ```json
 {
-  "name": "Company Knowledge",
-  "description": "Shared company information approved for employee use.",
+  "name": "<knowledge.knowledge_bases[].name>",
+  "description": "<knowledge.knowledge_bases[].description>",
   "type": "document",
   "is_temporary": false,
   "embedding_model_id": "<RESOLVED_EMBEDDING_MODEL_RUNTIME_ID>"
 }
 ```
+
+The `name` and `description` fields above are rendered from the active
+company Knowledge Base entry. `Company Knowledge` is only the reusable
+example's current display name; it is not a WeKnora-global fixed object name.
 
 Do not add a dedicated vector database, reranker, graph extractor, VLM, ASR, external object store, or custom parser unless active company configuration/requirements justify it.
 
@@ -508,9 +512,9 @@ Authorization: Bearer <OWNER_TOKEN>
 Content-Type: application/json
 
 {
-  "name": "enterprise-ai-office-hermes-general",
+  "name": "enterprise-ai-office-hermes-<PROFILE_ID>",
   "full_access": false,
-  "knowledge_base_ids": ["<COMPANY_GENERAL_RUNTIME_KB_ID>"],
+  "knowledge_base_ids": ["<PROFILE_ALLOWED_RUNTIME_KB_ID>", "..."],
   "capabilities": ["retrieve"]
 }
 ```
@@ -522,12 +526,21 @@ Critical rules:
 - `knowledge_base_ids` must be the explicit non-empty runtime allow-list for that Profile;
 - an empty Knowledge Base list is not the least-privilege baseline because it does not express the intended KB boundary;
 - do not share one broad retrieval key across Profiles with different knowledge scopes;
+- for a fresh deployment with no recorded key identity, use the stable default
+  name `enterprise-ai-office-hermes-<profile-id>`;
+- for an existing deployment, prefer the protected operational state's recorded
+  key record ID/name when it still resolves to the intended Profile scope; do
+  not rename a valid adopted key merely to match the default naming convention;
 - keep the returned plaintext token only in protected secret storage/Profile `.env`;
 - record key ID/name/scope metadata, never the token value.
 
 ### Idempotent key reconciliation
 
-Before creating a key, list existing keys for the tenant and reconcile by the deployment-managed key name plus expected scope.
+Before creating a key, first validate any key record ID/name already recorded
+for that Profile in protected operational state. If no valid recorded identity
+exists, list existing keys for the tenant and reconcile by the deterministic
+deployment-managed key name `enterprise-ai-office-hermes-<profile-id>` plus
+expected scope.
 
 If an existing key has the correct scope and its plaintext token is still available in protected secret storage, reuse it.
 
