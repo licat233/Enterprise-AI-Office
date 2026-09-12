@@ -194,6 +194,7 @@ capabilities:
       - knowledge bases
       - enabled profiles
       - employee groups and assistant mappings
+      - Open WebUI Profile connection URL/index and Model ID mappings
       - network exposure
       - memory state
       - core acceptance result
