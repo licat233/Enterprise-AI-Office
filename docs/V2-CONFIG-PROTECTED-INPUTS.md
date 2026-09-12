@@ -403,7 +403,7 @@ secret_refs:
   weknora-embedding-provider-openai-key:
     class: model-provider-credentials
     consumer: weknora-model-provisioning
-    native_binding: WeKnora /models parameters.api_key
+    native_binding: WeKnora model credential field api_key
 ```
 
 For the pinned Hermes 0.21.0 baseline, the selected provider's
@@ -413,9 +413,10 @@ and provider-native auth mode. For example, `openai-api` accepts
 catalog in EAO.
 
 For pinned WeKnora v0.8.0, model creation requires explicit `source`
-(`local` or `remote`). Remote model credentials are provided through the
-supported model provisioning request's `parameters.api_key`; local models do
-not require an invented remote-provider key.
+(`local` or `remote`). Remote model API keys bind to WeKnora's model credential field `api_key`.
+The provisioning contract uses the supported create/credential API surface
+without treating masked model reads as secret authority; local models do not
+require an invented remote-provider key.
 
 Rules:
 
