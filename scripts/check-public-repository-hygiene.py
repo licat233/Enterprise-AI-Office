@@ -23,6 +23,10 @@ FORBIDDEN_PREFIXES = (
     "runtime/",
 )
 
+FORBIDDEN_EXACT_PATHS = (
+    "state/deployment-state.md",
+)
+
 FORBIDDEN_SUFFIXES = (
     ".pem",
     ".key",
@@ -85,6 +89,9 @@ def tracked_files() -> list[Path]:
 
 
 def forbidden_tracked_path(rel: str) -> str | None:
+    if rel in FORBIDDEN_EXACT_PATHS:
+        return "protected operational deployment state is tracked"
+
     if rel.startswith(FORBIDDEN_PREFIXES):
         return "protected/local directory is tracked"
 
