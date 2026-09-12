@@ -21,6 +21,7 @@
 
 | 里程碑 / 能力 | 状态 |
 | --- | --- |
+| ARMOR 参考 EAO 基线 | ✅ 已部署 / 已投入使用 / CONFIGURED READY — PASS |
 | v1 核心员工使用路径 | ✅ 已有验证过的参考实现 |
 | v2 System Design | ✅ 已完成 |
 | v2 Installation Design | ✅ 已完成 |
@@ -41,7 +42,11 @@
 | Release Ready | ⏳ 尚未开启 |
 | Public Real Deployment Gate | ⛔ 默认未激活；已有 ARMOR 脱敏真实参考部署 |
 
-> **重要说明：** 本 README 中的“已经实现”，是指仓库已经具备相应的系统设计、安装合同、参考适配器/脚本、Schema 或已验证的核心资产；并不代表 v2 邮件能力已经连接真实企业邮箱并投入生产。
+> **实际运行状态：** ARMOR 的 EAO 基线已经部署在指定 Mac Studio，并已进入正常员工使用状态。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。当前唯一尚未满足的 `PRODUCTION READY` 条件是独立 off-primary 备份与从该副本完成最终恢复验证；这并不代表核心办公系统尚未搭建完成或不能使用。
+>
+> Public Blueprint 生命周期是仓库治理状态，不等同于 ARMOR 真实部署是否存在、是否已经可用。当前基线已经达到 `CONFIGURED READY — PASS`，后续 EAO 工作应以实际使用反馈驱动的维护和边界清晰的能力扩展为主，而不是继续把 Core 平台当成未完成项目建设。
+>
+> **重要说明：** 本 README 中的“已经实现”，是指仓库已经具备相应的系统设计、安装合同、参考适配器/脚本、Schema 或已验证的核心资产；并不代表 v2 邮件能力已经连接真实企业邮箱并投入生产。受治理的 AI 邮件营销属于下一项独立业务能力。
 
 机器可读权威状态：[`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)。
 

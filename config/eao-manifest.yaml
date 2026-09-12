@@ -217,5 +217,7 @@ maturity:
   agent_reproducibility_contract: present
   fresh_agent_validation_kit: present_pre_phase
   reference_real_deployment: present
+  reference_operational_status: configured_ready_pass_in_use
+  baseline_construction_posture: operational_complete_feedback_driven_maintenance
   blueprint_validation_phase: not_automatically_advanced
   release_ready: requires_explicit_lifecycle_decision

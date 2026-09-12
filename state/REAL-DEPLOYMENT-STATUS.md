@@ -2,7 +2,7 @@
 
 > This file is a **sanitized public progress summary** for the explicitly authorized real company deployment. It is not the protected runtime state record and must never contain credentials, real employee identifiers, private network details, mailbox data, or secret values.
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 ## Deployment authorization
 
@@ -16,6 +16,38 @@ Blueprint Validation: not opened
 ```
 
 The real deployment is an independently authorized consumer activity. This file records its sanitized progress, but it does **not** mutate the public blueprint activation gate in `state/PROJECT-PHASE.yaml`; that public/default gate intentionally remains inactive so a fresh clone never implies that a real company deployment is authorized. The real deployment authorization also does **not** advance the repository blueprint lifecycle.
+
+## 2026-09-12 operational baseline conclusion
+
+The ARMOR reference EAO baseline is no longer merely an installation or validation
+exercise. It is deployed on the designated company Mac Studio and is available
+for normal employee AI-office use through the approved private access boundary.
+
+Observed operational facts already validated in the reference deployment include:
+
+- employees can authenticate to Open WebUI;
+- General Assistant is usable through the employee-facing client;
+- the Operations employee path is deployed with its own RBAC boundary;
+- conversation history persists across refresh/re-login;
+- file upload is accepted under the validated employee boundary;
+- Hermes → WeKnora knowledge retrieval returns grounded answers with source evidence;
+- ordinary employee access remains least-privilege and unauthenticated access is denied;
+- LAN and the already-approved Tailscale private path can reach the employee surface;
+- restart/reboot acceptance has passed;
+- backup generation and isolated restore mechanics have passed on the primary host.
+
+Therefore the **EAO baseline construction phase is operationally complete for
+normal use at `CONFIGURED READY — PASS`**. Ongoing work should be treated as
+feedback-driven maintenance, defect correction, or bounded capability extension
+rather than as evidence that the Core office platform is still unfinished.
+
+This operational conclusion does not redefine `PRODUCTION READY`: the remaining
+blocker is still the independent encrypted off-primary backup copy plus final
+restore evidence sourced from that copy.
+
+Governed AI email marketing is a separate follow-on business capability. Existing
+email/governance/Hermes/Cron assets should be reused through the Capability Reuse
+Pass rather than reopening Core EAO architecture.
 
 ## 2026-09-11 synchronization update
 
