@@ -49,8 +49,9 @@ From the active company configuration:
 ```text
 company-defined Knowledge Bases
 Profile → Knowledge Base mappings
-selected WeKnora embedding provider/model/dimension
-optional rerank configuration, only when enabled
+selected WeKnora embedding source/provider/model/dimension
+models.weknora.embedding_credential_ref
+optional rerank source/provider/model/credential_ref, only when enabled
 core_provisioning.weknora.owner_identity
 core_provisioning.weknora.intended_workspace_name
 core_provisioning.weknora.runtime_secret_refs
@@ -58,10 +59,16 @@ core_network.weknora.api_base_url_for_hermes
 core_network.weknora.employee_exposed_directly
 ```
 
-The `owner_identity.password_ref` and each `runtime_secret_refs.*` value are
-symbolic references only. Resolve their secret values from protected storage
-using the corresponding `secret_refs` metadata; never place the values in
-company YAML.
+The `owner_identity.password_ref`, each `runtime_secret_refs.*` value, and
+each configured model-provider `*_credential_ref` are symbolic references
+only. Resolve their secret values from protected storage using the corresponding
+`secret_refs` metadata; never place the values in company YAML.
+
+For a remote WeKnora model that requires an API key, the selected role's
+credential ref must resolve to `class: model-provider-credentials` with the
+native binding `WeKnora model credential field api_key`. A local or
+explicitly keyless model may use a null credential ref; do not invent a remote
+credential for it.
 
 For the validated v0.8.0 standard runtime, the native startup bindings are:
 
@@ -77,7 +84,7 @@ From protected deployment input/secret storage:
 secret value referenced by owner_identity.password_ref when password auth is selected
 secret values referenced by runtime_secret_refs.* for the started runtime
 selected authentication policy when the deployment is not local self-serve
-selected model-provider credential(s)
+secret value referenced by each required WeKnora model-role credential ref
 provider-specific endpoint/config only when the selected provider requires it
 protected destination for generated Hermes retrieval keys
 ```
@@ -118,6 +125,8 @@ GET  /models
 POST /models
 GET  /models/:id
 PUT  /models/:id
+PUT  /models/:id/credentials
+DELETE /models/:id/credentials/:field
 
 Knowledge Bases
 GET  /knowledge-bases
@@ -315,7 +324,14 @@ GET <BASE>/models/providers?model_type=embedding
 Authorization: Bearer <OWNER_TOKEN>
 ```
 
-Use the selected provider from company configuration. If the provider exposes an upstream default URL, use it unless protected company configuration deliberately overrides it. A custom/generic provider may require an explicit approved base URL.
+Use the selected model `source` and provider from company configuration. In
+the validated v0.8.0 API, model creation requires `source` explicitly; the
+deployment agent must not infer `local` versus `remote` from a model name,
+provider string, or the ARMOR reference runtime.
+
+If the provider exposes an upstream default URL, use it unless protected company
+configuration deliberately overrides it. A custom/generic provider may require
+an explicit approved base URL.
 
 Never substitute another provider merely because the configured provider is unavailable.
 
@@ -339,7 +355,7 @@ For each required model:
 
 1. `GET /models`;
 2. prefer a previously recorded runtime model ID when it still resolves correctly;
-3. otherwise match the intended model by model type + configured upstream model name + selected provider/source;
+3. otherwise match the intended model by model type + configured upstream model name + selected source + provider when applicable;
 4. if exactly one matching model exists, adopt it;
 5. if none exists, create it;
 6. if multiple plausible matches exist, stop with `BLOCKED — AMBIGUOUS STATE` rather than binding a Knowledge Base arbitrarily;
@@ -367,9 +383,33 @@ A remote embedding model uses the upstream-native shape, for example:
 
 `1024` above is only an API-shape example. The deployment must use the verified dimension from the selected model, never copy that example value blindly.
 
-WeKnora masks stored provider secrets in read responses. Do not overwrite a valid stored secret with a masked/empty value during reconciliation. Update the secret only when the protected deployment input intentionally provides a replacement.
+For a remote model whose configured credential ref is non-null, resolve that
+ref only from protected storage and bind it to WeKnora's model credential field
+`api_key`. The pinned v0.8.0 surface supports the credential subresource:
 
-Record the resulting runtime model ID, provider, model name, source, and verified embedding dimension. Do not record the provider API key.
+```http
+PUT <BASE>/models/<MODEL_ID>/credentials
+Authorization: Bearer <OWNER_TOKEN>
+Content-Type: application/json
+
+{
+  "api_key": "<PROTECTED_PROVIDER_CREDENTIAL>"
+}
+```
+
+A fresh create request may also carry `parameters.api_key` because the pinned
+create schema accepts it, but normal reconciliation/rotation should prefer the
+dedicated credential subresource rather than mixing secret replacement into
+ordinary model-field updates.
+
+WeKnora masks/omits stored provider secrets in read responses. Do not overwrite
+a valid stored secret with a masked/empty value during reconciliation. Update
+the secret only when the active protected deployment input intentionally
+provides a replacement.
+
+Record the resulting runtime model ID, provider, model name, source, verified
+embedding dimension, symbolic credential ref name (when any), and non-secret
+native binding. Do not record the provider API key.
 
 ## 6. Reconcile Knowledge Bases
 
