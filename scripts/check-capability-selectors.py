@@ -310,6 +310,89 @@ def core_provisioning_symbolic_refs(text: str) -> set[str]:
     return result
 
 
+def model_provider_symbolic_refs(text: str) -> set[str]:
+    """Return non-empty symbolic secret refs declared under the models block."""
+    block = top_level_block(text, "models")
+    if not block:
+        return set()
+
+    result: set[str] = set()
+    lines = block.splitlines()
+    i = 0
+
+    while i < len(lines):
+        raw = lines[i]
+        singular = re.match(r"^(\s*)credential_ref:\s*(.*?)\s*$", raw)
+        if singular:
+            value = singular.group(2).strip().strip("'\"")
+            if value not in {"", "null", "~"}:
+                result.add(value)
+            i += 1
+            continue
+
+        plural = re.match(r"^(\s*)credential_refs:\s*(.*?)\s*$", raw)
+        if not plural:
+            i += 1
+            continue
+
+        base_indent = len(plural.group(1))
+        inline = plural.group(2).strip()
+        if inline and inline not in {"[]", "null", "~"}:
+            if inline.startswith("[") and inline.endswith("]"):
+                for item in inline[1:-1].split(","):
+                    value = item.strip().strip("'\"")
+                    if value:
+                        result.add(value)
+
+        i += 1
+        while i < len(lines):
+            child = lines[i]
+            if not child.strip():
+                i += 1
+                continue
+            indent = len(child) - len(child.lstrip(" "))
+            if indent <= base_indent:
+                break
+            item = re.match(r"^\s*-\s*(.*?)\s*$", child)
+            if item:
+                value = item.group(1).strip().strip("'\"")
+                if value not in {"", "null", "~"}:
+                    result.add(value)
+            i += 1
+
+    return result
+
+
+def validate_model_provider_secret_ref_metadata(
+    label: str,
+    text: str,
+    failures: list[str],
+) -> int:
+    refs = model_provider_symbolic_refs(text)
+    metadata = secret_ref_metadata(text)
+
+    for ref in sorted(refs):
+        if ref not in metadata:
+            failures.append(
+                f"{label}: model-provider symbolic ref is not declared in secret_refs: {ref}"
+            )
+            continue
+
+        if metadata[ref].get("class", "").strip() != "model-provider-credentials":
+            failures.append(
+                f"{label}: secret_refs.{ref} must use class model-provider-credentials"
+            )
+
+        for field_name in ("consumer", "native_binding"):
+            value = metadata[ref].get(field_name, "").strip()
+            if not value or value in {"null", "~"}:
+                failures.append(
+                    f"{label}: model-provider secret_refs.{ref} missing non-empty {field_name}"
+                )
+
+    return len(refs)
+
+
 def validate_core_secret_ref_metadata(
     label: str,
     text: str,
@@ -420,6 +503,17 @@ def main() -> int:
         failures,
     )
 
+    public_model_secret_refs = validate_model_provider_secret_ref_metadata(
+        "config/company.example.yaml",
+        company_text,
+        failures,
+    )
+    private_model_secret_refs = validate_model_provider_secret_ref_metadata(
+        "config/company.private.example.yaml",
+        private_company_text,
+        failures,
+    )
+
     for capability in sorted(conditional):
         if capability not in selected_names:
             failures.append(f"{capability}: conditional capability has no selection metadata")
@@ -472,6 +566,10 @@ def main() -> int:
     print(
         "Core provisioning symbolic refs checked: "
         f"{public_core_secret_refs + private_core_secret_refs}"
+    )
+    print(
+        "Model-provider symbolic refs checked: "
+        f"{public_model_secret_refs + private_model_secret_refs}"
     )
 
     if failures:
