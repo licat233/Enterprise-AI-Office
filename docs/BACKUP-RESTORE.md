@@ -1,8 +1,14 @@
 # Backup and Restore Standard
 
-Backups are a production requirement from v1, not a future enhancement.
+Backup/restore is an **optional operational hardening capability** for deployments
+whose selected target is `core-ready` or `configured-ready`. It becomes mandatory
+under the repository's stricter `production-ready` contract, or when company
+policy explicitly requires independent disaster recovery.
 
-This document defines what must be backed up, where it should be stored, and how recovery is verified.
+This document defines the standard to follow when backup/restore is enabled.
+A local backup on the primary Mac/host disk can be useful for accidental deletion,
+configuration rollback, or application/data corruption, but it does not protect
+against loss of the host or its internal disk.
 
 When the conditional media_transcription capability is enabled, reviewed
 Markdown transcripts under the derived runtime
@@ -169,7 +175,8 @@ container may be used only when explicitly named or uniquely discoverable.
 
 ## 3. What is not enough
 
-The following are not complete backup strategies:
+The following are not sufficient for **independent disaster recovery** or for
+the repository's `PRODUCTION READY` standard:
 
 - copying one Docker Compose YAML file;
 - relying only on Git;
@@ -180,7 +187,13 @@ The following are not complete backup strategies:
 
 ## 4. Backup destination
 
-Maintain at least one backup copy on storage independent from the primary host disk.
+When independent disaster recovery or `PRODUCTION READY` is requested, maintain
+at least one backup copy on storage independent from the primary host disk.
+
+For a deployment intentionally targeting `CONFIGURED READY`, backup may be
+disabled entirely or may use primary-disk local generations as a convenience
+recovery mechanism. Such a local-only policy must not be described as protection
+from host/disk loss.
 
 Examples:
 
@@ -211,7 +224,7 @@ prove independence from host/disk loss.
 
 ## 5. Frequency
 
-Default small-company starting policy:
+When scheduled backup is enabled, a reasonable small-company starting policy is:
 
 ```text
 Daily backup
