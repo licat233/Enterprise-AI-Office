@@ -220,6 +220,11 @@ def main() -> int:
         "Fresh Agent knows protected state is recoverable",
     )
     require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "### Security / access review",
+        "Fresh Agent has a protected sink for Production Ready evidence",
+    )
+    require_text(
         "docs/BACKUP-RESTORE.md",
         "restore must be sourced",
         "Fresh Agent distinguishes local restore from Production Ready evidence",
