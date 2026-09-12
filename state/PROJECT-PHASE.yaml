@@ -207,4 +207,4 @@ interpretation_rules:
   - Prototype code, tests, playbooks, adapters, and installation plans are repository artifacts, not evidence that a company instance is being deployed.
   - Missing real credentials are never blockers for blueprint development because credentials belong to a real deployment or explicitly approved validation task.
 
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
