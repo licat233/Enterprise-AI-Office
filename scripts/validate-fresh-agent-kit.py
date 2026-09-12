@@ -435,6 +435,16 @@ def main() -> int:
         "Fresh Agent fails closed on duplicate effective upstream model IDs",
     )
     require_text(
+        "infrastructure/open-webui/PROVISIONING.md",
+        "model_ids is non-empty",
+        "Fresh Agent computes effective Open WebUI models from configured manual IDs when present",
+    )
+    require_text(
+        "docs/ACCEPTANCE-TESTS.md",
+        "derived from non-empty configured `model_ids` when present",
+        "Fresh Agent acceptance mirrors pinned effective-model source semantics",
+    )
+    require_text(
         "state/DEPLOYMENT-STATE.template.md",
         "advertised model ID → resolved Open WebUI connection URL/index",
         "Fresh Agent records model-to-connection routing identity",
