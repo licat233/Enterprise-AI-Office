@@ -25,6 +25,7 @@ EAO revision changes during this deployment: `none | <explicitly authorized rest
 | Container runtime/version | `<...>` |
 | Runtime root | `<...>` |
 | Hermes source checkout | `<resolved installer path>` |
+| Hermes runtime home | `<resolved HERMES_HOME / active ~/.hermes path>` |
 
 ## Core network
 
