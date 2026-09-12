@@ -170,6 +170,9 @@ internal/router/router.go
 internal/router/routes_auth_tenant.go
 internal/router/routes_knowledge.go
 internal/router/routes_infra.go
+internal/application/service/tenant_api_key.go
+internal/application/repository/tenant_api_key.go
+internal/types/tenant_api_key.go
 ```
 
 At that commit:
@@ -180,7 +183,14 @@ At that commit:
 - `routes_knowledge.go` defines Knowledge Base, ingestion, retrieval,
   and knowledge-item routes;
 - `routes_infra.go` defines model/provider routes and their role/capability
-  guards.
+  guards;
+- `tenant_api_key.go` service/repository/type files define runtime API-key
+  identity semantics: `name` is not unique, only the key hash is unique, and
+  tenant key listing filters out revoked keys before ordering active rows.
+
+Therefore the deterministic EAO retrieval-key name is a reconciliation key, not
+a uniqueness guarantee. Never choose the first/newest active row when multiple
+active rows share that name.
 
 These paths are a version-specific provisioning contract, not a timeless
 WeKnora API promise. On upgrade, re-read the selected commit's route files,
@@ -577,16 +587,43 @@ Critical rules:
 ### Idempotent key reconciliation
 
 Before creating a key, first validate any key record ID/name already recorded
-for that Profile in protected operational state. If no valid recorded identity
-exists, list existing keys for the tenant and reconcile by the deterministic
-deployment-managed key name `enterprise-ai-office-hermes-<profile-id>` plus
-expected scope.
+for that Profile in protected operational state.
 
-If an existing key has the correct scope and its plaintext token is still available in protected secret storage, reuse it.
+Then list the tenant's **active** API keys through the supported API and evaluate
+the deterministic deployment-managed name
+`enterprise-ai-office-hermes-<profile-id>`. In pinned v0.8.0, revoked rows are
+already excluded by the list implementation; do not re-introduce revoked rows
+as identity candidates.
 
-If metadata drift exists and the stored token is available, use the supported update route rather than creating duplicates.
+Apply this fail-closed state machine:
 
-If the key record exists but its plaintext token has been lost, do not try to recover a secret from masked/list responses. Rotate it: create a replacement key, update and validate the Hermes Profile, then revoke the old key. Avoid leaving orphaned broad credentials.
+1. if protected state records a key ID that still resolves to the intended
+   Profile name/scope, treat that ID as the intended object identity;
+2. still check for any **additional active** keys with the same deterministic
+   EAO-managed name;
+3. if more than one active key shares that name, stop with
+   `BLOCKED — AMBIGUOUS STATE: duplicate active WeKnora retrieval-key name`;
+4. if no active key with that name exists and no valid recorded identity exists,
+   create one;
+5. if exactly one active key with that name exists, validate
+   `full_access=false`, the exact normalized Knowledge Base ID set, and the
+   exact normalized capability set expected for the Profile;
+6. if that single key has the correct scope and its plaintext token is still
+   available in protected secret storage, reuse it;
+7. if metadata drift exists and the stored token is available, use the
+   supported update route rather than creating another same-name key;
+8. if the intended key exists but its plaintext token has been lost, do not try
+   to recover a secret from masked/list responses. Rotate it in a controlled
+   sequence: create the replacement, update and validate Hermes, revoke the old
+   key, then re-list and prove only one active deterministic-name key remains.
+
+Do not pick the first/newest result merely because pinned WeKnora orders active
+keys by `created_at DESC`. Do not treat matching display name alone as proof of
+scope or ownership.
+
+After reconciliation, record the resolved active key ID/name/scope and the
+uniqueness check result in protected operational state. Avoid leaving orphaned
+broad credentials.
 
 ## 10. Prove the retrieval credential fails closed
 
