@@ -147,6 +147,15 @@ def main() -> int:
     production = production_controls(caps_text)
     recorded = recorded_capabilities(caps_text)
     failures: list[str] = []
+
+    if "operational_records_contract:" not in caps_text:
+        failures.append("registry: missing operational_records_contract")
+    if "sink_template: state/DEPLOYMENT-STATE.template.md" not in caps_text:
+        failures.append("registry: operational records sink must be state/DEPLOYMENT-STATE.template.md")
+    if "record_every_declared_records_item_for_each_enabled_capability" not in caps_text:
+        failures.append("registry: conditional capability records sink rule is missing")
+    if "secret_values_in_record: forbidden" not in caps_text:
+        failures.append("registry: records contract must forbid secret values")
     selected_names = {name for name, _, _, _ in selectors}
 
     for capability in sorted(conditional):
