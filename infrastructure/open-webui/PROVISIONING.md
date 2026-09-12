@@ -324,13 +324,19 @@ The validated update form contains:
 }
 ```
 
-Never replace the whole configuration from a static example without reading it first. Reconcile by Hermes Profile base URL:
+Never replace the whole configuration from a static example without reading it first. Reconcile by the exact Hermes Profile base URL and treat the Open WebUI array index as a runtime handle, not as durable identity:
 
 - preserve unrelated approved existing connections;
-- update the existing matching URL if already present;
-- otherwise append one connection;
+- if protected operational state records a prior connection URL/index for the Profile, trust the index only when it still points to that exact intended URL;
+- otherwise scan `OPENAI_API_BASE_URLS` for the exact intended Profile base URL;
+- if exactly one match exists, adopt/update that entry;
+- if no match exists, append one connection;
+- if more than one exact match exists, stop with `BLOCKED — AMBIGUOUS STATE` instead of choosing an array index;
 - keep key and URL array indices aligned;
-- add/update the corresponding index entry in `OPENAI_API_CONFIGS`.
+- add/update the corresponding index entry in `OPENAI_API_CONFIGS`;
+- record the intended Profile connection URL and the observed current index in protected operational state after reconciliation.
+
+An index may move when unrelated connections are inserted, removed, or reordered. Rediscover it from the exact intended URL before mutation; never treat a historical index by itself as object identity.
 
 For a Hermes employee Profile, use a narrow connection config such as:
 
@@ -423,7 +429,17 @@ GET /api/v1/models/model?id=<MODEL_ID>
 Authorization: Bearer <ADMIN_TOKEN>
 ```
 
-If it exists, submit the reconciled full `ModelForm` through:
+If it exists, first verify that it is compatible with the intended EAO metadata/access-control override for that same advertised upstream model. In the baseline pattern this means the record is not an unrelated custom/preset model with a non-null `base_model_id`.
+
+If an existing same-ID record has incompatible model semantics or cannot be safely identified as the intended upstream-model override, stop with:
+
+```text
+BLOCKED — AMBIGUOUS STATE
+```
+
+Do not repurpose an unrelated Model merely because its ID collides with the Hermes advertised model ID.
+
+For a compatible existing record, submit the reconciled full `ModelForm` through:
 
 ```http
 POST /api/v1/models/model/update
@@ -529,7 +545,8 @@ Open WebUI version
 admin bootstrap method
 group IDs/names
 employee identity method
-Hermes Profile connection URLs at non-secret level
+Hermes Profile → exact connection URL
+Hermes Profile → observed Open WebUI connection index/runtime handle
 employee-visible Model IDs/display names
 group → Model grants
 EAO-managed Open WebUI native company Knowledge attachments: none
