@@ -596,6 +596,15 @@ production_controls:
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       section: Backup and restore
+    records:
+      - latest backup generation/timestamp
+      - protected operational deployment-state artifact inclusion
+      - off-primary encrypted destination/boundary
+      - checksum/integrity result
+      - independent-copy freshness result
+      - last isolated restore source/generation
+      - restored Core employee-path acceptance result
+      - known backup exclusions/limitations
 
   production.startup_recovery:
     implementation:
@@ -605,6 +614,14 @@ production_controls:
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       section: Startup/recovery
+    records:
+      - startup/supervisor policy
+      - service dependency/start order
+      - last restart/reboot validation
+      - Hermes Profile/Gateway recovery result
+      - WeKnora/Open WebUI employee-path recovery result
+      - enabled-capability recovery result
+      - known manual recovery boundary
 
   production.security_access_review:
     implementation:
@@ -613,6 +630,14 @@ production_controls:
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       section: Production access/security review
+    records:
+      - review date/owner
+      - protected-secret storage/recovery boundary
+      - employee versus admin access review
+      - network exposure review
+      - company-knowledge scope review
+      - effective employee tool boundary review
+      - approved exceptions/known limitations
 
   production.operations_health:
     implementation:
@@ -621,3 +646,10 @@ production_controls:
     acceptance:
       document: docs/ACCEPTANCE-TESTS.md
       section: Operations/health ownership
+    records:
+      - operational owner
+      - health-check method/cadence
+      - last health result
+      - backup/restore monitoring method
+      - enabled-capability health ownership
+      - known alerts/limitations

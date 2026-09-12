@@ -106,6 +106,10 @@ It requires every `kind: conditional` capability to declare both:
 - `records` metadata describing the non-secret operational evidence/state that
   must be preserved after deployment.
 
+It also requires every entry under `production_controls` to declare
+`records` metadata so Production Ready evidence is machine-visible rather
+than implied only by runbooks.
+
 Generic selectors must use `source: company_configuration`, and every declared
 selector path must exist in `config/company.example.yaml`.
 ARMOR-reference-specific workflows remain explicit selection exceptions and are

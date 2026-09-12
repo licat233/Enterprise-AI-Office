@@ -2,8 +2,9 @@
 """Validate capability selectors and required deployment-record metadata.
 
 This is intentionally dependency-free and checks stable selector paths against
-the company schema plus the rule that every conditional capability declares
-what non-secret operational evidence must be recorded after deployment.
+the company schema plus the rule that every conditional capability and every
+Production Ready control declares what non-secret operational evidence must be
+recorded after deployment.
 """
 
 from __future__ import annotations
@@ -115,6 +116,23 @@ def recorded_capabilities(text: str) -> set[str]:
     return result
 
 
+def production_controls(text: str) -> set[str]:
+    result: set[str] = set()
+    in_production = False
+    for line in text.splitlines():
+        if line == "production_controls:":
+            in_production = True
+            continue
+        if not in_production:
+            continue
+        if line and not line.startswith(" "):
+            break
+        control = CAP_RE.match(line)
+        if control:
+            result.add(control.group(1))
+    return result
+
+
 def main() -> int:
     if not CAPS.is_file() or not COMPANY.is_file():
         print("FAIL required config file missing")
@@ -126,6 +144,7 @@ def main() -> int:
     schema_paths = company_paths(company_text)
     selectors = selector_blocks(caps_text)
     conditional = conditional_capabilities(caps_text)
+    production = production_controls(caps_text)
     recorded = recorded_capabilities(caps_text)
     failures: list[str] = []
     selected_names = {name for name, _, _, _ in selectors}
@@ -135,6 +154,10 @@ def main() -> int:
             failures.append(f"{capability}: conditional capability has no selection metadata")
         if capability not in recorded:
             failures.append(f"{capability}: conditional capability has no records metadata")
+
+    for control in sorted(production):
+        if control not in recorded:
+            failures.append(f"{control}: production control has no records metadata")
 
     checked_paths = 0
     for capability, source, paths, scope in selectors:
@@ -167,6 +190,8 @@ def main() -> int:
     print(f"Conditional capabilities: {len(conditional)}")
     print(f"Selector blocks: {len(selectors)}")
     print(f"Conditional record blocks: {len(conditional & recorded)}")
+    print(f"Production controls: {len(production)}")
+    print(f"Production control record blocks: {len(production & recorded)}")
     print(f"Company selector paths checked: {checked_paths}")
 
     if failures:
