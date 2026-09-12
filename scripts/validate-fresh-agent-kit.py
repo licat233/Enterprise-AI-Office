@@ -105,18 +105,18 @@ def main() -> int:
 
     require_text(
         "state/PROJECT-PHASE.yaml",
-        "current_phase: installation_design",
-        "Validation kit does not silently advance blueprint phase",
+        "current_phase: release_ready",
+        "Fresh Agent reads the current Release Ready lifecycle phase",
     )
     require_text(
         "state/PROJECT-PHASE.yaml",
-        "status: not_opened",
-        "Blueprint Validation remains not opened",
+        "blueprint_validation:",
+        "Fresh Agent sees Blueprint Validation lifecycle state",
     )
     require_text(
         "VALIDATE.md",
-        "Creating or improving this validation kit **does not open Blueprint Validation**",
-        "Validation entrypoint preserves lifecycle gate",
+        "Blueprint Validation and Release Ready were explicitly opened by human direction",
+        "Validation entrypoint reflects the explicitly opened lifecycle phases",
     )
     require_text(
         "VALIDATE.md",
