@@ -46,6 +46,16 @@ python3 scripts/validate-fresh-agent-kit.py
 
 GitHub Actions additionally checks shell syntax and Python compilation.
 
+Repository Readiness automatically runs for pull requests targeting `main`
+and for pushes to `main`. Ordinary work-branch pushes are intentionally not
+an automatic trigger; this avoids repeated CI noise while a coherent multi-file
+change is still being assembled.
+
+Use the workflow's manual dispatch when an explicit branch validation is needed
+before opening a pull request. Runs for the same Git ref use a concurrency group
+with `cancel-in-progress`, so a newer PR revision supersedes an older in-flight
+validation instead of consuming duplicate CI time.
+
 These checks validate repository closure. They do not replace deployment-host acceptance.
 
 ## 4. GitHub main-branch protection target
