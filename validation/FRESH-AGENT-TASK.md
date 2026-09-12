@@ -53,6 +53,12 @@ Before writing an installation plan, answer all of these from repository evidenc
 19. Which evidence is historical and should not silently override the current contracts?
 20. What would make you stop with a repository defect rather than improvise?
 21. Why is a primary-disk backup plus primary-disk isolated restore insufficient for `PRODUCTION READY`, and what additional off-primary evidence is required?
+22. How must a Fresh Agent determine:
+    - WeKnora model `source` (`local` / `remote`);
+    - Hermes model-provider credential native binding;
+    - WeKnora remote-model credential binding;
+    - when an API-key credential ref may legitimately be empty for local/keyless/OAuth/account paths?
+    Explain why none of these may be guessed from the ARMOR reference runtime or a provider name alone.
 
 Do not proceed until you can answer these with repository paths.
 
@@ -68,17 +74,18 @@ Produce:
 2. component installation order;
 3. exact public configuration inputs;
 4. private input classes that would be required before an authorized deployment;
-5. capability closure table;
-6. minimum Core target state;
-7. General Assistant/Profile/knowledge route;
-8. Operations Assistant/Profile/knowledge route if enabled;
-9. network and administrative exposure principles;
-10. least-privilege tool plan;
-11. acceptance sequence;
-12. restart/backup/restore sequence;
-13. Production Ready backup evidence boundary, including the distinction between primary-disk recovery-path validation and final off-primary restore evidence;
-14. rollback principles;
-15. all blockers, classified as one of:
+5. model-role source/auth plan, including symbolic provider-credential refs and exact pinned native bindings without secret values;
+6. capability closure table;
+7. minimum Core target state;
+8. General Assistant/Profile/knowledge route;
+9. Operations Assistant/Profile/knowledge route if enabled;
+10. network and administrative exposure principles;
+11. least-privilege tool plan;
+12. acceptance sequence;
+13. restart/backup/restore sequence;
+14. Production Ready backup evidence boundary, including the distinction between primary-disk recovery-path validation and final off-primary restore evidence;
+15. rollback principles;
+16. all blockers, classified as one of:
 
 ```text
 REPOSITORY_DEFECT
