@@ -44,8 +44,8 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Repository maintenance model | ✅ Single long-lived branch: `main` |
 | Backup / Restore | ➖ Optional capability / currently disabled |
 | Next business capability | ▶ Governed AI Email Marketing |
-| Blueprint Validation | ⏳ Governance lifecycle not opened; not a blocker for the deployed ARMOR baseline |
-| Release Ready | ⏳ Governance lifecycle not opened; not a blocker for normal ARMOR use |
+| Blueprint Validation | ✅ Opened; validation PASS remains evidence-driven |
+| Release Ready | ✅ Opened; phase-open status does not itself declare RELEASE READY |
 | ARMOR real deployment | ✅ Active / deployed / in use; runtime details remain private and only sanitized status is published |
 
 > **Operational status:** the ARMOR reference EAO baseline is already deployed on the designated Mac Studio and is in normal employee use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. The ARMOR deployment currently targets `CONFIGURED READY`, which is already PASS. The Mac Studio internal disk is the current EAO runtime and primary data storage. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
@@ -334,22 +334,22 @@ Final review: [`docs/V2-INSTALLATION-DESIGN-REVIEW.md`](docs/V2-INSTALLATION-DES
 Current repository state is intentionally:
 
 ```text
-current_phase: installation_design
+current_phase: release_ready
 installation_design.status: complete
-installation_design.transition_ready: true
-blueprint_validation.status: not_opened
+blueprint_validation.status: opened
+release_ready.status: opened
 real_deployment_task.active: false  # fresh-clone/new-target authorization default only
 ```
 
 Completion does **not** automatically change lifecycle phase or authorize a new real deployment target. The existing ARMOR reference deployment is already separately authorized, active, and in use; its protected runtime details are intentionally not public.
 
-## What is planned next
+## Open lifecycle work
 
-### Next blueprint milestone — Blueprint Validation
+### Blueprint Validation — opened
 
-The next major repository task is to prove that a **fresh capable AI engineering agent** can consume this repository without hidden chat context and reproduce the intended system on an explicitly approved clean validation target.
+Blueprint Validation is already open. Its job is to prove that a **fresh capable AI engineering agent** can consume this repository without hidden chat context and reproduce the intended system on an explicitly approved clean validation target.
 
-Blueprint Validation should verify:
+Validation should verify:
 
 - clean-host preflight and target-state resolution;
 - deterministic v1 installation / preservation;
@@ -365,14 +365,16 @@ Blueprint Validation should verify:
 - v2 rollback with v1 preservation;
 - evidence recording sufficient for a new agent to continue safely.
 
-### Later repository milestone — Release Ready
+### Release Ready — opened
 
-After Blueprint Validation findings are resolved:
+The Release Ready phase is also already open. Opening the phase is not the same as declaring `RELEASE READY`.
+
+Current work in this phase is to:
 
 - consolidate validation evidence;
 - fix genuine reproducibility gaps;
 - harden only where validation proves necessary;
-- declare `RELEASE READY` when the repository adequately explains both system intent and installation execution.
+- declare `RELEASE READY` only when the repository adequately explains both system intent and installation execution and the required evidence is satisfied.
 
 ### Future capabilities outside the current baseline
 
@@ -394,8 +396,10 @@ Potential later extensions, only when justified by real usage:
 ```text
 SYSTEM DESIGN COMPLETE          ✅
 INSTALLATION DESIGN COMPLETE    ✅
-BLUEPRINT VALIDATED             ⏳
-RELEASE READY                   ⏳
+BLUEPRINT VALIDATION OPEN       ✅
+RELEASE READY PHASE OPEN        ✅
+
+Validation PASS and final RELEASE READY declaration remain evidence-driven.
 ```
 
 ### Deployment-target readiness
