@@ -88,6 +88,27 @@ profiles:
       - company-general
     memory_policy: disabled-until-isolation-validated
 
+# Synthetic model-selection example. These are non-secret desired-state fields.
+# The symbolic refs bind protected provider credentials to exact native inputs.
+models:
+  hermes:
+    provider: openai-api
+    default_model: <SELECT_MODEL>
+    credential_refs:
+      - hermes-model-provider-openai-key
+  weknora:
+    embedding_source: remote
+    embedding_provider: openai
+    embedding_model: <SELECT_MODEL>
+    embedding_dimension: <VERIFY_DIMENSION>
+    embedding_credential_ref: weknora-embedding-provider-openai-key
+    rerank:
+      enabled: false
+      source: null
+      provider: null
+      model: null
+      credential_ref: null
+
 capabilities:
   enterprise_web_research:
     enabled: false
@@ -180,6 +201,16 @@ secret_refs:
     class: hermes-profile-api-keys
     consumer: hermes-general-profile
     native_binding: API_SERVER_KEY
+
+  hermes-model-provider-openai-key:
+    class: model-provider-credentials
+    consumer: hermes-model-provider
+    native_binding: OPENAI_API_KEY
+
+  weknora-embedding-provider-openai-key:
+    class: model-provider-credentials
+    consumer: weknora-model-provisioning
+    native_binding: WeKnora /models parameters.api_key
 
   openwebui-admin-password:
     class: open-webui-admin-credentials
