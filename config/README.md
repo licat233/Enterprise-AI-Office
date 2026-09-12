@@ -80,6 +80,21 @@ Schema v2 describes reusable deployment intent, including:
 
 It is intentionally synthetic and contains no production secrets.
 
+### Core path bindings
+
+`deployment.runtime_root` is the company desired-state root used by the Golden
+Path for EAO-managed runtime material. Shell examples use `RUNTIME_ROOT` only
+as a convenience alias for that exact resolved value.
+
+Hermes source checkout location is different: it is an observed installation
+fact resolved from the pinned Hermes installer rules recorded in
+`config/validated-stack.yaml`. Explicit `--dir` /
+`HERMES_INSTALL_DIR` wins; otherwise the validated installer uses its
+documented non-root or root/FHS default.
+
+Record the resolved Hermes source checkout path in protected operational state.
+Do not encode a reference-host checkout path into generic company configuration.
+
 ### Baseline
 
 The reusable baseline remains deliberately small:
