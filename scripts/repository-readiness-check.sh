@@ -337,7 +337,7 @@ require_text scripts/backup.sh 'Backup source runtime paths:' 'Backup manifest r
 require_text scripts/backup.sh 'Backup source runtime containers:' 'Backup manifest records source runtime containers'
 require_text scripts/restore.sh 'multiple running containers match compose service' 'Restore legacy fallback fails closed on ambiguous live containers'
 require_text docs/BACKUP-RESTORE.md '### 2.1 Backup source runtime identity' 'Backup standard defines source runtime identity'
-require_text docs/BACKUP-RESTORE.md 'Do not choose the first Docker result' 'Backup standard forbids first-match runtime guessing'
+require_text docs/BACKUP-RESTORE.md 'Do not choose the first filesystem or Docker result' 'Backup standard forbids first-match runtime guessing'
 require_text config/capabilities.yaml 'backup source runtime identity/selection result' 'Production backup evidence records source runtime identity'
 require_text state/DEPLOYMENT-STATE.template.md 'Hermes runtime home' 'Protected state records active Hermes runtime home'
 require_text state/DEPLOYMENT-STATE.template.md 'Backup source runtime identity/selection result' 'Protected state records backup source identity'
