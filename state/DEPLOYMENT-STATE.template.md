@@ -382,6 +382,7 @@ Schedule:
 Retention:
 Latest backup generation/timestamp:
 Protected operational deployment-state artifact included: <yes/no>
+Whole-generation confidentiality/encryption result:
 Off-primary encrypted destination/boundary:
 Latest successful off-primary copy generation/timestamp:
 Checksum/integrity result:
