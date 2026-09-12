@@ -53,7 +53,8 @@ Before writing an installation plan, answer all of these from repository evidenc
 19. Which evidence is historical and should not silently override the current contracts?
 20. What would make you stop with a repository defect rather than improvise?
 21. Is backup/restore enabled by any readiness label automatically? If backup is enabled and company policy requires off-primary independence, what evidence is required? Explain why the primary runtime/data disk is not itself a backup.
-22. How must a Fresh Agent determine:
+22. Why do LaunchAgent/Compose restart settings not prove startup/recovery PASS, and what post-recovery evidence is required before claiming automatic or unattended recovery?
+23. How must a Fresh Agent determine:
     - WeKnora model `source` (`local` / `remote`);
     - Hermes model-provider credential native binding;
     - WeKnora remote-model credential binding;

@@ -181,9 +181,13 @@ Before upgrading Open WebUI:
 - inspect database/schema changes;
 - inspect authentication/RBAC changes;
 - inspect OpenAI connection configuration changes;
-- re-verify the provisioning routes against the selected commit's
-  `backend/open_webui/main.py` plus `routers/auths.py`, `groups.py`,
+- re-verify the provisioning routes and first-admin bootstrap behavior against
+  the selected commit's `backend/open_webui/main.py`,
+  `backend/open_webui/utils/auth.py`, plus `routers/auths.py`, `groups.py`,
   `openai.py`, and `models.py`;
+- confirm `WEBUI_ADMIN_*` still creates an administrator only when the user DB
+  is empty, skips creation on an existing deployment, and keeps signup disabled
+  after successful first-admin creation;
 - inspect request/response schema changes for the exact admin/group/model
   reconciliation calls used by `infrastructure/open-webui/PROVISIONING.md`;
 - inspect dynamic-header support used for Hermes session scoping;

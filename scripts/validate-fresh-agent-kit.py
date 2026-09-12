@@ -345,6 +345,16 @@ def main() -> int:
         "Scorecard requires off-primary restore evidence only when selected by backup policy",
     )
     require_text(
+        "docs/ACCEPTANCE-TESTS.md",
+        "recovery procedure was actually exercised on the target",
+        "Fresh Agent requires observed startup/recovery evidence",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "observed_startup_recovery_when_production_ready",
+        "Scorecard requires observed startup recovery for Production Ready",
+    )
+    require_text(
         "validation/FRESH-AGENT-TASK.md",
         "primary runtime/data disk is not itself a backup",
         "Fresh Agent comprehension distinguishes primary data storage from optional backup",
@@ -398,6 +408,16 @@ def main() -> int:
         "infrastructure/open-webui/PROVISIONING.md",
         "container → host Hermes bridge acceptance",
         "Fresh Agent validates the container-to-host Hermes bridge",
+    )
+    require_text(
+        "infrastructure/open-webui/PROVISIONING.md",
+        "Do not temporarily enable public signup",
+        "Fresh Agent bootstraps Open WebUI without public signup",
+    )
+    require_text(
+        "infrastructure/open-webui/PROVISIONING.md",
+        "If users already exist",
+        "Fresh Agent preserves existing Open WebUI users during admin bootstrap",
     )
     require_text(
         "DEPLOY.md",

@@ -203,9 +203,67 @@ When Open WebUI is upgraded, re-read those router files at the selected commit,
 verify the exact request bodies/response semantics used by this playbook, and
 update this contract only after focused provisioning/RBAC acceptance passes.
 
-## 4. Authenticate the administrator
+## 4. Bootstrap or resolve the administrator
 
-Sign in with the protected bootstrap administrator:
+The validated Open WebUI v0.11.3 runtime supports native non-interactive
+first-administrator creation when the user database is empty.
+
+The checked-in Compose adapter maps:
+
+```text
+OPEN_WEBUI_ADMIN_EMAIL    → WEBUI_ADMIN_EMAIL
+OPEN_WEBUI_ADMIN_PASSWORD → WEBUI_ADMIN_PASSWORD
+OPEN_WEBUI_ADMIN_NAME     → WEBUI_ADMIN_NAME
+```
+
+Pinned upstream behavior:
+
+```text
+startup
+→ WEBUI_ADMIN_EMAIL + WEBUI_ADMIN_PASSWORD present?
+→ yes
+→ are there already any users?
+   → yes: skip env-driven admin creation
+   → no: create exactly one role=admin user from the env values
+         → disable signup
+```
+
+The implementation is version-specific to the validated Open WebUI source
+family. Re-qualify it on upgrade rather than assuming this bootstrap contract is
+timeless.
+
+### 4.1 Fresh deployment
+
+For an empty Open WebUI user database:
+
+1. resolve the authorized administrator email/display name from private company configuration;
+2. resolve the administrator password through the configured symbolic secret reference;
+3. supply the existing `OPEN_WEBUI_ADMIN_*` Compose inputs;
+4. start Open WebUI;
+5. require startup to create exactly one administrator;
+6. require public signup to remain disabled;
+7. authenticate as that administrator and continue reconciliation.
+
+Do not temporarily enable public signup just to create the first administrator.
+Do not use development fallback credentials as the production/bootstrap
+administrator.
+
+### 4.2 Existing deployment
+
+If users already exist, env-driven first-admin creation must be skipped. Use an
+existing authorized administrator credential for provisioning.
+
+Do not delete users, reset the user database, or change signup policy merely to
+make first-admin bootstrap run again. If no usable administrator authority can
+be resolved, stop with:
+
+```text
+BLOCKED — REQUIRED INPUT: authorized Open WebUI administrator credential
+```
+
+### 4.3 Authenticate the administrator
+
+Sign in with the protected bootstrap or existing authorized administrator:
 
 ```http
 POST /api/v1/auths/signin

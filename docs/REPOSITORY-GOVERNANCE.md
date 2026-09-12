@@ -6,7 +6,7 @@ It governs repository maintenance. It does not replace runtime RBAC, deployment 
 
 ## 1. Main branch role
 
-`main` is the canonical public blueprint state.
+`main` is the canonical public blueprint state and the **only long-lived branch** for this one-maintainer project.
 
 A fresh AI Agent must be able to clone `main` and obtain the current:
 
@@ -19,21 +19,26 @@ A fresh AI Agent must be able to clone `main` and obtain the current:
 
 Do not use a long-lived feature branch as the only home of a frozen capability or current operational lesson.
 
+Short-lived task branches are allowed only as temporary CI/PR workspaces. After a PR is merged, delete its head branch. Do not maintain permanent `develop`, `release/*`, `docs/*`, `fix/*`, `codex/*`, or similar parallel lines unless a future multi-maintainer workflow creates a concrete need.
+
 ## 2. Change path
 
-Material changes should use:
+Material changes should use a **short-lived** task branch:
 
 ```text
-branch
+short-lived branch
 → Capability Reuse Pass
 → implementation/docs/tests
 → Repository Readiness CI
 → pull request
 → review of authority/security/runtime impact
 → merge to main
+→ delete merged branch
 ```
 
-Direct commits to `main` should be treated as an exception rather than the normal Agent workflow.
+The branch is disposable workflow state, not project history. Git history and merged PRs preserve the audit trail.
+
+Direct commits to `main` remain an exception only when repository settings explicitly permit them and the maintainer intentionally bypasses the normal PR workflow for a trivial, low-risk edit. The default maintenance path remains a short-lived branch that is deleted after merge.
 
 ## 3. Required checks
 
@@ -65,10 +70,13 @@ The repository should protect `main` with the following policy where GitHub repo
 - require a pull request before merge;
 - require the **Repository Readiness / Agent reproducibility contract** check to pass;
 - block force pushes to `main`;
-- block branch deletion;
-- do not allow a failing/stale required check to be bypassed for routine Agent work.
+- block deletion of `main`;
+- allow/delete merged **head branches** as normal repository hygiene;
+- do not allow a failing/stale required check to be bypassed for material Agent work.
 
 This is a GitHub repository setting, not something a Markdown file can enforce by itself.
+
+For this one-maintainer repository, enable GitHub's **Automatically delete head branches** setting when available. If it is disabled, branch deletion after merge is a required maintenance step.
 
 If branch protection is temporarily unavailable or disabled, Agents must still follow the PR + CI workflow above and record the gap rather than treating direct-push capability as permission.
 

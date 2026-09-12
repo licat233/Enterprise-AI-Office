@@ -133,6 +133,9 @@ Any unintended cross-Profile key acceptance is a blocker.
 
 ```text
 [ ] Admin authentication works
+[ ] Fresh user DB: native `WEBUI_ADMIN_*` bootstrap creates exactly one administrator and signup remains disabled
+[ ] Existing user DB: env-driven admin creation is skipped and no user/admin resource is overwritten or duplicated
+[ ] Development fallback credentials are not used as the production/bootstrap administrator
 [ ] Normal employee authentication works
 [ ] Logged-out protected access fails
 [ ] All-Employees group exists
@@ -480,11 +483,15 @@ According to `docs/BACKUP-RESTORE.md`:
 According to configured production policy:
 
 ```text
-[ ] required services recover automatically or through documented supported operator procedure
+[ ] recovery procedure was actually exercised on the target; recovery is not inferred from restart configuration alone
+[ ] required services recover automatically or through the documented supported operator procedure
 [ ] required Hermes Profiles recover
 [ ] WeKnora knowledge path recovers
 [ ] Open WebUI employee path recovers
+[ ] post-recovery employee authorization/grounded-answer path passes
 [ ] enabled Cron/Kanban state recovers where applicable
+[ ] any required GUI login/operator intervention is recorded
+[ ] unattended boot-to-service recovery is claimed only if it was actually observed
 ```
 
 ## 30. Production access/security review
