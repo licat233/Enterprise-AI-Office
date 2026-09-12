@@ -6,16 +6,15 @@
 
 ## Lifecycle note
 
-The repository currently remains in:
+The lifecycle is currently:
 
 ```text
-blueprint_lifecycle.current_phase = installation_design
-blueprint_validation.status = not_opened
+blueprint_lifecycle.current_phase = release_ready
+blueprint_validation.status = opened
+release_ready.status = opened
 ```
 
-Creating or improving this validation kit **does not open Blueprint Validation** and does not authorize any real deployment.
-
-Opening Blueprint Validation still requires explicit human direction under `state/PROJECT-PHASE.yaml`.
+Blueprint Validation and Release Ready were explicitly opened by human direction. An opened phase is not the same as a PASS result or a final `RELEASE READY` declaration, and it does not authorize any new deployment target.
 
 ## What this validates
 
@@ -127,7 +126,7 @@ Do not accept vague statements such as "need more information" when the reposito
 
 ### Gate 3 — Authorized isolated reproduction
 
-Run only after an explicit human opens Blueprint Validation and identifies a validation target.
+Blueprint Validation is already open. Run runtime reproduction only after an explicit validation target is identified and authorized.
 
 The target should be isolated, synthetic, disposable, or otherwise explicitly designated for validation.
 
@@ -208,4 +207,4 @@ Do not mark EAO `release_ready` merely because this kit exists.
 
 A Release Ready decision should require at least one completed Fresh-Agent Validation run against an explicitly approved target, followed by correction of material repository defects discovered during that run.
 
-The lifecycle transition itself remains a human decision governed by `state/PROJECT-PHASE.yaml`.
+The Release Ready phase is already open. A final `RELEASE READY` declaration remains an evidence-based human decision governed by `state/PROJECT-PHASE.yaml`.

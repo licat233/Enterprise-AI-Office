@@ -1,6 +1,6 @@
 # Enterprise AI Office
 
-> **EAO baseline: COMPLETE / deployed / in use.** Enterprise AI Office is ARMOR's self-hosted AI workspace built around **WeKnora + Hermes Agent + Open WebUI**. This repository now serves two roles at once: the maintained source of truth for the deployed reference system, and an agent-readable / agent-executable blueprint that another capable AI Agent can use to reconstruct the same architecture from explicit private deployment inputs.
+> **EAO baseline: COMPLETE / deployed / handoff-ready / in use.** Enterprise AI Office is ARMOR's self-hosted AI workspace built around **WeKnora + Hermes Agent + Open WebUI**. The reference system has been installed on the designated company Mac Studio, operational acceptance has passed, employee access has been prepared, and the system is ready for departmental handoff. This repository now serves two roles at once: the maintained source of truth for the deployed reference system, and an agent-readable / agent-executable blueprint that another capable AI Agent can use to reconstruct the same architecture from explicit private deployment inputs.
 
 **[简体中文 README](./README.zh-CN.md)**
 
@@ -19,7 +19,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 
 ## Project status at a glance
 
-**Current project posture:** Core platform construction is complete. The ARMOR reference deployment is in normal employee use at `CONFIGURED READY — PASS`. Ongoing work is maintenance driven by real usage feedback plus explicitly selected business capabilities. The next planned business capability is governed AI email marketing.
+**Current project posture:** Core platform construction and the ARMOR reference installation are complete. The deployed system has passed the current acceptance baseline, is ready for departmental handoff, and can be used by employees through approved private access paths. Department account/access details can now be distributed operationally without further platform construction. Ongoing work is feedback-driven maintenance plus explicitly selected business capabilities. The next planned business capability is governed AI email marketing.
 
 | Milestone / capability | Status |
 | --- | --- |
@@ -41,14 +41,17 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Operations employee RBAC v1 | ✅ Closed / Frozen / PASS |
 | Media Transcription optional capability | ✅ Validated / enabled in ARMOR reference; not Core default |
 | Operational EAO baseline | ✅ Complete / deployed / in use |
+| Department handoff readiness | ✅ Ready — employee accounts and private access details can be distributed |
+| Office-network employee access | ✅ Validated through the approved private network boundary |
+| Remote employee access | ✅ Validated through Tailscale private access; no public exposure required |
 | Repository maintenance model | ✅ Single long-lived branch: `main` |
 | Backup / Restore | ➖ Optional capability / currently disabled |
 | Next business capability | ▶ Governed AI Email Marketing |
-| Blueprint Validation | ⏳ Governance lifecycle not opened; not a blocker for the deployed ARMOR baseline |
-| Release Ready | ⏳ Governance lifecycle not opened; not a blocker for normal ARMOR use |
+| Blueprint Validation | ✅ Opened; validation PASS remains evidence-driven |
+| Release Ready | ✅ Opened; phase-open status does not itself declare RELEASE READY |
 | ARMOR real deployment | ✅ Active / deployed / in use; runtime details remain private and only sanitized status is published |
 
-> **Operational status:** the ARMOR reference EAO baseline is already deployed on the designated Mac Studio and is in normal employee use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. The ARMOR deployment currently targets `CONFIGURED READY`, which is already PASS. The Mac Studio internal disk is the current EAO runtime and primary data storage. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
+> **Operational status:** the ARMOR reference EAO baseline is installed on the designated company Mac Studio, has passed the current acceptance baseline, and is ready for departmental handoff. Employee accounts and the approved private access address can be distributed to department staff for normal use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. Access has been validated both on the approved office/private network path and remotely through Tailscale, allowing authorized employees to reach EAO from outside the office without exposing the employee surface publicly. The Mac Studio internal disk is the current EAO runtime and primary data storage. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
 >
 > The public blueprint lifecycle is repository-governance state, not a proxy for whether the separately authorized ARMOR deployment exists or is usable. With the baseline system deployed and `CONFIGURED READY — PASS`, ongoing EAO work should primarily be feedback-driven maintenance and bounded capability extensions rather than continued core-platform construction.
 >
@@ -128,6 +131,20 @@ Current employee-lane interpretation:
 | **Communication** | v2 governed capability assets | Governed Email design/runtime assets exist in the repository; this does not imply a real company mailbox is already connected or autonomous send is enabled |
 
 For the current sanitized ARMOR runtime, see [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md). For reusable capability enablement, use [`config/capabilities.yaml`](config/capabilities.yaml) rather than copying the ARMOR lane set.
+
+### Employee access posture
+
+The deployed ARMOR employee surface is intentionally private:
+
+```text
+Authorized employee
+→ approved office/private network OR Tailscale private path
+→ Open WebUI
+→ approved Assistant/Profile
+→ EAO services
+```
+
+The ARMOR reference deployment has validated both the office/private-network path and the Tailscale remote path. This allows authorized staff to use EAO outside the office while keeping the service off the public Internet. Real employee credentials, access URLs/IPs, Tailscale node identity, and other private network details are intentionally excluded from this public repository.
 
 ## What this repository already implements
 
@@ -334,22 +351,22 @@ Final review: [`docs/V2-INSTALLATION-DESIGN-REVIEW.md`](docs/V2-INSTALLATION-DES
 Current repository state is intentionally:
 
 ```text
-current_phase: installation_design
+current_phase: release_ready
 installation_design.status: complete
-installation_design.transition_ready: true
-blueprint_validation.status: not_opened
+blueprint_validation.status: opened
+release_ready.status: opened
 real_deployment_task.active: false  # fresh-clone/new-target authorization default only
 ```
 
 Completion does **not** automatically change lifecycle phase or authorize a new real deployment target. The existing ARMOR reference deployment is already separately authorized, active, and in use; its protected runtime details are intentionally not public.
 
-## What is planned next
+## Open lifecycle work
 
-### Next blueprint milestone — Blueprint Validation
+### Blueprint Validation — opened
 
-The next major repository task is to prove that a **fresh capable AI engineering agent** can consume this repository without hidden chat context and reproduce the intended system on an explicitly approved clean validation target.
+Blueprint Validation is already open. Its job is to prove that a **fresh capable AI engineering agent** can consume this repository without hidden chat context and reproduce the intended system on an explicitly approved clean validation target.
 
-Blueprint Validation should verify:
+Validation should verify:
 
 - clean-host preflight and target-state resolution;
 - deterministic v1 installation / preservation;
@@ -365,14 +382,16 @@ Blueprint Validation should verify:
 - v2 rollback with v1 preservation;
 - evidence recording sufficient for a new agent to continue safely.
 
-### Later repository milestone — Release Ready
+### Release Ready — opened
 
-After Blueprint Validation findings are resolved:
+The Release Ready phase is also already open. Opening the phase is not the same as declaring `RELEASE READY`.
+
+Current work in this phase is to:
 
 - consolidate validation evidence;
 - fix genuine reproducibility gaps;
 - harden only where validation proves necessary;
-- declare `RELEASE READY` when the repository adequately explains both system intent and installation execution.
+- declare `RELEASE READY` only when the repository adequately explains both system intent and installation execution and the required evidence is satisfied.
 
 ### Future capabilities outside the current baseline
 
@@ -394,8 +413,10 @@ Potential later extensions, only when justified by real usage:
 ```text
 SYSTEM DESIGN COMPLETE          ✅
 INSTALLATION DESIGN COMPLETE    ✅
-BLUEPRINT VALIDATED             ⏳
-RELEASE READY                   ⏳
+BLUEPRINT VALIDATION OPEN       ✅
+RELEASE READY PHASE OPEN        ✅
+
+Validation PASS and final RELEASE READY declaration remain evidence-driven.
 ```
 
 ### Deployment-target readiness
