@@ -314,7 +314,9 @@ Guarded isolated restore-materialization helper:
   --confirm-isolated
 ```
 
-It verifies backup checksums and restores material into new temporary resources rather than overwriting the live deployment. Complete service-level bring-up and acceptance according to `docs/BACKUP-RESTORE.md`.
+It verifies backup checksums and restores material into new temporary resources rather than overwriting the live deployment. When the backup contains the protected operational deployment-state/handoff artifact, it restores it into the isolated target as `state/deployment-state.md`. Older backups without that artifact remain readable, but their logical/runtime mappings must be reconstructed and revalidated before production reuse.
+
+Complete service-level bring-up and acceptance according to `docs/BACKUP-RESTORE.md`.
 
 ## Scope boundary
 
