@@ -450,7 +450,7 @@ Expected:
 [ ] no secret/config disclosure
 ```
 
-## 28. Backup and restore — only when enabled
+## 28. Backup and restore
 
 Run this section only when `production.backup.enabled: true`. When backup is
 disabled, record this section as N/A; no readiness level enables it implicitly.
