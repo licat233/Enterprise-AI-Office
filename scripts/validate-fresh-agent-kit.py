@@ -430,6 +430,21 @@ def main() -> int:
         "Fresh Agent acceptance tests Open WebUI connection uniqueness",
     )
     require_text(
+        "infrastructure/open-webui/PROVISIONING.md",
+        "BLOCKED — AMBIGUOUS STATE: duplicate Open WebUI upstream model ID",
+        "Fresh Agent fails closed on duplicate effective upstream model IDs",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "advertised model ID → resolved Open WebUI connection URL/index",
+        "Fresh Agent records model-to-connection routing identity",
+    )
+    require_text(
+        "docs/ACCEPTANCE-TESTS.md",
+        "resolves to the intended Hermes Profile connection URL/index",
+        "Fresh Agent acceptance proves merged model routes to intended Hermes connection",
+    )
+    require_text(
         "docs/KNOWLEDGE.md",
         "Open WebUI is not a second company Knowledge authority",
         "Fresh Agent does not duplicate company knowledge in Open WebUI",
