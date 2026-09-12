@@ -45,6 +45,13 @@ architecture:
   generic_browser_for_employees: prohibited
   generic_smtp_for_employees: prohibited
 
+blueprint_revision_policy:
+  authority: git_commit_of_eao_repository_checkout
+  record_before_runtime_mutation: true
+  require_clean_tracked_worktree: true
+  moving_branch_or_git_pull_during_same_run: forbidden
+  operational_record: state/DEPLOYMENT-STATE.template.md
+
 validated_core_stack:
   authority: config/validated-stack.yaml
   role: single_machine_readable_source_for_validated_core_versions_and_host_baseline
