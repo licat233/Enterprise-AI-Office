@@ -173,6 +173,40 @@ Copy the enabled capability set derived from the active company config and `conf
 
 Disabled capabilities may be recorded compactly when useful, but do not create runtime objects for them.
 
+## Enabled conditional capability evidence
+
+For every company-enabled conditional capability in `config/capabilities.yaml`,
+record **every** item listed by that capability's `records` block. This section
+is the common evidence index for Configured Ready.
+
+Use one block per enabled capability:
+
+```text
+Capability registry key:
+Selected implementation/version/commit:
+Enabled Profile(s)/group(s):
+Acceptance document + section(s):
+Acceptance result:
+Records checklist:
+  <one line/value for every item declared by config/capabilities.yaml -> records>
+Dedicated protected-state section/reference:
+Known limitations/blockers:
+```
+
+Rules:
+
+- do not omit a registry `records` item because it seems repetitive;
+- when a dedicated section exists (for example v2 Email Governance), keep the
+  detailed evidence there and reference it from this common block;
+- record non-secret credential IDs/reference names/classes only, never values;
+- runtime UUIDs/IDs belong in the protected operational copy, not generic public
+  company configuration;
+- disabled capabilities do not need an evidence block and must not gain runtime
+  objects merely to make this template look complete.
+
+Configured Ready requires all enabled conditional capability blocks to be
+complete and their acceptance results to pass.
+
 ## v2 Email Governance
 
 Complete only when the Email capability is enabled.
