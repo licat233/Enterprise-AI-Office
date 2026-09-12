@@ -222,6 +222,10 @@ operation-surface references
 
 It does **not** execute business rules, connect to external systems, validate real employee authorization, generate MCP tools, or make an Ontology design example operational.
 
+The selector/record validator also requires the shared operational-records
+contract to point to `state/DEPLOYMENT-STATE.template.md`, so every enabled
+conditional capability has a protected, discoverable evidence sink.
+
 A validator PASS means the current YAML is structurally self-consistent according to the implemented checks. It does not mean the business policy is correct or Production Ready.
 
 ## `preflight.sh`
