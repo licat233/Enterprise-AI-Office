@@ -162,7 +162,8 @@ API-key provider lists `models.hermes.credential_refs`; each ref must map to a
 `secret_refs` entry whose `native_binding` is accepted by the pinned Hermes
 provider registry. A selected WeKnora remote embedding/rerank model uses its
 role-specific `*_credential_ref`, whose validated v0.8.0 provisioning binding
-is the model request's `parameters.api_key`. Local/keyless/OAuth paths may
+is WeKnora's model credential field `api_key` (create payload and supported
+credential subresource as defined by the provisioning contract). Local/keyless/OAuth paths may
 legitimately have no API-key ref, but that must follow the selected pinned
 upstream auth mechanism rather than an installer guess.
 
