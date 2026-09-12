@@ -156,6 +156,21 @@ validated bindings include WeKnora `DB_PASSWORD`, `REDIS_PASSWORD`, and
 `JWT_SECRET`; Hermes Profile-local `API_SERVER_KEY`; and the Open WebUI
 bootstrap admin password provisioning input.
 
+Model-provider credentials use the same symbolic-ref mechanism but live with
+the model role that consumes them under `models`. A selected Hermes
+API-key provider lists `models.hermes.credential_refs`; each ref must map to a
+`secret_refs` entry whose `native_binding` is accepted by the pinned Hermes
+provider registry. A selected WeKnora remote embedding/rerank model uses its
+role-specific `*_credential_ref`, whose validated v0.8.0 provisioning binding
+is the model request's `parameters.api_key`. Local/keyless/OAuth paths may
+legitimately have no API-key ref, but that must follow the selected pinned
+upstream auth mechanism rather than an installer guess.
+
+For WeKnora model roles, `source` is desired state, not an inference:
+v0.8.0 requires `local` or `remote` when creating a model. Do not derive it
+from a reference deployment or silently assume remote merely because a
+provider/model string is present.
+
 `config/.env.example` is only a runtime binding shape. It is not a competing
 secret authority: values must be resolved from the active symbolic refs /
 protected storage.
