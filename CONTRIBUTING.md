@@ -20,6 +20,16 @@ Before a material change, read:
 10. `config/capabilities.yaml` when the change affects a deployable capability
 11. the current standards/adapters for the area being changed.
 
+## Issue intake
+
+Before opening work:
+
+- use `.github/ISSUE_TEMPLATE/bug_report.md` for regressions, broken deployment/reproduction contracts, or acceptance failures;
+- use `.github/ISSUE_TEMPLATE/capability_request.md` for new capabilities or material architecture/integration changes;
+- use the private reporting path in `SECURITY.md` for security vulnerabilities rather than a public issue.
+
+Issue templates are intake contracts, not a substitute for repository evidence. Include the exact EAO commit/baseline and never paste protected deployment secrets or private company data.
+
 ## Mandatory Capability Reuse Pass
 
 Before adding a component, service, Skill, MCP server, scheduler, workflow engine, database, browser stack, memory layer, or external integration, execute `docs/CAPABILITY-REUSE-PASS.md`.
