@@ -387,7 +387,11 @@ For each company-enabled conditional capability in `config/capabilities.yaml`:
 3. deploy/configure only that requested capability;
 4. enforce the documented security boundary;
 5. run the matching conditional acceptance test;
-6. record actual state/evidence.
+6. write every item from that capability's `records` block into the protected
+   operational state created from `state/DEPLOYMENT-STATE.template.md`;
+7. when a dedicated evidence section exists, reference it from the common
+   Enabled conditional capability evidence block rather than creating an
+   untracked side record.
 
 Typical capability paths include:
 
