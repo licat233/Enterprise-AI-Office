@@ -436,6 +436,11 @@ def main() -> int:
         "Gate 0 includes capability selector integrity",
     )
     require_text(
+        "config/company.private.example.yaml",
+        "communication: communication-profile-api-key",
+        "Fresh Agent sees explicit specialist Profile credential mapping",
+    )
+    require_text(
         "VALIDATE.md",
         "python3 scripts/check-validated-stack-consistency.py",
         "Gate 0 includes validated stack consistency",
