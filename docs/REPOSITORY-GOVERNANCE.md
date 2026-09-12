@@ -38,7 +38,7 @@ short-lived branch
 
 The branch is disposable workflow state, not project history. Git history and merged PRs preserve the audit trail.
 
-For very small, low-risk maintainer-only edits, a direct commit to `main` is acceptable when the same repository checks are run and the change does not alter security, authority, runtime identity, capability boundaries, or lifecycle semantics.
+Direct commits to `main` remain an exception only when repository settings explicitly permit them and the maintainer intentionally bypasses the normal PR workflow for a trivial, low-risk edit. The default maintenance path remains a short-lived branch that is deleted after merge.
 
 ## 3. Required checks
 
@@ -75,6 +75,8 @@ The repository should protect `main` with the following policy where GitHub repo
 - do not allow a failing/stale required check to be bypassed for material Agent work.
 
 This is a GitHub repository setting, not something a Markdown file can enforce by itself.
+
+For this one-maintainer repository, enable GitHub's **Automatically delete head branches** setting when available. If it is disabled, branch deletion after merge is a required maintenance step.
 
 If branch protection is temporarily unavailable or disabled, Agents must still follow the PR + CI workflow above and record the gap rather than treating direct-push capability as permission.
 
