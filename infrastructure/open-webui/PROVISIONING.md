@@ -179,6 +179,12 @@ backend/open_webui/routers/openai.py
 backend/open_webui/routers/models.py
 ```
 
+At that pinned commit, `backend/open_webui/routers/openai.py`
+`get_all_models()` merges enabled connection catalogs by effective model ID.
+It retains the first occurrence and stores that connection's `urlIdx`; request
+routing later uses that `urlIdx`. This makes duplicate effective upstream
+model IDs an identity ambiguity, not a harmless display duplicate.
+
 At that commit, `main.py` mounts the relevant routers at:
 
 ```text
@@ -360,6 +366,58 @@ Content-Type: application/json
 Each Hermes Profile connection uses its own Profile API key. Do not connect the privileged Hermes default/admin Profile to the employee client.
 
 After updating, verify the administrator can see the expected upstream model IDs through `/openai/models` or `/api/models`.
+
+### 7.1 Prove advertised model ID → connection identity before ACL creation
+
+Pinned Open WebUI v0.11.3 merges enabled OpenAI-compatible connection catalogs
+in array order. For duplicate effective model IDs, the first connection wins
+and later duplicates are silently omitted from the merged runtime map. Request
+routing then uses the winning model record's `urlIdx`.
+
+Therefore connection-URL uniqueness alone is not enough. Before creating or
+updating the EAO Model ACL record, prove that each intended Hermes advertised
+model ID resolves to exactly the intended Hermes connection.
+
+Use the pinned admin surfaces to inspect the current connection config and each
+enabled connection's model catalog, for example:
+
+```http
+GET /openai/config
+Authorization: Bearer <ADMIN_TOKEN>
+
+GET /openai/models/<URL_IDX>
+Authorization: Bearer <ADMIN_TOKEN>
+```
+
+Apply the connection's existing `prefix_id` semantics when determining its
+effective Open WebUI model IDs. For the EAO Hermes Profile connection itself,
+the expected effective ID remains the exact advertised Hermes model ID
+(`general` for the baseline); do not silently add a prefix and rename the
+employee Assistant as a collision workaround.
+
+Require:
+
+```text
+exactly one enabled OpenAI-compatible connection
+→ produces effective model ID <HERMES_ADVERTISED_MODEL_ID>
+→ that connection is the intended Hermes Profile connection
+```
+
+If another enabled connection produces the same effective model ID, stop with:
+
+```text
+BLOCKED — AMBIGUOUS STATE: duplicate Open WebUI upstream model ID
+```
+
+Do not rely on connection ordering, and do not delete/rename/re-prefix an
+unrelated approved connection automatically. An unrelated connection that
+already has a distinct `prefix_id` is naturally non-conflicting and should be
+preserved.
+
+Finally refresh/read the merged Open WebUI model catalog and verify the expected
+model resolves to the same intended connection index/runtime handle. Record the
+Profile → model ID → exact connection URL/index resolution in protected
+operational state.
 
 This is also the required **container → host Hermes bridge acceptance** for the
 selected container runtime. The request is resolved by the Open WebUI backend

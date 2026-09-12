@@ -179,6 +179,7 @@ Also record, without secrets:
 ```text
 Profile → Open WebUI exact connection URL:
 Profile → observed Open WebUI connection index/runtime handle:
+Profile → advertised model ID → resolved Open WebUI connection URL/index:
 Profile → protected Profile-API-key reference name:
 EAO-managed native Open WebUI company Knowledge attachment: absent
 ```
