@@ -54,6 +54,7 @@ core_provisioning:
     default_api_key_ref: hermes-default-api-key
     profile_api_key_refs:
       general: hermes-general-api-key
+      communication: communication-profile-api-key
 
   open_webui:
     admin_identity:
