@@ -453,6 +453,7 @@ According to `docs/BACKUP-RESTORE.md`:
 [ ] required data/config backed up
 [ ] protected operational deployment-state/handoff record backed up
 [ ] secret recovery method protected/documented
+[ ] entire backup generation treated as confidential/secret-bearing and protected/encrypted according to approved policy
 [ ] backup integrity verified
 [ ] approved off-primary-disk copy exists for Production Ready
 [ ] off-primary copy checksum/integrity verified after transfer
