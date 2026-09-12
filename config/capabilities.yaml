@@ -607,6 +607,7 @@ production_controls:
       section: Backup and restore
     records:
       - latest backup generation/timestamp
+      - backup source runtime identity/selection result
       - protected operational deployment-state artifact inclusion
       - whole-generation confidentiality/encryption result
       - off-primary encrypted destination/boundary
