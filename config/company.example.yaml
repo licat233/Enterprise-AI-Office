@@ -263,14 +263,25 @@ models:
   hermes:
     provider: <SELECT_PROVIDER>
     default_model: <SELECT_MODEL>
+    # Symbolic refs only. For API-key providers, bind each selected ref to an
+    # exact credential input accepted by the pinned Hermes provider registry.
+    # Keyless/OAuth providers may legitimately use an empty list.
+    credential_refs: []
   weknora:
-    embedding_provider: <SELECT_PROVIDER>
+    # WeKnora v0.8.0 requires model source explicitly when creating models.
+    # local examples use Ollama-backed models; remote examples use a provider
+    # endpoint and may require a protected credential.
+    embedding_source: <SELECT_SOURCE> # local | remote
+    embedding_provider: <SELECT_PROVIDER_OR_NULL_FOR_LOCAL>
     embedding_model: <SELECT_MODEL>
     embedding_dimension: <VERIFY_DIMENSION>
+    embedding_credential_ref: null
     rerank:
       enabled: false
+      source: null # local | remote when enabled
       provider: null
       model: null
+      credential_ref: null
 
 # Secret classes are references only. The deployment agent must resolve them to
 # exact native secret variables/credential stores required by selected upstream
