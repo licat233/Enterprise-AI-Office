@@ -119,6 +119,17 @@ Never include:
 
 Use placeholders and sanitized examples.
 
+## Security reports
+
+Security vulnerabilities are not ordinary contribution traffic.
+
+Do not place exploit details, credentials, private runtime identifiers, or
+proof-of-concept payloads into a public Issue or Pull Request. Follow the
+private-disclosure flow in `SECURITY.md`.
+
+A normal PR is appropriate for an already-sanitized security fix only after the
+sensitive report/containment boundary has been handled privately.
+
 ## Generic vs company-specific
 
 Reusable improvements belong in generic standards/adapters.
