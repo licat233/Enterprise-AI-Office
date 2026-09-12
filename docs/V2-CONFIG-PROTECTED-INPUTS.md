@@ -371,6 +371,78 @@ The WeKnora owner/bootstrap identity is private non-secret configuration. Its
 password is a protected provisioning credential and must not be copied into a
 Hermes Profile, deployment-state record, or public evidence.
 
+### 6.2 Core model-provider credential bindings
+
+Model selection and provider authentication are separate desired/protected
+inputs. A Fresh Agent must not know a provider name yet still guess which
+credential value or runtime field should receive it.
+
+Reference shape:
+
+```yaml
+models:
+  hermes:
+    provider: openai-api
+    default_model: <SELECT_MODEL>
+    credential_refs:
+      - hermes-model-provider-openai-key
+
+  weknora:
+    embedding_source: remote
+    embedding_provider: openai
+    embedding_model: <SELECT_MODEL>
+    embedding_dimension: <VERIFY_DIMENSION>
+    embedding_credential_ref: weknora-embedding-provider-openai-key
+
+secret_refs:
+  hermes-model-provider-openai-key:
+    class: model-provider-credentials
+    consumer: hermes-model-provider
+    native_binding: OPENAI_API_KEY
+
+  weknora-embedding-provider-openai-key:
+    class: model-provider-credentials
+    consumer: weknora-model-provisioning
+    native_binding: WeKnora /models parameters.api_key
+```
+
+For the pinned Hermes 0.21.0 baseline, the selected provider's
+`PROVIDER_REGISTRY` / provider catalog is authoritative for API-key env names
+and provider-native auth mode. For example, `openai-api` accepts
+`OPENAI_API_KEY`. Do not maintain a second universal provider credential
+catalog in EAO.
+
+For pinned WeKnora v0.8.0, model creation requires explicit `source`
+(`local` or `remote`). Remote model credentials are provided through the
+supported model provisioning request's `parameters.api_key`; local models do
+not require an invented remote-provider key.
+
+Rules:
+
+```text
+selected provider requires protected API key
+→ role declares symbolic credential ref(s)
+→ every ref exists in secret_refs
+→ class/consumer/native_binding are non-empty
+→ native_binding matches the pinned upstream consumer
+→ protected value is injected only into that consumer
+
+selected provider uses keyless/native OAuth/account credential flow
+→ API-key ref may be empty
+→ use the pinned upstream auth mechanism
+→ do not fabricate an API-key environment variable
+
+WeKnora model source unresolved
+→ BLOCKED — REQUIRED INPUT: models.weknora.<role>_source
+
+required provider credential ref unresolved or binding incompatible
+→ BLOCKED — REQUIRED INPUT: model-provider credential binding
+```
+
+The deployment-state record stores only the selected auth mechanism and
+non-secret symbolic ref/native-binding metadata. It never stores the credential
+value.
+
 ---
 
 ## 7. v2 email private desired-state contract
