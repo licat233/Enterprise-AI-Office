@@ -54,6 +54,12 @@ components:
       installer_url_template: "https://raw.githubusercontent.com/NousResearch/hermes-agent/{commit}/scripts/install.sh"
       commit_flag: --commit
       eao_configuration_mode: install_runtime_then_apply_repository_managed_config
+      source_path_resolution:
+        provenance: scripts/install.sh_at_component_commit
+        explicit_env_override: HERMES_INSTALL_DIR
+        explicit_flag_override: --dir
+        non_root_default: "${HERMES_HOME:-$HOME/.hermes}/hermes-agent"
+        root_linux_default: /usr/local/lib/hermes-agent
     runtime_identity:
       version_command: hermes --version
       expected_version: "0.21.0"
