@@ -264,7 +264,13 @@ REPO_COMMIT="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || true)"
 DEPLOYMENT_BLUEPRINT_COMMIT=""
 if [ -f "$DEPLOYMENT_STATE_FILE" ]; then
   DEPLOYMENT_BLUEPRINT_COMMIT="$(awk -F'`' '/^EAO blueprint commit: `/ {print $2; exit}' "$DEPLOYMENT_STATE_FILE")"
-  if ! printf '%s\n' "$DEPLOYMENT_BLUEPRINT_COMMIT" | grep -Eq '^[0-9a-fA-F]{40}COMPOSE_VERSION="$(docker compose version --short)"
+  if ! printf '%s\n' "$DEPLOYMENT_BLUEPRINT_COMMIT" | grep -Eq '^[0-9a-fA-F]{40}$'; then
+    warn "Deployment blueprint commit" "protected state does not contain a valid 40-character EAO blueprint commit"
+    DEPLOYMENT_BLUEPRINT_COMMIT=""
+  fi
+fi
+DOCKER_VERSION="$(docker version --format '{{.Server.Version}}')"
+COMPOSE_VERSION="$(docker compose version --short)"
 
 [ ! -e "$DEST" ] || fail "destination" "already exists: $DEST"
 mkdir -p "$DEST/weknora" "$DEST/open-webui" "$DEST/hermes" "$DEST/secrets" \
