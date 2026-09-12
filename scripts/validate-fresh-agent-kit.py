@@ -210,6 +210,31 @@ def main() -> int:
         "Fresh Agent has Core secret-reference contract",
     )
     require_text(
+        "docs/V2-CONFIG-PROTECTED-INPUTS.md",
+        "### 6.2 Core model-provider credential bindings",
+        "Fresh Agent has model-provider secret-binding contract",
+    )
+    require_text(
+        "config/company.example.yaml",
+        "embedding_source: <SELECT_SOURCE>",
+        "Fresh Agent receives explicit WeKnora model source",
+    )
+    require_text(
+        "infrastructure/hermes/PROVISIONING.md",
+        "models.hermes.credential_refs",
+        "Fresh Agent resolves Hermes provider secrets symbolically",
+    )
+    require_text(
+        "infrastructure/weknora/PROVISIONING.md",
+        "models.weknora.embedding_credential_ref",
+        "Fresh Agent resolves WeKnora model secrets symbolically",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "Credential ref / native binding",
+        "Fresh Agent records recoverable non-secret model binding metadata",
+    )
+    require_text(
         "config/README.md",
         "### Runtime binding taxonomy",
         "Fresh Agent distinguishes provisioning aliases from native env",

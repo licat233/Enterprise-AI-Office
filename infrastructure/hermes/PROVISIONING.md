@@ -46,6 +46,7 @@ profiles[]
 mcp_control_plane.profile_allowlists
 models.hermes.provider
 models.hermes.default_model
+models.hermes.credential_refs
 core_network.hermes.shared_listener.bind_host
 core_network.hermes.shared_listener.port
 core_network.hermes.open_webui_backend_base_url
@@ -61,16 +62,27 @@ For the reusable baseline, the required employee Profile is:
 general
 ```
 
-Resolve the symbolic API-key refs through `secret_refs` and protected storage.
-Both the default/admin and named Profile bindings use Hermes' native
+Resolve the symbolic Profile API-key refs through `secret_refs` and protected
+storage. Both the default/admin and named Profile bindings use Hermes' native
 `API_SERVER_KEY`, but they must resolve to distinct values.
+
+Resolve model-provider authentication separately from Profile API
+authentication. For the selected Hermes provider, inspect the pinned 0.21.0
+`PROVIDER_REGISTRY` / provider catalog. When that provider uses an API key,
+each declared `models.hermes.credential_refs[]` entry must exist in
+`secret_refs`, use `class: model-provider-credentials`, and name a
+`native_binding` accepted by that pinned provider (for example,
+`openai-api` accepts `OPENAI_API_KEY`). If the selected provider is
+keyless or uses a supported OAuth/account flow, an empty API-key ref list is
+valid and the upstream native auth flow remains authoritative.
 
 From protected deployment input:
 
 ```text
 secret value referenced by core_provisioning.hermes.default_api_key_ref
 secret value referenced by core_provisioning.hermes.profile_api_key_refs.general
-selected Hermes model-provider credential(s)
+secret values referenced by models.hermes.credential_refs when the selected provider requires them
+selected provider-native OAuth/account authorization when applicable
 general WeKnora retrieve-only API key
 absolute path to the selected WeKnora MCP server runtime
 ```
@@ -273,6 +285,9 @@ model:
 ```
 
 Do not silently choose a provider/model because one happens to be available.
+Do not guess provider credential variable names. For API-key providers, bind
+only the declared symbolic refs whose `native_binding` is accepted by the
+pinned Hermes provider registry.
 
 ### Memory
 
@@ -319,13 +334,18 @@ The protected Profile `.env` must contain:
 API_SERVER_KEY=<distinct general Profile key>
 WEKNORA_API_KEY=<retrieve-only KB-scoped key>
 WEKNORA_BASE_URL=<deployed WeKnora API-v1 root>
-<selected model-provider credentials>
+<resolved models.hermes.credential_refs at their exact pinned-provider native bindings, when required>
 ```
 
 Do **not** set `API_SERVER_ENABLED=true` on `general` in the multiplex
 baseline. The default Profile owns the shared listener.
 
 Do not copy the default/admin API key into `general`.
+
+The model-provider secret value is available only to Profiles whose rendered
+model configuration actually uses that provider. A symbolic ref name or generic
+`model-provider-credentials` class is not enough: the exact native binding
+must be compatible with the selected pinned provider.
 
 ## 8. Reconcile the General Assistant SOUL
 

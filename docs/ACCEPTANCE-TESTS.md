@@ -46,6 +46,8 @@ Verify services required by the selected WeKnora release:
 [ ] Parser/DocReader healthy when required
 [ ] Uploaded-file storage persistent
 [ ] Database/cache/parser internals not publicly exposed
+[ ] Each required WeKnora model role has explicit `source` (`local` / `remote`) from active company desired state
+[ ] Each remote WeKnora model credential, when required, resolves from its symbolic ref to the supported model `api_key` credential binding; no secret is inferred from another role/provider
 ```
 
 ## 3. Seed-document ingestion
@@ -94,6 +96,9 @@ From `general`:
 [ ] `general` employee Profile served
 [ ] default/admin not exposed as employee Assistant
 [ ] intended model/provider used
+[ ] selected Hermes provider auth path matches the pinned provider registry/catalog
+[ ] when the selected Hermes provider requires an API key, every configured model credential ref resolves to a declared `secret_refs` entry whose native binding is accepted by that provider
+[ ] keyless/OAuth/account providers do not receive an invented API-key binding
 [ ] `general` exposes only approved tools
 [ ] employee long-term memory disabled unless isolation already proven
 ```
