@@ -110,7 +110,7 @@ Without mutating a host, the Agent must produce:
 - capability closure table;
 - security boundary plan;
 - acceptance plan;
-- backup/restore and restart plan;
+- restart plan, plus backup/restore plan only when backup is explicitly enabled;
 - explicit blockers, if any.
 
 The dry run must distinguish:
@@ -164,9 +164,8 @@ For the requested readiness level, verify applicable:
 - host/runtime recovery boundary;
 - configuration persistence;
 - employee-visible behavior after restart;
-- backup generation;
-- isolated restore;
-- when `production-ready` is requested: approved off-primary copy, post-transfer integrity/freshness evidence, and final isolated restore sourced from that independent copy;
+- when backup is explicitly enabled: backup generation and isolated restore;
+- when the selected backup policy requires off-primary independence: approved off-primary copy, post-transfer integrity/freshness evidence, and final isolated restore sourced from that independent copy;
 - second-run/idempotent reconciliation;
 - no privilege expansion after recovery.
 
