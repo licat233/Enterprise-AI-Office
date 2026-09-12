@@ -416,7 +416,7 @@ require_text config/mcp-registry.yaml 'runtime_state_scope: sanitized_ARMOR_refe
 require_text config/mcp-registry.yaml 'fresh_deployment_rule: recompute_runtime_and_health_do_not_inherit_reference_flags' 'MCP registry blocks reference runtime inheritance'
 require_text config/README.md 'A fresh deployment must recompute' 'Config guide explains MCP runtime recomputation'
 
-require_text .github/workflows/repository-readiness.yml 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4' 'Repository CI pins checkout action'
+require_text .github/workflows/repository-readiness.yml 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1' 'Repository CI pins checkout action'
 require_text .github/workflows/repository-readiness.yml 'persist-credentials: false' 'Repository CI does not persist checkout credentials'
 require_text .github/workflows/repository-readiness.yml 'runs-on: ubuntu-24.04' 'Repository CI pins runner image family'
 require_text .github/workflows/repository-readiness.yml 'fetch-depth: 0' 'Repository CI fetches full history for frozen baselines'
