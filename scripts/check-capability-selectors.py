@@ -199,8 +199,27 @@ def default_api_key_ref(text: str) -> str:
     return "" if value in {"", "null", "~"} else value
 
 
-def secret_ref_names(text: str) -> set[str]:
-    result: set[str] = set()
+def top_level_block(text: str, name: str) -> str:
+    lines = text.splitlines()
+    result: list[str] = []
+    in_block = False
+
+    for raw in lines:
+        if not in_block:
+            if raw.strip() == f"{name}:" and len(raw) - len(raw.lstrip(" ")) == 0:
+                in_block = True
+                result.append(raw)
+            continue
+
+        if raw.strip() and len(raw) - len(raw.lstrip(" ")) == 0:
+            break
+        result.append(raw)
+
+    return "\n".join(result)
+
+
+def mapping_values(text: str, header: str) -> list[str]:
+    values: list[str] = []
     lines = text.splitlines()
     in_block = False
     base_indent = 0
@@ -208,12 +227,9 @@ def secret_ref_names(text: str) -> set[str]:
     for raw in lines:
         stripped = raw.strip()
         if not in_block:
-            if stripped == "secret_refs:" and len(raw) - len(raw.lstrip(" ")) == 0:
-                # Public shape may intentionally use secret_refs: {}.
-                if raw.split(":", 1)[1].strip():
-                    return result
+            if stripped == f"{header}:":
                 in_block = True
-                base_indent = 0
+                base_indent = len(raw) - len(raw.lstrip(" "))
             continue
 
         if not stripped:
@@ -223,11 +239,101 @@ def secret_ref_names(text: str) -> set[str]:
         if indent <= base_indent:
             break
 
-        match = re.match(r"^  ([A-Za-z0-9_.-]+):\s*$", raw)
+        match = re.match(r"^\s*[A-Za-z0-9_.-]+:\s*(.*?)\s*$", raw)
         if match:
-            result.add(match.group(1))
+            value = match.group(1).strip().strip("'\"")
+            if value not in {"", "null", "~"}:
+                values.append(value)
+
+    return values
+
+
+def secret_ref_metadata(text: str) -> dict[str, dict[str, str]]:
+    result: dict[str, dict[str, str]] = {}
+    lines = text.splitlines()
+    in_block = False
+    current_ref = ""
+
+    for raw in lines:
+        stripped = raw.strip()
+        if not in_block:
+            if stripped == "secret_refs:" and len(raw) - len(raw.lstrip(" ")) == 0:
+                # Public shape may intentionally use secret_refs: {}.
+                if raw.split(":", 1)[1].strip():
+                    return result
+                in_block = True
+            continue
+
+        if not stripped:
+            continue
+
+        indent = len(raw) - len(raw.lstrip(" "))
+        if indent == 0:
+            break
+
+        ref_match = re.match(r"^  ([A-Za-z0-9_.-]+):\s*$", raw)
+        if ref_match:
+            current_ref = ref_match.group(1)
+            result[current_ref] = {}
+            continue
+
+        field_match = re.match(r"^    ([A-Za-z0-9_.-]+):\s*(.*?)\s*$", raw)
+        if field_match and current_ref:
+            value = field_match.group(2).strip().strip("'\"")
+            result[current_ref][field_match.group(1)] = value
 
     return result
+
+
+def secret_ref_names(text: str) -> set[str]:
+    return set(secret_ref_metadata(text))
+
+
+def core_provisioning_symbolic_refs(text: str) -> set[str]:
+    block = top_level_block(text, "core_provisioning")
+    if not block:
+        return set()
+
+    result: set[str] = set()
+
+    for match in re.finditer(r"^\s+password_ref:\s*(.*?)\s*$", block, flags=re.MULTILINE):
+        value = match.group(1).strip().strip("'\"")
+        if value not in {"", "null", "~"}:
+            result.add(value)
+
+    default_ref = default_api_key_ref(block)
+    if default_ref:
+        result.add(default_ref)
+
+    result.update(mapping_values(block, "profile_api_key_refs"))
+    result.update(mapping_values(block, "runtime_secret_refs"))
+    return result
+
+
+def validate_core_secret_ref_metadata(
+    label: str,
+    text: str,
+    failures: list[str],
+) -> int:
+    refs = core_provisioning_symbolic_refs(text)
+    metadata = secret_ref_metadata(text)
+    required_fields = ("class", "consumer", "native_binding")
+
+    for ref in sorted(refs):
+        if ref not in metadata:
+            failures.append(
+                f"{label}: Core provisioning symbolic ref is not declared in secret_refs: {ref}"
+            )
+            continue
+
+        for field_name in required_fields:
+            value = metadata[ref].get(field_name, "").strip()
+            if not value or value in {"null", "~"}:
+                failures.append(
+                    f"{label}: secret_refs.{ref} missing non-empty {field_name}"
+                )
+
+    return len(refs)
 
 
 def validate_profile_credential_contract(
@@ -303,6 +409,17 @@ def main() -> int:
         failures,
     )
 
+    public_core_secret_refs = validate_core_secret_ref_metadata(
+        "config/company.example.yaml",
+        company_text,
+        failures,
+    )
+    private_core_secret_refs = validate_core_secret_ref_metadata(
+        "config/company.private.example.yaml",
+        private_company_text,
+        failures,
+    )
+
     for capability in sorted(conditional):
         if capability not in selected_names:
             failures.append(f"{capability}: conditional capability has no selection metadata")
@@ -351,6 +468,10 @@ def main() -> int:
         "Profile credential mappings checked: "
         f"{public_profile_count + private_profile_count} declared Profiles / "
         f"{public_credential_refs + private_credential_refs} non-empty refs"
+    )
+    print(
+        "Core provisioning symbolic refs checked: "
+        f"{public_core_secret_refs + private_core_secret_refs}"
     )
 
     if failures:
