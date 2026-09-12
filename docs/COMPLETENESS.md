@@ -33,6 +33,11 @@ Core Ready is a functional milestone. It does not prove that every company-confi
 
 An optional capability that is disabled does not block Configured Ready.
 
+Backup/restore is **not** a Core Ready or Configured Ready requirement. A company
+may deliberately operate at `configured-ready` and defer backup/disaster-recovery
+hardening. That is an explicit target-readiness decision, not an incomplete
+Configured Ready deployment.
+
 An enabled capability whose required credential, external approval, provider choice, or security decision is genuinely unavailable produces `BLOCKED — REQUIRED INPUT`; the agent must not silently disable it merely to reach a green status.
 
 ### PRODUCTION READY
@@ -66,6 +71,11 @@ production-ready
 ```
 
 An AI deployment agent must continue until the requested target is reached, blocked on genuine required input, or fails at a specific boundary.
+
+For a small/internal deployment that does not currently require independent
+disaster recovery, `configured-ready` is a valid completion target. Selecting
+`production-ready` opts into the stricter production-control contract,
+including independent backup/recovery evidence.
 
 It must not stop at `CORE READY` when the requested target is `configured-ready` or `production-ready`.
 
