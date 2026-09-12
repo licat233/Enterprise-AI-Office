@@ -54,6 +54,8 @@ optional rerank configuration, only when enabled
 core_provisioning.weknora.owner_identity
 core_provisioning.weknora.intended_workspace_name
 core_provisioning.weknora.runtime_secret_refs
+core_network.weknora.api_base_url_for_hermes
+core_network.weknora.employee_exposed_directly
 ```
 
 The `owner_identity.password_ref` and each `runtime_secret_refs.*` value are
@@ -72,7 +74,6 @@ runtime_secret_refs.jwt_secret     → JWT_SECRET
 From protected deployment input/secret storage:
 
 ```text
-WeKnora API base URL
 secret value referenced by owner_identity.password_ref when password auth is selected
 secret values referenced by runtime_secret_refs.* for the started runtime
 selected authentication policy when the deployment is not local self-serve
@@ -85,7 +86,13 @@ The owner email/password and temporary JWT are provisioning credentials. They ar
 
 `WEKNORA_BASE_URL` and `WEKNORA_API_KEY` are real environment variables consumed by the official WeKnora MCP server. Other shell variable names shown in this document are local orchestration conveniences only; WeKnora does not read them unless upstream documentation explicitly says so.
 
-If a required provider, model, credential, or target Knowledge Base definition is unresolved, report:
+The WeKnora API base URL used by Hermes/MCP is non-secret desired state from
+`core_network.weknora.api_base_url_for_hermes`. Do not infer it from the
+reference demo URL. The reusable baseline requires
+`employee_exposed_directly: false`; any different exposure requires explicit
+deployment authorization and security review.
+
+If a required network route, provider, model, credential, or target Knowledge Base definition is unresolved, report:
 
 ```text
 BLOCKED — REQUIRED INPUT: <specific item>
