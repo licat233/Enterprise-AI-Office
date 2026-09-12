@@ -394,6 +394,19 @@ Profile must not rely on a similarly named secret ref existing somewhere else;
 the Profile→ref link is part of desired state. The plaintext key remains outside
 YAML and outside the protected operational state record.
 
+More generally, every non-empty symbolic ref consumed under
+`core_provisioning` must resolve to a `secret_refs` record that states:
+
+```text
+class
+consumer
+native_binding
+```
+
+A ref name alone is not a complete binding contract. These metadata fields tell
+a Fresh Agent what kind of secret it is, which provisioning/runtime boundary
+owns it, and which upstream/native input actually receives the value.
+
 ---
 
 ## 8. Missing/conflicting input behavior
