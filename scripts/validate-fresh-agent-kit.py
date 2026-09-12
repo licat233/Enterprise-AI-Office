@@ -225,6 +225,16 @@ def main() -> int:
         "Fresh Agent has a protected sink for Production Ready evidence",
     )
     require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "## Enabled conditional capability evidence",
+        "Fresh Agent uses the common conditional capability evidence sink",
+    )
+    require_text(
+        "config/capabilities.yaml",
+        "record_every_declared_records_item_for_each_enabled_capability",
+        "Fresh Agent must record every enabled capability evidence item",
+    )
+    require_text(
         "docs/BACKUP-RESTORE.md",
         "restore must be sourced",
         "Fresh Agent distinguishes local restore from Production Ready evidence",
