@@ -450,6 +450,11 @@ $COMPANY_CONFIG_MANIFEST_LINE
 $DEPLOYMENT_STATE_MANIFEST_LINE
 $MEDIA_TRANSCRIPTION_MANIFEST_LINE
 $GOVERNANCE_MANIFEST_LINE
+Backup source runtime containers:
+- PostgreSQL: $POSTGRES_CONTAINER
+- WeKnora app: $WEKNORA_APP_CONTAINER
+- Open WebUI: $OPENWEBUI_CONTAINER
+Source-container selection policy: explicit override or unique auto-discovery only; ambiguous candidates fail closed.
 Discovered Docker volumes:
 - PostgreSQL: $POSTGRES_VOLUME
 - WeKnora documents: $WEKNORA_DATA_VOLUME
