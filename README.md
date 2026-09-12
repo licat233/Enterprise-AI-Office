@@ -1,6 +1,6 @@
 # Enterprise AI Office
 
-> An agent-readable and agent-executable **system blueprint + installation blueprint** for building a governed, self-hosted enterprise AI workspace around **WeKnora + Hermes Agent + Open WebUI**, with capability-driven extensions for specialized AI roles, coding agents, automation, messaging, enterprise identity, and governed business-system actions.
+> **EAO baseline: COMPLETE / deployed / in use.** Enterprise AI Office is ARMOR's self-hosted AI workspace built around **WeKnora + Hermes Agent + Open WebUI**. This repository now serves two roles at once: the maintained source of truth for the deployed reference system, and an agent-readable / agent-executable blueprint that another capable AI Agent can use to reconstruct the same architecture from explicit private deployment inputs.
 
 **[简体中文 README](./README.zh-CN.md)**
 
@@ -18,6 +18,8 @@ If you are a fresh AI engineering agent, do not infer the system from directory 
 Before proposing any new component, run the mandatory [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md). For the documentation hierarchy, use the [Documentation authority map](docs/README.md). Maintainers and AI engineering agents should also follow [Repository governance](docs/REPOSITORY-GOVERNANCE.md).
 
 ## Project status at a glance
+
+**Current project posture:** Core platform construction is complete. The ARMOR reference deployment is in normal employee use at `CONFIGURED READY — PASS`. Ongoing work is maintenance driven by real usage feedback plus explicitly selected business capabilities. The next planned business capability is governed AI email marketing.
 
 | Milestone / capability | Status |
 | --- | --- |
@@ -38,8 +40,12 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Enterprise Web Research v1.0 | ✅ Closed / Frozen / PASS |
 | Operations employee RBAC v1 | ✅ Closed / Frozen / PASS |
 | Media Transcription optional capability | ✅ Validated / enabled in ARMOR reference; not Core default |
-| Blueprint Validation | ⏳ Not yet opened |
-| Release Ready | ⏳ Not yet opened |
+| Operational EAO baseline | ✅ Complete / deployed / in use |
+| Repository maintenance model | ✅ Single long-lived branch: `main` |
+| Backup / Restore | ➖ Optional capability / currently disabled |
+| Next business capability | ▶ Governed AI Email Marketing |
+| Blueprint Validation | ⏳ Governance lifecycle not opened; not a blocker for the deployed ARMOR baseline |
+| Release Ready | ⏳ Governance lifecycle not opened; not a blocker for normal ARMOR use |
 | Public real-deployment gate | ⛔ Inactive by default; sanitized ARMOR reference deployment exists |
 
 > **Operational status:** the ARMOR reference EAO baseline is already deployed on the designated Mac Studio and is in normal employee use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. The ARMOR deployment currently targets `CONFIGURED READY`, which is already PASS. The Mac Studio internal disk is the current EAO runtime and primary data storage. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
@@ -49,6 +55,35 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 > **Important:** “implemented” in this README means the repository contains the corresponding system design, installation contract, reference adapters/scripts, schemas, or validated core assets. It does **not** mean the v2 email workflow has already been deployed to a real company mailbox. Governed AI email marketing remains a separate follow-on business capability.
 
 Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml).
+
+## Repository maintenance model
+
+EAO is maintained as a **solo-maintainer, single-main repository**.
+
+```text
+main
+  ↓
+short-lived task branch
+  ↓
+Pull Request
+  ↓
+Repository Readiness PASS
+  ↓
+merge
+  ↓
+head branch automatically deleted
+```
+
+Rules:
+
+- `main` is the only long-lived branch;
+- do not keep permanent `develop`, `release/*`, `docs/*`, `fix/*`, `codex/*`, `ci/*`, or `test/*` branches;
+- GitHub's **Automatically delete head branches** setting is enabled;
+- merged PRs and Git history preserve development history, so historical branches are not retained;
+- use a short-lived branch for material changes, then delete it immediately after merge;
+- keep the repository focused on the current deployable/maintainable EAO state rather than accumulating abandoned parallel implementations.
+
+See [Repository governance](docs/REPOSITORY-GOVERNANCE.md) for the full contract.
 
 ## Architecture overview
 
@@ -108,7 +143,7 @@ The validated core stack provides:
 - distinct Hermes Profile API boundaries;
 - least-privilege employee tool exposure;
 - conversation history and controlled file-upload behavior;
-- backup / isolated restore reference procedures.
+- optional backup / isolated-restore procedures that remain available but are not enabled in the current ARMOR deployment.
 
 Core workflow:
 
