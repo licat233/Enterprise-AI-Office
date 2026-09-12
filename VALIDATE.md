@@ -162,6 +162,8 @@ For the requested readiness level, verify applicable:
 
 - controlled restart;
 - host/runtime recovery boundary;
+- observed recovery exercise appropriate to the requested readiness level; do not infer recovery PASS from restart configuration alone;
+- any required operator/GUI-login boundary and whether unattended boot-to-service recovery was actually observed;
 - configuration persistence;
 - employee-visible behavior after restart;
 - when backup is explicitly enabled: backup generation and isolated restore;
