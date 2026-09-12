@@ -506,6 +506,8 @@ require_text config/company.private.example.yaml 'weknora-db-password:' 'Private
 require_text config/company.private.example.yaml 'weknora-jwt-secret:' 'Private example declares WeKnora JWT symbolic secret ref'
 require_text config/company.private.example.yaml 'hermes-default-api-key:' 'Private example declares Hermes default symbolic secret ref'
 require_text config/company.private.example.yaml 'hermes-general-api-key:' 'Private example declares Hermes general symbolic secret ref'
+require_text config/company.private.example.yaml 'communication: communication-profile-api-key' 'Private communication Profile has explicit API-key ref mapping'
+require_text config/company.private.example.yaml 'communication-profile-api-key:' 'Private example declares communication Profile symbolic secret ref'
 require_text config/company.private.example.yaml 'openwebui-admin-password:' 'Private example declares Open WebUI admin symbolic secret ref'
 require_text config/.env.example 'DB_PASSWORD=<GENERATE_STRONG_SECRET>' 'Core env uses native WeKnora DB_PASSWORD binding'
 require_text config/.env.example 'REDIS_PASSWORD=<GENERATE_STRONG_SECRET>' 'Core env uses native WeKnora REDIS_PASSWORD binding'
