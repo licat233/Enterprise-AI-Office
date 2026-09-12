@@ -35,19 +35,36 @@ discover_container() {
   local explicit="$1"
   local service="$2"
   local fallback_regex="$3"
-  local found
+  local explicit_var="$4"
+  local candidates
+  local count
+
   if [ -n "$explicit" ]; then
     printf '%s' "$explicit"
     return
   fi
-  found="$(docker ps --filter "label=com.docker.compose.service=$service" \
-    --format '{{.Names}}' | sed -n '1p')"
-  if [ -n "$found" ]; then
-    printf '%s' "$found"
+
+  candidates="$(docker ps --filter "label=com.docker.compose.service=$service" \
+    --format '{{.Names}}' | awk 'NF')"
+  count="$(printf '%s\n' "$candidates" | awk 'NF {n++} END {print n+0}')"
+  if [ "$count" -eq 1 ]; then
+    printf '%s' "$candidates"
     return
   fi
-  docker ps --format '{{.Names}}' | awk -v pattern="$fallback_regex" \
-    '$0 ~ pattern {print; exit}'
+  if [ "$count" -gt 1 ]; then
+    fail "container discovery" "multiple running containers match compose service '$service'; set $explicit_var explicitly"
+  fi
+
+  candidates="$(docker ps --format '{{.Names}}' | awk -v pattern="$fallback_regex" \
+    '$0 ~ pattern {print}')"
+  count="$(printf '%s\n' "$candidates" | awk 'NF {n++} END {print n+0}')"
+  if [ "$count" -eq 1 ]; then
+    printf '%s' "$candidates"
+    return
+  fi
+  if [ "$count" -gt 1 ]; then
+    fail "container discovery" "multiple running containers match fallback '$fallback_regex'; set $explicit_var explicitly"
+  fi
 }
 
 CONFIG_RUNTIME_ROOT="$(company_yaml_runtime_root "$COMPANY_CONFIG")"
@@ -188,7 +205,7 @@ DEPLOYMENT_BLUEPRINT_COMMIT="$(manifest_value 'Deployment blueprint commit')"
 [ -n "$WEKNORA_IMAGE" ] || fail "manifest" "WeKnora image is missing"
 [ -n "$OPENWEBUI_IMAGE" ] || fail "manifest" "Open WebUI image is missing"
 if [ -z "$POSTGRES_IMAGE" ]; then
-  POSTGRES_CONTAINER="${WEKNORA_POSTGRES_CONTAINER:-$(discover_container "" postgres 'postgres')}"
+  POSTGRES_CONTAINER="$(discover_container "${WEKNORA_POSTGRES_CONTAINER:-}" postgres 'postgres' WEKNORA_POSTGRES_CONTAINER)"
   if [ -n "$POSTGRES_CONTAINER" ]; then
     POSTGRES_IMAGE="$(docker inspect --format '{{.Config.Image}}' "$POSTGRES_CONTAINER" 2>/dev/null || true)"
   fi
