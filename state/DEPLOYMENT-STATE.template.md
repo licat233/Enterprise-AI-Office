@@ -25,6 +25,7 @@ EAO revision changes during this deployment: `none | <explicitly authorized rest
 | Container runtime/version | `<...>` |
 | Runtime root | `<...>` |
 | Hermes source checkout | `<resolved installer path>` |
+| Hermes runtime home | `<resolved HERMES_HOME / active ~/.hermes path>` |
 
 ## Core network
 
@@ -382,6 +383,7 @@ Complete when `production-ready` is requested.
 Schedule:
 Retention:
 Latest backup generation/timestamp:
+Backup source runtime identity/selection result:
 Protected operational deployment-state artifact included: <yes/no>
 Whole-generation confidentiality/encryption result:
 Off-primary encrypted destination/boundary:

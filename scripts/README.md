@@ -301,6 +301,22 @@ protected state when the new-format manifest provides it. Older backups without
 that field remain readable but require explicit blueprint-revision verification
 before production reuse.
 
+Backup source discovery is fail-closed. The helper may automatically adopt a
+runtime directory or running container only when exactly one candidate exists
+for the required role. If both case/layout variants of a runtime directory
+exist, set `EAIO_WEKNORA_RUNTIME_DIR` or `EAIO_OPENWEBUI_RUNTIME_DIR`
+explicitly. If multiple Compose/test/restore containers match, set the
+already-supported `WEKNORA_POSTGRES_CONTAINER`, `WEKNORA_APP_CONTAINER`,
+and/or `OPENWEBUI_CONTAINER` variable explicitly. The helper must never choose
+the first candidate merely because filesystem/Docker enumeration returned it
+first.
+
+`HERMES_HOME` is not guessed across users. Its default is the invoking user's
+`~/.hermes`; when the active deployment uses another Hermes home, bind
+`HERMES_HOME` explicitly from observed/protected deployment state before
+backup. The backup manifest records the actual runtime paths and source
+container names used for the generation.
+
 Use only after reconciling it with the actual selected component/storage layout:
 
 ```sh
@@ -321,6 +337,11 @@ Guarded isolated restore-materialization helper:
 ```
 
 It verifies backup checksums and restores material into new temporary resources rather than overwriting the live deployment. When the backup contains the protected operational deployment-state/handoff artifact, it restores it into the isolated target as `state/deployment-state.md`. Older backups without that artifact remain readable, but their logical/runtime mappings must be reconstructed and revalidated before production reuse.
+
+For older manifests that do not record the PostgreSQL image, the compatibility
+fallback may inspect a live PostgreSQL container only when the candidate is
+explicitly named or uniquely discoverable. Multiple live candidates are an
+ambiguity failure, not a reason to select the first one.
 
 Complete service-level bring-up and acceptance according to `docs/BACKUP-RESTORE.md`.
 

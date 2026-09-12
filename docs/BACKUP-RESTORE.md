@@ -121,6 +121,52 @@ Therefore the **entire backup generation** is confidential/secret-bearing and
 must receive the protection appropriate for production secrets. Do not put any
 of these artifacts in this public repository.
 
+### 2.1 Backup source runtime identity
+
+A backup is only useful evidence when the source runtime is identified
+unambiguously. On hosts that contain production plus test/restore Compose
+projects, Docker service labels or container-name regexes can legitimately match
+more than one running container. Stale/migrated layouts can likewise leave both
+supported runtime-directory name variants present.
+
+The repository helper therefore follows this rule:
+
+```text
+explicit EAIO_WEKNORA_RUNTIME_DIR / EAIO_OPENWEBUI_RUNTIME_DIR
+→ use that runtime configuration directory
+
+otherwise exactly one supported runtime-directory candidate
+→ adopt it
+
+explicit WEKNORA_POSTGRES_CONTAINER / WEKNORA_APP_CONTAINER / OPENWEBUI_CONTAINER
+→ use that named running container, then validate the expected mounts/runtime
+
+otherwise exactly one discovered container candidate for the required role
+→ adopt it
+
+more than one directory or container candidate
+→ FAIL — ambiguous backup source; require an explicit existing override
+
+zero candidates
+→ existing missing-directory/container failure
+```
+
+Do not choose the first filesystem or Docker result. Do not assume the path
+or container with the shortest/newest/reference-looking name is production.
+
+`HERMES_HOME` defaults to the invoking user's `~/.hermes`; a deployment that
+uses a different Hermes home must supply the observed active path explicitly.
+Record that active Hermes runtime home in protected operational state.
+
+Each backup manifest records the selected WeKnora/Open WebUI runtime paths,
+Hermes home, actual PostgreSQL/WeKnora/Open WebUI source container names, and
+discovered persistent volumes. Record the source-runtime identity/selection
+result in protected operational state for Production Ready evidence.
+
+The same fail-closed rule applies to the legacy restore compatibility path that
+tries to recover a missing PostgreSQL image from a running container: a live
+container may be used only when explicitly named or uniquely discoverable.
+
 ## 3. What is not enough
 
 The following are not complete backup strategies:
