@@ -164,6 +164,39 @@ Adjust for:
 - available storage;
 - compliance requirements.
 
+### Blueprint revision provenance
+
+Backup provenance contains two different repository identities and they must not
+be conflated:
+
+```text
+Backup helper repository commit
+= EAO checkout that executed scripts/backup.sh
+
+Deployment blueprint commit
+= EAO commit recorded in protected operational deployment state
+  that actually governs the backed-up runtime
+```
+
+Those commits may legitimately differ. For example, `main` may advance after a
+production deployment while the runtime intentionally remains on its previously
+accepted blueprint revision.
+
+New backup manifests therefore record both values. When protected operational
+state contains a valid 40-character blueprint commit, the backup copies that
+value into `MANIFEST.txt`.
+
+During isolated restore, a new-format backup must have the restored protected
+state's `EAO blueprint commit` match the manifest's `Deployment blueprint
+commit`. A mismatch is a restore-integrity failure.
+
+Older backups that predate this field remain readable, but absence of the
+deployment blueprint commit is an evidence limitation. Verify/reconstruct the
+governing revision before treating such a restored target as production-ready.
+
+The backup helper checkout commit is tool provenance only. It must never be
+silently substituted for the deployment blueprint authority.
+
 ## 6. Backup consistency
 
 For major upgrades or migrations, create an explicit pre-change backup set that represents a recoverable point in time.

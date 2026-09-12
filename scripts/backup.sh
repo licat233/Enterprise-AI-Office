@@ -261,6 +261,14 @@ POSTGRES_IMAGE="$(docker inspect --format '{{.Config.Image}}' "$POSTGRES_CONTAIN
 OPENWEBUI_IMAGE="$(docker inspect --format '{{.Config.Image}}' "$OPENWEBUI_CONTAINER")"
 HERMES_VERSION="$(hermes --version 2>/dev/null | sed -n '1p')"
 REPO_COMMIT="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || true)"
+DEPLOYMENT_BLUEPRINT_COMMIT=""
+if [ -f "$DEPLOYMENT_STATE_FILE" ]; then
+  DEPLOYMENT_BLUEPRINT_COMMIT="$(awk -F'`' '/^EAO blueprint commit: `/ {print $2; exit}' "$DEPLOYMENT_STATE_FILE")"
+  if ! printf '%s\n' "$DEPLOYMENT_BLUEPRINT_COMMIT" | grep -Eq '^[0-9a-fA-F]{40}$'; then
+    warn "Deployment blueprint commit" "protected state does not contain a valid 40-character EAO blueprint commit"
+    DEPLOYMENT_BLUEPRINT_COMMIT=""
+  fi
+fi
 DOCKER_VERSION="$(docker version --format '{{.Server.Version}}')"
 COMPOSE_VERSION="$(docker compose version --short)"
 
@@ -403,7 +411,8 @@ Host OS: $(uname -s)
 Host architecture: $(uname -m)
 Docker Engine: $DOCKER_VERSION
 Docker Compose: $COMPOSE_VERSION
-Repository commit: ${REPO_COMMIT:-unavailable}
+Backup helper repository commit: ${REPO_COMMIT:-unavailable}
+Deployment blueprint commit: ${DEPLOYMENT_BLUEPRINT_COMMIT:-unavailable}
 WeKnora version: $WEKNORA_VERSION
 WeKnora image: $WEKNORA_IMAGE
 PostgreSQL image: $POSTGRES_IMAGE
