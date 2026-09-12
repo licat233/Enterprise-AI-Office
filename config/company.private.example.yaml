@@ -210,7 +210,7 @@ secret_refs:
   weknora-embedding-provider-openai-key:
     class: model-provider-credentials
     consumer: weknora-model-provisioning
-    native_binding: WeKnora /models parameters.api_key
+    native_binding: WeKnora model credential field api_key
 
   openwebui-admin-password:
     class: open-webui-admin-credentials
