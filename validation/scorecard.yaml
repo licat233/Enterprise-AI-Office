@@ -51,7 +51,7 @@ gates:
         evidence: identifies validated core versions from config/validated-stack.yaml
       - id: conceptual_boundaries
         weight: 10
-        evidence: correctly explains Profile/user, Knowledge/Memory, credential/authority, blueprint/deployment distinctions
+        evidence: correctly explains Profile/user, Knowledge/Memory, credential/authority, blueprint/deployment distinctions, and model source/provider credential binding without guessing
       - id: lifecycle_vs_reference
         weight: 8
         evidence: distinguishes default deployment gate from existing ARMOR reference implementation
@@ -87,6 +87,7 @@ gates:
     required: true
     criteria:
       - public_private_input_separation
+      - model_source_and_provider_credential_binding
       - dependency_order
       - readiness_resolution
       - capability_closure

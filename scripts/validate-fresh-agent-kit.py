@@ -144,6 +144,26 @@ def main() -> int:
         "Scorecard has explicit comprehension threshold",
     )
     require_text(
+        "validation/FRESH-AGENT-TASK.md",
+        "WeKnora model `source` (`local` / `remote`)",
+        "Fresh Agent comprehension examines explicit WeKnora model source",
+    )
+    require_text(
+        "validation/FRESH-AGENT-TASK.md",
+        "symbolic provider-credential refs and exact pinned native bindings",
+        "Fresh Agent dry run requires model-provider binding plan",
+    )
+    require_text(
+        "validation/scorecard.yaml",
+        "model_source_and_provider_credential_binding",
+        "Scorecard evaluates model source/provider credential binding",
+    )
+    require_text(
+        "validation/REPORT.template.md",
+        "Model source/provider credential binding: PASS / FAIL",
+        "Validation report captures model binding result",
+    )
+    require_text(
         "validation/scorecard.yaml",
         "checks_hermes_cron_before_new_scheduler",
         "Scorecard tests scheduler reuse behavior",
