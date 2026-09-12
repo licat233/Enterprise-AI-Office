@@ -56,7 +56,7 @@ jobs:
       - name: Check capability acceptance sections
         run: python3 scripts/check-capability-acceptance.py
 
-      - name: Check capability selectors and records
+      - name: Check capability selectors, records, and Profile credentials
         run: python3 scripts/check-capability-selectors.py
 
       - name: Check validated stack consistency
