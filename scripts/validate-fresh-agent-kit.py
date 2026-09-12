@@ -365,6 +365,11 @@ def main() -> int:
         "Fresh Agent can bootstrap WeKnora without bypassing auth policy",
     )
     require_text(
+        "infrastructure/weknora/PROVISIONING.md",
+        "enterprise-ai-office-hermes-<PROFILE_ID>",
+        "Fresh Agent renders WeKnora object identity from desired/protected state",
+    )
+    require_text(
         "DEPLOY.md",
         "company logical ID → display name → runtime group UUID",
         "Fresh Agent distinguishes group logical IDs from runtime identity",
