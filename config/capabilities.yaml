@@ -191,7 +191,7 @@ capabilities:
       - component versions
       - model role source/auth path and symbolic provider-credential ref/native-binding metadata, never secret values
       - WeKnora runtime tenant and logical-to-runtime Knowledge Base mappings
-      - WeKnora Profile retrieval-key IDs/names and scope metadata, never token values
+      - WeKnora Profile retrieval-key IDs/names, scope metadata, and active deterministic-name uniqueness result, never token values
       - knowledge bases
       - enabled profiles
       - employee groups and assistant mappings
