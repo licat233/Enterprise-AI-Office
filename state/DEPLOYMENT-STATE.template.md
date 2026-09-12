@@ -24,6 +24,7 @@ EAO revision changes during this deployment: `none | <explicitly authorized rest
 | Storage/free space | `<...>` |
 | Container runtime/version | `<...>` |
 | Runtime root | `<...>` |
+| Hermes source checkout | `<resolved installer path>` |
 
 ## Core network
 
