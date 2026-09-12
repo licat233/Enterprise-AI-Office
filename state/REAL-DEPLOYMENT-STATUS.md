@@ -9,7 +9,7 @@ Last updated: 2026-09-12
 ```text
 Reference real deployment: ACTIVE (separately authorized)
 Target: designated company Mac Studio (publicly sanitized)
-Requested readiness: production-ready
+Requested readiness: configured-ready
 Public blueprint real_deployment_task default: inactive
 Blueprint lifecycle: installation_design (unchanged)
 Blueprint Validation: not opened
@@ -41,9 +41,12 @@ normal use at `CONFIGURED READY — PASS`**. Ongoing work should be treated as
 feedback-driven maintenance, defect correction, or bounded capability extension
 rather than as evidence that the Core office platform is still unfinished.
 
-This operational conclusion does not redefine `PRODUCTION READY`: the remaining
-blocker is still the independent encrypted off-primary backup copy plus final
-restore evidence sourced from that copy.
+The ARMOR owner has explicitly selected `CONFIGURED READY` as the current
+delivery target. Backup/restore remains available as optional operational
+hardening rather than a blocker for the deployed office baseline. If ARMOR later
+chooses the stricter `PRODUCTION READY` target, the existing contract still
+requires independent encrypted off-primary backup plus restore evidence sourced
+from that independent copy.
 
 Governed AI email marketing is a separate follow-on business capability. Existing
 email/governance/Hermes/Cron assets should be reused through the Capability Reuse
@@ -88,7 +91,7 @@ These updates supersede any earlier demo-only role list or network description w
 CORE READY — PASS
 CONFIGURED READY — PASS
 REBOOT ACCEPTANCE — PASS
-PRODUCTION READY — BLOCKED ONLY BY EXTERNAL BACKUP / RESTORE EVIDENCE
+PRODUCTION READY — NOT CURRENTLY REQUESTED
 ```
 
 Validated employee path:
@@ -160,9 +163,9 @@ be accompanied by explicit changelog/upgrade evidence.
 | Real Mac Studio reboot acceptance | ✅ PASS |
 | Post-reboot employee path | ✅ Grounded answer + source |
 | Post-reboot ACL / history / upload / retrieve-only boundary | ✅ PASS |
-| Independent encrypted backup target | ⏳ Not yet provided |
-| Off-primary backup / retention / final external restore evidence | ⏳ Pending backup target and approved policy |
-| Production Ready | ⛔ BLOCKED ONLY BY EXTERNAL BACKUP / RESTORE EVIDENCE |
+| Independent encrypted backup target | ➖ Optional / not currently requested |
+| Off-primary backup / retention / final external restore evidence | ➖ Optional future hardening |
+| Production Ready | ➖ Not the current delivery target |
 
 Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETENESS.md).
 
