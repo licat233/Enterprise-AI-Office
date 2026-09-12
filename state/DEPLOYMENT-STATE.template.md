@@ -382,6 +382,7 @@ Complete when `production-ready` is requested.
 Schedule:
 Retention:
 Latest backup generation/timestamp:
+Backup source runtime identity/selection result:
 Protected operational deployment-state artifact included: <yes/no>
 Whole-generation confidentiality/encryption result:
 Off-primary encrypted destination/boundary:
