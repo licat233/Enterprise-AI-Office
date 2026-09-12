@@ -593,6 +593,8 @@ capabilities:
       - video extraction result
       - temporary WeKnora compatibility result
 
+# Production controls are not Core/Configured Ready defaults. They become
+# mandatory only when the selected target readiness requires them.
 production_controls:
   production.backup_restore:
     implementation:
