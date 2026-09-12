@@ -508,10 +508,11 @@ require_text docs/OPERATIONS.md 'For the ARMOR reference implementation it is cl
 
 # Guard against blueprint-lifecycle / real-deployment semantic drift.
 require_text state/PROJECT-PHASE.yaml 'repository_role: blueprint_repository' 'Repository role is blueprint repository'
-require_text state/PROJECT-PHASE.yaml 'current_phase: installation_design' 'Current blueprint phase remains installation design'
+require_text state/PROJECT-PHASE.yaml 'current_phase: release_ready' 'Current blueprint phase is Release Ready'
 require_text state/PROJECT-PHASE.yaml 'completion_milestone: INSTALLATION DESIGN COMPLETE' 'Installation design completion milestone exists'
 require_text state/PROJECT-PHASE.yaml 'transition_ready: true' 'Installation design is transition-ready only after explicit direction'
-require_text state/PROJECT-PHASE.yaml 'blueprint_validation' 'Blueprint lifecycle includes validation'
+require_text state/PROJECT-PHASE.yaml 'blueprint_validation:' 'Blueprint lifecycle includes validation'
+require_text state/PROJECT-PHASE.yaml 'status: opened' 'Blueprint lifecycle records opened validation/release phases'
 require_text state/PROJECT-PHASE.yaml 'implicit_transition_allowed: false' 'Implicit blueprint transition is disabled'
 require_text state/PROJECT-PHASE.yaml 'real_deployment_task:' 'Real deployment has a separate gate'
 require_text state/PROJECT-PHASE.yaml 'active: false' 'No real deployment task is active by default'
