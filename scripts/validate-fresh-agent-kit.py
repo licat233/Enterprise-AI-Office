@@ -190,6 +190,11 @@ def main() -> int:
         "Fresh Agent pins the EAO repository revision",
     )
     require_text(
+        "docs/BACKUP-RESTORE.md",
+        "Backup helper repository commit",
+        "Fresh Agent distinguishes backup-tool and runtime blueprint commits",
+    )
+    require_text(
         "state/DEPLOYMENT-STATE.template.md",
         "EAO blueprint commit:",
         "Fresh Agent records EAO blueprint commit in protected state",
