@@ -23,7 +23,6 @@ readiness_levels:
     requires:
       - core.employee_path
       - all_company_enabled_capabilities
-      - production.backup_restore
       - production.startup_recovery
       - production.security_access_review
       - production.operations_health
@@ -408,7 +407,7 @@ capabilities:
       - governance state/log path or accepted derived default
       - symbolic mailbox client-credential reference
       - protected operator/evidence path for reconciliation
-      - Governance backup/retention policy or accepted company default when production-ready is requested
+      - Governance backup/retention policy only when backup/restore is explicitly enabled
     required_secret_classes:
       - specialist-profile-credential
       - open-webui-governance-forwarder-credential
@@ -593,10 +592,16 @@ capabilities:
       - video extraction result
       - temporary WeKnora compatibility result
 
-# Production controls are not Core/Configured Ready defaults. They become
-# mandatory only when the selected target readiness requires them.
+# Backup/restore is an explicitly selected optional capability. It is not
+# implicitly enabled by any readiness level.
 production_controls:
   production.backup_restore:
+    kind: conditional
+    enabled_when: production.backup.enabled == true
+    selection:
+      source: company_configuration
+      path: production.backup.enabled
+      required_value: true
     implementation:
       - docs/BACKUP-RESTORE.md
       - docs/V2-RECOVERY-CLEAN-HOST.md
@@ -663,6 +668,6 @@ production_controls:
       - operational owner
       - health-check method/cadence
       - last health result
-      - backup/restore monitoring method
+      - backup/restore monitoring method when backup is enabled
       - enabled-capability health ownership
       - known alerts/limitations

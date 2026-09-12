@@ -602,7 +602,7 @@ During a real deployment, use `docs/ACCEPTANCE-TESTS.md` and provider-specific a
 
 Do not instantiate an optional feature merely to satisfy a test section. Conversely, do not skip the test for a capability that the company configuration enabled during a real deployment.
 
-Runtime evidence matters more than configuration intent once an authorized target exists: test the real/validation employee client, actual MCP retrieval, actual authorization boundary, actual provider behavior for enabled operational integrations, actual harmless Cron/Kanban/coding run when enabled, and actual restore when the target requires Production Ready.
+Runtime evidence matters more than configuration intent once an authorized target exists: test the real/validation employee client, actual MCP retrieval, actual authorization boundary, actual provider behavior for enabled operational integrations, actual harmless Cron/Kanban/coding run when enabled, and actual restore when backup/restore is explicitly enabled.
 
 Offline/unit tests are necessary where defined but do not replace target runtime acceptance, and they do not activate a target by themselves.
 

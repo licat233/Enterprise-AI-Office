@@ -376,9 +376,10 @@ Other enabled surfaces: <...>
 
 ## Production controls
 
-Complete when `production-ready` is requested.
+Complete the always-applicable sections when `production-ready` is requested.
+Complete Backup / restore only when `production.backup.enabled: true`.
 
-### Backup / restore
+### Backup / restore — optional
 
 ```text
 Schedule:
@@ -391,7 +392,7 @@ Off-primary encrypted destination/boundary:
 Latest successful off-primary copy generation/timestamp:
 Checksum/integrity result:
 Independent-copy freshness/retention result:
-Last isolated restore source/generation (must identify off-primary copy for Production Ready):
+Last isolated restore source/generation (must match selected backup policy):
 Last isolated restore result/date:
 Restored Core handoff-mapping verification:
 Restored Core employee-path acceptance result:
@@ -433,7 +434,7 @@ Approved exceptions/known limitations:
 Operational owner:
 Health-check method/cadence:
 Last health result:
-Backup/restore monitoring method:
+Backup/restore monitoring method when enabled:
 Enabled-capability health ownership:
 Known alerts/limitations:
 ```

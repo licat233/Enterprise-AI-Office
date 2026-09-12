@@ -219,7 +219,9 @@ maturity:
   reference_real_deployment: present
   reference_operational_status: configured_ready_pass_in_use
   reference_target_readiness: configured_ready
-  reference_backup_posture: optional_future_hardening
+  reference_primary_data_storage: mac_studio_internal_disk
+  reference_backup_enabled: false
+  reference_backup_posture: optional_not_currently_enabled
   baseline_construction_posture: operational_complete_feedback_driven_maintenance
   blueprint_validation_phase: not_automatically_advanced
   release_ready: requires_explicit_lifecycle_decision

@@ -52,7 +52,7 @@ Before writing an installation plan, answer all of these from repository evidenc
 18. Which documents are the primary execution and acceptance contracts?
 19. Which evidence is historical and should not silently override the current contracts?
 20. What would make you stop with a repository defect rather than improvise?
-21. Why is a primary-disk backup plus primary-disk isolated restore insufficient for `PRODUCTION READY`, and what additional off-primary evidence is required?
+21. Is backup/restore enabled by any readiness label automatically? If backup is enabled and company policy requires off-primary independence, what evidence is required? Explain why the primary runtime/data disk is not itself a backup.
 22. How must a Fresh Agent determine:
     - WeKnora model `source` (`local` / `remote`);
     - Hermes model-provider credential native binding;
@@ -82,8 +82,8 @@ Produce:
 10. network and administrative exposure principles;
 11. least-privilege tool plan;
 12. acceptance sequence;
-13. restart/backup/restore sequence;
-14. Production Ready backup evidence boundary, including the distinction between primary-disk recovery-path validation and final off-primary restore evidence;
+13. restart sequence and backup/restore sequence only if backup is explicitly enabled;
+14. backup evidence boundary when enabled, including the distinction between primary runtime/data storage and any separately selected backup target;
 15. rollback principles;
 16. all blockers, classified as one of:
 

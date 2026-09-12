@@ -360,9 +360,10 @@ Then run acceptance only for capabilities actually enabled on that target, for e
 - media-transcription smoke tests;
 - Cron/Kanban/messaging/SSO/remote-access checks where selected.
 
-For `production-ready`, also close the production controls in
-`config/capabilities.yaml`, including backup/restore, startup recovery,
-security/access review, and operations health.
+For `production-ready`, close the always-applicable production controls in
+`config/capabilities.yaml`, including startup recovery, security/access review,
+and operations health. Backup/restore is closed only when
+`production.backup.enabled: true`; no readiness level enables it implicitly.
 
 Create/update the deployment's protected operational state from
 `state/DEPLOYMENT-STATE.template.md`, including the Core runtime handoff mappings

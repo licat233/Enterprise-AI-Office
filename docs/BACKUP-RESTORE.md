@@ -1,14 +1,13 @@
 # Backup and Restore Standard
 
-Backup/restore is an **optional operational hardening capability** for deployments
-whose selected target is `core-ready` or `configured-ready`. It becomes mandatory
-under the repository's stricter `production-ready` contract, or when company
-policy explicitly requires independent disaster recovery.
+Backup/restore is an **optional operational capability**. No readiness level
+implicitly enables it. It is instantiated only when the company configuration
+explicitly sets `production.backup.enabled: true`.
 
-This document defines the standard to follow when backup/restore is enabled.
-A local backup on the primary Mac/host disk can be useful for accidental deletion,
-configuration rollback, or application/data corruption, but it does not protect
-against loss of the host or its internal disk.
+The Mac/host internal disk may be the normal EAO runtime and primary data storage.
+That primary data storage is not called a backup merely because it holds the
+working EAO data. This document applies only after backup/restore is explicitly
+enabled.
 
 When the conditional media_transcription capability is enabled, reviewed
 Markdown transcripts under the derived runtime
@@ -187,13 +186,13 @@ the repository's `PRODUCTION READY` standard:
 
 ## 4. Backup destination
 
-When independent disaster recovery or `PRODUCTION READY` is requested, maintain
-at least one backup copy on storage independent from the primary host disk.
+When backup/restore is enabled, use the destination and protection policy
+explicitly selected by the company. If that policy requires independent disaster
+recovery, maintain at least one backup copy on storage independent from the
+primary host disk.
 
-For a deployment intentionally targeting `CONFIGURED READY`, backup may be
-disabled entirely or may use primary-disk local generations as a convenience
-recovery mechanism. Such a local-only policy must not be described as protection
-from host/disk loss.
+When backup is disabled, do not create or schedule backup generations merely to
+satisfy a readiness label.
 
 Examples:
 
@@ -204,9 +203,9 @@ Examples:
 
 The exact target depends on company policy.
 
-For `PRODUCTION READY`, evidence must distinguish a local/primary-disk
-validation generation from the approved independent production copy. Record at
-least:
+If the selected backup policy requires an independent/off-primary copy, evidence
+must distinguish any local validation generation from that independent copy.
+Record at least:
 
 ```text
 backup generation ID/timestamp
@@ -219,8 +218,8 @@ final isolated restore result
 ```
 
 A backup generated on the primary disk and an isolated restore from that same
-primary-disk generation are useful recovery-path validation, but they do **not**
-prove independence from host/disk loss.
+primary-disk generation do **not** prove independence from host/disk loss when
+the selected backup policy requires such independence.
 
 ## 5. Frequency
 
@@ -398,8 +397,9 @@ checks before relying on a newly restored target.
 
 A restore is successful only when at least these checks pass:
 
-For final `PRODUCTION READY` acceptance, the isolated restore must be sourced
-from the approved off-primary backup copy (or an equivalent independently
+When the selected backup policy requires an off-primary copy, the final isolated
+restore acceptance must be sourced from the approved off-primary backup copy
+(or an equivalent independently
 stored generation), not merely from a generation that still resides on the
 primary host disk. Verify the copied generation's checksums/integrity before
 restore.
@@ -533,7 +533,7 @@ The default daily policy is a starting point, not a universal compliance answer.
 [ ] Off-primary copy integrity/checksum verified after transfer
 [ ] Retention and freshness against the off-primary destination verified
 [ ] Backup failures visible
-[ ] Isolated restore tested from the approved off-primary copy for Production Ready
+[ ] Isolated restore tested from the selected backup source; use the approved off-primary copy when company policy requires it
 [ ] Restored deployment-state/handoff mappings validated against restored resources
 [ ] Last restore-test date recorded in protected deployment state
 ```

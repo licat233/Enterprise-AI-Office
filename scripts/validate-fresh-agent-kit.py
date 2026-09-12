@@ -301,8 +301,8 @@ def main() -> int:
     )
     require_text(
         "docs/BACKUP-RESTORE.md",
-        "restore must be sourced",
-        "Fresh Agent distinguishes local restore from Production Ready evidence",
+        "restore acceptance must be sourced",
+        "Fresh Agent follows the selected backup source policy when backup is enabled",
     )
     require_text(
         "docs/BACKUP-RESTORE.md",
@@ -341,13 +341,13 @@ def main() -> int:
     )
     require_text(
         "validation/scorecard.yaml",
-        "off_primary_restore_evidence_when_production_ready",
-        "Scorecard requires off-primary restore evidence for Production Ready",
+        "off_primary_restore_evidence_when_selected_by_backup_policy",
+        "Scorecard requires off-primary restore evidence only when selected by backup policy",
     )
     require_text(
         "validation/FRESH-AGENT-TASK.md",
-        "primary-disk backup plus primary-disk isolated restore insufficient",
-        "Fresh Agent comprehension tests independent backup evidence",
+        "primary runtime/data disk is not itself a backup",
+        "Fresh Agent comprehension distinguishes primary data storage from optional backup",
     )
     require_text(
         "REPRODUCE.md",

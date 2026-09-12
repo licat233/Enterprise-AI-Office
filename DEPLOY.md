@@ -485,24 +485,22 @@ If the requested target is `configured-ready`, continue to state recording/repor
 
 ## 13. Phase H — Production readiness closure
 
-For `production-ready`, implement and validate the production controls selected by the capability registry and company configuration:
+For `production-ready`, implement and validate the applicable production controls selected by the capability registry and company configuration:
 
 - production knowledge/data boundary review;
-- backup plus protected/off-primary-disk recovery strategy;
-- isolated restore validation;
 - startup/recovery policy;
 - secrets protection/recovery;
 - network and admin access review;
 - operational health/ownership;
-- representative production parsing/Golden Questions/security tests.
+- representative production parsing/Golden Questions/security tests;
+- backup/restore only when `production.backup.enabled: true`.
 
 Use:
 
-- `docs/BACKUP-RESTORE.md`;
+- `docs/BACKUP-RESTORE.md` only when backup is enabled;
 - `docs/SECURITY.md`;
 - `docs/OPERATIONS.md`;
-- `scripts/backup.sh`;
-- `scripts/restore.sh`;
+- `scripts/backup.sh` and `scripts/restore.sh` only when backup is enabled;
 - `scripts/health-check.sh`;
 - Part C of `docs/ACCEPTANCE-TESTS.md`.
 
@@ -514,10 +512,12 @@ For a fresh deployment, copy `state/DEPLOYMENT-STATE.template.md` into the
 deployment's **protected operational storage** and record actual runtime truth
 there.
 
-The reference backup/restore path expects the protected operational copy at
+When backup/restore is enabled, the reference backup/restore path expects the
+protected operational copy at
 `${EAIO_RUNTIME_DIR}/state/deployment-state.md`. If the deployment deliberately
 stores it elsewhere, set `EAIO_DEPLOYMENT_STATE_FILE` for backup operations and
-record that non-secret location/boundary in the operational state.
+record that non-secret location/boundary in the operational state. When backup is
+disabled, no backup operation is required.
 
 Do **not** overwrite the repository's `state/DEPLOYMENT-STATE.md`: that file is
 the historical sanitized demo record. Do not put private runtime IDs, network

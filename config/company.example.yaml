@@ -18,7 +18,7 @@ company:
 
 deployment:
   environment: production # demo | staging | production
-  target_readiness: configured-ready # core-ready | configured-ready | production-ready; production-ready opts into stricter backup/DR controls
+  target_readiness: configured-ready # core-ready | configured-ready | production-ready; backup remains separately opt-in
   host:
     type: mac-studio # examples: mac-studio, mac-mini, linux-server
     hostname: enterprise-ai-office
@@ -240,13 +240,15 @@ email_governance:
     group_ids_header: X-EAO-Human-Group-Ids
 
 production:
+  # Optional. The primary host disk is runtime data storage, not a backup.
+  # Enable only when the company explicitly adopts a backup policy.
   backup:
-    enabled: true
+    enabled: false
     schedule: daily
     daily_retention: 14
     weekly_retention: 4
-    require_off_primary_disk_copy: true
-    off_primary_destination: <SELECT_PROTECTED_DESTINATION>
+    require_off_primary_disk_copy: false
+    off_primary_destination: null
     restore_test_frequency: monthly
   startup_recovery:
     policy: documented-supported-recovery # automatic | documented-supported-recovery

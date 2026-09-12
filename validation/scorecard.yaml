@@ -96,8 +96,8 @@ gates:
       - least_privilege
       - acceptance_sequence
       - restart_recovery
-      - backup_restore
-      - distinguishes_primary_disk_restore_from_production_backup_evidence
+      - backup_restore_only_when_enabled
+      - distinguishes_primary_data_storage_from_backup
       - rollback
       - explicit_failure_taxonomy
 
@@ -115,8 +115,8 @@ gates:
       - core_employee_path
       - enabled_optional_capability_acceptance
       - restart_persistence
-      - backup_restore_when_required_by_target_readiness
-      - off_primary_restore_evidence_when_production_ready
+      - backup_restore_when_explicitly_enabled
+      - off_primary_restore_evidence_when_selected_by_backup_policy
       - no_privilege_expansion
       - exact_commit_recorded
 

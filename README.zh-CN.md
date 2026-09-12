@@ -42,7 +42,7 @@
 | Release Ready | ⏳ 尚未开启 |
 | Public Real Deployment Gate | ⛔ 默认未激活；已有 ARMOR 脱敏真实参考部署 |
 
-> **实际运行状态：** ARMOR 的 EAO 基线已经部署在指定 Mac Studio，并已进入正常员工使用状态。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。ARMOR 当前目标正式收敛为已经 PASS 的 `CONFIGURED READY`。Backup / Restore 保留为可选的运维增强能力；只有公司以后主动选择更严格的 `PRODUCTION READY` 目标时，才要求完成独立 off-primary 灾备副本及恢复证据。
+> **实际运行状态：** ARMOR 的 EAO 基线已经部署在指定 Mac Studio，并已进入正常员工使用状态。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。ARMOR 当前目标正式收敛为已经 PASS 的 `CONFIGURED READY`。Mac Studio 内置硬盘当前作为 EAO 的运行与主数据存储盘。Backup / Restore 是独立的可选能力，目前不启用；以后只有在业务需要和存储条件合适时再显式开启。
 >
 > Public Blueprint 生命周期是仓库治理状态，不等同于 ARMOR 真实部署是否存在、是否已经可用。当前基线已经达到 `CONFIGURED READY — PASS`，后续 EAO 工作应以实际使用反馈驱动的维护和边界清晰的能力扩展为主，而不是继续把 Core 平台当成未完成项目建设。
 >
