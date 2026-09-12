@@ -122,6 +122,17 @@ non-empty API-key ref must resolve to a declared `secret_refs` record in that
 configuration layer. This catches orphaned specialist Profile credentials before
 deployment.
 
+For every non-empty symbolic ref consumed by `core_provisioning`, the checker
+also requires the referenced `secret_refs` entry to declare non-empty:
+
+- `class`;
+- `consumer`;
+- `native_binding`.
+
+This covers WeKnora bootstrap/runtime refs, Hermes default/Profile API keys, and
+the Open WebUI bootstrap administrator password without hard-coding secret
+names.
+
 ## `check-validated-stack-consistency.py`
 
 Dependency-free cross-file check for derived Core runtime pins.
