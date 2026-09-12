@@ -175,13 +175,17 @@ Add only groups selected by active company configuration.
 Also record, without secrets:
 
 ```text
-Profile → Open WebUI connection index/identifier if stable and useful:
+Profile → Open WebUI exact connection URL:
+Profile → observed Open WebUI connection index/runtime handle:
 Profile → protected Profile-API-key reference name:
 EAO-managed native Open WebUI company Knowledge attachment: absent
 ```
 
 The Open WebUI mapping consumes the Hermes route/model identity and company group
-mapping; it must not invent a second Profile or Knowledge authority.
+mapping; it must not invent a second Profile or Knowledge authority. The exact
+Profile connection URL is the reconciliation identity. The Open WebUI array
+index is only an observed runtime handle and must be rediscovered when the
+connection list changes; never bind a Profile from a historical index alone.
 
 ## Capability closure
 
