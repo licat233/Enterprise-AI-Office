@@ -18,7 +18,7 @@ company:
 
 deployment:
   environment: production # demo | staging | production
-  target_readiness: production-ready # core-ready | configured-ready | production-ready
+  target_readiness: configured-ready # core-ready | configured-ready | production-ready; production-ready opts into stricter backup/DR controls
   host:
     type: mac-studio # examples: mac-studio, mac-mini, linux-server
     hostname: enterprise-ai-office
