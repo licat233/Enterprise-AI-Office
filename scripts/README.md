@@ -266,6 +266,17 @@ The deployment-state source defaults to
 elsewhere. The script never uses the repository's historical
 `state/DEPLOYMENT-STATE.md` as the real runtime state source.
 
+The backup manifest records two Git identities:
+
+- `Backup helper repository commit` — the checkout that executed the backup;
+- `Deployment blueprint commit` — the commit recorded in protected operational
+  state that governs the runtime.
+
+They are intentionally separate. Restore checks the latter against the restored
+protected state when the new-format manifest provides it. Older backups without
+that field remain readable but require explicit blueprint-revision verification
+before production reuse.
+
 Use only after reconciling it with the actual selected component/storage layout:
 
 ```sh
