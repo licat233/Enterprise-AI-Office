@@ -67,6 +67,7 @@ Schema v2 describes reusable deployment intent, including:
 
 - company identity/language/timezone;
 - target readiness (`core-ready`, `configured-ready`, or `production-ready`);
+- Core network desired state for the existing WeKnora → Hermes → Open WebUI paths;
 - Core provisioning bootstrap identities and symbolic secret-reference slots;
 - Knowledge Base structure;
 - Hermes Profiles;
@@ -123,6 +124,16 @@ symbolic secret references
 ```
 
 Do not place actual secret values in the private overlay.
+
+For Core, private non-secret network routes belong under `core_network` rather
+than ad-hoc fields. The public schema defines the shape; the private overlay
+resolves the real WeKnora API route used by Hermes, Hermes listener/backend
+route, and Open WebUI employee URL/access layer.
+
+The reusable exposure default is: Open WebUI is employee-facing; WeKnora and
+Hermes are not directly employee-exposed. A different exposure pattern is an
+explicit deployment/security decision, not a value to infer from the ARMOR
+reference instance.
 
 For Core, the private overlay also resolves the non-secret bootstrap identity
 and stable symbolic secret refs under `core_provisioning`. The current
