@@ -46,7 +46,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Next business capability | ▶ Governed AI Email Marketing |
 | Blueprint Validation | ⏳ Governance lifecycle not opened; not a blocker for the deployed ARMOR baseline |
 | Release Ready | ⏳ Governance lifecycle not opened; not a blocker for normal ARMOR use |
-| Public real-deployment gate | ⛔ Inactive by default; sanitized ARMOR reference deployment exists |
+| ARMOR real deployment | ✅ Active / deployed / in use; runtime details remain private and only sanitized status is published |
 
 > **Operational status:** the ARMOR reference EAO baseline is already deployed on the designated Mac Studio and is in normal employee use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. The ARMOR deployment currently targets `CONFIGURED READY`, which is already PASS. The Mac Studio internal disk is the current EAO runtime and primary data storage. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
 >
@@ -89,7 +89,7 @@ See [Repository governance](docs/REPOSITORY-GOVERNANCE.md) for the full contract
 
 ![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
 
-The SVG is a v2 system-design view focused on the separation between the Core General path and governed Communication/Email. The Communication/Email lane is a **conditional capability**, not part of mandatory Core, and is instantiated only when the active company configuration enables it. The diagram is **not an exhaustive snapshot of every capability currently enabled in the ARMOR reference deployment**. The public/default deployment gate remains inactive while the separately authorized ARMOR reference deployment is active and reported only through sanitized evidence.
+The SVG is a v2 system-design view focused on the separation between the Core General path and governed Communication/Email. The Communication/Email lane is a **conditional capability**, not part of mandatory Core, and is instantiated only when the active company configuration enables it. The diagram is **not an exhaustive snapshot of every capability currently enabled in the ARMOR reference deployment**. The ARMOR real deployment is already active and in use behind a private access boundary. Public repository content intentionally exposes only sanitized deployment evidence. The repository's default `real_deployment_task.active: false` is only a fresh-clone/new-target authorization safety default; it does not describe the ARMOR deployment status.
 
 The validated Core employee path is intentionally independent from the governed v2 communication path:
 
@@ -338,10 +338,10 @@ current_phase: installation_design
 installation_design.status: complete
 installation_design.transition_ready: true
 blueprint_validation.status: not_opened
-real_deployment_task.active: false
+real_deployment_task.active: false  # fresh-clone/new-target authorization default only
 ```
 
-Completion does **not** automatically change lifecycle phase or authorize a real deployment.
+Completion does **not** automatically change lifecycle phase or authorize a new real deployment target. The existing ARMOR reference deployment is already separately authorized, active, and in use; its protected runtime details are intentionally not public.
 
 ## What is planned next
 

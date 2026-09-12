@@ -7,15 +7,15 @@ Last updated: 2026-09-12
 ## Deployment authorization
 
 ```text
-Reference real deployment: ACTIVE (separately authorized)
+Reference real deployment: ACTIVE / DEPLOYED / IN USE (separately authorized; runtime details private)
 Target: designated company Mac Studio (publicly sanitized)
 Requested readiness: configured-ready
-Public blueprint real_deployment_task default: inactive
+Fresh-clone/new-target deployment authorization default: inactive
 Blueprint lifecycle: installation_design (unchanged)
 Blueprint Validation: not opened
 ```
 
-The real deployment is an independently authorized consumer activity. This file records its sanitized progress, but it does **not** mutate the public blueprint activation gate in `state/PROJECT-PHASE.yaml`; that public/default gate intentionally remains inactive so a fresh clone never implies that a real company deployment is authorized. The real deployment authorization also does **not** advance the repository blueprint lifecycle.
+The ARMOR real deployment is already independently authorized, deployed, active, and in use. This file exposes only a sanitized public summary; protected runtime details remain outside Git. The `real_deployment_task.active: false` value in `state/PROJECT-PHASE.yaml` is only the default authorization state for a fresh clone or a new target, so cloning the repository never implies permission to perform another real deployment. It is **not** the ARMOR deployment status. The existing ARMOR deployment authorization also does **not** advance the repository blueprint lifecycle.
 
 ## 2026-09-12 operational baseline conclusion
 

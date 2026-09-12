@@ -150,6 +150,11 @@ continuation_language:
 
 # A real deployment is a separate consumer activity, not the automatic next
 # phase of repository development.
+#
+# IMPORTANT: this gate is the DEFAULT authorization state for a fresh clone or
+# a new deployment target. It intentionally remains false even though the ARMOR
+# reference implementation below is already separately authorized, deployed,
+# active, and in use. Never interpret this field as the ARMOR runtime status.
 real_deployment_task:
   active: false
   activation_requires_explicit_human_request: true
@@ -177,11 +182,13 @@ reference_implementation:
   exists: true
   independently_authorized: true
   sanitized_public_status: state/REAL-DEPLOYMENT-STATUS.md
-  current_public_status_as_of: 2026-09-11
+  current_public_status_as_of: 2026-09-12
   note: >-
-    This records that a real reference implementation exists. It does not activate
-    real_deployment_task for a fresh clone, authorize another deployment, or advance
-    the blueprint lifecycle. Deployment authorization is always target-specific.
+    The ARMOR reference implementation is already separately authorized, deployed,
+    active, and in use. Its protected runtime details remain private and only a
+    sanitized public status is published. This does not activate real_deployment_task
+    for a fresh clone, authorize another deployment target, or advance the blueprint
+    lifecycle. Deployment authorization is always target-specific.
 
 public_repository_data_policy:
   real_credentials: prohibited

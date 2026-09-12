@@ -46,7 +46,7 @@
 | 下一项业务能力 | ▶ 受治理的 AI 邮件营销 |
 | Blueprint Validation | ⏳ 仓库治理生命周期尚未开启；不阻塞当前 ARMOR 已部署基线 |
 | Release Ready | ⏳ 仓库治理生命周期尚未开启；不阻塞 ARMOR 正常使用 |
-| Public Real Deployment Gate | ⛔ 默认未激活；已有 ARMOR 脱敏真实参考部署 |
+| ARMOR 真实部署 | ✅ 已激活 / 已部署 / 已投入使用；运行细节保持私有，仅公开脱敏状态 |
 
 > **实际运行状态：** ARMOR 的 EAO 基线已经部署在指定 Mac Studio，并已进入正常员工使用状态。员工可以登录 Open WebUI，并通过已批准的 General / Operations AI 路径开展办公。ARMOR 当前目标正式收敛为已经 PASS 的 `CONFIGURED READY`。Mac Studio 内置硬盘当前作为 EAO 的运行与主数据存储盘。Backup / Restore 是独立的可选能力，目前不启用；以后只有在业务需要和存储条件合适时再显式开启。
 >
@@ -89,7 +89,7 @@ merge
 
 ![Enterprise AI Office v2 中文架构图](./enterprise-ai-office-architecture.zh-CN.svg)
 
-这张 SVG 是 v2 系统设计视图，重点表达 Core General 路径与受治理 Communication/Email 路径的隔离关系。Communication/Email 是**条件能力**，不是强制 Core，只有在当前公司配置显式启用时才实例化；它**不是 ARMOR 当前参考部署全部能力的完整快照**。默认/公开 deployment gate 仍未开启，但独立授权的 ARMOR 参考部署已经激活，并且只通过脱敏证据公开状态。
+这张 SVG 是 v2 系统设计视图，重点表达 Core General 路径与受治理 Communication/Email 路径的隔离关系。Communication/Email 是**条件能力**，不是强制 Core，只有在当前公司配置显式启用时才实例化；它**不是 ARMOR 当前参考部署全部能力的完整快照**。ARMOR 的真实部署已经激活并投入使用，运行在私有访问边界内。公开仓库只发布脱敏后的部署证据。仓库中的默认 `real_deployment_task.active: false` 仅表示“Fresh Clone / 新目标默认不自动获得真实部署授权”，并不代表 ARMOR 真实部署未激活。
 
 已经验证的 Core General 路径与新增的 v2 Communication 路径刻意相互隔离：
 
@@ -336,8 +336,10 @@ current_phase: installation_design
 installation_design.status: complete
 installation_design.transition_ready: true
 blueprint_validation.status: not_opened
-real_deployment_task.active: false
+real_deployment_task.active: false  # 仅表示 Fresh Clone / 新目标默认不自动授权真实部署
 ```
+
+这里的 `active: false` 只描述仓库默认的新部署授权 Gate。ARMOR 参考部署已经单独获得授权、完成部署并正在使用；其受保护的运行细节不会公开到仓库。
 
 ## 接下来要实现什么
 
