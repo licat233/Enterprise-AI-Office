@@ -49,6 +49,25 @@ A fresh agent MUST read these files before changing architecture or deploying:
 
 Historical migration and design documents are evidence, not the first installation instructions. Prefer the current normative files above.
 
+## 2.1 Pin the repository revision
+
+The EAO repository itself is part of the deployment contract.
+
+Before runtime mutation:
+
+```sh
+git rev-parse HEAD
+git status --porcelain --untracked-files=no
+```
+
+Require a commit-addressable revision and a clean tracked worktree. Record that
+exact EAO commit in the protected operational deployment state.
+
+Do not let a moving `main` branch silently change the blueprint midway through
+the same reproduction. An explicitly authorized repository revision change is a
+rebaseline and requires recording the new commit plus rerunning affected
+acceptance.
+
 ## 3. Frozen responsibility map
 
 | Responsibility | EAO authority / component |

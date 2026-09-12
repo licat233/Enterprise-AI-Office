@@ -180,6 +180,21 @@ def main() -> int:
         "Manifest delegates Core version truth",
     )
     require_text(
+        "config/eao-manifest.yaml",
+        "blueprint_revision_policy:",
+        "Fresh Agent sees EAO blueprint revision policy",
+    )
+    require_text(
+        "REPRODUCE.md",
+        "## 2.1 Pin the repository revision",
+        "Fresh Agent pins the EAO repository revision",
+    )
+    require_text(
+        "state/DEPLOYMENT-STATE.template.md",
+        "EAO blueprint commit:",
+        "Fresh Agent records EAO blueprint commit in protected state",
+    )
+    require_text(
         "config/company.example.yaml",
         "core_provisioning:",
         "Fresh Agent sees Core protected-input symbolic refs",

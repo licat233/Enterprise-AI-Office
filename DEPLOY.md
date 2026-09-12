@@ -12,6 +12,30 @@ The agent may stop for genuine human input such as missing credentials, an OS pe
 
 The agent must not stop merely to ask whether to perform a phase that is already required by this Golden Path.
 
+### 1.1 Pin the EAO blueprint revision
+
+Before changing runtime state, resolve the exact EAO repository revision that
+will govern this deployment:
+
+```sh
+EAO_BLUEPRINT_COMMIT="$(git rev-parse HEAD)"
+test -n "$EAO_BLUEPRINT_COMMIT"
+test -z "$(git status --porcelain --untracked-files=no)"
+printf '%s\n' "$EAO_BLUEPRINT_COMMIT"
+```
+
+Record the 40-character commit SHA in the protected operational state created
+from `state/DEPLOYMENT-STATE.template.md`.
+
+If tracked repository files are modified, stop and either commit/review the
+intended blueprint change first or restore the checkout. A dirty tracked tree is
+not a reproducible deployment contract.
+
+Do not run an implicit `git pull`, switch branches, or otherwise change the
+EAO blueprint revision during the same deployment/validation run. If an explicit
+human-authorized revision change is required, treat it as a rebaseline: record
+the new commit and restart the affected acceptance sequence.
+
 ## 2. Readiness levels
 
 The adopting company's configuration declares one target:

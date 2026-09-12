@@ -8,6 +8,10 @@ Requested readiness: `<core-ready | configured-ready | production-ready>`
 Achieved readiness: `<CORE READY | CONFIGURED READY | PRODUCTION READY | BLOCKED | FAIL>`
 Operational state path: `<protected path; recommended ${EAIO_RUNTIME_DIR}/state/deployment-state.md>`
 Backup state source: `<default path or EAIO_DEPLOYMENT_STATE_FILE override>`
+EAO repository origin: `<repository URL / approved local mirror>`
+EAO blueprint commit: `<40-character git commit SHA>`
+EAO tracked working tree at start: `clean`
+EAO revision changes during this deployment: `none | <explicitly authorized restart/rebaseline>`
 
 ## Host
 
