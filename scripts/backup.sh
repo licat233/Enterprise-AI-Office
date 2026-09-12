@@ -64,19 +64,36 @@ discover_container() {
   local explicit="$1"
   local service="$2"
   local fallback_regex="$3"
-  local found
+  local explicit_var="$4"
+  local candidates
+  local count
+
   if [ -n "$explicit" ]; then
     printf '%s' "$explicit"
     return
   fi
-  found="$(docker ps --filter "label=com.docker.compose.service=$service" \
-    --format '{{.Names}}' | sed -n '1p')"
-  if [ -n "$found" ]; then
-    printf '%s' "$found"
+
+  candidates="$(docker ps --filter "label=com.docker.compose.service=$service" \
+    --format '{{.Names}}' | awk 'NF')"
+  count="$(printf '%s\n' "$candidates" | awk 'NF {n++} END {print n+0}')"
+  if [ "$count" -eq 1 ]; then
+    printf '%s' "$candidates"
     return
   fi
-  docker ps --format '{{.Names}}' | awk -v pattern="$fallback_regex" \
-    '$0 ~ pattern {print; exit}'
+  if [ "$count" -gt 1 ]; then
+    fail "container discovery" "multiple running containers match compose service '$service'; set $explicit_var explicitly"
+  fi
+
+  candidates="$(docker ps --format '{{.Names}}' | awk -v pattern="$fallback_regex" \
+    '$0 ~ pattern {print}')"
+  count="$(printf '%s\n' "$candidates" | awk 'NF {n++} END {print n+0}')"
+  if [ "$count" -eq 1 ]; then
+    printf '%s' "$candidates"
+    return
+  fi
+  if [ "$count" -gt 1 ]; then
+    fail "container discovery" "multiple running containers match fallback '$fallback_regex'; set $explicit_var explicitly"
+  fi
 }
 
 CONFIG_RUNTIME_ROOT="$(company_yaml_runtime_root "$COMPANY_CONFIG")"
@@ -234,9 +251,9 @@ require_directory "$HERMES_HOME"
 require_file "$WEKNORA_ENV_FILE"
 require_file "$OPENWEBUI_COMPOSE_FILE"
 
-POSTGRES_CONTAINER="$(discover_container "$POSTGRES_CONTAINER" postgres 'postgres')"
-WEKNORA_APP_CONTAINER="$(discover_container "$WEKNORA_APP_CONTAINER" app 'weknora.*app')"
-OPENWEBUI_CONTAINER="$(discover_container "$OPENWEBUI_CONTAINER" open-webui 'open-webui')"
+POSTGRES_CONTAINER="$(discover_container "$POSTGRES_CONTAINER" postgres 'postgres' WEKNORA_POSTGRES_CONTAINER)"
+WEKNORA_APP_CONTAINER="$(discover_container "$WEKNORA_APP_CONTAINER" app 'weknora.*app' WEKNORA_APP_CONTAINER)"
+OPENWEBUI_CONTAINER="$(discover_container "$OPENWEBUI_CONTAINER" open-webui 'open-webui' OPENWEBUI_CONTAINER)"
 [ -n "$POSTGRES_CONTAINER" ] || fail "container discovery" "PostgreSQL container not found"
 [ -n "$WEKNORA_APP_CONTAINER" ] || fail "container discovery" "WeKnora app container not found"
 [ -n "$OPENWEBUI_CONTAINER" ] || fail "container discovery" "Open WebUI container not found"
