@@ -180,10 +180,12 @@ backend/open_webui/routers/models.py
 ```
 
 At that pinned commit, `backend/open_webui/routers/openai.py`
-`get_all_models()` merges enabled connection catalogs by effective model ID.
-It retains the first occurrence and stores that connection's `urlIdx`; request
-routing later uses that `urlIdx`. This makes duplicate effective upstream
-model IDs an identity ambiguity, not a harmless display duplicate.
+`get_all_models_responses()` uses non-empty per-connection `model_ids`
+directly and otherwise queries the upstream model catalog; `get_all_models()`
+then merges those effective connection catalogs by model ID. It retains the
+first occurrence and stores that connection's `urlIdx`; request routing later
+uses that `urlIdx`. This makes duplicate effective upstream model IDs an
+identity ambiguity, not a harmless display duplicate.
 
 At that commit, `main.py` mounts the relevant routers at:
 
@@ -378,8 +380,8 @@ Therefore connection-URL uniqueness alone is not enough. Before creating or
 updating the EAO Model ACL record, prove that each intended Hermes advertised
 model ID resolves to exactly the intended Hermes connection.
 
-Use the pinned admin surfaces to inspect the current connection config and each
-enabled connection's model catalog, for example:
+Use the pinned admin surfaces to inspect the current connection config and, when
+needed, each enabled connection's upstream model catalog, for example:
 
 ```http
 GET /openai/config
@@ -389,11 +391,29 @@ GET /openai/models/<URL_IDX>
 Authorization: Bearer <ADMIN_TOKEN>
 ```
 
-Apply the connection's existing `prefix_id` semantics when determining its
-effective Open WebUI model IDs. For the EAO Hermes Profile connection itself,
-the expected effective ID remains the exact advertised Hermes model ID
-(`general` for the baseline); do not silently add a prefix and rename the
-employee Assistant as a collision workaround.
+Derive each connection's **effective model set using the same v0.11.3 rule**:
+
+```text
+OPENAI_API_CONFIGS[<idx>].model_ids is non-empty
+→ use that configured model_ids list as the connection's effective source list
+
+model_ids is empty/absent
+→ use the model IDs returned by that connection's upstream /models catalog
+
+then
+→ apply the connection's existing prefix_id to each source ID
+→ compare the resulting effective IDs across all enabled connections
+```
+
+Do not substitute the live upstream catalog for a non-empty configured
+`model_ids` list: pinned Open WebUI deliberately skips upstream enumeration for
+that connection in the merged-model path and synthesizes models from the manual
+list.
+
+For the EAO Hermes Profile connection itself, the expected effective ID remains
+the exact advertised Hermes model ID (`general` for the baseline); do not
+silently add a prefix and rename the employee Assistant as a collision
+workaround.
 
 Require:
 
