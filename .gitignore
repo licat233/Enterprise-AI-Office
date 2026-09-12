@@ -49,7 +49,10 @@ __pycache__/
 # Node
 node_modules/
 
-# Local deployment-state overrides
+# Local/protected deployment-state overrides
+# The lowercase file is the default protected operational state artifact when
+# an operator accidentally places the runtime state under the repository tree.
+state/deployment-state.md
 state/DEPLOYMENT-STATE.local.md
 state/*.private.md
 
