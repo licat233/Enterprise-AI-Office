@@ -133,6 +133,17 @@ commit/runtime before configuration.
 
 For the current baseline:
 
+Before using any `RUNTIME_ROOT` command below, bind the shell convenience
+variable to the active company desired state:
+
+```text
+RUNTIME_ROOT = deployment.runtime_root
+```
+
+Do not choose a different filesystem root merely because the reference host used
+one. The existing fail-closed shell assertions intentionally stop when
+`RUNTIME_ROOT` has not been resolved.
+
 #### WeKnora
 
 ```sh
@@ -178,7 +189,20 @@ curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES
   | bash -s -- --commit "${HERMES_COMMIT}" --skip-setup
 ```
 
-After installation, verify the installed checkout resolves to
+After installation, resolve the actual source checkout using the pinned
+installer's own path rules:
+
+```text
+1. explicit --dir / HERMES_INSTALL_DIR, when supplied;
+2. otherwise non-root macOS/user install:
+   ${HERMES_HOME:-$HOME/.hermes}/hermes-agent
+3. otherwise root Linux new install:
+   /usr/local/lib/hermes-agent
+```
+
+These rules are recorded machine-readably in `config/validated-stack.yaml` and
+were verified against `scripts/install.sh` at the validated Hermes commit.
+Set `HERMES_SOURCE_DIR` to the resolved path, verify its checkout resolves to
 `HERMES_COMMIT`, then apply the repository-managed default/general Profile
 configuration. Do not run `hermes update` during the same reproduction task.
 
@@ -224,8 +248,9 @@ test "$(docker inspect -f '{{.Config.Image}}' WeKnora-app)" = "wechatopenai/wekn
 
 #### Hermes Agent
 
-Resolve the actual installed source checkout; do not assume a path when the
-installer used an explicit directory or an FHS/root layout.
+Resolve `HERMES_SOURCE_DIR` using the installer path rules in §4.1; do not
+guess a path or assume the non-root layout when an explicit directory or
+root/FHS layout applies.
 
 ```sh
 : "${HERMES_SOURCE_DIR:?set HERMES_SOURCE_DIR to the actual Hermes source checkout}"
