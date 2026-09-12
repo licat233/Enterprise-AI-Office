@@ -18,6 +18,24 @@ deployment:
   environment: staging
   runtime_root: /Users/Shared/enterprise-ai-office
 
+# Core network routes are private, non-secret deployment desired state.
+# These synthetic values demonstrate shape only.
+core_network:
+  weknora:
+    api_base_url_for_hermes: http://127.0.0.1:18080/api/v1
+    employee_exposed_directly: false
+
+  hermes:
+    shared_listener:
+      bind_host: 0.0.0.0
+      port: 8642
+    open_webui_backend_base_url: http://host.docker.internal:8642
+    employee_exposed_directly: false
+
+  open_webui:
+    employee_url: https://ai-office.example.invalid
+    access_layer: private-network
+
 # Core bootstrap identity is private company configuration, not a secret.
 # Secret values are resolved by the symbolic refs below.
 core_provisioning:
@@ -182,6 +200,7 @@ secret_refs:
     consumer: open-webui-tool-connection+eao-email-governance
     native_binding: EAIO_TRUSTED_FORWARDER_TOKEN
 
-# A real private overlay may also select non-secret model IDs, private network
-# routes, real employee/group identifiers, backup destinations, and similar
-# deployment desired state. Keep actual passwords/tokens/keys outside this file.
+# A real private overlay may also select non-secret model IDs, real
+# employee/group identifiers, backup destinations, and similar deployment
+# desired state. Core network routes should use the structured `core_network`
+# block above rather than ad-hoc fields. Keep actual passwords/tokens/keys outside this file.

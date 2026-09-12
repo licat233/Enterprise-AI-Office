@@ -46,6 +46,11 @@ profiles[]
 mcp_control_plane.profile_allowlists
 models.hermes.provider
 models.hermes.default_model
+core_network.hermes.shared_listener.bind_host
+core_network.hermes.shared_listener.port
+core_network.hermes.open_webui_backend_base_url
+core_network.hermes.employee_exposed_directly
+core_network.weknora.api_base_url_for_hermes
 core_provisioning.hermes.default_api_key_ref
 core_provisioning.hermes.profile_api_key_refs
 ```
@@ -65,15 +70,21 @@ From protected deployment input:
 ```text
 secret value referenced by core_provisioning.hermes.default_api_key_ref
 secret value referenced by core_provisioning.hermes.profile_api_key_refs.general
-trusted shared API bind address and port
 selected Hermes model-provider credential(s)
 general WeKnora retrieve-only API key
-general WeKnora API base URL
 absolute path to the selected WeKnora MCP server runtime
 ```
 
 Do not place secret values in company YAML, repository templates, deployment
 state, shell history, or logs.
+
+The shared bind address/port, Open WebUI-backend route to Hermes, and WeKnora
+API base URL are non-secret desired state from `core_network`. Do not silently
+fall back to `8642`, `0.0.0.0`, `host.docker.internal`, or a reference
+WeKnora URL when those fields are unresolved.
+
+The reusable baseline keeps `core_network.hermes.employee_exposed_directly:
+false`; Open WebUI is the employee surface.
 
 If any required protected input is unresolved, stop with:
 

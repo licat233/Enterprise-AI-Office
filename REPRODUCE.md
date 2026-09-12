@@ -156,6 +156,19 @@ Use `config/.env.example`, `config/company.example.yaml`, and `config/company.pr
 5. Resolve public company configuration and required private inputs.
 6. Run repository readiness checks before installation.
 
+Resolve the Core network desired state before provisioning:
+
+```text
+core_network.weknora.api_base_url_for_hermes
+core_network.hermes.shared_listener.bind_host
+core_network.hermes.shared_listener.port
+core_network.hermes.open_webui_backend_base_url
+core_network.open_webui.employee_url
+core_network.open_webui.access_layer
+```
+
+Do not substitute ARMOR reference addresses when these values are unresolved.
+
 ### Stage B — WeKnora
 
 1. Install the validated upstream WeKnora baseline through `DEPLOY.md §4.1` and prove runtime identity through §4.2.

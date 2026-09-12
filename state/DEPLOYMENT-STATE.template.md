@@ -25,6 +25,21 @@ EAO revision changes during this deployment: `none | <explicitly authorized rest
 | Container runtime/version | `<...>` |
 | Runtime root | `<...>` |
 
+## Core network
+
+Record the resolved non-secret network desired state and the observed runtime
+truth. Do not copy private addresses into public status documents.
+
+| Boundary | Desired state | Observed runtime | Acceptance |
+| --- | --- | --- | --- |
+| WeKnora API for Hermes/MCP | `<core_network.weknora.api_base_url_for_hermes>` | `<...>` | `<PASS/FAIL>` |
+| WeKnora direct employee exposure | `false or explicitly authorized value` | `<...>` | `<PASS/FAIL>` |
+| Hermes shared listener bind | `<host:port>` | `<...>` | `<PASS/FAIL>` |
+| Hermes URL used by Open WebUI backend | `<core_network.hermes.open_webui_backend_base_url>` | `<...>` | `<PASS/FAIL>` |
+| Hermes direct employee exposure | `false or explicitly authorized value` | `<...>` | `<PASS/FAIL>` |
+| Open WebUI employee URL | `<core_network.open_webui.employee_url>` | `<...>` | `<PASS/FAIL>` |
+| Open WebUI access layer | `<lan-only/private-network/approved ingress>` | `<...>` | `<PASS/FAIL>` |
+
 ## Core components
 
 | Component | Version / commit | Deployment | Health |
