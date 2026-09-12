@@ -38,13 +38,44 @@ require_file() {
   fi
 }
 
+contains_text() {
+  rel="$1"
+  text="$2"
+
+  case "$rel" in
+    *.md)
+      # Markdown prose can be reflowed without changing meaning. Collapse
+      # whitespace before matching so harmless wrapping does not break CI.
+      EAO_READINESS_NEEDLE="$text" awk '
+        BEGIN {
+          needle = ENVIRON["EAO_READINESS_NEEDLE"]
+          gsub(/[[:space:]]+/, " ", needle)
+        }
+        {
+          if (content != "") {
+            content = content " "
+          }
+          content = content $0
+        }
+        END {
+          gsub(/[[:space:]]+/, " ", content)
+          exit(index(content, needle) > 0 ? 0 : 1)
+        }
+      ' "$ROOT/$rel"
+      ;;
+    *)
+      grep -F "$text" "$ROOT/$rel" >/dev/null 2>&1
+      ;;
+  esac
+}
+
 require_text() {
   rel="$1"
   text="$2"
   label="$3"
   if [ ! -f "$ROOT/$rel" ]; then
     fail "$label" "$rel missing"
-  elif grep -F "$text" "$ROOT/$rel" >/dev/null 2>&1; then
+  elif contains_text "$rel" "$text"; then
     pass "$label"
   else
     fail "$label" "expected reference not found in $rel"
@@ -57,7 +88,7 @@ require_no_text() {
   label="$3"
   if [ ! -f "$ROOT/$rel" ]; then
     fail "$label" "$rel missing"
-  elif grep -F "$text" "$ROOT/$rel" >/dev/null 2>&1; then
+  elif contains_text "$rel" "$text"; then
     fail "$label" "forbidden reference found in $rel"
   else
     pass "$label"
