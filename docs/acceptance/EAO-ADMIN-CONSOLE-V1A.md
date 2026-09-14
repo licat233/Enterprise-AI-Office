@@ -73,6 +73,7 @@ the repository contract.
     [ ] Tool is classified Local Utility/Agent Tool or MCP/External Backend/Development Tool
     [ ] no automatic Tool-to-MCP conversion occurs
     [ ] MCP operations are narrow and Profile-bound when justified
+    [ ] v1A MCP/backend review is review-only; no registration/exposure/install mutation binding is implied
     [ ] positive and negative Profile access tests pass
 
 ## Repository workflow
@@ -100,6 +101,7 @@ and human review before it can enter the v1A runtime operation set.
     [ ] exact operation fields are shown before approval
     [ ] approval TTL is bounded (default and maximum 30 minutes)
     [ ] canonical plan is bound to a protected server-side HMAC signature
+    [ ] protected signing-key reference is resolved server-side and the key value is absent from model/browser-visible payloads
     [ ] missing, invalid, or wrong-key signature is denied
     [ ] expired approval is denied
     [ ] changed plan/current state/target is denied

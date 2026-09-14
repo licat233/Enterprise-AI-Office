@@ -188,6 +188,7 @@ capabilities:
     assistant_id: maintainer
     assistant_display_name: EAO Admin
     operation_approval_ttl_minutes: 30
+    approval_signing_key_ref: null
     repository:
       owner: <EAO_REPOSITORY_OWNER>
       name: <EAO_REPOSITORY_NAME>

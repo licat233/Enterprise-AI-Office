@@ -620,8 +620,6 @@ capabilities:
       - maintainer Profile and EAO Admin Assistant identifiers
       - configured WeKnora target Knowledge Base
       - bounded WeKnora contributor path using the pinned official API
-      - typed repository capability (currently unresolved; required before runtime enablement)
-      - typed MCP/control-plane review capability
       - protected Open WebUI server-side approval binding
       - bounded approval TTL, default 30 minutes
     runtime_capability_resolution:
@@ -659,10 +657,16 @@ capabilities:
         status: blocked
         blocker: "BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED"
         runtime_operations: []
+      mcp_control_plane_review:
+        status: review_only
+        authority: config/mcp-registry.yaml
+        runtime_mutation_binding_required: false
+        runtime_operations: []
     required_secret_classes:
       - maintainer-profile-credential
       - open-webui-admin-credential
       - weknora-contributor-credential
+      - operation-envelope-signing-key
     protected_input_contract:
       document: docs/EAO-ADMIN-CONSOLE-V1A.md
       provisioning: infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md

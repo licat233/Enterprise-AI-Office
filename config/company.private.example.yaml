@@ -140,6 +140,7 @@ capabilities:
     administrator_group_id: eao-administrators
     assistant_id: maintainer
     operation_approval_ttl_minutes: 30
+    approval_signing_key_ref: eao-admin-operation-signing-key
     repository:
       owner: <EAO_REPOSITORY_OWNER>
       name: <EAO_REPOSITORY_NAME>

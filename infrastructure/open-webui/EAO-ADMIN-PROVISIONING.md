@@ -20,8 +20,9 @@ Required protected inputs:
     EAO Administrators logical/runtime group identity
     Hermes maintainer Profile API URL and unique API key
     configured WeKnora target Knowledge Base
-    typed MCP/control-plane bindings
+    MCP/control-plane registry authority for review-only inspection
     repository typed path status: BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
+    protected operation-envelope HMAC signing-key reference
     operation-envelope approval TTL (default and maximum 30 minutes)
 
 Never print, store, or commit the API key, bootstrap password, bearer token, or
@@ -120,6 +121,10 @@ Resolved typed operations:
     review_tool_with_toolscout
     review_mcp_backend
     ingest_approved_knowledge_source
+
+The MCP/backend review operation is review-only. It may inspect the current MCP
+control-plane authority but has no registration, exposure, install, or mutation
+operation in v1A and therefore does not require a mutation-capable MCP binding.
 
 Repository operations are not in the v1A runtime set:
 
