@@ -93,6 +93,7 @@ These record accepted capability boundaries and evidence.
 | `OPEN-WEBUI-BRANDING.md` | Open WebUI branding implementation notes and boundary |
 | `THIRD-PARTY-SKILL-ADMISSION-PILOT.md` | Non-normative evidence from the first real DIRECT / ADAPT / DELEGATE / REJECT admission pilot |
 | `THIRD-PARTY-SKILL-ADAPT-RUNTIME-ACCEPTANCE.md` | Runtime evidence for the plugin-eval ADAPT compatibility pilot |
+| `THIRD-PARTY-SKILL-PRODUCTION-ACCEPTANCE.md` | Production admission and Operations-only runtime evidence for `competitive-intel` |
 
 Use these when reproducing or changing the corresponding capability.
 
