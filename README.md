@@ -92,47 +92,79 @@ See [Repository governance](docs/REPOSITORY-GOVERNANCE.md) for the full contract
 
 ## Architecture overview
 
-![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
+The current Enterprise AI Office architecture is centered on four stable boundaries: a private employee access surface, Hermes Profile-based work execution, a dual knowledge layer, and capability-specific governed integrations. ARMOR-specific capabilities are layered on top of the reusable Core rather than redefining it.
 
-The SVG is a v2 system-design view focused on the separation between the Core General path and governed Communication/Email. The Communication/Email lane is a **conditional capability**, not part of mandatory Core, and is instantiated only when the active company configuration enables it. The diagram is **not an exhaustive snapshot of every capability currently enabled in the ARMOR reference deployment**. The ARMOR real deployment is already active and in use behind a private access boundary. Public repository content intentionally exposes only sanitized deployment evidence. The repository's default `real_deployment_task.active: false` is only a fresh-clone/new-target authorization safety default; it does not describe the ARMOR deployment status.
+```mermaid
+flowchart TB
+  Employee["Authorized employee"]
+  Access["Private access<br/>Office LAN / Tailscale"]
+  WebUI["Open WebUI<br/>Identity · RBAC · Chat · History"]
 
-The validated Core employee path is intentionally independent from the governed v2 communication path:
+  Employee --> Access --> WebUI
 
+  subgraph Hermes["Hermes Agent — work runtime"]
+    General["General Profile<br/>Core"]
+    Operations["Operations Profile<br/>ARMOR reference"]
+    Communication["Communication Profile<br/>Conditional"]
+  end
 
-```text
-Employee
-  ↓
-Open WebUI
-  ├─ General Assistant
-  │    ↓
-  │  Hermes `general`
-  │    ↓
-  │  WeKnora
-  │
-  └─ Communication Assistant
-       ├─ Hermes `communication` Profile for reasoning
-       └─ Open WebUI server-side governed Email actions/tools
-            ↓
-          eao-email-governance
-            ├─ Governance SQLite
-            └─ Email Provider
+  WebUI --> General
+  WebUI --> Operations
+  WebUI -. if enabled .-> Communication
+
+  subgraph Knowledge["Knowledge and business memory"]
+    WeKnora["WeKnora RAG<br/>Approved factual / reference knowledge"]
+    Vault["ARMOR Vault Wiki<br/>Markdown working memory / business assets"]
+  end
+
+  General -->|retrieve| WeKnora
+  Operations -->|operations-weknora · retrieve-only| WeKnora
+  Operations -->|Scoped Vault Router| Vault
+  Vault -. explicit promotion only .-> WeKnora
+
+  subgraph LocalAI["Local AI model serving — ARMOR reference"]
+    Ollama["Ollama"]
+    VLM["qwen2.5vl:3b<br/>Vision parsing"]
+    ASR["Whisper<br/>Audio parsing"]
+    Embed["bge-m3<br/>Embedding / semantic retrieval"]
+    Ollama --> VLM
+    Ollama --> ASR
+    Ollama --> Embed
+  end
+
+  WeKnora -->|local parsing / embedding roles| Ollama
+
+  Operations --> Tools["Approved Skills and bounded tools<br/>Web Research · ToolScout · Media Transcription"]
+
+  Communication --> EmailActions["Governed Email actions<br/>Draft / review boundary"]
+  WebUI -->|human approval| EmailActions
+  EmailActions --> Governance["eao-email-governance<br/>Approval evidence · audit · reconciliation"]
+  Governance --> Provider["Email Provider"]
 ```
 
-A v2 Email failure must not break:
+The diagram above is the **current system view**, not a statement that every depicted lane is mandatory for every deployment.
 
-```text
-Open WebUI → General Assistant → Hermes general → WeKnora
-```
-
-Current employee-lane interpretation:
-
-| Lane | Status | Meaning |
+| Layer / lane | Current status | Architectural meaning |
 | --- | --- | --- |
-| **General** | Core / validated | Reusable baseline: Open WebUI → Hermes `general` → WeKnora |
-| **Operations** | ARMOR reference / frozen | Deployed least-privilege department capability using approved Skills, `operations-weknora`, Web Research, ToolScout, and scoped Vault Router boundaries |
-| **Communication** | v2 governed capability assets | Governed Email design/runtime assets exist in the repository; this does not imply a real company mailbox is already connected or autonomous send is enabled |
+| **Open WebUI** | Core / deployed | Employee identity, RBAC, chat UX, history, and approved Assistant access |
+| **Hermes General** | Core / validated | Default employee work runtime and reasoning path |
+| **Hermes Operations** | ARMOR reference / deployed / frozen | Shared least-privilege department Profile with approved Skills, bounded tools, WeKnora retrieval, and scoped Vault access |
+| **WeKnora RAG** | Core knowledge layer / active | Approved enterprise factual/reference ingestion, retrieval, grounding, and source evidence |
+| **ARMOR Vault Wiki** | ARMOR knowledge layer / active | Durable Markdown working memory, work products, research, publication records, workflow standards, and business assets |
+| **Ollama local AI serving** | ARMOR reference / active | Task-specific WeKnora vision, audio, and embedding models; **not** the Hermes reasoning model |
+| **Communication / Governed Email** | Conditional capability assets | Activated only when explicitly configured; external send remains behind human approval and governance |
+| **Repository + protected company configuration** | Control / desired-state layer | Defines the reusable blueprint, enabled capabilities, deployment contracts, and private runtime inputs |
 
-For the current sanitized ARMOR runtime, see [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md). For reusable capability enablement, use [`config/capabilities.yaml`](config/capabilities.yaml) rather than copying the ARMOR lane set.
+Key invariants:
+
+- the reusable Core remains `Open WebUI → Hermes general → WeKnora`;
+- WeKnora and ARMOR Vault are complementary authorities by object/source type, not duplicate knowledge stores;
+- ordinary Vault work products do **not** automatically flow into WeKnora; promotion requires an explicit knowledge-governance decision;
+- Ollama provides task-specific local inference for WeKnora in the ARMOR reference deployment and does **not** imply that Hermes reasoning runs on a local LLM;
+- Operations receives only approved Skills/tools and scoped knowledge interfaces; generic shell, browser, filesystem, code execution, and generic SMTP are not employee capabilities;
+- conditional capabilities such as governed Email must fail independently without breaking the Core employee knowledge path.
+
+For the reusable architecture contract, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). For the current sanitized ARMOR runtime, see [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md). Capability enablement remains configuration-driven through [`config/capabilities.yaml`](config/capabilities.yaml).
 
 ### Dual knowledge architecture — RAG + Wiki
 
