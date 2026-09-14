@@ -126,6 +126,17 @@ Company-owned reusable Skills should be version-controlled outside runtime Profi
 
 External Skill directories are preferred for shared company Skills because they make ownership explicit and reduce accidental autonomous modification.
 
+Third-party Skills must pass [`SKILL-ADMISSION.md`](SKILL-ADMISSION.md) before production exposure.
+
+A Skill never grants authority by itself:
+
+```text
+Skill procedure
+≠ Profile permission
+```
+
+A portable Skill may be loaded only where its required tools are already approved for that Profile. A thin adapter may map compatible runtime assumptions but must not widen permissions. Backend-native Codex/Claude Code Skills may be used only through the existing authorized coding-agent delegation boundary; normal business Profiles must not gain privileged execution indirectly through delegation.
+
 ## 8. Tool policy examples
 
 Tool access must follow least privilege.
