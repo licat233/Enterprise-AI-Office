@@ -165,6 +165,8 @@ be accompanied by explicit changelog/upgrade evidence.
 | File upload | ✅ Accepted and source reference visible |
 | Unknown-company-fact behavior | ✅ Unavailable / no fabrication observed |
 | Local Embedding | ✅ `bge-m3` / 1024 dimensions |
+| WeKnora visual parsing | ✅ local Ollama → `qwen2.5vl:3b` |
+| WeKnora audio parsing | ✅ local Ollama → `karanchopda333/whisper:latest` |
 | Formal `Company Knowledge` | ✅ Created and bound to `bge-m3` |
 | `general` WeKnora credential | ✅ Retrieve-only / `full_access=false` |
 | Knowledge write-denial check | ✅ HTTP 403 |
@@ -201,30 +203,31 @@ Hermes
 → gpt-5.6-luna
 ```
 
-Knowledge retrieval / embedding:
+WeKnora local AI processing backend:
 
 ```text
 WeKnora v0.8.0
 → local Ollama
-→ bge-m3
-→ 1024 dimensions
+   ├─ Vision parsing  → qwen2.5vl:3b
+   ├─ Audio parsing   → karanchopda333/whisper:latest
+   └─ Embedding       → bge-m3 / 1024 dimensions
 ```
 
-The current Core deployment does **not** require a separate WeKnora Chat/KnowledgeQA model.
+The current Core deployment does **not** require a separate WeKnora Chat/KnowledgeQA model. Hermes reasoning remains a separate model-provider decision and is not served by these WeKnora task-specific models.
 
 Current WeKnora model-role posture:
 
 ```text
 Embedding        enabled: bge-m3 / 1024
-KnowledgeQA/Chat not required for Core or retrieval-only transcript compatibility
+Vision / VLM     enabled: qwen2.5vl:3b via local Ollama
+Audio / ASR      enabled: karanchopda333/whisper:latest via local Ollama
+KnowledgeQA/Chat not required for the Core retrieval path
 Rerank           disabled
-VLLM             disabled
-ASR              disabled in WeKnora Core
 ```
 
-DashScope and `qwen-plus` are not required for the selected Core or media-transcription retrieval path.
+DashScope and `qwen-plus` are not required for the selected Core retrieval path.
 
-Media transcription remains a separate host-native capability rather than a WeKnora ASR model role:
+The dedicated Media Transcription capability remains a separate host-native workflow. Enabling WeKnora audio parsing for knowledge ingestion does not replace that workflow:
 
 ```text
 English audio/video
