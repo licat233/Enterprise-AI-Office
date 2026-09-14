@@ -41,6 +41,8 @@
 | Operations 员工 RBAC v1 | ✅ 已关闭 / 冻结 / PASS |
 | Media Transcription 可选能力 | ✅ 已验证 / ARMOR Reference 已启用；非 Core 默认能力 |
 | EAO 运行基线 | ✅ 已完成 / 已部署 / 已投入使用 |
+| 双知识库架构（RAG + Wiki） | ✅ 已启用 — WeKnora RAG + ARMOR Vault Wiki / Working Memory |
+| 本地 AI 模型基础设施 | ✅ ARMOR Reference 已启用 — Ollama 为 WeKnora 提供视觉、音频与向量模型；Hermes 主推理模型保持独立 |
 | 部门交接准备 | ✅ 已完成 — 员工账号与私有访问资料可直接交付 |
 | 公司内部员工访问 | ✅ 已通过批准的私有网络路径验证 |
 | 公司外远程访问 | ✅ 已通过 Tailscale 私有访问验证；无需公开暴露服务 |
@@ -156,6 +158,32 @@ ARMOR Vault Wiki
 Operations 仍维持最小权限：通过 Scoped ARMOR Vault Adapter 进行受治理的 Vault 持久化，通用 filesystem 仍关闭。Vault 的受限检索/搜索属于同一适配边界的后续受控能力，不能用通用文件系统权限替代。
 
 规范性的知识权威与内容归属规则见 [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md)。
+
+### WeKnora 的本地 AI 模型基础设施
+
+ARMOR 当前参考部署已经使用一套轻量、任务专用的本地 AI 模型层，为 WeKnora 的知识摄取与检索提供能力。这**不代表** Hermes 的主推理模型已经迁移到本地 LLM。
+
+```text
+WeKnora
+  ↓
+Ollama — 本地模型运行 / Serving
+  ├─ 视觉解析
+  │    └─ qwen2.5vl:3b
+  ├─ 音频解析
+  │    └─ karanchopda333/whisper:latest
+  └─ 向量化 / 语义检索
+       └─ bge-m3:latest
+```
+
+ARMOR 当前参考部署中的角色：
+
+| 本地模型 | 在 WeKnora 中的用途 | 模型类型 |
+| --- | --- | --- |
+| `qwen2.5vl:3b` | 知识摄取过程中的视觉 / 多模态解析 | VLM |
+| `karanchopda333/whisper:latest` | 知识摄取过程中的音频解析 / 语音转文字 | ASR |
+| `bge-m3:latest` | Embedding / 语义检索 | Embedding Model |
+
+Ollama 是这里的**本地模型运行与 Serving 层**。这些模型属于 WeKnora 特定处理角色所依赖的基础设施，不属于员工 Profile，也不替代 Hermes 的推理模型。对于其它 EAO 部署，本地模型还是远程模型应由具体部署条件决定，并继续遵守 Capability Reuse Pass，不能因为需要某种模型能力就额外再造一套推理基础设施。
 
 ### 员工访问状态
 
@@ -337,7 +365,7 @@ ID-7 已经补齐：
 | 第二个 Scheduler | 拒绝 | Hermes Cron 已经是调度权威 | Cron 被真实需求证明无法满足 |
 | 额外 Vector DB / 新 RAG Layer | baseline 拒绝 | 当前双知识库已经把 WeKnora RAG 与 Markdown ARMOR Vault Wiki 分工；再加 Vector Store 会重复 RAG 层并增加同步和维护风险 | 测量证明 WeKnora / upstream 无法解决真实检索瓶颈 |
 | Prometheus / Grafana 大型 Observability Stack | 延后 | 当前规模用 health check + operations procedure 已足够 | 实际运行规模、故障频率或 SLA 证明需要专门观测平台 |
-| Local LLM 基础设施 | 延后 | 本地模型基础设施不是证明 Enterprise AI Office 架构所必需 | 隐私、成本或离线要求成为真实部署需求 |
+| Hermes 主推理使用通用本地 LLM | 延后 | ARMOR 已经使用 Ollama 为 WeKnora 提供任务专用的视觉、音频与向量模型；是否把 Hermes 主推理迁移到自托管 LLM 是另一项独立决策，并非 baseline 必需 | 隐私、成本、离线运行或真实负载需求证明有必要替换或补充当前推理 Provider |
 | 自研 Agent Framework | 拒绝 | Hermes 已经是 Agent Runtime / Orchestration，再造一套只会重复核心平台 | Hermes 无法满足某项已证明的关键能力 |
 | Graph DB / Generic Ontology Runtime | baseline 拒绝 | Ontology 当前只需要作为 Governance / Design Contract；没必要提前再建数据库与推理平台 | 真实跨系统流程要求 graph-native 查询或执行期约束 |
 | 独立 Employee Portal | 拒绝 | Open WebUI 已经提供员工入口 | 某个必要员工流程无法安全地通过 Open WebUI 完成 |
@@ -530,6 +558,7 @@ Container runtime: OrbStack / Docker
 WeKnora: v0.8.0
 Hermes Agent: v0.21.0, host-native
 Open WebUI: v0.11.3
+Ollama: ARMOR Reference 中用于 WeKnora 解析 / Embedding 的本地 AI 模型 Serving
 Employee Hermes long-term memory: disabled
 ```
 
