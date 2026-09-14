@@ -22,6 +22,7 @@ import asyncio
 from datetime import datetime, timezone
 import hashlib
 import importlib.util
+import ipaddress
 import json
 import mimetypes
 import os
@@ -61,6 +62,12 @@ def _validate_public_http_url(value: str) -> str:
     host = parsed.hostname.lower().rstrip(".")
     if host in {"localhost", "localhost.localdomain"} or host.endswith(".local"):
         raise ActionError("SOURCE_URL_LOCAL_FORBIDDEN")
+    try:
+        literal_ip = ipaddress.ip_address(host)
+    except ValueError:
+        literal_ip = None
+    if literal_ip is not None and not literal_ip.is_global:
+        raise ActionError("SOURCE_URL_NON_GLOBAL_IP_FORBIDDEN")
     return urllib.parse.urlunsplit(parsed)
 
 
