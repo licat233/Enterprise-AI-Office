@@ -133,8 +133,10 @@ operations:
 
 The temporary validation invocation itself exposed only `terminal,skills` and
 used no MCP, Codex, Claude Code, delegation, browser, file, or external-write
-tool. The post-test Gateway remained the existing service serving only
-`general` and `operations`; no new Profile or served route appeared.
+tool. During the test window, gateway.log recorded a production Gateway
+restart; this procedure issued no Gateway control command. The post-check was
+healthy and still served only `general` and `operations`; no new Profile or
+route appeared.
 
 ## Acceptance scenarios
 
@@ -197,14 +199,17 @@ HOME/config, temporary auth/env links, and temporary session/evidence files
 were removed after the evidence needed for this record was captured.
 
 ```text
-Persistent Hermes runtime changes: NONE
+Persistent Hermes configuration/profile permission changes: NONE
 Production employee exposure: NONE
 Rollback: PASS
 ```
 
-The only intended persistent change is this repository evidence document and
-its navigation-map entry on the existing short-lived PR branch. No historical
-`PHASE4*` or `PHASE5*` closure was changed.
+The only persistent change attributable to this task is this repository
+evidence document and its navigation-map entry on the existing short-lived PR
+branch. Observed runtime-generated configuration backup snapshots were
+retained because they are outside the disposable test context and their
+ownership is not safely attributable to this task. No historical `PHASE4*` or
+`PHASE5*` closure was changed.
 
 ## Repository and scope limits
 
