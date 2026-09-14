@@ -226,7 +226,14 @@ for path in \
   infrastructure/email/tencent-exmail/smtp.env.example \
   infrastructure/email/tencent-exmail/test_smtp_send_adapter.py \
   docs/acceptance/TENCENT-EXMAIL.md \
-  ontology/examples/email-communication.yaml
+  ontology/examples/email-communication.yaml \
+  docs/EAO-ADMIN-CONSOLE-V1A.md \
+  docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md \
+  profiles/maintainer/SOUL.md \
+  skills/shared/eao-resource-intake/SKILL.md \
+  infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md \
+  infrastructure/open-webui/eao_operation_envelope.py \
+  infrastructure/open-webui/test_eao_operation_envelope.py
 do
   require_file "$path"
 done
@@ -896,6 +903,38 @@ require_text infrastructure/weknora/PROVISIONING.md 'first validate any key reco
 require_text infrastructure/hermes/features/MESSAGING.md 'hermes gateway setup' 'Messaging contract uses native Hermes setup'
 require_text infrastructure/hermes/features/EMPLOYEE-MEMORY.md 'BLOCKED — REQUIRED INPUT' 'Employee memory gate fails closed without isolation'
 require_text config/capabilities.yaml 'technical-profile.config.example.yaml' 'Coding capability has executable Profile template'
+require_text config/capabilities.yaml 'eao_administrator_console:' 'Capability registry contains EAO administrator console'
+require_text config/capabilities.yaml 'profiles/maintainer/SOUL.md' 'EAO capability has maintainer Profile'
+require_text config/capabilities.yaml 'skills/shared/eao-resource-intake/SKILL.md' 'EAO capability has intake Skill'
+require_text config/capabilities.yaml 'docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md' 'EAO capability has acceptance path'
+require_text profiles/maintainer/SOUL.md 'Memory is OFF' 'Maintainer memory is disabled'
+require_text profiles/maintainer/SOUL.md 'generic shell, terminal, code execution' 'Maintainer denies generic execution'
+require_text profiles/maintainer/SOUL.md 'Profile switching to `default/admin`' 'Maintainer denies default/admin switching'
+require_text skills/shared/eao-resource-intake/SKILL.md 'classify (read-only)' 'Intake classifies before mutation'
+require_text skills/shared/eao-resource-intake/SKILL.md 'ToolScout-first is mandatory' 'Intake requires ToolScout-first review'
+require_text skills/shared/eao-resource-intake/SKILL.md 'OUTCOME_UNKNOWN' 'Intake blocks blind retry after unknown outcome'
+require_text infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md 'EAO Administrators' 'Open WebUI EAO Admin group is explicit'
+require_text infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md 'default/admin' 'Open WebUI EAO Admin excludes default/admin'
+require_text infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md 'server-side Open WebUI user context' 'Approval uses server-side user context'
+require_text infrastructure/open-webui/eao_operation_envelope.py 'DEFAULT_APPROVAL_TTL_MINUTES = 30' 'Operation envelope has bounded default TTL'
+require_text infrastructure/open-webui/eao_operation_envelope.py 'MAX_APPROVAL_TTL_MINUTES = 30' 'Operation envelope enforces maximum TTL'
+require_text infrastructure/open-webui/eao_operation_envelope.py 'SIGNATURE_PREFIX = "hmac-sha256:"' 'Operation envelope has trusted HMAC binding'
+require_text infrastructure/open-webui/eao_operation_envelope.py 'SIGNATURE_MISSING' 'Operation envelope rejects missing signature'
+require_text infrastructure/open-webui/eao_operation_envelope.py 'APPROVAL_INVALIDATED' 'Operation envelope invalidates stale plans'
+require_text infrastructure/open-webui/eao_operation_envelope.py 'RECONCILIATION_REQUIRED' 'Operation envelope blocks blind unknown retry'
+require_text config/capabilities.yaml 'resolved_for_v1a_contract' 'EAO registry records resolved WeKnora contract'
+require_text config/capabilities.yaml '          - retrieve' 'EAO WeKnora contributor contract includes retrieve'
+require_text config/capabilities.yaml 'parse_status_allowed_kb' 'EAO acceptance covers parse-status read-back'
+require_text config/capabilities.yaml 'full_access_false' 'EAO acceptance preserves full_access=false'
+require_text docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md 'GET /api/v1/knowledge/:id' 'EAO acceptance covers knowledge status route'
+require_text docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md 'out-of-scope Knowledge Base access is denied' 'EAO acceptance covers out-of-scope KB denial'
+require_text infrastructure/weknora/PROVISIONING.md 'capabilities: [ingest, retrieve]' 'WeKnora EAO contributor scope includes ingest and retrieve'
+require_text config/capabilities.yaml 'BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED' 'EAO registry records unresolved repository typed path'
+require_no_text config/capabilities.yaml 'repository_pr_preparation' 'EAO registry does not claim repository PR runtime operation'
+require_no_text config/capabilities.yaml 'repository_readiness_inspection' 'EAO registry does not claim repository readiness runtime operation'
+require_text docs/EAO-ADMIN-CONSOLE-V1A.md 'No database, workflow engine, scheduler, vector store, IAM layer' 'EAO reuse pass rejects replacement infrastructure'
+require_text docs/EAO-ADMIN-CONSOLE-V1A.md 'v1A explicitly does not include generic runtime mutation' 'EAO v1A excludes generic runtime mutation'
+require_text docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md 'Operations and General employee RBAC are unchanged' 'EAO acceptance preserves frozen employee baseline'
 require_text README.md 'CONFIGURED READY' 'README explains configured completeness'
 
 if [ "$REPOSITORY_ONLY" != "1" ]; then

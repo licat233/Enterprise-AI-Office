@@ -349,3 +349,21 @@ Potential additions may include ERP, CRM, email, calendars, workflow systems, mo
 None are automatic requirements.
 
 Each addition must pass the architecture/change rules in `AGENTS.md`.
+
+## 21. EAO Administrator Console
+
+EAO administration is a conditional specialist capability composed from the
+existing Open WebUI, Hermes maintainer Profile, WeKnora, ToolScout, MCP
+control-plane, and Git/PR authorities. The EAO Admin Assistant is restricted
+to the EAO Administrators group and is never a general employee portal.
+
+v1A permits read/review/proposal work and one bounded approved WeKnora
+contributor operation. Skill, Tool, and MCP changes remain canonical in Git
+and require the normal external branch, PR, Repository Readiness, review, and
+merge gates. The EAO runtime repository path is
+BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED; a later v1B typed
+reconciler is separate.
+
+The maintainer Profile is not a root shell: generic terminal, filesystem,
+Docker, SSH, sudo/root, default/admin switching, raw secrets, Cron, Kanban,
+and Messaging Gateway remain denied.

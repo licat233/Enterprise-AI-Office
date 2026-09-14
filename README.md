@@ -552,6 +552,7 @@ Optional capabilities are installed only when selected by company configuration.
 | Tencent Enterprise Mail | `infrastructure/email/tencent-exmail/` |
 | Remote/private access / SSO | `infrastructure/access/` |
 | Employee long-term memory | Profile/RBAC isolation gate |
+| EAO Administrator Console v1A | docs/EAO-ADMIN-CONSOLE-V1A.md + maintainer Profile |
 
 An enabled capability may not be silently skipped to manufacture a green result. A disabled capability should not be instantiated merely because a template exists.
 
@@ -569,6 +570,7 @@ python3 infrastructure/email/governance/test_send_reconciliation.py
 python3 infrastructure/email/governance/test_recovery.py
 python3 infrastructure/email/tencent-exmail/test_imap_readonly.py
 python3 infrastructure/email/tencent-exmail/test_smtp_send_adapter.py
+python3 infrastructure/open-webui/test_eao_operation_envelope.py
 ```
 
 Static/offline PASS is blueprint evidence only. It does not replace acceptance on an explicitly approved validation/deployment target.
@@ -581,6 +583,7 @@ Static/offline PASS is blueprint evidence only. It does not replace acceptance o
 | [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml) | blueprint lifecycle + real deployment gate |
 | [`DEPLOY.md`](DEPLOY.md) | installation/deployment Golden Path |
 | [`docs/COMPLETENESS.md`](docs/COMPLETENESS.md) | readiness semantics |
+| [docs/EAO-ADMIN-CONSOLE-V1A.md](docs/EAO-ADMIN-CONSOLE-V1A.md) | governed EAO administrator capability |
 | [`docs/V2-PHASE-STATUS.md`](docs/V2-PHASE-STATUS.md) | current v2 blueprint status |
 | [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md) | v2 scope + explicit reductions / non-goals |
 | [`docs/V2-EMAIL-DESIGN.md`](docs/V2-EMAIL-DESIGN.md) | governed email system design |

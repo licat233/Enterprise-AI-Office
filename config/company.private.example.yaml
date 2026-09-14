@@ -55,6 +55,7 @@ core_provisioning:
     profile_api_key_refs:
       general: hermes-general-api-key
       communication: communication-profile-api-key
+      maintainer: maintainer-profile-api-key
 
   open_webui:
     admin_identity:
@@ -69,6 +70,8 @@ employee_access:
     groups:
       - id: sales-team
         display_name: Sales Team
+      - id: eao-administrators
+        display_name: EAO Administrators
 
 # Enable only the specialist Profile actually required by the selected capability.
 # Each allowlist key must name a Profile that is actually declared below.
@@ -77,6 +80,8 @@ mcp_control_plane:
   employee_exposure_default: disabled
   profile_allowlists:
     communication:
+      - weknora
+    maintainer:
       - weknora
 
 profiles:
@@ -87,6 +92,20 @@ profiles:
     knowledge_bases:
       - company-general
     memory_policy: disabled-until-isolation-validated
+
+  - id: maintainer
+    display_name: EAO Admin
+    template: profiles/maintainer/SOUL.md
+    employee_groups:
+      - eao-administrators
+    knowledge_bases:
+      - company-general
+    capabilities:
+      terminal: false
+      code_execution: false
+      coding_delegation: false
+      web_search: false
+    memory_policy: disabled
 
 # Synthetic model-selection example. These are non-secret desired-state fields.
 # The symbolic refs bind protected provider credentials to exact native inputs.
@@ -115,6 +134,30 @@ capabilities:
     allowed_profiles: []
     upstream: firecrawl
     credential_ref: null
+
+  eao_administrator_console:
+    enabled: true
+    administrator_group_id: eao-administrators
+    assistant_id: maintainer
+    operation_approval_ttl_minutes: 30
+    repository:
+      owner: <EAO_REPOSITORY_OWNER>
+      name: <EAO_REPOSITORY_NAME>
+      default_branch: main
+    weknora_contributor:
+      api_key_ref: eao-weknora-contributor-api-key
+      full_access: false
+      capabilities:
+        - ingest
+        - retrieve
+      knowledge_base_ids:
+        - <EAO_KNOWLEDGE_BASE_ID>
+      allowed_routes:
+        - POST /knowledge-bases/{id}/knowledge/file
+        - POST /knowledge-bases/{id}/knowledge/url
+        - POST /knowledge-bases/{id}/knowledge/manual
+        - GET /knowledge/{id}
+    target_runtime: <EXPLICITLY_AUTHORIZED_TARGET>
 
   email:
     enabled: true
@@ -201,6 +244,16 @@ secret_refs:
     class: hermes-profile-api-keys
     consumer: hermes-general-profile
     native_binding: API_SERVER_KEY
+
+  maintainer-profile-api-key:
+    class: specialist-profile-credential
+    consumer: hermes-maintainer-profile
+    native_binding: API_SERVER_KEY
+
+  eao-weknora-contributor-api-key:
+    class: weknora-contributor-credential
+    consumer: eao-admin-weknora-contributor
+    native_binding: X-API-Key
 
   hermes-model-provider-openai-key:
     class: model-provider-credentials

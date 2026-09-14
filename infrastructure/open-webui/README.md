@@ -131,3 +131,11 @@ Backend health alone is not sufficient.
 ## License note
 
 Open WebUI uses its own upstream license rather than this repository's Apache-2.0 license. Review `THIRD_PARTY_NOTICES.md` and the exact upstream license for the deployed version, especially before rebranding or larger deployments.
+
+## EAO Admin Assistant
+
+When enabled by company configuration, reconcile a native Open WebUI group and
+Model/Assistant ACL for EAO Administrators → EAO Admin → Hermes maintainer.
+Keep the Profile key server-side, grant no wildcard/read access to ordinary
+groups, and test direct unauthorized access. Use the bounded provisioning
+contract in infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md.

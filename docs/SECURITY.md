@@ -301,3 +301,19 @@ Do not enable optional capabilities merely to have more security tests to run.
 ## 28. Boundary changes require review
 
 A change that materially alters who can access data/tools, adds a new external data path, or expands privileges is a security/architecture change and should be documented/reviewed accordingly.
+
+## 29. EAO Admin approval boundary
+
+When enabled, EAO Admin is visible only to the configured EAO Administrators
+group. Direct resource/model and maintainer-route requests from ordinary
+employees, Operations, and unrelated groups must fail closed.
+
+Material operations use a server-side Open WebUI HumanActor context, an exact
+immutable plan hash, a protected server-side HMAC signature, expected-current-
+state check, and bounded expiry. Model text, user-supplied actor/group IDs,
+Profile names, and provider credentials are not approval authority. A missing
+or invalid signature, changed plan, or expired envelope is denied. The EAO
+runtime repository path is BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED.
+
+The v1A maintainer capability has no generic shell, filesystem, Docker, SSH,
+sudo/root, browser, package-manager, raw-secret, or default/admin route.

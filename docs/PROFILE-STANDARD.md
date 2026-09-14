@@ -360,3 +360,21 @@ Avoid:
 - exposing default/admin as the company general assistant;
 - using prompt wording as the only security boundary;
 - cloning memory blindly between department Profiles.
+
+## 21. EAO Admin maintainer Profile
+
+When the EAO administrator capability is enabled, define the specialist as:
+
+| Field | Contract |
+| --- | --- |
+| Canonical/display name | maintainer / EAO Admin |
+| Human groups | EAO Administrators only |
+| Memory | OFF |
+| Cron, Kanban, Messaging | OFF |
+| Terminal, filesystem, Docker, SSH, sudo/root, browser | DENY |
+| default/admin switching and raw secrets | DENY |
+| Work | classify, review, inspect, propose, and prepare only resolved typed Knowledge operations; repository runtime path blocked |
+
+Enforce these limits in Hermes/Open WebUI/control-plane tool configuration.
+The SOUL is not the security boundary. See
+docs/EAO-ADMIN-CONSOLE-V1A.md and profiles/maintainer/SOUL.md.

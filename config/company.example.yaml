@@ -178,6 +178,30 @@ capabilities:
     allow_all_users: false
     routes: []
 
+  eao_administrator_console:
+    # The public generic example keeps this optional capability disabled.
+    # An adopting company enables it only with a private authorized group,
+    # typed control-plane bindings, and a separately authorized target.
+    enabled: false
+    administrator_group_id: eao-administrators
+    administrator_group_display_name: EAO Administrators
+    assistant_id: maintainer
+    assistant_display_name: EAO Admin
+    operation_approval_ttl_minutes: 30
+    repository:
+      owner: <EAO_REPOSITORY_OWNER>
+      name: <EAO_REPOSITORY_NAME>
+      default_branch: main
+      typed_runtime_status: blocked-until-approved-binding
+    weknora_contributor:
+      api_key_ref: null
+      full_access: false
+      capabilities:
+        - ingest
+        - retrieve
+      knowledge_base_ids:
+        - <EAO_KNOWLEDGE_BASE_ID>
+    target_runtime: <EXPLICITLY_AUTHORIZED_TARGET>
   # Email is a governed operational integration, not part of the core baseline.
   # Real mailbox/user/group values belong in the company-private overlay.
   email:
