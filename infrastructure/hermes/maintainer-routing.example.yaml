@@ -74,7 +74,7 @@ mcp_servers:
       prompts: false
 
 # Explicitly absent from maintainer:
-# - ToolScout record_memory / recall_memory
+# - ToolScout persistent memory tools
 # - raw Firecrawl / Obscura / CloakBrowser tools
 # - generic browser
 # - terminal / shell
