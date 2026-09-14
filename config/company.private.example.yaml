@@ -146,8 +146,10 @@ capabilities:
       default_branch: main
     weknora_contributor:
       api_key_ref: eao-weknora-contributor-api-key
+      full_access: false
       capabilities:
         - ingest
+        - retrieve
       knowledge_base_ids:
         - <EAO_KNOWLEDGE_BASE_ID>
       allowed_routes:

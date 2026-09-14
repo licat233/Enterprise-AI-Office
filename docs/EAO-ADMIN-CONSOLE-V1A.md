@@ -181,7 +181,8 @@ The pinned v0.8.0 contributor contract uses WeKnora's official API with a
 separate scoped tenant API key:
 
     X-API-Key
-    capabilities: [ingest]
+    full_access: false
+    capabilities: [ingest, retrieve]
     knowledge_base_ids: [<EAO_KNOWLEDGE_BASE_ID>]
 
 The allowed routes are:
@@ -191,10 +192,18 @@ The allowed routes are:
     POST /api/v1/knowledge-bases/{id}/knowledge/manual
     GET  /api/v1/knowledge/{id}
 
-The key must not be full_access and must not carry manage_kbs, manage_agents,
-platform, or runtime-management capabilities. The explicit Knowledge Base
-allow-list is required. No owner/admin credential, direct database write,
-destructive clear, or unbounded WeKnora API is part of v1A.
+The key must set full_access=false and carry exactly ingest and retrieve. It
+must not carry manage_kbs, manage_agents, manage_models, MCP admin,
+tenant/system admin, platform, or runtime-management capabilities. The explicit
+non-empty Knowledge Base allow-list is required. No owner/admin credential,
+direct database write, destructive clear, or unbounded WeKnora API is part of
+v1A.
+
+Contributor acceptance must prove that the scoped key can ingest into the
+allowed Knowledge Base, can GET /api/v1/knowledge/:id for knowledge in that
+Knowledge Base, and can inspect parse_status through that route; access to an
+out-of-scope Knowledge Base and Knowledge Base lifecycle/admin operations must
+be denied.
 A failed parse/index remains inactive. Conflicting authoritative sources are
 surfaced, not silently reconciled. No Knowledge Base deletion, bulk destructive
 delete, embedding change, or direct database write is part of v1A.

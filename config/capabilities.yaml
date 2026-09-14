@@ -631,7 +631,16 @@ capabilities:
         authentication: X-API-Key
         required_api_key_capabilities:
           - ingest
+          - retrieve
         required_knowledge_base_scope: explicit_non_empty_allow_list
+        acceptance_checks:
+          - ingest_allowed_kb
+          - retrieve_allowed_kb
+          - parse_status_allowed_kb
+          - out_of_scope_kb_denied
+          - knowledge_base_lifecycle_denied
+          - full_access_false
+          - explicit_non_empty_knowledge_base_ids
         allowed_routes:
           - POST /knowledge-bases/{id}/knowledge/file
           - POST /knowledge-bases/{id}/knowledge/url
@@ -641,6 +650,10 @@ capabilities:
           - full_access
           - manage_kbs
           - manage_agents
+          - manage_models
+          - mcp_admin
+          - tenant_admin
+          - system_admin
           - system_runtime_manage
       typed_repository:
         status: blocked

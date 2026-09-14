@@ -45,7 +45,13 @@ the repository contract.
     [ ] authoritative conflict is surfaced and remains inactive
     [ ] exact metadata/source fingerprint is preserved
     [ ] trusted approval binds to the exact immutable operation plan and server-side HMAC signature
-    [ ] WeKnora contributor credential is an official v0.8.0 scoped key with ingest and a non-empty KB allow-list
+    [ ] WeKnora contributor credential is an official v0.8.0 scoped key with full_access=false, exactly ingest + retrieve, and an explicit non-empty knowledge_base_ids allow-list
+    [ ] scoped contributor key ingests into the allowed Knowledge Base
+    [ ] scoped contributor key can GET /api/v1/knowledge/:id for knowledge in the allowed Knowledge Base
+    [ ] scoped contributor key can inspect parse_status through GET /api/v1/knowledge/:id
+    [ ] out-of-scope Knowledge Base access is denied
+    [ ] Knowledge Base lifecycle/admin operations remain denied
+    [ ] owner/admin credentials, tenant/system admin, MCP admin, and direct database access remain unavailable
     [ ] bounded WeKnora contributor operation succeeds
     [ ] ingestion completes
     [ ] parsing completes

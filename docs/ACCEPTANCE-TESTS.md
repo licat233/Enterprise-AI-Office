@@ -419,7 +419,9 @@ the repository contract.
     [ ] duplicate/version/supersession/conflict handling passes
     [ ] exact source fingerprint and metadata are preserved
     [ ] trusted approval binds to the exact immutable plan and server-side HMAC signature
-    [ ] WeKnora contributor key has only ingest and an explicit non-empty KB allow-list
+    [ ] WeKnora contributor key has full_access=false, exactly ingest + retrieve, and an explicit non-empty KB allow-list
+    [ ] scoped contributor key can GET /api/v1/knowledge/:id and inspect parse_status in the allowed KB
+    [ ] out-of-scope KB access and Knowledge Base lifecycle/admin operations remain denied
     [ ] bounded WeKnora ingestion succeeds
     [ ] parsing and indexing complete
     [ ] direct retrieval and source evidence pass

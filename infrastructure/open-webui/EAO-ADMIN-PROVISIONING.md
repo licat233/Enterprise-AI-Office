@@ -126,16 +126,18 @@ Repository operations are not in the v1A runtime set:
     BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
 
 The WeKnora operation must use the pinned official v0.8.0 bounded contributor
-path: X-API-Key with the ingest capability and a non-empty
-knowledge_base_ids allow-list. The only v1A write routes are:
+path: X-API-Key with exactly the ingest and retrieve capabilities,
+full_access=false, and a non-empty knowledge_base_ids allow-list. The only v1A
+write routes are:
 
     POST /api/v1/knowledge-bases/{id}/knowledge/file
     POST /api/v1/knowledge-bases/{id}/knowledge/url
     POST /api/v1/knowledge-bases/{id}/knowledge/manual
 
-Status is read through GET /api/v1/knowledge/{id}. The credential must not
-have full_access, manage_kbs, manage_agents, platform, or runtime-management
-capabilities. It must not expose tenant deletion, Knowledge Base deletion,
+Status is read through GET /api/v1/knowledge/{id}. The credential must keep
+full_access=false and must not carry manage_kbs, manage_agents, manage_models,
+MCP admin, tenant/system admin, platform, or runtime-management capabilities.
+It must not expose tenant deletion, Knowledge Base deletion,
 embedding/reranker administration, bulk deletion, or direct database writes.
 
 Not exposed in v1A:

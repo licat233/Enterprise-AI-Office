@@ -440,11 +440,11 @@ For critical company facts, preserve enough provenance to determine:
 
 The EAO maintainer may receive a bounded WeKnora contributor surface when the
 administrator capability is enabled. Pin Tencent/WeKnora v0.8.0 and use the
-official API with a separate tenant API key carrying only ingest and an
-explicit non-empty Knowledge Base allow-list. The v1A routes are file, URL,
-and manual knowledge creation plus knowledge status retrieval. Do not use
-full_access, manage_kbs, manage_agents, platform, or runtime-management
-capabilities.
+official API with a separate tenant API key carrying exactly ingest and
+retrieve plus an explicit non-empty Knowledge Base allow-list. The v1A routes
+are file, URL, and manual knowledge creation plus knowledge status retrieval.
+Do not use full_access, manage_kbs, manage_agents, manage_models, MCP admin,
+tenant/system admin, platform, or runtime-management capabilities.
 
 Keep owner/admin provisioning credentials separate from the maintainer
 contributor credential. Do not grant tenant or Knowledge Base deletion,

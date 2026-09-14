@@ -81,10 +81,11 @@ For a Knowledge candidate:
 10. leave failed or conflicting material inactive and surface the conflict.
 
 The pinned WeKnora v0.8.0 contributor path is the official API with a
-separate tenant API key carrying only ingest and an explicit non-empty
-Knowledge Base allow-list. Its v1A routes are file, URL, and manual knowledge
-creation, plus knowledge status retrieval. It must not use full_access,
-manage_kbs, manage_agents, platform, or runtime-management capabilities.
+separate tenant API key carrying exactly ingest and retrieve plus an
+explicit non-empty Knowledge Base allow-list. Its v1A routes are file, URL, and
+manual knowledge creation, plus knowledge status retrieval. It must keep
+full_access=false and must not use manage_kbs, manage_agents, manage_models, MCP
+admin, tenant/system admin, platform, or runtime-management capabilities.
 
 Knowledge ingestion does not authorize Knowledge Base deletion, embedding/reranker changes, bulk destructive deletion, or direct database writes.
 
