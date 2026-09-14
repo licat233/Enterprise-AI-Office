@@ -30,6 +30,10 @@ the repository contract.
 
 ## Resource intake
 
+    [ ] maintainer Enterprise Web Research surface exposes exactly web_search + web_fetch for source inspection
+    [ ] maintainer ToolScout surface exposes exactly advise_tool_use/query_registry/detect_candidates/check_conflicts/doctor
+    [ ] maintainer does not receive ToolScout record_memory or recall_memory
+    [ ] raw Firecrawl/Obscura/CloakBrowser/browser tools remain unavailable to maintainer
     [ ] URL classifies as Knowledge/Skill/Tool/MCP/Unsupported correctly
     [ ] Git repository classifies without mutation
     [ ] PDF/DOCX/text classifies without mutation
@@ -44,6 +48,10 @@ the repository contract.
     [ ] duplicate/version/supersession check passes
     [ ] authoritative conflict is surfaced and remains inactive
     [ ] exact metadata/source fingerprint is preserved
+    [ ] Open WebUI Action resolves the exact parent user source from the current owned chat rather than accepting a source/path/target from model text
+    [ ] uploaded file approval resolves through Open WebUI Files + Storage and verifies current HumanActor ownership
+    [ ] URL/manual/file source fingerprint is computed server-side
+    [ ] operation_id, target Knowledge Base and expected current state are derived server-side
     [ ] trusted approval binds to the exact immutable operation plan and server-side HMAC signature
     [ ] WeKnora contributor credential is an official v0.8.0 scoped key with full_access=false, exactly ingest + retrieve, and an explicit non-empty knowledge_base_ids allow-list
     [ ] scoped contributor key ingests into the allowed Knowledge Base
@@ -105,10 +113,15 @@ and human review before it can enter the v1A runtime operation set.
     [ ] missing, invalid, or wrong-key signature is denied
     [ ] expired approval is denied
     [ ] changed plan/current state/target is denied
+    [ ] source edit/replacement between confirmation display and commit is denied
+    [ ] removed EAO Administrators membership between display and commit is denied
     [ ] unauthorized human is denied
     [ ] Cancel creates no effect
+    [ ] sanitized OUTCOME_UNKNOWN replay marker is persisted before the external write
+    [ ] replay metadata contains no contributor key, HMAC key, or trusted signature
     [ ] repeated completed operation_id returns existing/current result
-    [ ] OUTCOME_UNKNOWN becomes RECONCILIATION_REQUIRED
+    [ ] OUTCOME_UNKNOWN with a known knowledge_id reconciles through GET /api/v1/knowledge/:id
+    [ ] OUTCOME_UNKNOWN without a bounded knowledge_id becomes RECONCILIATION_REQUIRED
     [ ] unknown outcome is not blindly retried
 
 ## Frozen baseline and runtime gate
@@ -119,6 +132,8 @@ and human review before it can enter the v1A runtime operation set.
 Baseline assertion: Operations and General employee RBAC are unchanged.
     [ ] default/admin remains control-plane only
     [ ] Cron/Kanban/Messaging remain OFF for maintainer v1A
+    [ ] maintainer WeKnora contributor credential is absent from Hermes Profile/MCP environment
+    [ ] contributor credential exists only in the server-side Open WebUI Action binding
     [ ] no EAO Runtime Reconciler exists in v1A
     [ ] repository/offline PASS is not reported as runtime deployment
     [ ] state records exact evidence or BLOCKED — REQUIRED INPUT
