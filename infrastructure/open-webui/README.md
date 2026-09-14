@@ -139,3 +139,10 @@ Model/Assistant ACL for EAO Administrators → EAO Admin → Hermes maintainer.
 Keep the Profile key server-side, grant no wildcard/read access to ordinary
 groups, and test direct unauthorized access. Use the bounded provisioning
 contract in infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md.
+
+Knowledge mutation uses the server-side
+infrastructure/open-webui/eao_admin_knowledge_action.py Action. The Action
+re-derives the exact source from the current owned chat, uses the shared
+eao_operation_envelope.py HMAC/current-state contract, and holds the separate
+scoped WeKnora contributor credential. The maintainer model never receives that
+write credential.
