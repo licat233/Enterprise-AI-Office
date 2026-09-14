@@ -257,7 +257,38 @@ The backend-native Skill remains subject to:
 
 A backend exit code of zero is not sufficient acceptance.
 
-## 10. Source, update, and supply-chain policy
+## 10. Admission granularity and mixed-runtime Skills
+
+Admission is performed at the **smallest meaningful executable/procedural unit**, normally an individual Skill or tightly coupled workflow.
+
+Do not treat repository/plugin reputation as blanket approval:
+
+```text
+trusted repository
+≠ every Skill approved
+```
+
+A single plugin bundle may legitimately contain:
+
+- one Skill that is DIRECT;
+- another that requires ADAPT;
+- another that is backend-native and must DELEGATE;
+- a global/process Skill that EAO should REJECT.
+
+Repository/plugin provenance and license may be shared evidence, but the operational admission decision remains Skill/workflow-specific.
+
+A mostly portable Skill may also contain an optional backend-native subflow. It may remain ADAPT rather than being forced into DELEGATE when a thin adapter can safely express:
+
+```text
+portable subflow → run through approved Hermes capability
+backend-only subflow → explicit BLOCK or authorized delegation
+```
+
+The adapter must fail closed when the backend-only path is unavailable. It must not silently invoke a more privileged backend.
+
+The first real classification evidence is recorded in [`THIRD-PARTY-SKILL-ADMISSION-PILOT.md`](THIRD-PARTY-SKILL-ADMISSION-PILOT.md). That report is evidence/example material; this document remains the normative policy.
+
+## 12. Source, update, and supply-chain policy
 
 For every admitted third-party Skill, record enough provenance to reproduce the decision:
 
@@ -288,7 +319,7 @@ Do not silently auto-update a production Skill across major behavioral changes. 
 - licensing;
 - core workflow semantics.
 
-## 11. Minimal decision record
+## 12. Minimal decision record
 
 A material admission should record at least:
 
@@ -310,7 +341,7 @@ A material admission should record at least:
 
 If the compatibility class or required authority cannot be stated clearly, do not admit the Skill yet.
 
-## 12. Acceptance expectations
+## 13. Acceptance expectations
 
 ### DIRECT
 
@@ -344,7 +375,7 @@ Verify at minimum:
 - no unauthorized host resource is intentionally granted;
 - delegation does not provide a path from a normal business Profile to privileged execution.
 
-## 13. Installation/ownership model
+## 14. Installation/ownership model
 
 EAO should manage approved Skill sources, not create a Hermes-specific copy of every useful Skill.
 
@@ -361,7 +392,7 @@ This is a logical ownership model, not a requirement to create a new service or 
 
 Use existing Hermes supported external Skill directories and existing Codex/Claude Code Skill mechanisms where applicable.
 
-## 14. Rejected approaches
+## 15. Rejected approaches
 
 Do not adopt these as default architecture:
 
@@ -389,7 +420,7 @@ This collapses Hermes into a routing shell and can bypass Profile privilege boun
 
 EAO is not a Skill collection. Admission follows concrete business value and least privilege.
 
-## 15. Examples
+## 16. Examples
 
 ### Research/writing Skill
 
@@ -436,7 +467,7 @@ BLOCK / REJECT for that Profile
 
 A separate role/capability decision is required before any privileged execution path exists.
 
-## 16. Relationship to historical ARMOR Skill migration
+## 17. Relationship to historical ARMOR Skill migration
 
 The `PHASE4*` and `PHASE5*` documents are historical migration/closure evidence.
 
@@ -449,7 +480,7 @@ This standard:
 
 Historical migration decisions remain evidence, not the default process for future external Skills.
 
-## 17. Final principle
+## 18. Final principle
 
 EAO's objective is not:
 
