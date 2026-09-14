@@ -11,10 +11,12 @@ Provide the governed, read-first orchestration for EAO administrator resource in
 - authenticated Open WebUI user in the configured `EAO Administrators` group;
 - the `maintainer` Profile and private `EAO Admin` Assistant;
 - current repository authority and capability registry;
-- supported WeKnora contributor/retrieval API when Knowledge ingestion is requested;
-- existing MCP/control-plane registry for capability registration;
+- supported read-only WeKnora retrieval path for review/verification;
+- supported WeKnora contributor API held only by the server-side approval Action when Knowledge ingestion is requested;
+- bounded Enterprise Web Research source-inspection path (web_search + web_fetch only);
+- existing MCP/control-plane registry for review-only MCP/backend assessment;
 - ToolScout-first review path for proposed Tools or commodity utilities;
-- protected server-side operation-plan/approval binding.
+- protected server-side operation-plan/approval binding implemented by the Open WebUI Action.
 
 If a prerequisite is missing, stop with `BLOCKED — REQUIRED INPUT` or `BLOCKED — TYPED CAPABILITY NOT AVAILABLE`. Do not substitute generic shell, direct database writes, or an unapproved HTTP client.
 
@@ -74,11 +76,12 @@ For a Knowledge candidate:
 3. review confidentiality, owner, version, effective date, status, and license/provenance;
 4. check duplicate, supersession, and authoritative conflict state;
 5. prepare metadata for the configured `Company Knowledge` Base;
-6. create an immutable operation envelope;
-7. show the exact plan to the authenticated administrator and require trusted approval;
-8. use only the bounded WeKnora contributor operation;
-9. require parse/index completion, direct retrieval, source evidence, and normal Hermes retrieval before `ACTIVE`;
-10. leave failed or conflicting material inactive and surface the conflict.
+6. create an immutable operation envelope through the server-side Action using source material re-derived from the current owned Open WebUI chat;
+7. show the exact source fingerprint/target/plan hash to the authenticated administrator and require trusted approval;
+8. re-resolve group membership and source/current state after confirmation;
+9. use only the bounded WeKnora contributor operation held by the Action;
+10. require parse/index completion, direct retrieval, source evidence, and normal Hermes retrieval before `ACTIVE`;
+11. leave failed or conflicting material inactive and surface the conflict.
 
 The pinned WeKnora v0.8.0 contributor path is the official API with a
 separate tenant API key carrying exactly ingest and retrieve plus an
@@ -93,7 +96,10 @@ Knowledge ingestion does not authorize Knowledge Base deletion, embedding/rerank
 
 Inspect actual source before recommending anything:
 
-- `SKILL.md`, referenced documents, scripts, templates, dependencies, package metadata, environment variables, network calls, filesystem/process behavior, credentials, external services, license, upstream source, and pinned version/commit;
+- public URL/GitHub source inspection uses only the bounded Enterprise Web Research web_search/web_fetch surface;
+- uploaded PDF/DOCX/text content is reviewed through Open WebUI's existing transient attachment/context path; the model receives no generic filesystem path;
+- private/authenticated repository review is BLOCKED in v1A while the typed repository path remains unresolved;
+- inspect `SKILL.md`, referenced documents, scripts, templates, dependencies, package metadata, environment variables, network calls, filesystem/process behavior, credentials, external services, license, upstream source, and pinned version/commit;
 - whether user-controlled values can become shell commands, executable code, arbitrary filesystem destinations, or administrative operations;
 - overlap with existing company/upstream Skills and the canonical Git source-of-truth path.
 
@@ -111,6 +117,11 @@ determine requested operation
 → classify Local Utility / Agent Tool or MCP / External Backend / Development Tool
 → propose the smallest bounded interface
 ```
+
+The maintainer ToolScout surface is review-only and limited to
+`advise_tool_use`, `query_registry`, `detect_candidates`,
+`check_conflicts`, and `doctor`. It does not expose ToolScout memory-write
+tools or any install/execute primitive.
 
 For a local utility, the model selects only an approved logical Tool ID; an execution layer resolves the reviewed recipe. Never expose model-controlled `brew install`, `pip install`, `npm install`, arbitrary download-and-execute, or package-manager primitives.
 
@@ -137,15 +148,24 @@ Direct push to `main`, force push, unseen-commit merge, or runtime-only canonica
 
 ## Approval and Replay Safety
 
-The model may prepare a plan but never approves it. A trusted Open WebUI
-server-side action derives the HumanActor from the current authenticated user
-and group context, rechecks authorization, verifies the immutable plan hash,
-trusted server-side HMAC signature, and expected current state, and enforces a
-bounded TTL (default 30 minutes and maximum).
+The model may recommend an action but never supplies approval authority.
+The trusted Open WebUI server-side Action derives the HumanActor from the
+current authenticated user and group context and re-derives the exact knowledge
+source from the current owned chat branch. The Action computes the source
+fingerprint, operation_id, target, expected current state, plan hash and HMAC
+binding server-side, then rechecks authorization/source/current state after the
+native confirmation dialog. It enforces a bounded TTL (default and maximum 30
+minutes).
 
 Material changes invalidate approval, including source fingerprint, upstream commit, dependency set, PR HEAD/CI state, Tool version/recipe, credentials/security scope, Profile exposure, target, or expected current state changes.
 
-Every mutation carries a stable `operation_id`. A replay of a completed operation returns the existing/current result. `OUTCOME_UNKNOWN` becomes `RECONCILIATION_REQUIRED` and must not be blindly retried.
+Every mutation carries a stable `operation_id`. The Action records only
+sanitized result/replay evidence in existing Open WebUI assistant-message
+metadata before/after the external write; no new approval database is added.
+A replay of a completed operation returns the existing/current result.
+`OUTCOME_UNKNOWN` becomes `RECONCILIATION_REQUIRED` and must not be blindly
+retried. The HMAC key, contributor key and trusted signature never enter chat
+metadata or model-visible output.
 
 ## Forbidden Capabilities
 
