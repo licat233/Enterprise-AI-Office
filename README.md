@@ -468,7 +468,8 @@ PRODUCTION READY
 | --- | --- |
 | Blueprint lifecycle / real deployment gate | `state/PROJECT-PHASE.yaml` |
 | System & installation blueprint | normative repository contracts |
-| Company knowledge | WeKnora |
+| Approved enterprise factual/reference knowledge | WeKnora RAG |
+| Durable business work / project memory / research / publication records / governed assets | ARMOR Vault Wiki |
 | Agent role / behavior / tools | Hermes Profiles / SOUL / Skills / tools |
 | Employee Web identity/access | Open WebUI / selected enterprise identity layer |
 | Mailbox and provider delivery facts | Email Provider |
@@ -488,12 +489,16 @@ HumanActor
 ≠ provider/mailbox credential
 ```
 
-### Knowledge is not memory
+### Knowledge, working memory, and Agent memory are different layers
 
 ```text
-WeKnora = authoritative shared company knowledge
+WeKnora RAG = approved enterprise factual/reference retrieval
+ARMOR Vault Wiki = durable business working memory and assets
 Hermes memory = optional continuity state subject to isolation rules
 ```
+
+Do not auto-ingest ordinary Vault work products into WeKnora. Promotion to RAG
+requires an explicit knowledge-governance decision.
 
 ### Natural language is not formal approval
 
