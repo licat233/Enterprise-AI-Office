@@ -35,7 +35,7 @@ import uuid
 from typing import Any, Optional
 
 
-_URL_RE = re.compile(r"https?://[^\\s<>\\[\\]{}\\\"']+", re.IGNORECASE)
+_URL_RE = re.compile(r"https?://[^\s<>\[\]{}\"']+", re.IGNORECASE)
 _MAX_MANUAL_CHARS = 12000
 _DEFAULT_HTTP_TIMEOUT = 30
 
