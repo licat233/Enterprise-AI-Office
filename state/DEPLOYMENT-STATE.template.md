@@ -471,10 +471,14 @@ Complete only when the capability is enabled by private company configuration:
     Capability: eao_administrator_console
     Group → Assistant → Profile: EAO Administrators → EAO Admin → maintainer
     Maintainer API credential: distinct/protected; value omitted
-    WeKnora contributor scope: <...>
+    WeKnora contributor scope: <Action-only scoped key; full_access=false; ingest+retrieve; explicit KB allow-list>
+    Maintainer source-inspection binding: <enterprise-web-research; web_search+web_fetch only>
+    Maintainer ToolScout binding: <review-only subset; no memory-write tools>
     Repository typed binding: BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
     MCP/control-plane review authority: <review-only authority; mutation binding not required in v1A>
+    Knowledge approval Action: <Open WebUI Action id/version/binding>
     Approval signing-key reference: <protected symbolic reference only; value omitted>
+    Replay evidence location: <Open WebUI assistant-message metadata; sanitized only>
     Capability Reuse Pass / ToolScout evidence: <...>
     Operation IDs / plan hashes / TTL / invalidation: <...>
     v1A acceptance: <PASS/FAIL/BLOCKED>
