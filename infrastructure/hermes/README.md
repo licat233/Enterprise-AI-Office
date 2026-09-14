@@ -25,6 +25,8 @@ infrastructure/hermes/
 ├── general.config.example.yaml
 ├── general.env.example
 ├── operations-routing.example.yaml
+├── maintainer-routing.example.yaml
+├── maintainer.env.example
 ├── specialist.config.example.yaml
 ├── specialist.env.example
 └── features/
@@ -42,9 +44,14 @@ The first four artifacts encode the baseline:
 - API tool exposure restricted to the approved read-only WeKnora surface.
 
 The specialist templates are generic starting points only when company configuration enables a real specialist Profile. They are not a list of Profiles to provision.
-The checked-in operations-routing example records the two profile-local
-settings required for the existing Operations Profile to coexist with the
-shared Hermes multiplex gateway; it contains no credentials.
+The checked-in operations-routing example records the profile-local settings
+required for the existing Operations Profile to coexist with the shared Hermes
+multiplex gateway; it contains no credentials.
+
+The maintainer routing/env examples are conditional EAO Admin v1A artifacts.
+They bind read-only WeKnora retrieval, Enterprise Web Research web_search/web_fetch
+and the ToolScout review-only subset. They intentionally do not contain or expose
+the WeKnora contributor credential used by the Open WebUI approval Action.
 
 `features/README.md` covers the optional native Hermes Kanban, Cron, and messaging capabilities selected through the capability registry.
 
@@ -133,8 +140,14 @@ Every enabled specialist/native optional capability adds its corresponding condi
 ## EAO Admin maintainer Profile
 
 When enabled, create maintainer from profiles/maintainer/SOUL.md with a unique
-server-side API credential and an explicit served-profile allowlist. Bind only
-typed EAO intake/review operations and the bounded WeKnora contributor path.
-Do not add terminal, filesystem, Docker, SSH, sudo/root, browser, package
-manager, raw secrets, or a route to default/admin. The maintainer Profile is
-an administrator work role, not a host sandbox or a root shell.
+server-side API credential and an explicit served-profile allowlist. Apply
+infrastructure/hermes/maintainer-routing.example.yaml so the Profile receives
+only read-only WeKnora retrieval, Enterprise Web Research web_search/web_fetch,
+and the ToolScout review-only subset.
+
+The WeKnora contributor credential and write routes belong only to the
+server-side Open WebUI approval Action and must not be placed in the maintainer
+Hermes Profile environment. Do not add terminal, filesystem, Docker, SSH,
+sudo/root, generic browser, package manager, raw secrets, or a route to
+default/admin. The maintainer Profile is an administrator work role, not a host
+sandbox or a root shell.
