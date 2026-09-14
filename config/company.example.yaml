@@ -189,6 +189,21 @@ capabilities:
     assistant_display_name: EAO Admin
     operation_approval_ttl_minutes: 30
     approval_signing_key_ref: null
+    approval_action_id: eao-admin-knowledge-approval
+    review_bindings:
+      source_inspection:
+        capability: enterprise-web-research
+        allowed_tools:
+          - web_search
+          - web_fetch
+      tool_review:
+        capability: toolscout
+        allowed_tools:
+          - advise_tool_use
+          - query_registry
+          - detect_candidates
+          - check_conflicts
+          - doctor
     repository:
       owner: <EAO_REPOSITORY_OWNER>
       name: <EAO_REPOSITORY_NAME>
