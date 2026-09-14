@@ -65,6 +65,7 @@ These describe how EAO is intended to work now.
 | `OPERATIONS.md` | Operating procedures |
 | `UPGRADE.md` | Version-change and upgrade rules |
 | `CAPABILITY-REUSE-PASS.md` | Mandatory reuse-before-build decision gate |
+| `SKILL-ADMISSION.md` | Third-party Skill compatibility, authority, adaptation, and delegation standard |
 | `REPOSITORY-GOVERNANCE.md` | Branch, PR, CI, frozen-history, and repository authority rules |
 
 These should normally be read before specialized or historical files.
@@ -194,6 +195,7 @@ Use this shortcut:
 | Rebuild EAO | `REPRODUCE.md` → `DEPLOY.md` |
 | Validate a fresh Agent | `VALIDATE.md` |
 | Add a capability | `CAPABILITY-REUSE-PASS.md` → `config/capabilities.yaml` |
+| Assess a third-party Skill | `CAPABILITY-REUSE-PASS.md` → `SKILL-ADMISSION.md` |
 | Change architecture | `AGENTS.md` → `ARCHITECTURE.md` → `SECURITY.md` |
 | Maintain repository / GitHub workflow | `REPOSITORY-GOVERNANCE.md` |
 | Work with knowledge | `KNOWLEDGE.md` |
