@@ -580,3 +580,20 @@ A dry run is successful only when the agent can reach an unambiguous execution p
 The repository should make routine integration decisions for the deployment agent.
 
 Human intervention is for missing authority, secrets, permissions, or real business choices — not for reminding the agent to connect components, configure baseline RBAC, implement an already-enabled capability, run acceptance, or record deployment state.
+
+## 17. Conditional EAO Administrator Console
+
+When company configuration enables eao_administrator_console, provision the
+maintainer Profile and EAO Admin Assistant through the existing Hermes and
+Open WebUI paths, then run docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md.
+
+Complete the capability closure before claiming Configured Ready: resolve the
+EAO Administrators group, typed MCP/control-plane bindings, bounded WeKnora
+contributor path, protected approval binding, and the enforced 30-minute
+default/max approval TTL. The EAO runtime repository path remains
+BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED; keep Skill/Tool/MCP changes
+behind the external Git/PR/Repository Readiness gates.
+
+This capability does not authorize a live target. Re-read
+state/PROJECT-PHASE.yaml and require an explicit real-deployment request before
+mutating Mac Studio or any other real runtime.

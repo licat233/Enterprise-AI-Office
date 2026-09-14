@@ -463,3 +463,20 @@ Production controls: <PASS/FAIL/BLOCKED/N/A>
 ```
 
 Never record a readiness level higher than the evidence supports.
+
+## EAO Administrator Console v1A
+
+Complete only when the capability is enabled by private company configuration:
+
+    Capability: eao_administrator_console
+    Group → Assistant → Profile: EAO Administrators → EAO Admin → maintainer
+    Maintainer API credential: distinct/protected; value omitted
+    WeKnora contributor scope: <...>
+    Repository typed binding: BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
+    MCP/control-plane typed bindings: <...>
+    Capability Reuse Pass / ToolScout evidence: <...>
+    Operation IDs / plan hashes / TTL / invalidation: <...>
+    v1A acceptance: <PASS/FAIL/BLOCKED>
+    Runtime status: <repository/design implementation only | deployed and accepted>
+
+Do not record secrets or claim runtime deployment from repository/offline tests.

@@ -592,6 +592,102 @@ capabilities:
       - video extraction result
       - temporary WeKnora compatibility result
 
+  eao_administrator_console:
+    kind: conditional
+    enabled_when: capabilities.eao_administrator_console.enabled == true
+    selection:
+      source: company_configuration
+      path: capabilities.eao_administrator_console.enabled
+      required_value: true
+    upstream:
+      - Open WebUI native groups/models/actions
+      - Hermes Profile routing and shared Skills
+      - WeKnora supported contributor/retrieval API
+      - existing MCP/control-plane registry
+      - GitHub repository workflow and Repository Readiness
+    implementation:
+      - docs/EAO-ADMIN-CONSOLE-V1A.md
+      - docs/PROFILE-STANDARD.md
+      - docs/SECURITY.md
+      - docs/CLIENT-RBAC.md
+      - docs/KNOWLEDGE.md
+      - profiles/maintainer/SOUL.md
+      - skills/shared/eao-resource-intake/SKILL.md
+      - infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md
+      - infrastructure/open-webui/eao_operation_envelope.py
+    required_company_values:
+      - authorized EAO Administrators group identity
+      - maintainer Profile and EAO Admin Assistant identifiers
+      - configured WeKnora target Knowledge Base
+      - bounded WeKnora contributor path using the pinned official API
+      - typed repository capability (currently unresolved; required before runtime enablement)
+      - typed MCP/control-plane review capability
+      - protected Open WebUI server-side approval binding
+      - bounded approval TTL, default 30 minutes
+    runtime_capability_resolution:
+      weknora_contributor:
+        status: resolved_for_v1a_contract
+        upstream: Tencent/WeKnora v0.8.0
+        authentication: X-API-Key
+        required_api_key_capabilities:
+          - ingest
+        required_knowledge_base_scope: explicit_non_empty_allow_list
+        allowed_routes:
+          - POST /knowledge-bases/{id}/knowledge/file
+          - POST /knowledge-bases/{id}/knowledge/url
+          - POST /knowledge-bases/{id}/knowledge/manual
+          - GET /knowledge/{id}
+        forbidden_capabilities:
+          - full_access
+          - manage_kbs
+          - manage_agents
+          - system_runtime_manage
+      typed_repository:
+        status: blocked
+        blocker: "BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED"
+        runtime_operations: []
+    required_secret_classes:
+      - maintainer-profile-credential
+      - open-webui-admin-credential
+      - weknora-contributor-credential
+    protected_input_contract:
+      document: docs/EAO-ADMIN-CONSOLE-V1A.md
+      provisioning: infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md
+      missing_required_input: "BLOCKED — REQUIRED INPUT: <specific input>"
+      invalid_plan: "APPROVAL_INVALIDATED"
+      expired_plan: "APPROVAL_EXPIRED"
+    acceptance:
+      document: docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md
+      section: EAO Administrator Console v1A Acceptance
+      offline_test: infrastructure/open-webui/test_eao_operation_envelope.py
+      result: "PASS — EAO ADMIN CONSOLE V1A"
+    v1a_allowed_operations:
+      - resource_classification
+      - capability_reuse_review
+      - skill_review
+      - tool_review
+      - mcp_backend_review
+      - knowledge_ingestion
+    v1a_forbidden_operations:
+      - run_shell
+      - execute
+      - arbitrary_filesystem_write
+      - docker_admin
+      - install_skill
+      - install_tool
+      - reconcile_profile
+      - reconcile_mcp
+      - profile_switch
+    records:
+      - EAO Administrators group and Assistant mapping
+      - maintainer tool/MCP/credential scope without secret values
+      - Capability Reuse Pass and ToolScout findings
+      - Knowledge source fingerprints and ingestion/retrieval evidence
+      - repository branch/PR/HEAD/CI/Readiness evidence from the external repository workflow
+      - typed repository blocker and re-resolution evidence
+      - operation_id, immutable plan hash, trusted plan signature, approval TTL and invalidation result
+      - runtime result only when a separately authorized target exists
+
 # Backup/restore is an explicitly selected optional capability. It is not
 # implicitly enabled by any readiness level.
 production_controls:

@@ -435,3 +435,20 @@ For critical company facts, preserve enough provenance to determine:
 [ ] Sensitive-data boundary is reviewed
 [ ] Knowledge ownership is defined
 ```
+
+## 24. Maintainer contributor boundary
+
+The EAO maintainer may receive a bounded WeKnora contributor surface when the
+administrator capability is enabled. Pin Tencent/WeKnora v0.8.0 and use the
+official API with a separate tenant API key carrying only ingest and an
+explicit non-empty Knowledge Base allow-list. The v1A routes are file, URL,
+and manual knowledge creation plus knowledge status retrieval. Do not use
+full_access, manage_kbs, manage_agents, platform, or runtime-management
+capabilities.
+
+Keep owner/admin provisioning credentials separate from the maintainer
+contributor credential. Do not grant tenant or Knowledge Base deletion,
+embedding/reranker administration, bulk deletion, or direct database access.
+Every ingestion still requires source review, duplicate/conflict handling,
+trusted approval, parse/index completion, direct retrieval, source evidence,
+and normal Hermes retrieval before it becomes active.

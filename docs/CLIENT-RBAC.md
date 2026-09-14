@@ -249,3 +249,19 @@ Use supported routing, allowlists/pairing, and platform identity controls.
 ```
 
 Specific runtime validation results from an individual deployment belong in its protected operational state created from `state/DEPLOYMENT-STATE.template.md`. Record only reusable/public repository changes in `state/CHANGELOG.md`; do not use the historical sanitized `state/DEPLOYMENT-STATE.md` as the live RBAC evidence store.
+
+
+## 20. EAO Admin Assistant
+
+The optional EAO Admin Assistant is a private native Open WebUI resource:
+
+    EAO Administrators → EAO Admin → Hermes maintainer
+
+Grant read/use only to EAO Administrators. Do not grant All-Employees,
+Operations, Sales, Procurement, wildcard, or unrelated groups. Keep the
+maintainer credential server-side and distinct from every other Profile.
+Validate both visibility and direct unauthorized resource/route access.
+Approval must use the current authenticated Open WebUI HumanActor context,
+an exact operation envelope, and its protected server-side HMAC binding; chat
+text is never formal approval. The EAO runtime repository path remains
+BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED.

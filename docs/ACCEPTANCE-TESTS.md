@@ -384,6 +384,75 @@ Required:
 ```
 
 If an enabled capability is blocked on genuine external authority/input, report `BLOCKED — REQUIRED INPUT` instead of downgrading it silently.
+# EAO Administrator Console v1A
+
+Run this conditional section when
+capabilities.eao_administrator_console.enabled is true. It applies only on an
+explicitly authorized validation/deployment target; offline tests prove only
+the repository contract.
+
+## RBAC and Profile boundary
+
+    [ ] authorized EAO administrator sees and uses EAO Admin
+    [ ] ordinary General employee cannot see or invoke EAO Admin
+    [ ] Operations employee cannot see or invoke EAO Admin
+    [ ] unrelated employee groups cannot invoke EAO Admin
+    [ ] direct unauthorized Assistant/model access fails closed
+    [ ] direct unauthorized maintainer route access fails closed
+    [ ] maintainer cannot reach default/admin or switch Profile
+    [ ] maintainer has no generic shell, terminal, filesystem, Docker, SSH, sudo/root, or browser
+    [ ] raw secrets are absent from tools, output, logs, and Git
+
+## Resource and capability intake
+
+    [ ] URL, Git repository, PDF, DOCX, text, Skill, Tool, and MCP references classify correctly
+    [ ] classification performs no mutation
+    [ ] Capability Reuse Pass records inspected capabilities and exact gap
+    [ ] Skill source, dependencies, network/filesystem/process behavior, license, and provenance are inspected
+    [ ] ToolScout-first review occurs before Tool installation/reimplementation
+    [ ] Tool is classified without automatic Tool-to-MCP conversion
+    [ ] MCP/backend operations are narrow and Profile-bound when justified
+
+## Knowledge intake
+
+    [ ] Company Authoritative vs External Reference is explicit
+    [ ] duplicate/version/supersession/conflict handling passes
+    [ ] exact source fingerprint and metadata are preserved
+    [ ] trusted approval binds to the exact immutable plan and server-side HMAC signature
+    [ ] WeKnora contributor key has only ingest and an explicit non-empty KB allow-list
+    [ ] bounded WeKnora ingestion succeeds
+    [ ] parsing and indexing complete
+    [ ] direct retrieval and source evidence pass
+    [ ] normal Hermes retrieval returns the same evidence
+    [ ] failed parse/index remains inactive
+    [ ] unknown information is not invented
+
+## Repository and approval
+
+    [ ] material work starts from current main on a short-lived branch
+    [ ] capability request and external repository record include reuse, gap, security, rollback, and baseline impact
+    [ ] no material change pushes directly to main
+    [ ] external repository workflow remains the authority for PR/HEAD/CI/Readiness
+    [ ] EAO runtime does not claim repository PR preparation is deployable
+    [ ] changed source/version/dependency/target/PR HEAD invalidates approval when a future typed repository path is selected
+    [ ] HumanActor and group membership come from authenticated server-side Open WebUI context
+    [ ] unauthorized human, expired plan, changed state, or changed hash is denied
+    [ ] Cancel creates no effect
+    [ ] repeated completed operation_id returns existing/current result
+    [ ] OUTCOME_UNKNOWN becomes RECONCILIATION_REQUIRED and is not blindly retried
+
+## Frozen baseline and runtime gate
+
+    [ ] Operations and General employee RBAC are unchanged
+    [ ] default/admin remains control-plane only
+    [ ] maintainer Memory, Cron, Kanban, and Messaging Gateway remain OFF
+    [ ] v1A has no generic runtime reconciler
+    [ ] repository/offline PASS is not reported as runtime deployment
+    [ ] exact evidence is recorded in deployment state without secrets
+
+Record PASS — EAO ADMIN CONSOLE V1A only when every enabled-target check passes.
+Otherwise report the failed boundary or
+BLOCKED — REQUIRED INPUT: <specific item>.
 
 # Media transcription
 

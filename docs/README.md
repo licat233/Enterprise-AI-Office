@@ -84,6 +84,7 @@ These record accepted capability boundaries and evidence.
 | `ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md` | Frozen Enterprise Operations v1.0 baseline |
 | `ENTERPRISE-WEB-RESEARCH-V1.md` | Frozen Enterprise Web Research v1 capability |
 | `ENTERPRISE-EMAIL-OPERATIONS-V1.md` | Governed Email Operations boundary |
+| EAO-ADMIN-CONSOLE-V1A.md | Conditional governed EAO administrator capability |
 | `EAO-RBAC-BASELINE.md` | Employee RBAC baseline |
 | `OPERATIONS-EMPLOYEE-RBAC-AUDIT.md` | Operations RBAC audit evidence |
 | `MCP-CONTROL-PLANE.md` | MCP inventory/control-plane contract |

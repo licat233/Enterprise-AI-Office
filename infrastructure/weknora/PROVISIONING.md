@@ -793,3 +793,26 @@ WeKnora provisioning passes only when all applicable checks below are true:
 ```
 
 Only then continue to the remaining Core Ready employee-client acceptance.
+
+## EAO Admin contributor surface
+
+When eao_administrator_console is enabled, bind only the pinned official
+Tencent/WeKnora v0.8.0 contributor API path:
+
+    X-API-Key
+    capabilities: [ingest]
+    knowledge_base_ids: [<EAO_KNOWLEDGE_BASE_ID>]
+
+The allow-list must be explicit and non-empty. The bounded routes are:
+
+    POST /api/v1/knowledge-bases/{id}/knowledge/file
+    POST /api/v1/knowledge-bases/{id}/knowledge/url
+    POST /api/v1/knowledge-bases/{id}/knowledge/manual
+    GET  /api/v1/knowledge/{id}
+
+The contributor key must not be full_access and must not carry manage_kbs,
+manage_agents, platform, or runtime-management capabilities. Do not expose
+owner/admin credentials, tenant or Knowledge Base deletion, embedding/reranker
+changes, bulk deletion, folder-moving operations, or direct database access.
+This surface is approved at the repository-contract level and requires
+separate target binding and acceptance before runtime use.

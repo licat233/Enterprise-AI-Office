@@ -106,6 +106,7 @@ optional_capabilities:
   cron: disabled-unless-configured
   messaging: disabled-unless-configured
   remote_access: disabled-unless-configured
+  eao_administrator_console: disabled-unless-configured
 
 notes:
   - This file is a reproducibility baseline, not a permanent version policy.

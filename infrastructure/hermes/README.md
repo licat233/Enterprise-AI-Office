@@ -129,3 +129,12 @@ Core Hermes acceptance includes:
 - deliberate employee-memory disablement or proven isolation.
 
 Every enabled specialist/native optional capability adds its corresponding conditional acceptance before `CONFIGURED READY` may be claimed.
+
+## EAO Admin maintainer Profile
+
+When enabled, create maintainer from profiles/maintainer/SOUL.md with a unique
+server-side API credential and an explicit served-profile allowlist. Bind only
+typed EAO intake/review operations and the bounded WeKnora contributor path.
+Do not add terminal, filesystem, Docker, SSH, sudo/root, browser, package
+manager, raw secrets, or a route to default/admin. The maintainer Profile is
+an administrator work role, not a host sandbox or a root shell.
