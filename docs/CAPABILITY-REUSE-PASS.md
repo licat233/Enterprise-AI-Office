@@ -26,8 +26,9 @@ Before proposing a new implementation, inspect in this order:
 5. WeKnora native capability.
 6. Existing EAO email/governance capability where relevant.
 7. Official upstream capability or supported integration of the selected component.
-8. A thin adapter around an existing authority.
-9. New infrastructure only after every earlier option is proven insufficient.
+8. If the remaining gap may be solved by a third-party Skill, run `SKILL-ADMISSION.md`.
+9. A thin adapter around an existing authority.
+10. New infrastructure only after every earlier option is proven insufficient.
 
 Do not state that “EAO cannot do X” until this pass has been completed against repository and, where relevant, runtime evidence.
 
