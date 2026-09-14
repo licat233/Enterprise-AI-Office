@@ -92,6 +92,7 @@ These record accepted capability boundaries and evidence.
 | `THIRD-PARTY-SKILL-RUNTIME-ACCEPTANCE.md` | Runtime evidence for admitted direct-use third-party Skills |
 | `OPEN-WEBUI-BRANDING.md` | Open WebUI branding implementation notes and boundary |
 | `THIRD-PARTY-SKILL-ADMISSION-PILOT.md` | Non-normative evidence from the first real DIRECT / ADAPT / DELEGATE / REJECT admission pilot |
+| `THIRD-PARTY-SKILL-ADAPT-RUNTIME-ACCEPTANCE.md` | Runtime evidence for the plugin-eval ADAPT compatibility pilot |
 
 Use these when reproducing or changing the corresponding capability.
 
