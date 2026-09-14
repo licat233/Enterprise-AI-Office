@@ -19,19 +19,13 @@ resolve_script_path() {
   printf '%s/%s\n' "$final_dir" "$(basename "$source_path")"
 }
 
-if [[ -n "${ARMOR_ARCH_ROOT:-}" ]]; then
-  repo_root="$ARMOR_ARCH_ROOT"
-else
-  real_script="$(resolve_script_path)"
-  script_dir="$(dirname "$real_script")"
-  repo_root="$(cd "$script_dir/../../../.." >/dev/null 2>&1 && pwd)"
-fi
-
-knowledge_tool="$repo_root/minimal-stable/scripts/armor-knowledge.py"
+real_script="$(resolve_script_path)"
+script_dir="$(dirname "$real_script")"
+knowledge_tool="$script_dir/armor-knowledge.py"
 
 if [[ ! -f "$knowledge_tool" ]]; then
   echo "ERROR: ARMOR knowledge tool not found: $knowledge_tool" >&2
-  echo "Set ARMOR_ARCH_ROOT to the armor-memory repository root." >&2
+  echo "The armor-memory Skill must contain its local armor-knowledge.py implementation." >&2
   exit 1
 fi
 
