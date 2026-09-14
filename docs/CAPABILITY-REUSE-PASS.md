@@ -54,6 +54,21 @@ For a material new capability, record at least:
 
 If the gap cannot be stated precisely, do not add the component.
 
+## Third-party Skill admission
+
+When the remaining gap may be solved by a third-party Skill, continue with [`SKILL-ADMISSION.md`](SKILL-ADMISSION.md).
+
+Do not use the Skill author's advertised Agent label as the compatibility decision. Inspect the Skill's actual runtime primitives and use:
+
+```text
+DIRECT
+→ ADAPT
+→ DELEGATE
+→ REJECT
+```
+
+A Skill is procedure, not authority. Direct use, adaptation, or delegation must remain inside the target Profile's existing permission and capability boundary. Installing a Skill in Codex or Claude Code does not authorize a normal business Profile to reach privileged execution indirectly.
+
 ## Decision rule
 
 Prefer:
@@ -62,7 +77,9 @@ Prefer:
 reuse existing capability
 → enable/configure upstream capability
 → reuse approved Skill
+→ admit portable third-party Skill directly
 → narrow thin adapter
+→ authorized native-backend delegation when genuinely runtime-dependent
 → new infrastructure only as last resort
 ```
 
