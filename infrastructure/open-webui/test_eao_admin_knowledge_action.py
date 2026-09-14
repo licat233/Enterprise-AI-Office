@@ -25,6 +25,17 @@ class ActionUtilityTests(unittest.TestCase):
                 "http://localhost:8080/private"
             )
 
+    def test_reject_non_global_literal_ip(self):
+        for value in (
+            "http://127.0.0.1/private",
+            "http://10.0.0.1/private",
+            "http://169.254.169.254/latest/meta-data",
+            "http://[::1]/private",
+        ):
+            with self.subTest(value=value):
+                with self.assertRaises(module.ActionError):
+                    module._validate_public_http_url(value)
+
     def test_manual_title(self):
         self.assertEqual(
             module._manual_title("# Title\nBody"),
