@@ -466,7 +466,8 @@ PRODUCTION READY
 | --- | --- |
 | Blueprint lifecycle / real deployment gate | `state/PROJECT-PHASE.yaml` |
 | System / Installation Blueprint | 仓库中的 normative contracts |
-| 企业知识 | WeKnora |
+| 已批准的企业事实 / 参考知识 | WeKnora RAG |
+| 长期业务工作 / 项目记忆 / Research / 发布记录 / 受治理资产 | ARMOR Vault Wiki |
 | AI 角色 / 行为 / Skills / Tools | Hermes Profiles |
 | 员工 Web 身份与访问 | Open WebUI / 企业 Identity Layer |
 | Mailbox / Email Provider Delivery Fact | Email Provider |
@@ -482,12 +483,16 @@ PRODUCTION READY
 
 Hermes Profile 是 AI 工作角色/能力边界，不是员工账号。
 
-### Knowledge ≠ Memory
+### 企业知识、Working Memory 与 Agent Memory 是不同层
 
 ```text
-WeKnora = 权威共享企业知识
+WeKnora RAG = 已批准的企业事实 / 参考知识检索
+ARMOR Vault Wiki = 长期业务 Working Memory 与资产
 Hermes Memory = 可选连续性状态，需要单独满足隔离条件
 ```
+
+普通 Vault 工作产物不能自动回灌 WeKnora。只有经过明确 Knowledge Governance
+决策、成为可复用企业知识后，才允许进入 RAG。
 
 ### 自然语言 ≠ 正式 Approval
 
