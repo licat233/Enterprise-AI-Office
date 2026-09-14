@@ -127,6 +127,11 @@ def _parse_status(payload: Any) -> str | None:
     return str(value) if value is not None else None
 
 
+def _http_outcome_is_ambiguous(status: int) -> bool:
+    """Return True when an HTTP response cannot prove the write was not applied."""
+    return status >= 500 or status == 408
+
+
 def _load_envelope_module():
     try:
         import eao_operation_envelope as module  # type: ignore
@@ -837,6 +842,14 @@ class Action:
                     "no new knowledge item was confirmed."
                 ),
             }
+
+        if _http_outcome_is_ambiguous(http_status):
+            # Keep the pre-write OUTCOME_UNKNOWN record intact. A 5xx or
+            # request-timeout response cannot prove the upstream write did not
+            # commit, so the same operation must not be blindly retried.
+            raise ActionError(
+                f"WEKNORA_OUTCOME_UNKNOWN_HTTP:{http_status}"
+            )
 
         resolved = {
             **record,
