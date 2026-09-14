@@ -1,5 +1,20 @@
 # Enterprise Operations Capability Baseline v1.0
 
+> **Post-baseline knowledge architecture update — 2026-09-14:** the deployed ARMOR
+> reference system now uses a dual knowledge architecture: **WeKnora RAG +
+> ARMOR Vault Wiki / working memory**. This document remains the frozen v1.0
+> acceptance record for the Operations capability set that existed at closure.
+> Any older statement below that describes ARMOR Vault or WeKnora as the single
+> global authority for all knowledge must be read through the current normative
+> model in [`docs/KNOWLEDGE.md`](KNOWLEDGE.md): authority is resolved by object
+> and source type. WeKnora is the approved enterprise factual/reference RAG
+> retrieval layer; ARMOR Vault is the durable Markdown Wiki / working-memory /
+> business-asset layer. Original authoritative technical sources remain primary
+> evidence for exact technical facts. The frozen six-tool scoped Router contract
+> below is historical v1.0 evidence and must not be interpreted as proof that
+> current/future scoped Vault retrieval is forbidden.
+
+
 ## Final Acceptance and Freeze
 
 Date: 2026-09-10

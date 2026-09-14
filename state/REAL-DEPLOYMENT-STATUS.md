@@ -2,7 +2,7 @@
 
 > This file is a **sanitized public progress summary** for the explicitly authorized real company deployment. It is not the protected runtime state record and must never contain credentials, real employee identifiers, private network details, mailbox data, or secret values.
 
-Last updated: 2026-09-12
+Last updated: 2026-09-14
 
 ## Deployment authorization
 
@@ -16,6 +16,31 @@ Blueprint Validation: not opened
 ```
 
 The ARMOR real deployment is already independently authorized, deployed, active, and in use. This file exposes only a sanitized public summary; protected runtime details remain outside Git. The `real_deployment_task.active: false` value in `state/PROJECT-PHASE.yaml` is only the default authorization state for a fresh clone or a new target, so cloning the repository never implies permission to perform another real deployment. It is **not** the ARMOR deployment status. The existing ARMOR deployment authorization also does **not** advance the repository blueprint lifecycle.
+
+## 2026-09-14 dual knowledge architecture update
+
+The ARMOR reference deployment now uses a dual knowledge architecture with
+separate responsibilities:
+
+- **WeKnora RAG** is the approved enterprise factual/reference retrieval layer.
+- **ARMOR Vault Wiki** is the durable Markdown working-memory and business-asset
+  layer for work products, project memory, research, publication records, and
+  governed workflow standards.
+- authority is resolved by object/source type; neither store is declared the
+  global authority for every object;
+- original authoritative datasheets, manuals, tests, and certifications remain
+  primary evidence for exact technical facts;
+- ordinary Vault work products are not automatically ingested into WeKnora;
+- the canonical ARMOR Vault is stored on the designated Mac Studio internal
+  SSD rather than depending on the former NAS runtime path;
+- authorized human Vault access is provided only through the approved private
+  file-sharing boundary over trusted LAN / existing Tailscale connectivity;
+- generic Operations filesystem access remains disabled.
+
+The existing scoped ARMOR Vault adapter continues to own governed persistence.
+Scoped Vault retrieval/search is a bounded follow-on adaptation and must not be
+implemented by enabling a generic filesystem or by introducing another
+persistent knowledge database.
 
 ## 2026-09-12 operational baseline conclusion
 

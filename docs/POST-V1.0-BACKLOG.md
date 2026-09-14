@@ -9,6 +9,7 @@ request.
 | Agent Delegate / Multi-Agent Orchestration | `EXPERIMENTAL_HOLD` | Requires a separately approved orchestrator, worker, auditor, executor-selection, fallback, audit-return, task-state, security, and acceptance design. Operations remains OFF. |
 | Product Visual actual image-generation integration | Deferred optional capability | Requires separate approval for a bounded image tool/runtime, credentials, product/Brand gates, asset QA, binary handling, and publication boundary. v1.0 remains text/metadata-only. |
 | Credential-dependent external research enhancements | Deferred optional capability | Requires an approved credential, least-privilege read scope, runtime health evidence, and a dedicated acceptance contract. |
+| Scoped ARMOR Vault retrieval for Operations | Bounded follow-on adaptation | Extend the existing scoped Vault adapter with least-privilege read/list/search primitives for approved Vault areas. Do not enable generic filesystem access or add a second persistent store. |
 
 Raw Legacy public, generic, commodity, administrative, machine-specific, and
 superseded Skills are not v1.0 migration obligations. The permanent ledger is

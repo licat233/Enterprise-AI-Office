@@ -8,7 +8,7 @@ This document defines the reusable architecture of Enterprise AI Office. Company
 
 Enterprise AI Office is an AI work layer for a company, not merely a chatbot or RAG demo.
 
-The baseline lets an employee use an approved client to reach a Hermes work role that can retrieve authoritative company knowledge from WeKnora and return a grounded answer with source evidence.
+The baseline lets an employee use an approved client to reach a Hermes work role that can retrieve approved enterprise factual/reference knowledge from WeKnora and return a grounded answer with source evidence. The deployed ARMOR reference architecture also uses ARMOR Vault as a complementary Markdown Wiki / working-memory layer for durable business work, project memory, research, records, and governed assets.
 
 Additional workflows, tools, automation, specialist agents, coding workers, and messaging surfaces are extensions enabled only when required.
 
@@ -21,17 +21,23 @@ Employee
 Open WebUI
    │
    ▼
-General Assistant
+Hermes Profile
    │
-   ▼
-Hermes `general` Profile
+   ├──────────────→ WeKnora RAG
+   │                  ↓
+   │             approved factual /
+   │             reference knowledge
    │
-   ▼
-WeKnora MCP / supported API
-   │
-   ▼
-Company Knowledge
+   └──────────────→ scoped ARMOR Vault capability
+                      ↓
+                 Markdown Wiki /
+                 working memory /
+                 business assets
 ```
+
+The General baseline may use only the WeKnora retrieval path. Department
+Profiles expose ARMOR Vault capabilities only when the business workflow
+requires them and only through least-privilege scoped interfaces.
 
 Control plane:
 
@@ -44,11 +50,33 @@ Optional extensions may add specialist Profiles, messaging, Kanban, Cron, Codex,
 
 ## 3. Component responsibilities
 
-### WeKnora — enterprise knowledge platform
+### WeKnora — enterprise RAG knowledge platform
 
-Owns document ingestion, parsing, chunking, embedding, retrieval, source traceability, metadata, and Knowledge Base management.
+Owns document ingestion, parsing, chunking, embedding, retrieval, source
+traceability, metadata, and Knowledge Base management for approved enterprise
+factual/reference knowledge.
 
-WeKnora answers: **What does the company know?**
+WeKnora answers: **What is true / what does the company know as approved reference knowledge?**
+
+### ARMOR Vault — enterprise Wiki / working-memory layer
+
+Owns durable human-readable Markdown business memory and business assets such
+as work products, project memory, research, publication records, and governed
+workflow standards.
+
+ARMOR Vault answers: **What have we done, produced, researched, decided, or published?**
+
+The Vault is not a second RAG database. It remains file/Markdown based and can
+be exposed to humans through an approved private file-access boundary while
+Agent access remains separately scoped.
+
+Authority is determined by object/source type and provenance rather than by
+declaring WeKnora or ARMOR Vault the global authority for every object.
+Authoritative original datasheets, manuals, tests, and certifications remain
+primary evidence for exact technical facts.
+
+Normal Vault work products are not automatically ingested into WeKnora.
+Promotion to RAG requires an explicit knowledge-governance decision.
 
 ### Hermes Agent — primary work runtime
 
