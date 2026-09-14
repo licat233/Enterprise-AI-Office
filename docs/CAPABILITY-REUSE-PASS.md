@@ -26,8 +26,9 @@ Before proposing a new implementation, inspect in this order:
 5. WeKnora native capability.
 6. Existing EAO email/governance capability where relevant.
 7. Official upstream capability or supported integration of the selected component.
-8. A thin adapter around an existing authority.
-9. New infrastructure only after every earlier option is proven insufficient.
+8. If the remaining gap may be solved by a third-party Skill, run `SKILL-ADMISSION.md`.
+9. A thin adapter around an existing authority.
+10. New infrastructure only after every earlier option is proven insufficient.
 
 Do not state that “EAO cannot do X” until this pass has been completed against repository and, where relevant, runtime evidence.
 
@@ -54,6 +55,21 @@ For a material new capability, record at least:
 
 If the gap cannot be stated precisely, do not add the component.
 
+## Third-party Skill admission
+
+When the remaining gap may be solved by a third-party Skill, continue with [`SKILL-ADMISSION.md`](SKILL-ADMISSION.md).
+
+Do not use the Skill author's advertised Agent label as the compatibility decision. Inspect the Skill's actual runtime primitives and use:
+
+```text
+DIRECT
+→ ADAPT
+→ DELEGATE
+→ REJECT
+```
+
+A Skill is procedure, not authority. Direct use, adaptation, or delegation must remain inside the target Profile's existing permission and capability boundary. Installing a Skill in Codex or Claude Code does not authorize a normal business Profile to reach privileged execution indirectly.
+
 ## Decision rule
 
 Prefer:
@@ -62,7 +78,9 @@ Prefer:
 reuse existing capability
 → enable/configure upstream capability
 → reuse approved Skill
+→ admit portable third-party Skill directly
 → narrow thin adapter
+→ authorized native-backend delegation when genuinely runtime-dependent
 → new infrastructure only as last resort
 ```
 

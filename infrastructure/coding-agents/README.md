@@ -72,7 +72,29 @@ For unattended one-shot work, prefer `claude -p` with an explicit workdir, bound
 
 Do not use `--dangerously-skip-permissions` as a default Enterprise AI Office integration policy.
 
-## 4. Repository-local instructions
+## 4. Backend-native third-party Skills
+
+Some third-party Skills are genuinely Codex-native or Claude-Code-native. Evaluate them under [`../../docs/SKILL-ADMISSION.md`](../../docs/SKILL-ADMISSION.md).
+
+Installing a backend-native Skill does not expand who may use coding delegation.
+
+The execution boundary remains:
+
+```text
+authorized employee
+→ authorized technical Assistant/Profile
+→ approved coding backend
+→ approved backend-native Skill
+→ explicit workspace
+```
+
+Do not use Codex or Claude Code as a privilege proxy for `general`, Operations, Sales, Marketing, Procurement, or another normal business Profile that lacks coding-agent authority.
+
+A delegated Skill must remain inside the same backend, workspace, credential, repository-instruction, side-effect, and verification rules defined by this playbook. If the Skill requires broader authority, treat that as a separate Profile/capability change requiring explicit review rather than silently inheriting the backend's host privileges.
+
+Prefer the backend-native Skill when its value depends materially on native session, sandbox, hook, plugin, subagent, review, or worktree semantics. Prefer direct Hermes use or a thin adapter when those semantics are not actually required.
+
+## 5. Repository-local instructions
 
 Before a coding backend modifies a repository, Hermes/the coding agent must read repository-local instructions such as:
 
@@ -85,7 +107,7 @@ project README / contribution rules
 
 The target repository's own rules outrank generic coding assumptions.
 
-## 5. Workspace policy
+## 6. Workspace policy
 
 Company configuration declares allowed workspaces, for example:
 
@@ -106,7 +128,7 @@ Do not infer broad home-directory access from an empty workspace list. A missing
 
 For higher-risk work, use worktrees/disposable clones or another approved isolation boundary.
 
-## 6. Authentication and credentials
+## 7. Authentication and credentials
 
 Validate separately:
 
@@ -122,7 +144,7 @@ Do not copy all host credentials into a Profile `.env`.
 
 With `terminal.home_mode: profile`, initialize only the required CLI identities/configuration inside that Profile-scoped HOME.
 
-## 7. Delegation completion contract
+## 8. Delegation completion contract
 
 A coding task is not successful merely because the coding CLI exits zero.
 
@@ -138,7 +160,7 @@ correct repository/workdir
 
 Do not silently commit, push, merge, release, or deploy unless company/repository policy explicitly authorizes those actions.
 
-## 8. Acceptance
+## 9. Acceptance
 
 Use a disposable or harmless test repository before real work.
 

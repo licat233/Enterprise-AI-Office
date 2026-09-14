@@ -65,6 +65,7 @@ These describe how EAO is intended to work now.
 | `OPERATIONS.md` | Operating procedures |
 | `UPGRADE.md` | Version-change and upgrade rules |
 | `CAPABILITY-REUSE-PASS.md` | Mandatory reuse-before-build decision gate |
+| `SKILL-ADMISSION.md` | Third-party Skill compatibility, authority, adaptation, and delegation standard |
 | `REPOSITORY-GOVERNANCE.md` | Branch, PR, CI, frozen-history, and repository authority rules |
 
 These should normally be read before specialized or historical files.
@@ -88,7 +89,10 @@ These record accepted capability boundaries and evidence.
 | `EAO-RBAC-BASELINE.md` | Employee RBAC baseline |
 | `OPERATIONS-EMPLOYEE-RBAC-AUDIT.md` | Operations RBAC audit evidence |
 | `MCP-CONTROL-PLANE.md` | MCP inventory/control-plane contract |
+| `THIRD-PARTY-SKILL-RUNTIME-ACCEPTANCE.md` | Runtime evidence for admitted direct-use third-party Skills |
 | `OPEN-WEBUI-BRANDING.md` | Open WebUI branding implementation notes and boundary |
+| `THIRD-PARTY-SKILL-ADMISSION-PILOT.md` | Non-normative evidence from the first real DIRECT / ADAPT / DELEGATE / REJECT admission pilot |
+| `THIRD-PARTY-SKILL-ADAPT-RUNTIME-ACCEPTANCE.md` | Runtime evidence for the plugin-eval ADAPT compatibility pilot |
 
 Use these when reproducing or changing the corresponding capability.
 
@@ -194,6 +198,7 @@ Use this shortcut:
 | Rebuild EAO | `REPRODUCE.md` → `DEPLOY.md` |
 | Validate a fresh Agent | `VALIDATE.md` |
 | Add a capability | `CAPABILITY-REUSE-PASS.md` → `config/capabilities.yaml` |
+| Assess a third-party Skill | `CAPABILITY-REUSE-PASS.md` → `SKILL-ADMISSION.md` (pilot report is example evidence, not authority) |
 | Change architecture | `AGENTS.md` → `ARCHITECTURE.md` → `SECURITY.md` |
 | Maintain repository / GitHub workflow | `REPOSITORY-GOVERNANCE.md` |
 | Work with knowledge | `KNOWLEDGE.md` |
