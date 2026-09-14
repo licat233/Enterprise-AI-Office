@@ -210,13 +210,16 @@ capabilities:
       default_branch: main
       typed_runtime_status: blocked-until-approved-binding
     weknora_contributor:
+      status: blocked_disabled
+      reason: BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT STACK
       api_key_ref: null
       full_access: false
-      capabilities:
-        - ingest
-        - retrieve
-      knowledge_base_ids:
-        - <EAO_KNOWLEDGE_BASE_ID>
+      capabilities: []
+      knowledge_base_ids: []
+      allowed_routes:
+        - GET /knowledge/{id}
+      production_use: disabled
+      reference_only: true
     target_runtime: <EXPLICITLY_AUTHORIZED_TARGET>
   # Email is a governed operational integration, not part of the core baseline.
   # Real mailbox/user/group values belong in the company-private overlay.

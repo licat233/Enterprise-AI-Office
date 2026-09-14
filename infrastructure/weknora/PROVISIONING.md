@@ -794,27 +794,14 @@ WeKnora provisioning passes only when all applicable checks below are true:
 
 Only then continue to the remaining Core Ready employee-client acceptance.
 
-## EAO Admin contributor surface
+## EAO Admin Knowledge surface
 
-When eao_administrator_console is enabled, bind only the pinned official
-Tencent/WeKnora v0.8.0 contributor API path:
+The accepted EAO Admin surface is review/recommendation plus read-only WeKnora
+retrieval. Knowledge Mutation through EAO Admin is `BLOCKED / DISABLED` with
+reason `BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT STACK`.
 
-    X-API-Key
-    full_access: false
-    capabilities: [ingest, retrieve]
-    knowledge_base_ids: [<EAO_KNOWLEDGE_BASE_ID>]
-
-The allow-list must be explicit and non-empty. The bounded routes are:
-
-    POST /api/v1/knowledge-bases/{id}/knowledge/file
-    POST /api/v1/knowledge-bases/{id}/knowledge/url
-    POST /api/v1/knowledge-bases/{id}/knowledge/manual
-    GET  /api/v1/knowledge/{id}
-
-The contributor key must set full_access=false and carry exactly ingest and
-retrieve. It must not carry manage_kbs, manage_agents, manage_models, MCP admin,
-tenant/system admin, platform, or runtime-management capabilities. Do not expose
-owner/admin credentials, tenant or Knowledge Base deletion, embedding/reranker
-changes, bulk deletion, folder-moving operations, or direct database access.
-This surface is approved at the repository-contract level and requires
-separate target binding and acceptance before runtime use.
+The v0.8.0 contributor API shape and its Action-only credential are retained as
+reference material only; the write routes are not a v1A runtime binding. Do
+not shorten operation markers, enable audit, add a ledger/database, patch
+WeKnora/Open WebUI, or substitute direct database access. A future replacement
+path requires separate approval and acceptance.

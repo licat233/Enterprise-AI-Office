@@ -164,18 +164,17 @@ capabilities:
       name: <EAO_REPOSITORY_NAME>
       default_branch: main
     weknora_contributor:
-      api_key_ref: eao-weknora-contributor-api-key
+      status: blocked_disabled
+      reason: BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT STACK
+      retired_api_key_ref: eao-weknora-contributor-api-key
+      api_key_ref: null
       full_access: false
-      capabilities:
-        - ingest
-        - retrieve
-      knowledge_base_ids:
-        - <EAO_KNOWLEDGE_BASE_ID>
+      capabilities: []
+      knowledge_base_ids: []
       allowed_routes:
-        - POST /knowledge-bases/{id}/knowledge/file
-        - POST /knowledge-bases/{id}/knowledge/url
-        - POST /knowledge-bases/{id}/knowledge/manual
         - GET /knowledge/{id}
+      production_use: disabled
+      reference_only: true
     target_runtime: <EXPLICITLY_AUTHORIZED_TARGET>
 
   email:
