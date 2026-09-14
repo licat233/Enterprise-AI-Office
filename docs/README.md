@@ -90,6 +90,7 @@ These record accepted capability boundaries and evidence.
 | `OPERATIONS-EMPLOYEE-RBAC-AUDIT.md` | Operations RBAC audit evidence |
 | `MCP-CONTROL-PLANE.md` | MCP inventory/control-plane contract |
 | `OPEN-WEBUI-BRANDING.md` | Open WebUI branding implementation notes and boundary |
+| `THIRD-PARTY-SKILL-ADMISSION-PILOT.md` | Non-normative evidence from the first real DIRECT / ADAPT / DELEGATE / REJECT admission pilot |
 
 Use these when reproducing or changing the corresponding capability.
 
@@ -195,7 +196,7 @@ Use this shortcut:
 | Rebuild EAO | `REPRODUCE.md` → `DEPLOY.md` |
 | Validate a fresh Agent | `VALIDATE.md` |
 | Add a capability | `CAPABILITY-REUSE-PASS.md` → `config/capabilities.yaml` |
-| Assess a third-party Skill | `CAPABILITY-REUSE-PASS.md` → `SKILL-ADMISSION.md` |
+| Assess a third-party Skill | `CAPABILITY-REUSE-PASS.md` → `SKILL-ADMISSION.md` (pilot report is example evidence, not authority) |
 | Change architecture | `AGENTS.md` → `ARCHITECTURE.md` → `SECURITY.md` |
 | Maintain repository / GitHub workflow | `REPOSITORY-GOVERNANCE.md` |
 | Work with knowledge | `KNOWLEDGE.md` |
