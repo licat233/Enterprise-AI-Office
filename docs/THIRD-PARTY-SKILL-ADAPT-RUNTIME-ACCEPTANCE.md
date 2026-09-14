@@ -250,11 +250,12 @@ operations: NOT USED / NOT MODIFIED
 Company-wide exposure: NONE
 ```
 
-The procedure issued no Gateway control command. A Gateway restart was
-observed in the existing production log during the broader test window; the
-post-check remained healthy, launchd-supervised, and served only `general` and
-`operations`. This was recorded as an operational observation, not treated as
-an adapter permission change and not expanded into root-cause investigation.
+The procedure issued no Gateway control command. The existing production log
+contains a supervisor restart event at `2026-09-14 15:04:37.823`, before the
+acceptance sessions recorded here; the post-check remained healthy,
+launchd-supervised, and served only `general` and `operations`. This was
+recorded as an operational observation, not treated as an adapter permission
+change and not expanded into root-cause investigation.
 
 ## Rollback and persistent state
 
