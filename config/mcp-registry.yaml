@@ -1,6 +1,6 @@
 schema_version: 2
 registry: enterprise-mcp-control-plane
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-14
 
 scope:
   definition_layer: reusable_enterprise_control_plane
