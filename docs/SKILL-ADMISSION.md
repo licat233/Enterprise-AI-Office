@@ -288,7 +288,7 @@ The adapter must fail closed when the backend-only path is unavailable. It must 
 
 The first real classification evidence is recorded in [`THIRD-PARTY-SKILL-ADMISSION-PILOT.md`](THIRD-PARTY-SKILL-ADMISSION-PILOT.md). That report is evidence/example material; this document remains the normative policy.
 
-## 12. Source, update, and supply-chain policy
+## 11. Source, update, and supply-chain policy
 
 For every admitted third-party Skill, record enough provenance to reproduce the decision:
 
