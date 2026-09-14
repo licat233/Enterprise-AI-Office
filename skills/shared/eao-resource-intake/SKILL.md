@@ -12,11 +12,10 @@ Provide the governed, read-first orchestration for EAO administrator resource in
 - the `maintainer` Profile and private `EAO Admin` Assistant;
 - current repository authority and capability registry;
 - supported read-only WeKnora retrieval path for review/verification;
-- supported WeKnora contributor API held only by the server-side approval Action when Knowledge ingestion is requested;
 - bounded Enterprise Web Research source-inspection path (web_search + web_fetch only);
 - existing MCP/control-plane registry for review-only MCP/backend assessment;
 - ToolScout-first review path for proposed Tools or commodity utilities;
-- protected server-side operation-plan/approval binding implemented by the Open WebUI Action.
+- protected non-secret runtime state recording that Knowledge Mutation through EAO Admin is disabled.
 
 If a prerequisite is missing, stop with `BLOCKED — REQUIRED INPUT` or `BLOCKED — TYPED CAPABILITY NOT AVAILABLE`. Do not substitute generic shell, direct database writes, or an unapproved HTTP client.
 
@@ -31,9 +30,8 @@ receive
 → current-authority review
 → source/security/provenance review
 → proposed action + risk/impact summary
-→ immutable operation plan
-→ trusted approval when material mutation is required
-→ bounded typed operation only
+→ exact metadata/state recommendation
+→ read-only verification evidence
 → acceptance evidence
 ```
 
@@ -41,7 +39,7 @@ Classification must produce exactly one primary class:
 
 | Class | Initial authority | v1A disposition |
 | --- | --- | --- |
-| Knowledge | WeKnora + source provenance | bounded contributor ingestion after approval |
+| Knowledge | WeKnora + source provenance | review/recommendation and read-only verification; mutation blocked |
 | Skill | Git + actual source/license/dependency review | recommendation; external repository PR workflow only |
 | Tool | ToolScout-first + official source | recommendation; external repository PR workflow only |
 | MCP / External Backend | official API/MCP + MCP control plane | narrow registration proposal; no automatic exposure |
@@ -76,19 +74,16 @@ For a Knowledge candidate:
 3. review confidentiality, owner, version, effective date, status, and license/provenance;
 4. check duplicate, supersession, and authoritative conflict state;
 5. prepare metadata for the configured `Company Knowledge` Base;
-6. create an immutable operation envelope through the server-side Action using source material re-derived from the current owned Open WebUI chat;
-7. show the exact source fingerprint/target/plan hash to the authenticated administrator and require trusted approval;
-8. re-resolve group membership and source/current state after confirmation;
-9. use only the bounded WeKnora contributor operation held by the Action;
-10. require parse/index completion, direct retrieval, source evidence, and normal Hermes retrieval before `ACTIVE`;
-11. leave failed or conflicting material inactive and surface the conflict.
+6. prepare the exact metadata/state recommendation from the current review context;
+7. show the source fingerprint, target recommendation, risks, and evidence to the authenticated administrator;
+8. perform read-only retrieval verification for existing Company Knowledge and record source evidence;
+9. leave failed or conflicting material inactive and surface the conflict; do not mutate through EAO Admin.
 
-The pinned WeKnora v0.8.0 contributor path is the official API with a
-separate tenant API key carrying exactly ingest and retrieve plus an
-explicit non-empty Knowledge Base allow-list. Its v1A routes are file, URL, and
-manual knowledge creation, plus knowledge status retrieval. It must keep
-full_access=false and must not use manage_kbs, manage_agents, manage_models, MCP
-admin, tenant/system admin, platform, or runtime-management capabilities.
+The pinned WeKnora v0.8.0 contributor path and its write credential are
+reference-only and retired/disabled for this baseline. Knowledge Mutation
+through EAO Admin is `BLOCKED / DISABLED` with reason `BLOCKED — REPLAY/AUDIT
+DURABILITY NOT ACCEPTED ON CURRENT STACK`. Prepare exact metadata/state for a
+direct approved external/manual path once one is defined; do not invent one.
 
 Knowledge ingestion does not authorize Knowledge Base deletion, embedding/reranker changes, bulk destructive deletion, or direct database writes.
 
@@ -159,13 +154,12 @@ minutes).
 
 Material changes invalidate approval, including source fingerprint, upstream commit, dependency set, PR HEAD/CI state, Tool version/recipe, credentials/security scope, Profile exposure, target, or expected current state changes.
 
-Every mutation carries a stable `operation_id`. The Action records only
-sanitized result/replay evidence in existing Open WebUI assistant-message
-metadata before/after the external write; no new approval database is added.
-A replay of a completed operation returns the existing/current result.
-`OUTCOME_UNKNOWN` becomes `RECONCILIATION_REQUIRED` and must not be blindly
-retried. The HMAC key, contributor key and trusted signature never enter chat
-metadata or model-visible output.
+The operation-envelope and approval Action artifacts are reference-only. Their
+replay/audit durability is not accepted on the current stack, so no EAO Admin
+mutation, operation marker, or reconciliation claim is active. Do not invoke
+the Action, retry `OUTCOME_UNKNOWN` or any unknown outcome, or use chat metadata as a ledger. The
+HMAC key, contributor key, and trusted signature remain unavailable to the
+maintainer model.
 
 ## Forbidden Capabilities
 

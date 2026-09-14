@@ -94,6 +94,8 @@ See [Repository governance](docs/REPOSITORY-GOVERNANCE.md) for the full contract
 
 The current Enterprise AI Office architecture is centered on four stable boundaries: a private employee access surface, Hermes Profile-based work execution, a dual knowledge layer, and capability-specific governed integrations. ARMOR-specific capabilities are layered on top of the reusable Core rather than redefining it.
 
+The Communication/Email lane is a **conditional capability**, not part of mandatory Core, and is instantiated only when the active company configuration enables it.
+
 ```mermaid
 flowchart TB
   Employee["Authorized employee"]

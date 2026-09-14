@@ -622,14 +622,17 @@ capabilities:
       - authorized EAO Administrators group identity
       - maintainer Profile and EAO Admin Assistant identifiers
       - configured WeKnora target Knowledge Base
-      - bounded WeKnora contributor path using the pinned official API
+      - bounded read-only WeKnora retrieval binding
       - bounded read-only source inspection through enterprise-web-research
       - ToolScout-first review binding with no maintainer memory-write tools
-      - protected Open WebUI server-side approval binding
+      - protected non-secret runtime state for the disabled experimental mutation Action
       - bounded approval TTL, default 30 minutes
     runtime_capability_resolution:
       weknora_contributor:
-        status: resolved_for_v1a_contract
+        status: blocked_disabled
+        blocker: "BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT STACK"
+        production_use: disabled
+        reference_only: true
         upstream: Tencent/WeKnora v0.8.0
         authentication: X-API-Key
         required_api_key_capabilities:
@@ -645,10 +648,11 @@ capabilities:
           - full_access_false
           - explicit_non_empty_knowledge_base_ids
         allowed_routes:
+          - GET /knowledge/{id}
+        reference_only_write_routes:
           - POST /knowledge-bases/{id}/knowledge/file
           - POST /knowledge-bases/{id}/knowledge/url
           - POST /knowledge-bases/{id}/knowledge/manual
-          - GET /knowledge/{id}
         forbidden_capabilities:
           - full_access
           - manage_kbs
@@ -687,18 +691,22 @@ capabilities:
         runtime_mutation_binding_required: false
         runtime_operations: []
       approval_action:
-        status: resolved_for_v1a_contract
+        status: blocked_disabled
+        blocker: "BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT STACK"
+        production_use: disabled
+        accepted_runtime_scope: review_and_recommendation_only
         upstream: Open WebUI v0.11.3 server-side Action
         implementation: infrastructure/open-webui/eao_admin_knowledge_action.py
-        source_authority: current owned Open WebUI chat and attachment metadata
-        replay_evidence: Open WebUI assistant-message metadata
-        mutation_scope: bounded WeKnora contributor routes only
+        source_authority: reference artifact only; not an accepted production mutation authority
+        replay_evidence: not accepted for production durability
+        mutation_scope: "BLOCKED / DISABLED — no production Knowledge Mutation"
     required_secret_classes:
       - maintainer-profile-credential
       - open-webui-admin-credential
+      - firecrawl-api-credential
+    optional_reference_secret_classes:
       - weknora-contributor-credential
       - operation-envelope-signing-key
-      - firecrawl-api-credential
     protected_input_contract:
       document: docs/EAO-ADMIN-CONSOLE-V1A.md
       provisioning: infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md
@@ -711,14 +719,15 @@ capabilities:
       offline_test: infrastructure/open-webui/test_eao_operation_envelope.py
       additional_offline_tests:
         - infrastructure/open-webui/test_eao_admin_knowledge_action.py
-      result: "PASS — EAO ADMIN CONSOLE V1A"
+      result: "PASS — EAO ADMIN CONSOLE V1A REVIEW PLANE; KNOWLEDGE MUTATION BLOCKED / DISABLED"
     v1a_allowed_operations:
       - resource_classification
       - capability_reuse_review
       - skill_review
       - tool_review
       - mcp_backend_review
-      - knowledge_ingestion
+      - knowledge_review_recommendation
+      - knowledge_read_only_verification
     v1a_forbidden_operations:
       - run_shell
       - execute
@@ -729,13 +738,16 @@ capabilities:
       - reconcile_profile
       - reconcile_mcp
       - profile_switch
+      - knowledge_mutation
+      - knowledge_ingestion
+      - approval_action_execution
     records:
       - EAO Administrators group and Assistant mapping
       - maintainer tool/MCP/credential scope without secret values
       - bounded source-inspection and ToolScout review bindings
-      - Open WebUI knowledge-approval Action binding and replay evidence
+      - disabled experimental Action state and production replay/audit blocker
       - Capability Reuse Pass and ToolScout findings
-      - Knowledge source fingerprints and ingestion/retrieval evidence
+      - Knowledge source fingerprints, review, recommendation, and read-only retrieval evidence
       - repository branch/PR/HEAD/CI/Readiness evidence from the external repository workflow
       - typed repository blocker and re-resolution evidence
       - operation_id, immutable plan hash, trusted plan signature, approval TTL and invalidation result

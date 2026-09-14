@@ -94,6 +94,8 @@ merge
 
 当前 Enterprise AI Office 的整体架构围绕四条稳定边界展开：私有员工访问入口、基于 Hermes Profile 的工作执行层、双知识层，以及按业务能力独立启用的受治理集成。ARMOR 的专用能力建立在可复用 Core 之上，而不是反过来重定义 Core。
 
+Communication/Email 是**条件能力**，不属于强制 Core；只有当前公司配置显式启用时才会实例化。
+
 ```mermaid
 flowchart TB
   Employee["授权员工"]

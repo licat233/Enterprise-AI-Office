@@ -25,8 +25,8 @@ Required protected inputs:
     bounded ToolScout maintainer review binding
     MCP/control-plane registry authority for review-only inspection
     repository typed path status: BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
-    protected operation-envelope HMAC signing-key reference
-    scoped WeKnora contributor credential for the Action only
+    disabled/reference-only operation-envelope HMAC binding
+    retired/disabled WeKnora contributor credential; not a runtime prerequisite
     operation-envelope approval TTL (default and maximum 30 minutes)
 
 Never print, store, or commit the API key, bootstrap password, bearer token, or
@@ -84,11 +84,11 @@ intake/review capability set only:
     Skill actual-source review
     ToolScout-first review through the maintainer review subset
     MCP/backend review without automatic exposure
-    operation-plan preview/approval binding
+    operation-plan preview only; no accepted mutation binding
 
 The Hermes maintainer Profile MUST NOT receive the WeKnora contributor write
-credential or contributor write routes. Knowledge mutation is held by the
-server-side Open WebUI Action only.
+credential or contributor write routes. Knowledge Mutation through EAO Admin is
+`BLOCKED / DISABLED`; no server-side Open WebUI Action mutation path is active.
 
 The repository read/search, CI/readiness, branch, and PR path is currently:
 
@@ -99,7 +99,7 @@ binding is unavailable, leave that operation disabled/blocked. Do not
 compensate with generic terminal, filesystem, Docker, browser, shell,
 package-manager, or arbitrary HTTP access.
 
-## 4. Deterministic approval Action
+## 4. Deterministic approval Action (reference-only; disabled)
 
 Reference implementation:
 
@@ -111,6 +111,11 @@ Shared deterministic envelope primitive:
 
 The Action reuses Open WebUI v0.11.3's server-side authenticated Action
 runtime. It does not add a governance service or approval database.
+
+Production status: `BLOCKED / DISABLED` — `BLOCKED — REPLAY/AUDIT DURABILITY
+NOT ACCEPTED ON CURRENT STACK`. The following is retained only to document the
+experimental/reference artifact. Do not provision, enable, or invoke it as a
+production mutation path.
 
 The Action/control-plane binding must:
 
@@ -143,7 +148,8 @@ operation result/replay evidence in the already-existing Open WebUI chat message
 metadata. It must never store the HMAC key, WeKnora contributor key or trusted
 plan signature there. Do not add an approval database or generic admin endpoint.
 
-The Open WebUI Action receives server-side-only configuration equivalent to:
+The disabled experimental Action would receive server-side-only configuration
+equivalent to:
 
     EAIO_EAO_ADMIN_GROUP_ID
     EAIO_EAO_ADMIN_ASSISTANT_ID=maintainer
@@ -168,7 +174,7 @@ Resolved typed operations:
     review_skill_source
     review_tool_with_toolscout
     review_mcp_backend
-    ingest_approved_knowledge_source
+    prepare_knowledge_review_recommendation
 
 The source-inspection binding exposes only enterprise-web-research web_search
 and web_fetch. Raw Firecrawl, Obscura, CloakBrowser, authenticated browsing,
@@ -186,20 +192,23 @@ Repository operations are not in the v1A runtime set:
 
     BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
 
-The WeKnora operation must use the pinned official v0.8.0 bounded contributor
-path: X-API-Key with exactly the ingest and retrieve capabilities,
-full_access=false, and a non-empty knowledge_base_ids allow-list. The only v1A
-write routes are:
+Knowledge Mutation through EAO Admin is not a v1A typed operation. The pinned
+official v0.8.0 contributor routes are reference-only and disabled because
+`BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT STACK`. The accepted
+WeKnora capability is read-only retrieval/verification.
+
+Reference-only disabled write-route shape:
 
     POST /api/v1/knowledge-bases/{id}/knowledge/file
     POST /api/v1/knowledge-bases/{id}/knowledge/url
     POST /api/v1/knowledge-bases/{id}/knowledge/manual
 
-Status is read through GET /api/v1/knowledge/{id}. The credential must keep
-full_access=false and must not carry manage_kbs, manage_agents, manage_models,
-MCP admin, tenant/system admin, platform, or runtime-management capabilities.
-It must not expose tenant deletion, Knowledge Base deletion,
-embedding/reranker administration, bulk deletion, or direct database writes.
+Status is read through GET /api/v1/knowledge/{id} by the accepted read-only
+binding. Any reference-only credential shape would keep full_access=false and
+must not carry manage_kbs, manage_agents, manage_models, MCP admin,
+tenant/system admin, platform, or runtime-management capabilities. It must not
+expose tenant deletion, Knowledge Base deletion, embedding/reranker
+administration, bulk deletion, or direct database writes.
 
 Not exposed in v1A:
 
@@ -214,6 +223,10 @@ Not exposed in v1A:
     reconcile_profile
     reconcile_mcp
     switch_profile
+
+The dedicated contributor credential is not placed in maintainer and must be
+retired/deactivated through the supported WeKnora credential-management path
+when it is Action-only.
 
 ## 6. Direct acceptance probes
 
