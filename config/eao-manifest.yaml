@@ -35,7 +35,13 @@ entrypoints:
 architecture:
   employee_surface: Open WebUI
   agent_runtime: Hermes Agent
-  enterprise_knowledge: WeKnora
+  knowledge_architecture: dual_rag_plus_wiki
+  enterprise_factual_retrieval: WeKnora
+  enterprise_working_memory_wiki: ARMOR Vault
+  authority_model: by_object_and_source_type
+  vault_role: durable_business_memory_work_products_research_records_and_governed_assets
+  rag_role: approved_enterprise_factual_reference_retrieval
+  automatic_vault_to_rag_ingestion: prohibited
   integration_boundary: MCP
   durable_business_authority: approved Vault Router contracts where enabled
   scheduling: Hermes Cron
