@@ -27,6 +27,9 @@ policy:
     - armor-vault-scoped-router
     - enterprise-web-research
     - toolscout
+  maintainer_allowlist:
+    - enterprise-web-research
+    - toolscout
 
 servers:
   anysearch:
@@ -156,15 +159,24 @@ servers:
     exposure:
       allowed_profiles:
         - operations
+        - maintainer
       reserved_profiles: []
       default_enabled: false
       operations_exposure: true
+      maintainer_exposure: true
     boundary:
       risk: read_only
       adapter_required: true
       allowed_tools:
         - web_search
         - web_fetch
+      profile_tool_allowlists:
+        operations:
+          - web_search
+          - web_fetch
+        maintainer:
+          - web_search
+          - web_fetch
       denied_tools:
         - firecrawl_scrape
         - firecrawl_crawl
@@ -335,9 +347,11 @@ servers:
     exposure:
       allowed_profiles:
         - operations
+        - maintainer
       reserved_profiles: []
       default_enabled: false
       operations_exposure: true
+      maintainer_exposure: true
     boundary:
       separate_agent_identity: true
       separate_memory_home: true
@@ -351,6 +365,22 @@ servers:
         - record_memory
         - check_conflicts
         - doctor
+      profile_tool_allowlists:
+        operations:
+          - advise_tool_use
+          - resolve_memory_home
+          - query_registry
+          - detect_candidates
+          - recall_memory
+          - record_memory
+          - check_conflicts
+          - doctor
+        maintainer:
+          - advise_tool_use
+          - query_registry
+          - detect_candidates
+          - check_conflicts
+          - doctor
       prompts: false
       resources: false
     health:
