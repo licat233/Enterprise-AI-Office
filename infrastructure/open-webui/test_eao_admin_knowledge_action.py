@@ -90,6 +90,14 @@ class ActionUtilityTests(unittest.TestCase):
             "completed",
         )
 
+    def test_ambiguous_http_outcomes_fail_closed(self):
+        for status in (408, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                self.assertTrue(module._http_outcome_is_ambiguous(status))
+        for status in (400, 401, 403, 404, 409, 422, 429):
+            with self.subTest(status=status):
+                self.assertFalse(module._http_outcome_is_ambiguous(status))
+
     def test_multipart_contains_only_bounded_fields(self):
         body, content_type = module._multipart_file_body(
             "demo.txt",
