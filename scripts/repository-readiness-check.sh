@@ -231,9 +231,13 @@ for path in \
   docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md \
   profiles/maintainer/SOUL.md \
   skills/shared/eao-resource-intake/SKILL.md \
+  infrastructure/hermes/maintainer-routing.example.yaml \
+  infrastructure/hermes/maintainer.env.example \
   infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md \
   infrastructure/open-webui/eao_operation_envelope.py \
-  infrastructure/open-webui/test_eao_operation_envelope.py
+  infrastructure/open-webui/eao_admin_knowledge_action.py \
+  infrastructure/open-webui/test_eao_operation_envelope.py \
+  infrastructure/open-webui/test_eao_admin_knowledge_action.py
 do
   require_file "$path"
 done
@@ -704,6 +708,13 @@ if grep -F 'KEEP_MIGRATE' "$ROOT/docs/inventory/legacy-operations-skills-triage.
 else
   pass 'Final migration ledger has no KEEP_MIGRATE rows'
 fi
+
+if python3 "$ROOT/infrastructure/open-webui/test_eao_admin_knowledge_action.py" >/dev/null; then
+  pass 'EAO Admin Knowledge Action offline tests'
+else
+  fail 'EAO Admin Knowledge Action offline tests' 'bounded Action utility tests failed'
+fi
+
 if [ "$REPOSITORY_ONLY" != "1" ]; then
   require_text private/department-profile/.symlink_manifest 'armor-product-visual -> /Users/armor/Enterprise-AI-Office/skills/shared/department/armor-product-visual' 'Profile manifest exposes Product Visual canonically'
 fi
@@ -937,6 +948,20 @@ require_text config/capabilities.yaml 'operation-envelope-signing-key' 'EAO regi
 require_text config/company.example.yaml 'approval_signing_key_ref: null' 'Generic company config declares approval signing-key ref without a value'
 require_text config/company.private.example.yaml 'approval_signing_key_ref: eao-admin-operation-signing-key' 'Private example binds a symbolic approval signing-key ref'
 require_text infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md 'protected operation-envelope HMAC signing-key reference' 'EAO provisioning requires protected approval signing key'
+require_text config/capabilities.yaml 'capability: enterprise_web_research' 'EAO Admin reuses Enterprise Web Research for source inspection'
+require_text config/capabilities.yaml 'capability: toolscout' 'EAO Admin reuses ToolScout for tool review'
+require_text config/capabilities.yaml 'implementation: infrastructure/open-webui/eao_admin_knowledge_action.py' 'EAO Admin has deployable approval Action'
+require_text config/mcp-registry.yaml 'conditional_profile_allowlists:' 'MCP registry has conditional maintainer review allowlist'
+require_text config/mcp-registry.yaml 'maintainer_exposure_current_snapshot: false' 'MCP registry does not claim undeployed maintainer exposure'
+require_text infrastructure/hermes/maintainer-routing.example.yaml 'mcp-maintainer-web-research' 'Maintainer routing binds bounded Web Research'
+require_text infrastructure/hermes/maintainer-routing.example.yaml 'mcp-maintainer-toolscout' 'Maintainer routing binds ToolScout'
+require_no_text infrastructure/hermes/maintainer-routing.example.yaml 'record_memory' 'Maintainer routing excludes ToolScout memory writes'
+require_no_text infrastructure/hermes/maintainer-routing.example.yaml 'recall_memory' 'Maintainer routing excludes ToolScout memory reads'
+require_text infrastructure/open-webui/eao_admin_knowledge_action.py 'SOURCE_FILE_NOT_OWNED' 'Knowledge Action verifies file ownership'
+require_text infrastructure/open-webui/eao_admin_knowledge_action.py 'OUTCOME_UNKNOWN' 'Knowledge Action persists fail-closed replay state'
+require_text infrastructure/open-webui/eao_admin_knowledge_action.py 'X-API-Key' 'Knowledge Action uses scoped WeKnora API key'
+require_no_text infrastructure/open-webui/eao_admin_knowledge_action.py 'manage_kbs' 'Knowledge Action does not expose KB administration'
+require_no_text infrastructure/open-webui/eao_admin_knowledge_action.py 'subprocess' 'Knowledge Action has no process execution'
 require_no_text config/capabilities.yaml 'repository_pr_preparation' 'EAO registry does not claim repository PR runtime operation'
 require_no_text config/capabilities.yaml 'repository_readiness_inspection' 'EAO registry does not claim repository readiness runtime operation'
 require_text docs/EAO-ADMIN-CONSOLE-V1A.md 'No database, workflow engine, scheduler, vector store, IAM layer' 'EAO reuse pass rejects replacement infrastructure'

@@ -20,9 +20,13 @@ Required protected inputs:
     EAO Administrators logical/runtime group identity
     Hermes maintainer Profile API URL and unique API key
     configured WeKnora target Knowledge Base
+    read-only maintainer WeKnora retrieval binding
+    bounded Enterprise Web Research binding (web_search + web_fetch only)
+    bounded ToolScout maintainer review binding
     MCP/control-plane registry authority for review-only inspection
     repository typed path status: BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
     protected operation-envelope HMAC signing-key reference
+    scoped WeKnora contributor credential for the Action only
     operation-envelope approval TTL (default and maximum 30 minutes)
 
 Never print, store, or commit the API key, bootstrap password, bearer token, or
@@ -75,11 +79,16 @@ intake/review capability set only:
 
     resource classification
     Capability Reuse Pass
+    read-only Company Knowledge retrieval
+    bounded external source inspection through enterprise-web-research
     Skill actual-source review
-    ToolScout-first review
+    ToolScout-first review through the maintainer review subset
     MCP/backend review without automatic exposure
-    bounded WeKnora contributor/retrieval operation
     operation-plan preview/approval binding
+
+The Hermes maintainer Profile MUST NOT receive the WeKnora contributor write
+credential or contributor write routes. Knowledge mutation is held by the
+server-side Open WebUI Action only.
 
 The repository read/search, CI/readiness, branch, and PR path is currently:
 
@@ -92,24 +101,62 @@ package-manager, or arbitrary HTTP access.
 
 ## 4. Deterministic approval Action
 
-A server-side Open WebUI Action may use
-infrastructure/open-webui/eao_operation_envelope.py for validation. The
-Action/control-plane binding must:
+Reference implementation:
+
+    infrastructure/open-webui/eao_admin_knowledge_action.py
+
+Shared deterministic envelope primitive:
+
+    infrastructure/open-webui/eao_operation_envelope.py
+
+The Action reuses Open WebUI v0.11.3's server-side authenticated Action
+runtime. It does not add a governance service or approval database.
+
+The Action/control-plane binding must:
 
 1. receive the current authenticated Open WebUI user context;
 2. derive HumanActor and current groups server-side. The Action receives server-side Open WebUI user context only from the authenticated request.
-3. resolve the operation subject by server-owned operation context, not model text;
-4. display exact operation fields, source fingerprint, target, impact, hash, and expiry;
-5. on Approve, reload current state, recheck authorization, recompute the hash,
-   reject expiry/staleness, and invoke only the typed operation;
-6. on Cancel, create no approval/effect;
-7. return only sanitized non-secret evidence.
+3. resolve the source from the current owned chat branch and the exact parent user
+   message; uploaded files must resolve through Open WebUI's own file record and
+   storage provider and must be owned by the current HumanActor;
+4. derive the source fingerprint, operation_id, target Knowledge Base and expected
+   current state server-side. Do not accept these as authority from model text;
+5. build/sign the immutable operation envelope with the protected HMAC key;
+6. display exact operation fields, source fingerprint, target, impact and plan hash;
+7. on Approve, reload current group membership and re-resolve the source from the
+   current chat. Changed source/current state must invalidate approval;
+8. before the external write, persist a sanitized OUTCOME_UNKNOWN operation marker
+   in the existing Open WebUI assistant-message metadata so a crash cannot cause a
+   blind retry. This is replay evidence, not a new approval database;
+9. invoke only the three bounded WeKnora contributor write routes and the one
+   bounded knowledge-detail read route;
+10. on Cancel, create no approval/effect;
+11. return only sanitized non-secret evidence.
 
 The Action must never accept actor IDs, group IDs, operation IDs, plan hashes,
-commands, paths, package names, or approval state as authority from assistant
-text or user-supplied tool arguments. The envelope helper is side-effect free;
-durable approval/effect evidence belongs to the existing control-plane/owning
-authority. Do not add an approval database or generic admin endpoint.
+commands, filesystem paths, package names, Knowledge Base IDs, or approval state
+as authority from assistant text or user-supplied tool arguments. A URL/manual
+body/file attachment is source material, not approval authority.
+
+The envelope helper is side-effect free. The Action may keep only sanitized
+operation result/replay evidence in the already-existing Open WebUI chat message
+metadata. It must never store the HMAC key, WeKnora contributor key or trusted
+plan signature there. Do not add an approval database or generic admin endpoint.
+
+The Open WebUI Action receives server-side-only configuration equivalent to:
+
+    EAIO_EAO_ADMIN_GROUP_ID
+    EAIO_EAO_ADMIN_ASSISTANT_ID=maintainer
+    EAIO_EAO_ADMIN_WEKNORA_BASE_URL
+    EAIO_EAO_ADMIN_WEKNORA_API_KEY
+    EAIO_EAO_ADMIN_KB_ID
+    EAIO_EAO_ADMIN_KB_DISPLAY_NAME
+    EAIO_EAO_ADMIN_APPROVAL_SIGNING_KEY
+    EAIO_EAO_ADMIN_APPROVAL_TTL_MINUTES
+    EAIO_EAO_ADMIN_OPERATION_ENVELOPE_PATH (or approved module directory)
+
+Only symbolic secret references belong in company/deployment state. The real
+contributor key and HMAC key must never be committed or returned to the model.
 
 ## 5. v1A typed operations
 
@@ -117,10 +164,19 @@ Resolved typed operations:
 
     classify_resource
     review_capability_reuse
+    inspect_public_source_with_web_search_or_fetch
     review_skill_source
     review_tool_with_toolscout
     review_mcp_backend
     ingest_approved_knowledge_source
+
+The source-inspection binding exposes only enterprise-web-research web_search
+and web_fetch. Raw Firecrawl, Obscura, CloakBrowser, authenticated browsing,
+binary download and generic browser access remain unavailable.
+
+The maintainer ToolScout binding exposes only advise_tool_use, query_registry,
+detect_candidates, check_conflicts and doctor. ToolScout record_memory,
+recall_memory and install/execute primitives are not exposed to maintainer.
 
 The MCP/backend review operation is review-only. It may inspect the current MCP
 control-plane authority but has no registration, exposure, install, or mutation

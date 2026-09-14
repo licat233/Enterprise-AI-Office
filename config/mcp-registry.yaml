@@ -1,6 +1,6 @@
 schema_version: 2
 registry: enterprise-mcp-control-plane
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-14
 
 scope:
   definition_layer: reusable_enterprise_control_plane
@@ -27,6 +27,12 @@ policy:
     - armor-vault-scoped-router
     - enterprise-web-research
     - toolscout
+  conditional_profile_allowlists:
+    eao_administrator_console:
+      profile: maintainer
+      servers:
+        - enterprise-web-research
+        - toolscout
 
 servers:
   anysearch:
@@ -159,12 +165,23 @@ servers:
       reserved_profiles: []
       default_enabled: false
       operations_exposure: true
+      conditional_profiles:
+        - profile: maintainer
+          enabled_when: capabilities.eao_administrator_console.enabled
+      maintainer_exposure_current_snapshot: false
     boundary:
       risk: read_only
       adapter_required: true
       allowed_tools:
         - web_search
         - web_fetch
+      profile_tool_allowlists:
+        operations:
+          - web_search
+          - web_fetch
+        maintainer:
+          - web_search
+          - web_fetch
       denied_tools:
         - firecrawl_scrape
         - firecrawl_crawl
@@ -338,6 +355,10 @@ servers:
       reserved_profiles: []
       default_enabled: false
       operations_exposure: true
+      conditional_profiles:
+        - profile: maintainer
+          enabled_when: capabilities.eao_administrator_console.enabled
+      maintainer_exposure_current_snapshot: false
     boundary:
       separate_agent_identity: true
       separate_memory_home: true
@@ -351,6 +372,22 @@ servers:
         - record_memory
         - check_conflicts
         - doctor
+      profile_tool_allowlists:
+        operations:
+          - advise_tool_use
+          - resolve_memory_home
+          - query_registry
+          - detect_candidates
+          - recall_memory
+          - record_memory
+          - check_conflicts
+          - doctor
+        maintainer:
+          - advise_tool_use
+          - query_registry
+          - detect_candidates
+          - check_conflicts
+          - doctor
       prompts: false
       resources: false
     health:

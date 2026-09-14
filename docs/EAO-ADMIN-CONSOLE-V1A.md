@@ -57,10 +57,12 @@ Assistant contract, or non-email generic operation-envelope primitive.
 
 ### Smallest additions
 
-- the maintainer Profile template;
+- the maintainer Profile template plus least-privilege Hermes routing overlay;
 - the shared eao-resource-intake Skill;
 - the EAO Admin Open WebUI provisioning contract;
-- a side-effect-free operation-envelope/hash helper and offline test;
+- the bounded Open WebUI Knowledge Approval Action;
+- a side-effect-free operation-envelope/hash helper and offline tests;
+- explicit reuse of Enterprise Web Research for source inspection and ToolScout for tool review;
 - capability/configuration/acceptance/readiness wiring.
 
 No database, workflow engine, scheduler, vector store, IAM layer, admin portal,
@@ -80,8 +82,11 @@ v1A provides:
 - Capability Reuse Pass integration;
 - bounded Knowledge review and approved WeKnora ingestion;
 - actual-source Skill review and recommendation;
-- ToolScout-first Tool review and recommendation;
+- ToolScout-first Tool review and recommendation through the maintainer review-only subset;
+- public URL/GitHub source inspection through Enterprise Web Research web_search/web_fetch only;
+- uploaded file review through Open WebUI transient attachment/context handling without generic filesystem access;
 - narrow MCP/backend review without automatic exposure;
+- bounded server-side Knowledge approval/ingestion using Open WebUI authenticated context + HMAC + WeKnora scoped contributor API;
 - repository branch/PR preparation is
   BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED in v1A and is not in the
   runtime operation set;
@@ -106,10 +111,12 @@ destructive deletion, or EAO Runtime Reconciler actions.
 | Docker / SSH / sudo/root | DENY |
 | default/admin switching | DENY |
 | Raw secrets | DENY |
-| Knowledge | configured WeKnora target, normally Company Knowledge |
+| Knowledge | read-only WeKnora retrieval in Hermes; configured Company Knowledge contributor target in the Action |
+| Source inspection | Enterprise Web Research web_search + web_fetch only; no raw browser/provider surface |
+| Tool review | ToolScout review-only subset; no maintainer ToolScout memory-write tools |
 | Repository | runtime repository operations blocked until an approved typed capability is selected |
-| Allowed work | classify, review, inspect, and propose; prepare only the resolved typed Knowledge operation |
-| Material mutation | only the exact approved typed WeKnora operation, never a model-authored command |
+| Allowed work | classify, review, inspect, and recommend; material operation fields are re-derived server-side |
+| Material mutation | only the exact approved typed WeKnora operation executed by the Open WebUI Action, never a model-authored command |
 
 Profile isolation is not host sandboxing. The runtime must enforce the tool
 boundary in Hermes/Open WebUI/control-plane configuration, not only in SOUL
@@ -264,16 +271,21 @@ The model cannot provide or forge:
 - expiry;
 - current-state evidence.
 
-The trusted Open WebUI server-side action resolves the current authenticated
-user/groups, rechecks authorization, displays the exact persisted plan, and
-approves only the unchanged hash before invoking a bounded typed operation.
-Natural-language approval text is not formal approval.
+The trusted Open WebUI server-side Action resolves the current authenticated
+user/groups and the exact parent user source from the current owned chat. It
+computes source fingerprint, operation_id, target, expected current state,
+plan hash, and HMAC binding server-side. After the native confirmation dialog,
+it re-resolves group membership and source/current state before invoking the
+bounded typed WeKnora operation. Natural-language approval text is not formal
+approval.
 
-The helper intentionally persists nothing. Durable evidence remains in the
-existing authority that owns it: WeKnora, Git/PR history, MCP registry, runtime
-state, and Open WebUI history. OUTCOME_UNKNOWN requires reconciliation and must
-not be blindly retried. A repeated completed operation_id resolves to the
-existing/current result.
+The helper intentionally persists nothing. The Action stores only sanitized
+operation result/replay evidence in the existing Open WebUI assistant-message
+metadata; this is not a new approval database and contains no contributor key,
+HMAC key, or trusted signature. Durable business evidence remains in WeKnora,
+Git/PR history, MCP registry, runtime state, and Open WebUI history.
+OUTCOME_UNKNOWN requires reconciliation and must not be blindly retried. A
+repeated completed operation_id resolves to the existing/current result.
 
 ## 8. Repository and runtime gates
 
@@ -306,7 +318,9 @@ Rollback is capability-specific:
 
 No generic reverse-shell-command rollback exists. general, Operations,
 employee RBAC, the frozen v1/v2 baselines, and default/admin control-plane
-separation remain unchanged.
+separation remain unchanged. Reusing Enterprise Web Research for maintainer
+does not expose raw Firecrawl/Obscura/CloakBrowser tools; reusing ToolScout does
+not expose its memory-write tools to maintainer.
 
 ## 10. Evidence and status
 

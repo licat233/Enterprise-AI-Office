@@ -1,0 +1,85 @@
+# Enterprise AI Office EAO Admin `maintainer` Profile routing overlay.
+#
+# This is a non-secret deployment source for the optional Administrator Console
+# v1A capability. Merge it with the protected maintainer Profile config only
+# when capabilities.eao_administrator_console.enabled is true.
+#
+# The Profile remains a least-privilege review role. Knowledge mutation is NOT
+# exposed through Hermes MCP. Approved ingestion is executed only by the
+# server-side Open WebUI Action using its separate scoped contributor key.
+
+platforms:
+  api_server:
+    # Secondary Profiles use the shared default gateway listener.
+    enabled: false
+
+platform_toolsets:
+  api_server:
+    - mcp-maintainer-weknora
+    - mcp-maintainer-web-research
+    - mcp-maintainer-toolscout
+
+mcp_servers:
+  maintainer-weknora:
+    command: "<HERMES_PYTHON>"
+    args:
+      - "<WEKNORA_MCP_SERVER>"
+    env:
+      WEKNORA_API_KEY: "${WEKNORA_API_KEY}"
+      WEKNORA_BASE_URL: "${WEKNORA_BASE_URL}"
+    tools:
+      include:
+        - list_knowledge_bases
+        - get_knowledge_base
+        - hybrid_search
+        - list_knowledge
+        - get_knowledge
+        - list_chunks
+      resources: false
+      prompts: false
+
+  maintainer-web-research:
+    command: "${EAIO_WEB_RESEARCH_BIN}"
+    args: []
+    env:
+      FIRECRAWL_API_KEY: "${FIRECRAWL_API_KEY}"
+      EAIO_OBSCURA_BIN: "${EAIO_OBSCURA_BIN}"
+      EAIO_OBSCURA_STORAGE_DIR: "${EAIO_OBSCURA_STORAGE_DIR}"
+      EAIO_CLOAKBROWSER_PYTHON: "${EAIO_CLOAKBROWSER_PYTHON}"
+      EAIO_CLOAKBROWSER_WORKER: "${EAIO_CLOAKBROWSER_WORKER}"
+      EAIO_CLOAKBROWSER_STORAGE_DIR: "${EAIO_CLOAKBROWSER_STORAGE_DIR}"
+      EAIO_CLOAKBROWSER_VERSION: "${EAIO_CLOAKBROWSER_VERSION}"
+    tools:
+      include:
+        - web_search
+        - web_fetch
+      resources: false
+      prompts: false
+
+  maintainer-toolscout:
+    command: "${EAIO_TOOLSCOUT_BIN}"
+    args:
+      - mcp
+      - serve
+    env:
+      TOOLSCOUT_AGENT_NAME: eao-maintainer
+    tools:
+      include:
+        - advise_tool_use
+        - query_registry
+        - detect_candidates
+        - check_conflicts
+        - doctor
+      resources: false
+      prompts: false
+
+# Explicitly absent from maintainer:
+# - ToolScout persistent memory tools
+# - raw Firecrawl / Obscura / CloakBrowser tools
+# - generic browser
+# - terminal / shell
+# - arbitrary filesystem
+# - package manager
+# - Docker / SSH / sudo/root
+# - repository mutation
+# - default/admin switching

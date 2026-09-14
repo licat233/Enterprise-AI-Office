@@ -613,13 +613,18 @@ capabilities:
       - docs/KNOWLEDGE.md
       - profiles/maintainer/SOUL.md
       - skills/shared/eao-resource-intake/SKILL.md
+      - infrastructure/hermes/maintainer-routing.example.yaml
+      - infrastructure/hermes/maintainer.env.example
       - infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md
       - infrastructure/open-webui/eao_operation_envelope.py
+      - infrastructure/open-webui/eao_admin_knowledge_action.py
     required_company_values:
       - authorized EAO Administrators group identity
       - maintainer Profile and EAO Admin Assistant identifiers
       - configured WeKnora target Knowledge Base
       - bounded WeKnora contributor path using the pinned official API
+      - bounded read-only source inspection through enterprise-web-research
+      - ToolScout-first review binding with no maintainer memory-write tools
       - protected Open WebUI server-side approval binding
       - bounded approval TTL, default 30 minutes
     runtime_capability_resolution:
@@ -657,16 +662,43 @@ capabilities:
         status: blocked
         blocker: "BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED"
         runtime_operations: []
+      source_inspection:
+        status: resolved_for_v1a_contract
+        capability: enterprise_web_research
+        allowed_tools:
+          - web_search
+          - web_fetch
+        raw_browser_exposure: false
+        runtime_mutation_binding_required: false
+      tool_review:
+        status: resolved_for_v1a_contract
+        capability: toolscout
+        allowed_tools:
+          - advise_tool_use
+          - query_registry
+          - detect_candidates
+          - check_conflicts
+          - doctor
+        maintainer_memory_write_tools: false
+        runtime_mutation_binding_required: false
       mcp_control_plane_review:
         status: review_only
         authority: config/mcp-registry.yaml
         runtime_mutation_binding_required: false
         runtime_operations: []
+      approval_action:
+        status: resolved_for_v1a_contract
+        upstream: Open WebUI v0.11.3 server-side Action
+        implementation: infrastructure/open-webui/eao_admin_knowledge_action.py
+        source_authority: current owned Open WebUI chat and attachment metadata
+        replay_evidence: Open WebUI assistant-message metadata
+        mutation_scope: bounded WeKnora contributor routes only
     required_secret_classes:
       - maintainer-profile-credential
       - open-webui-admin-credential
       - weknora-contributor-credential
       - operation-envelope-signing-key
+      - firecrawl-api-credential
     protected_input_contract:
       document: docs/EAO-ADMIN-CONSOLE-V1A.md
       provisioning: infrastructure/open-webui/EAO-ADMIN-PROVISIONING.md
@@ -677,6 +709,8 @@ capabilities:
       document: docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md
       section: EAO Administrator Console v1A Acceptance
       offline_test: infrastructure/open-webui/test_eao_operation_envelope.py
+      additional_offline_tests:
+        - infrastructure/open-webui/test_eao_admin_knowledge_action.py
       result: "PASS — EAO ADMIN CONSOLE V1A"
     v1a_allowed_operations:
       - resource_classification
@@ -698,6 +732,8 @@ capabilities:
     records:
       - EAO Administrators group and Assistant mapping
       - maintainer tool/MCP/credential scope without secret values
+      - bounded source-inspection and ToolScout review bindings
+      - Open WebUI knowledge-approval Action binding and replay evidence
       - Capability Reuse Pass and ToolScout findings
       - Knowledge source fingerprints and ingestion/retrieval evidence
       - repository branch/PR/HEAD/CI/Readiness evidence from the external repository workflow
