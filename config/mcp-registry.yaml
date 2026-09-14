@@ -27,9 +27,12 @@ policy:
     - armor-vault-scoped-router
     - enterprise-web-research
     - toolscout
-  maintainer_allowlist:
-    - enterprise-web-research
-    - toolscout
+  conditional_profile_allowlists:
+    eao_administrator_console:
+      profile: maintainer
+      servers:
+        - enterprise-web-research
+        - toolscout
 
 servers:
   anysearch:
@@ -159,11 +162,13 @@ servers:
     exposure:
       allowed_profiles:
         - operations
-        - maintainer
       reserved_profiles: []
       default_enabled: false
       operations_exposure: true
-      maintainer_exposure: true
+      conditional_profiles:
+        - profile: maintainer
+          enabled_when: capabilities.eao_administrator_console.enabled
+      maintainer_exposure_current_snapshot: false
     boundary:
       risk: read_only
       adapter_required: true
@@ -347,11 +352,13 @@ servers:
     exposure:
       allowed_profiles:
         - operations
-        - maintainer
       reserved_profiles: []
       default_enabled: false
       operations_exposure: true
-      maintainer_exposure: true
+      conditional_profiles:
+        - profile: maintainer
+          enabled_when: capabilities.eao_administrator_console.enabled
+      maintainer_exposure_current_snapshot: false
     boundary:
       separate_agent_identity: true
       separate_memory_home: true
