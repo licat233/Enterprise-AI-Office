@@ -473,7 +473,8 @@ Complete only when the capability is enabled by private company configuration:
     Maintainer API credential: distinct/protected; value omitted
     WeKnora contributor scope: <...>
     Repository typed binding: BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED
-    MCP/control-plane typed bindings: <...>
+    MCP/control-plane review authority: <review-only authority; mutation binding not required in v1A>
+    Approval signing-key reference: <protected symbolic reference only; value omitted>
     Capability Reuse Pass / ToolScout evidence: <...>
     Operation IDs / plan hashes / TTL / invalidation: <...>
     v1A acceptance: <PASS/FAIL/BLOCKED>
