@@ -42,6 +42,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Media Transcription optional capability | ✅ Validated / enabled in ARMOR reference; not Core default |
 | Operational EAO baseline | ✅ Complete / deployed / in use |
 | Dual knowledge architecture (RAG + Wiki) | ✅ Active — WeKnora RAG + ARMOR Vault Wiki / working memory |
+| Local AI model infrastructure | ✅ Active in ARMOR reference — Ollama serves task-specific vision, audio, and embedding models for WeKnora; Hermes reasoning remains separate |
 | Department handoff readiness | ✅ Ready — employee accounts and private access details can be distributed |
 | Office-network employee access | ✅ Validated through the approved private network boundary |
 | Remote employee access | ✅ Validated through Tailscale private access; no public exposure required |
@@ -157,6 +158,32 @@ The Wiki layer is the existing Markdown-based ARMOR Vault, not a separate Wiki s
 Current Operations exposure remains least-privilege: governed Vault persistence is enabled through the scoped ARMOR Vault adapter; generic filesystem access remains disabled. Scoped Vault retrieval/search is a bounded adaptation surface and must not be replaced by generic filesystem access.
 
 See [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) for the normative authority and placement rules.
+
+### Local AI model infrastructure for WeKnora
+
+The ARMOR reference deployment also uses a small, task-specific local AI model layer to support WeKnora ingestion and retrieval. This is **not** a migration of Hermes reasoning to a self-hosted LLM.
+
+```text
+WeKnora
+  ↓
+Ollama — local model serving
+  ├─ Vision parsing
+  │    └─ qwen2.5vl:3b
+  ├─ Audio parsing
+  │    └─ karanchopda333/whisper:latest
+  └─ Embedding / semantic retrieval
+       └─ bge-m3:latest
+```
+
+Current ARMOR reference roles:
+
+| Local model | Role in WeKnora | Model class |
+| --- | --- | --- |
+| `qwen2.5vl:3b` | Visual / multimodal parsing during knowledge ingestion | VLM |
+| `karanchopda333/whisper:latest` | Audio parsing / speech-to-text during knowledge ingestion | ASR |
+| `bge-m3:latest` | Embedding and semantic retrieval | Embedding model |
+
+Ollama is the **local model runtime / serving layer**. These models are infrastructure dependencies for specific WeKnora processing roles; they are not employee Profiles and they do not replace the Hermes reasoning provider. For reusable deployments, local-versus-remote model selection remains deployment-configured and should be chosen through the Capability Reuse Pass rather than by adding another inference stack.
 
 ### Employee access posture
 
@@ -342,7 +369,7 @@ The detailed v2 scope contract remains [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md).
 | Second scheduler | Rejected | Hermes Cron is already the scheduling authority | Cron is demonstrably insufficient for a required workflow |
 | Additional vector database / new RAG layer | Rejected for baseline | The current dual architecture already separates WeKnora RAG from the Markdown ARMOR Vault Wiki; another vector store would duplicate the RAG layer and add synchronization/maintenance risk | measured retrieval limits cannot be solved inside WeKnora/upstream |
 | Prometheus/Grafana-style large observability stack | Deferred | Small-system health checks and operating procedures are sufficient at the current scale | operating scale or incidents justify dedicated observability infrastructure |
-| Local-LLM infrastructure project | Deferred | Model-hosting infrastructure is independent from proving the Enterprise AI Office architecture | privacy/cost/offline requirements make local inference a real deployment need |
+| General-purpose local LLM for Hermes reasoning | Deferred | ARMOR already uses task-specific Ollama models for WeKnora parsing and embedding; moving the main Hermes reasoning model to a self-hosted LLM is a separate decision and is not required by the baseline | privacy, cost, offline operation, or measured workload needs justify replacing or supplementing the current reasoning provider |
 | Custom Agent framework | Rejected | Hermes already owns Agent runtime/orchestration; building another framework would duplicate the core platform | Hermes cannot satisfy a demonstrated essential capability |
 | Graph database / generic Ontology Runtime | Rejected for baseline | Ontology is currently a governance/design contract; a graph runtime would add a new database/reasoning platform without proven need | a real cross-system workflow requires graph-native enforcement/query semantics |
 | Dedicated employee portal | Rejected | Open WebUI already provides the employee surface | a required employee workflow cannot be safely delivered through Open WebUI |
@@ -536,6 +563,7 @@ Container runtime: OrbStack / Docker
 WeKnora: v0.8.0
 Hermes Agent: v0.21.0, host-native
 Open WebUI: v0.11.3
+Ollama: local AI model serving for WeKnora parsing / embedding in the ARMOR reference
 Employee Hermes long-term memory: disabled
 ```
 

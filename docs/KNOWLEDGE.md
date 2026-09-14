@@ -319,6 +319,29 @@ Open WebUI
    → local Ollama embedding model
 ```
 
+### Task-specific local AI model roles
+
+A deployment may reuse the same local Ollama runtime for other WeKnora processing roles when the active WeKnora configuration requires them. This is a **task-specific local inference layer**, not a requirement to run the Hermes reasoning model locally.
+
+The current ARMOR reference deployment uses:
+
+```text
+WeKnora
+→ Ollama
+   ├─ Vision parsing  → qwen2.5vl:3b
+   ├─ Audio parsing   → karanchopda333/whisper:latest
+   └─ Embedding       → bge-m3 / 1024
+```
+
+Interpret these roles separately:
+
+- **Vision / VLM** supports visual or multimodal parsing during knowledge ingestion.
+- **Audio / ASR** supports audio parsing / speech-to-text during knowledge ingestion.
+- **Embedding** supports vectorization and semantic retrieval.
+- **Hermes reasoning** remains a separate model-provider choice.
+
+Do not introduce a second local inference framework merely because more than one WeKnora model role is enabled. Reuse the existing Ollama serving layer when it satisfies the required role and acceptance checks. Conversely, do not treat every deployment as requiring these exact local models; reusable EAO deployments may choose local or remote providers according to their protected configuration, resource limits, privacy requirements, and measured quality.
+
 ### Recommended local starting candidates
 
 For multilingual enterprise knowledge, especially Chinese + English, use a small mature embedding model first and increase model size only when measured retrieval failures justify it.
