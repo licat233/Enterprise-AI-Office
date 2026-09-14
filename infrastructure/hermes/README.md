@@ -97,6 +97,8 @@ Do not couple ordinary knowledge retrieval to WeKnora's internal database schema
 
 Use upstream bundled Skills where appropriate and company-owned Skills through supported external Skill directories.
 
+Before exposing a third-party Skill in production, apply [`../../docs/SKILL-ADMISSION.md`](../../docs/SKILL-ADMISSION.md). Evaluate actual runtime primitives rather than the Skill author's advertised Agent label, and prefer direct use before thin adaptation or authorized backend delegation.
+
 Authoritative company facts belong in WeKnora rather than SOUL or Skill prose.
 
 Do not copy all shared Skills into every Profile merely because they exist.
