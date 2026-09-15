@@ -1,14 +1,15 @@
 schema_version: 1
 status: current-reference-baseline
 first_validated_on: 2026-09-06
-reference_runtime_last_confirmed_on: 2026-09-11
+reference_runtime_last_confirmed_on: 2026-09-15
 reference_runtime_confirmation_source: state/REAL-DEPLOYMENT-STATUS.md
 qualification_semantics:
   first_validated_on: clean_reference_qualification_date
-  reference_runtime_last_confirmed_on: same_versions_observed_in_current_reference_runtime
+  reference_runtime_last_confirmed_on: current_reference_runtime_observation_date
+  hermes_reference_runtime_is_not_permanent_pin: true
   does_not_claim_new_clean_host_validation: true
 upgrade_policy: docs/UPGRADE.md
-provenance_verified_on: 2026-09-11
+provenance_verified_on: 2026-09-15
 
 target:
   host_os: macos
@@ -43,27 +44,37 @@ components:
       container_image: wechatopenai/weknora-app:0.8.0
     deployment: upstream-compose-plus-thin-adapter
   hermes_agent:
-    version: 0.21.0
-    commit: f1ccf436a27522c1bb5d36383a6f13b950676338
+    version_policy: rolling-validated
     upstream_repository: https://github.com/NousResearch/hermes-agent.git
-    source_ref: commit
-    source_ref_type: commit_only_no_version_tag
-    version_source: pyproject.toml_at_component_commit
+    tracking_ref: main
+    reference_version: 0.21.2
+    reference_tag: v2026.9.11
+    reference_commit: 939e45c91d751fadd94dcd1b873ac3cb44846213
+    reference_confirmed_on: 2026-09-15
+    version_source: hermes_version_plus_git_identity
+    update_policy:
+      permanent_version_pin: false
+      resolve_candidate_once_per_change: true
+      automatic_unattended_update: false
+      candidate_acceptance_required: true
+      rollback_commit_required: true
     acquisition:
-      method: official_installer_from_component_commit
-      installer_url_template: "https://raw.githubusercontent.com/NousResearch/hermes-agent/{commit}/scripts/install.sh"
+      method: official_installer_from_resolved_candidate_commit
+      candidate_resolution: upstream_tracking_ref_at_transaction_start
+      installer_url_template: "https://raw.githubusercontent.com/NousResearch/hermes-agent/{candidate_commit}/scripts/install.sh"
       commit_flag: --commit
       eao_configuration_mode: install_runtime_then_apply_repository_managed_config
       source_path_resolution:
-        provenance: scripts/install.sh_at_component_commit
+        provenance: scripts/install.sh_at_candidate_commit
         explicit_env_override: HERMES_INSTALL_DIR
         explicit_flag_override: --dir
         non_root_default: "${HERMES_HOME:-$HOME/.hermes}/hermes-agent"
         root_linux_default: /usr/local/lib/hermes-agent
     runtime_identity:
       version_command: hermes --version
-      expected_version: "0.21.0"
+      exact_version_recording_required: true
       source_commit_required: true
+      reference_match_required: false
       source_dir_must_be_resolved_from_actual_install: true
     deployment: host-native
   open_webui:
@@ -109,7 +120,9 @@ optional_capabilities:
   eao_administrator_console: disabled-unless-configured
 
 notes:
-  - This file is a reproducibility baseline, not a permanent version policy.
-  - Do not silently replace these versions during an ordinary Golden Path deployment.
-  - Upgrade qualification is a separate task governed by docs/UPGRADE.md.
+  - WeKnora and Open WebUI retain exact reference versions for the current Core baseline.
+  - Hermes Agent uses a rolling-validated policy: no permanent version pin.
+  - Each Hermes deployment/upgrade transaction resolves one upstream candidate commit, freezes that candidate for the transaction, records its exact runtime identity, runs acceptance, and retains a rollback commit.
+  - Do not silently change a running Hermes deployment through unattended updates.
+  - Hermes update qualification is governed by docs/UPGRADE.md.
   - Runtime secrets, model-provider values, company Knowledge Bases, and private access data do not belong in this file.
