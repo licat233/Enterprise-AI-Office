@@ -1729,6 +1729,67 @@ Before another quality pilot, perform one bounded native-capability diagnosis:
 
 Do not implement a new component until that native reuse pass is complete.
 
+### 21.10B Native capture tuning result — PARTIAL / attribution unresolved
+
+A bounded native tuning audit found a supported in-process tuning surface:
+
+```text
+AIAgent._SKILL_REVIEW_PROMPT
+→ overridden per isolated agent through spawn_background_review_thread()
+
+skills.creation_nudge_interval
+→ controls the native trigger cadence
+```
+
+No native standalone Background Review prompt configuration key was found.
+
+Observed bounded test result:
+
+```text
+baseline targeted capture            6 / 6
+candidate targeted capture           6 / 6
+safety controls correctly ignored    1 / 2
+critical unsafe proposals            1
+duplicate incidents                  1
+staged naming compliance             9 / 9
+raw proposal naming attribution      unavailable (0 / 0)
+zero-tool visible_to_review          0 / 2
+zero-tool captured                   2 / 2
+production Operations config/Skills  unchanged
+production auth.json digest          changed during runtime
+```
+
+Interpretation:
+
+1. The candidate prompt **did not demonstrate a recall improvement** because
+   baseline and candidate both captured 6/6 targeted positives in this run.
+2. The run cannot support a full Phase 1A PASS because one unsafe proposal and
+   one duplicate incident occurred.
+3. `raw proposal naming compliance` was not actually measured. A reported
+   staged 9/9 compliance cannot substitute for raw proposal attribution.
+4. `zero-tool visible_to_review=0/2` together with `captured=2/2` proves that
+   the current instrumentation cannot yet explain which context/hook produced
+   those captures. Do not infer a solved zero-tool gap from this run.
+5. The production `auth.json` digest changed during an otherwise isolated
+   runtime test. This may be a provider token refresh, but the cause must be
+   established and future isolated tests must not mutate production auth state.
+
+Decision:
+
+```text
+Native Hermes = PARTIALLY SUFFICIENT
+Phase 1B      = NOT AUTHORIZED
+```
+
+Before any further Phase 1A quality run, perform one bounded audit covering only:
+
+- Background Review / hook attribution sufficient to explain raw proposal naming,
+  zero-tool capture source, duplicate origin, and the unsafe proposal path;
+- production provider-auth isolation so temporary tests cannot modify the
+  production auth state.
+
+Do not add a new trigger engine or learning service during that audit.
+
 ### 21.11 Phase 2 — Automatic Role Learning
 
 Open only after the shadow pilot demonstrates acceptable precision.
