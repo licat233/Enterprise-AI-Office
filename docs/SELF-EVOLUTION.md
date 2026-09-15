@@ -749,12 +749,21 @@ useful role experience
 
 #### B. Company-owned shared / frozen Skills
 
-These remain version-controlled EAO/company assets and may be exposed through
-Hermes `skills.external_dirs`.
+These remain version-controlled EAO/company assets.
 
-Hermes 0.21.2 source-level behavior provides an important but limited guard:
-autonomous Background Review treats external Skills as externally owned and
-refuses to mutate them.
+The 2026-09-15 production audit showed that the current Operations deployment
+does **not** expose its canonical Company Skills primarily through
+`skills.external_dirs`. Instead, the canonical department Skills and ToolScout
+are Profile-local symlinks whose resolved targets live in the EAO Git
+repository, while `skills.external_dirs` currently points to the approved
+third-party Skill root.
+
+Therefore the authority boundary must be defined by **resolved ownership /
+mutation scope**, not by assuming every Company Skill is an external Skill.
+
+Hermes 0.21.2 source-level behavior still provides an important but limited
+guard: autonomous Background Review refuses external, protected, bundled,
+hub-managed, and non-curator/user-owned Skills.
 
 That guard is **not** a complete write-protection boundary. A foreground,
 user-directed `skill_manage` call may still update an external Skill when the
@@ -767,9 +776,10 @@ Profile-local agent-created Skills
 → writable
 → autonomous low-risk learning allowed
 
-company shared/frozen Skills in external_dirs
+company shared/frozen Skills
+→ may be exposed by symlink and/or external_dirs
 → readable by the Profile
-→ filesystem read-only to the employee Hermes learning path
+→ mutation denied to the employee Hermes learning path
 → version-controlled source remains authoritative
 ```
 
@@ -778,10 +788,11 @@ workflow.
 
 The first implementation must prove both behaviors on the exact deployed build:
 
-1. Background Review cannot mutate an external company Skill.
-2. A foreground `skill_manage` attempt also cannot persist changes to that
-   company Skill because the deployed company-Skill path is read-only to the
-   employee Profile runtime.
+1. Background Review cannot mutate a Company Skill regardless of whether that
+   Skill is reached through a Profile-local symlink or `external_dirs`.
+2. A foreground `skill_manage` attempt cannot persist changes to any resolved
+   Company Skill target.
+3. Profile-local `learned-*` Skills remain writable.
 
 Do not rely on prompt wording such as "do not modify shared Skills" as the
 security boundary.
@@ -819,7 +830,7 @@ auxiliary:
 
 skills:
   external_dirs:
-    - <READ_ONLY_APPROVED_COMPANY_SHARED_SKILL_DIRS>
+    - <APPROVED_EXTERNAL_SKILL_DIRS>
   create_dir: ""
   creation_nudge_interval: <PILOT_MEASURED_VALUE>
   write_approval: false
@@ -840,13 +851,17 @@ Important semantics:
   tested for false positives before production adoption.
 - `ledger: true` provides evidence and rollback without turning every learning
   event into a human approval task.
-- Curator remains **off initially**. Department experience may be low-frequency
-  but high-value; inactivity alone is not evidence that a learned operating
-  method should disappear from the active department Profile.
+- Curator should remain **off initially** for Self-Evolution. The production
+  audit found Operations currently inherits Curator as enabled, with 30-day
+  stale and 90-day archive behavior. That is a configuration drift to resolve
+  before live learned Skills are introduced. Department experience may be
+  low-frequency but high-value; inactivity alone is not evidence that a learned
+  operating method should disappear from the active department Profile.
 - Curator can be reconsidered only after the learned-Skill library becomes large
   enough to create a measured maintenance/retrieval problem. LLM consolidation
   remains off unless separately justified.
-- Existing company Skill directories remain external/version-controlled.
+- Company Skills remain version-controlled and mutation-protected whether they
+  are exposed through Profile-local symlinks or `external_dirs`.
 
 ### 21.5A Tool-surface requirement
 
@@ -854,20 +869,10 @@ Hermes' native Skill self-improvement does not run merely because
 `auxiliary.background_review.enabled=true`.
 
 The Skill trigger requires `skill_manage` to exist in the active Agent tool
-surface. In EAO, employee API Profiles use explicit toolset allowlists, so the
-Self-Evolution pilot must deliberately add the Hermes `skills` toolset to the
-target Profile's API surface.
+surface.
 
-Conceptually:
-
-```yaml
-platform_toolsets:
-  api_server:
-    - skills
-    - <existing approved toolsets>
-```
-
-The Hermes `skills` toolset contains:
+The 2026-09-15 production audit confirmed that the current Operations API
+surface **already exposes**:
 
 ```text
 skills_list
@@ -875,8 +880,12 @@ skill_view
 skill_manage
 ```
 
-This is a real capability change and must receive the same acceptance treatment
-as any other Profile tool-surface change.
+Therefore Self-Evolution does **not** require adding a new Skills toolset to the
+current Operations Profile. The required native tool surface already exists.
+
+This changes the implementation question from "how do we expose Skill
+management?" to "how do we constrain Skill mutation to the learned-Skill
+plane?"
 
 It does **not** grant terminal, generic filesystem, browser, coding-agent,
 credential, or new MCP authority.
@@ -930,8 +939,10 @@ Also verify that:
 
 ### 21.5B Learning trigger and cadence
 
-Hermes 0.21.2 skill review is triggered by accumulated **tool-calling
-iterations**:
+The production audit confirmed Hermes 0.21.2 skill review is triggered by
+accumulated **tool-calling iterations**. Operations currently inherits
+Background Review as enabled and uses an effective
+`skills.creation_nudge_interval = 15`:
 
 ```text
 skills.creation_nudge_interval = N
@@ -1254,10 +1265,93 @@ find out.
 
 No production setting changes are authorized by this document alone.
 
+#### 21.9A Phase 0 observed result — 2026-09-15
+
+The read-only production audit completed against the designated ARMOR Mac
+Studio with **no production mutation**.
+
+Observed runtime:
+
+```text
+Hermes version                  0.21.2
+Hermes commit                   939e45c91d751fadd94dcd1b873ac3cb44846213
+Operations Memory               OFF
+Background Review               ON (default-derived)
+skills.creation_nudge_interval  15
+skills.write_approval           ON
+skills.guard_agent_created      ON
+skills.ledger                   ON (default-derived)
+Operations Skills tools         skills_list / skill_view / skill_manage
+Curator                         ON (default-derived)
+Curator consolidate             OFF
+```
+
+Observed Skill topology:
+
+```text
+/Users/armor/.hermes/profiles/operations/skills
+→ writable Profile-local namespace
+→ canonical Company Skills exposed largely as symlinks
+→ learned Skills would also be created in this namespace
+
+resolved Company Skill targets
+→ version-controlled EAO repository
+→ currently writable by the Hermes runtime identity
+
+skills.external_dirs
+→ approved third-party Skill root
+→ also currently writable by the Hermes runtime identity
+```
+
+Key conclusions:
+
+1. **Native Hermes is sufficient for the learning loop.**
+   Background Review, Skill-only review with Memory OFF, provenance, write
+   approval, ledger, local Skill creation, patching, and search precedence are
+   all present.
+2. **No new Skills tool exposure is needed for Operations.**
+   `skill_manage` is already present.
+3. **The Company Skill authority boundary is not yet safe for automatic
+   learning.**
+   Foreground `skill_manage` can edit/patch resolved Company Skill targets
+   when filesystem permissions allow, and the current Company roots are
+   writable.
+4. **The Company Skill problem is broader than `external_dirs`.**
+   Canonical department Skills are currently Profile-local symlinks into the
+   writable EAO repository, so a durable guard must classify resolved Company
+   ownership rather than only external-directory membership.
+5. **Curator must not be allowed to age out enterprise experience by default.**
+   Current 30/90-day stale/archive behavior supports keeping Curator off for
+   Self-Evolution v1.
+6. **Hermes has no Profile-wide or per-Skill mutation serialization.**
+   Atomic writes and targeted patching exist, but concurrent-learning behavior
+   still requires the isolated Phase 1B test before deciding whether a thin
+   mutation lock is necessary.
+
+Phase 0 verdict:
+
+```text
+Result: PARTIAL
+Capability Reuse Pass:
+NATIVE HERMES SUFFICIENT WITH THIN ADAPTATION
+```
+
+The measured thin-adaptation concerns are intentionally narrow:
+
+```text
+A. immutable Company Skill mutation boundary
+B. Profile/per-Skill mutation serialization only if Phase 1B proves lost-update risk
+```
+
+Do not build a new Self-Evolution engine, database, review queue, event bus, or
+experience store.
+
 ### 21.10 Phase 1 — Learning Pilot
 
-Use bounded test Profiles/domains and a finite test window. The pilot has two
-different jobs and therefore two subphases.
+Use an **isolated non-production test Profile/domain** and a finite test window.
+Do not use the live Operations Profile for mutation testing until the Company
+Skill mutation boundary is accepted. The pilot has two different jobs and
+therefore two subphases.
 
 #### Phase 1A — Shadow capture quality
 
@@ -1266,9 +1360,9 @@ department's active learned-Skill plane.
 
 ```text
 Memory                              OFF
-skills toolset                      ON for the pilot Profile
+skills toolset                      ON / native tool surface confirmed
 Background Review                   ON
-Company external Skills             READ / USE, filesystem read-only
+Company Skills                      READ / USE; mutation blocked in pilot boundary
 skills.creation_nudge_interval      LOW, chosen for observation
 skills.write_approval               ON
 Curator                             OFF
@@ -1301,7 +1395,7 @@ Memory                              OFF
 skills toolset                      ON
 Background Review                   ON
 Profile-local autonomous Skill path ON
-Company external Skills             READ / USE, filesystem read-only
+Company Skills                      READ / USE; mutation blocked in pilot boundary
 skills.write_approval               OFF
 Curator                             OFF
 ```
@@ -1355,7 +1449,7 @@ Background Review                   ON
 skills.creation_nudge_interval      evidence-based production value
 skills.write_approval               OFF
 Profile-local agent-created Skills  autonomous within accepted low-risk scope
-Company external Skills             filesystem read-only to employee learning path
+Company Skills                      mutation-protected from employee learning path
 Skill ledger                        ON
 Curator                             OFF initially
 Curator LLM consolidation           OFF
@@ -1518,7 +1612,8 @@ A production-ready v1 implementation must prove all of the following.
 
 - learned Skills stay in the intended Profile-local learning plane;
 - other Profiles do not inherit them unless explicitly designed to;
-- company `external_dirs` Skills are not autonomously mutated;
+- Company Skills are not mutated, whether exposed through local symlinks or
+  `external_dirs`;
 - WeKnora remains authoritative for approved company facts.
 
 #### Security
