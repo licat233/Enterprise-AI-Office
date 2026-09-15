@@ -1,0 +1,16 @@
+# Enterprise AI Office WeKnora runtime hardening override.
+# Apply together with the pinned upstream WeKnora docker-compose.yml.
+#
+# Required:
+#   export EAO_WEKNORA_ADAPTER_DIR=/absolute/path/to/Enterprise-AI-Office/infrastructure/weknora
+#
+# The frontend wrapper patches only the pinned upstream nginx template and then
+# delegates back to WeKnora's official /docker-entrypoint.sh. It fails closed if
+# the expected v0.8.0 template shape changes.
+services:
+  frontend:
+    volumes:
+      - ${EAO_WEKNORA_ADAPTER_DIR:?set EAO_WEKNORA_ADAPTER_DIR}/frontend-entrypoint.sh:/eao/frontend-entrypoint.sh:ro
+    entrypoint:
+      - /bin/sh
+      - /eao/frontend-entrypoint.sh
