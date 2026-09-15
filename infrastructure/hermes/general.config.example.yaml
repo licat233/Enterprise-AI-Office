@@ -1,5 +1,5 @@
 # Enterprise AI Office baseline Hermes `general` employee Profile
-# Derived schema pin: config/validated-stack.yaml -> Hermes Agent 0.21.0.
+# Derived schema contract: config/validated-stack.yaml -> Hermes Agent rolling-validated candidate.
 # Copy/adapt into ~/.hermes/profiles/general/config.yaml.
 # Secrets belong in the Profile's protected .env, not in this file.
 

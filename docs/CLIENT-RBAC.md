@@ -153,7 +153,7 @@ Baseline conceptual route:
 General Assistant → /p/general/... → `general` Profile key
 ```
 
-Exact URLs and supported connection behavior must match the pinned Hermes/Open WebUI versions.
+Exact URLs and supported connection behavior must match the active Hermes candidate/runtime contract and the validated Open WebUI version.
 
 For every additional employee Profile, create a distinct connection using that Profile's own key.
 

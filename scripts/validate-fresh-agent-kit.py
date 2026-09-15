@@ -391,7 +391,7 @@ def main() -> int:
     )
     require_text(
         "config/validated-stack.yaml",
-        "provenance: scripts/install.sh_at_component_commit",
+        "provenance: scripts/install.sh_at_candidate_commit",
         "Fresh Agent resolves Hermes source path from pinned installer behavior",
     )
     require_text(

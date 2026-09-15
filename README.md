@@ -628,13 +628,20 @@ official upstream capability
 Host: Apple Silicon macOS
 Container runtime: OrbStack / Docker
 WeKnora: v0.8.0
-Hermes Agent: v0.21.0, host-native
+Hermes Agent: rolling-validated, host-native
+  current accepted ARMOR reference: 0.21.2 / v2026.9.11
 Open WebUI: v0.11.3
 Ollama: local AI model serving for WeKnora parsing / embedding in the ARMOR reference
 Employee Hermes long-term memory: disabled
 ```
 
-Machine-readable baseline: [`config/validated-stack.yaml`](config/validated-stack.yaml).
+Hermes is **not permanently pinned**. Each install/upgrade transaction resolves
+one exact upstream candidate commit, holds it stable for that transaction,
+validates it, records the exact deployed identity, and retains a rollback point.
+This keeps EAO aligned with fast-moving upstream Hermes capabilities without
+turning production into an unattended `latest` tracker.
+
+Machine-readable policy/reference: [`config/validated-stack.yaml`](config/validated-stack.yaml).
 
 Reference-instance evidence: [`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md).
 

@@ -2,7 +2,7 @@
 
 > This file is a **sanitized public progress summary** for the explicitly authorized real company deployment. It is not the protected runtime state record and must never contain credentials, real employee identifiers, private network details, mailbox data, or secret values.
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
 ## Deployment authorization
 
@@ -16,6 +16,35 @@ Blueprint Validation: not opened
 ```
 
 The ARMOR real deployment is already independently authorized, deployed, active, and in use. This file exposes only a sanitized public summary; protected runtime details remain outside Git. The `real_deployment_task.active: false` value in `state/PROJECT-PHASE.yaml` is only the default authorization state for a fresh clone or a new target, so cloning the repository never implies permission to perform another real deployment. It is **not** the ARMOR deployment status. The existing ARMOR deployment authorization also does **not** advance the repository blueprint lifecycle.
+
+## 2026-09-15 Hermes rolling-validation policy update
+
+The ARMOR reference deployment no longer treats one Hermes Agent release as a
+permanent product requirement.
+
+Current observed Hermes runtime identity:
+
+```text
+version: 0.21.2
+release/tag: v2026.9.11
+commit: 939e45c91d751fadd94dcd1b873ac3cb44846213
+install mode: host-native Git checkout
+working tree: clean
+```
+
+EAO now treats Hermes as a **rolling-validated dependency**:
+
+```text
+permanent version pin: NO
+exact runtime identity recording: YES
+one candidate commit per install/upgrade transaction: YES
+unattended production auto-update: NO
+post-change acceptance: YES
+rollback point: YES
+```
+
+The recorded version/commit above is current accepted reference evidence, not a
+requirement that future EAO deployments remain on this version.
 
 ## 2026-09-14 dual knowledge architecture update
 
@@ -138,20 +167,23 @@ The active protected company configuration now enables the Core employee path, t
 | Remote host preflight | ✅ Complete |
 | OrbStack / Docker | ✅ Running |
 | WeKnora v0.8.0 | ✅ Running |
-| Hermes v0.21.0 | ✅ Running |
+| Hermes rolling-validated (`0.21.2` / `v2026.9.11` currently observed) | ✅ Running |
 | Hermes `general` | ✅ Configured |
 | Hermes reasoning model | ✅ `gpt-5.6-luna` |
 | Hermes employee long-term memory | ✅ Disabled |
 | Hermes network bind | ✅ Loopback-only baseline |
 | Open WebUI v0.11.3 | ✅ Running |
 
-The current table above is the later 2026-09-11 sanitized runtime truth. The
-historical 2026-09-09 Phase 2 section in `state/DEPLOYMENT-STATE.md` records a
-phase-local Hermes `0.21.1` observation. That older observation is preserved
-for audit history but does not override `config/validated-stack.yaml` or this
-current status. The public repository does not contain a complete
-0.21.1→0.21.0 transition record; future reference-runtime version changes must
-be accompanied by explicit changelog/upgrade evidence.
+The current table above reflects the 2026-09-15 sanitized runtime observation.
+Historical Hermes `0.21.0` / `0.21.1` records remain preserved as audit
+history. They do not define a permanent product version requirement.
+
+For Hermes, `config/validated-stack.yaml` now defines the rolling-validation
+policy and current accepted reference identity. Future Hermes changes must record
+their exact candidate/runtime commit and acceptance evidence, but they do not
+require EAO to remain on one historical release.
+future reference-runtime version changes must be accompanied by explicit
+changelog/upgrade evidence.
 | Signup | ✅ Disabled |
 | Employee groups / baseline ACL | ✅ Reconciled |
 | General Assistant | ✅ Configured |

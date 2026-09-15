@@ -1,17 +1,14 @@
 # Hermes Messaging Execution Path
 
-This is the version-bound execution companion to `infrastructure/hermes/features/README.md` for the first validated Hermes baseline:
+This is the execution companion to `infrastructure/hermes/features/README.md` for the rolling-validated Hermes runtime.
 
-```text
-NousResearch/hermes-agent 0.21.0
-commit f1ccf436a27522c1bb5d36383a6f13b950676338
-```
+Messaging support changes quickly upstream. Before enabling this capability, inspect the exact transaction-scoped Hermes candidate commit and use only platforms/configuration paths supported by that candidate. Historical 0.21.0 validation remains evidence, not a permanent runtime requirement.
 
 Use it only when `capabilities.messaging.enabled: true`. The company configuration selects one real platform; do not enable every supported platform for completeness.
 
 ## 1. Native execution path
 
-Hermes 0.21.0 provides the native messaging setup wizard:
+When the selected Hermes candidate provides the native messaging setup wizard, use:
 
 ```bash
 hermes gateway setup
@@ -19,7 +16,7 @@ hermes gateway setup
 
 Use that supported path before hand-editing a platform configuration from memory. It can create/collect credentials for supported platforms and guide access control.
 
-Start/restart the Gateway through the deployment's normal managed Hermes lifecycle after configuration. For direct foreground verification, the pinned platform guides use:
+Start/restart the Gateway through the deployment's normal managed Hermes lifecycle after configuration. For direct foreground verification, use the candidate's supported Gateway command, typically:
 
 ```bash
 hermes gateway
@@ -51,7 +48,7 @@ not allow-all
 
 Hermes uses platform-specific `*_ALLOWED_USERS` and `*_ALLOW_ALL_USERS` authorization controls. Do not enable an `*_ALLOW_ALL_USERS=true` shortcut merely to pass setup.
 
-## 3. Feishu / Lark — validated 0.21.0 path
+## 3. Feishu / Lark — candidate-verified path
 
 Preferred transport on a workstation/private server is the upstream WebSocket/long-connection path, so no public webhook is required.
 
@@ -61,7 +58,7 @@ Run:
 hermes gateway setup
 ```
 
-Select **Feishu / Lark**. The pinned upstream supports QR-assisted app creation or manual App ID/App Secret entry.
+Select **Feishu / Lark** only when the current candidate supports it. Use the candidate's supported QR-assisted or manual App ID/App Secret path.
 
 Native environment variables include:
 
@@ -74,13 +71,13 @@ FEISHU_ALLOWED_USERS=<comma-separated approved Open IDs>
 FEISHU_HOME_CHANNEL=<optional chat ID>
 ```
 
-If webhook mode is deliberately selected, also follow the pinned upstream webhook security controls (`FEISHU_ENCRYPT_KEY`, `FEISHU_VERIFICATION_TOKEN`, host/port/path) and the company-approved remote access boundary. Do not choose webhook mode merely because it exists.
+If webhook mode is deliberately selected, also follow the current candidate's upstream webhook security controls (`FEISHU_ENCRYPT_KEY`, `FEISHU_VERIFICATION_TOKEN`, host/port/path) and the company-approved remote access boundary. Do not choose webhook mode merely because it exists.
 
 For production, keep Feishu DM/group access constrained to the configured identities. The company must authorize the actual Feishu/Lark app and permissions; the deployment agent must not invent that enterprise authority.
 
-## 4. WeCom — validated 0.21.0 path
+## 4. WeCom — candidate-verified path
 
-Hermes 0.21.0 supports the WeCom AI Bot WebSocket gateway and does not require a public webhook for this path.
+When the current candidate supports the WeCom AI Bot WebSocket gateway, prefer that native path; do not assume a public webhook is required.
 
 Run:
 
@@ -103,9 +100,9 @@ WECOM_GROUP_POLICY=allowlist|disabled
 
 Use `allowlist`/`disabled` according to company configuration. Do not keep the upstream-open DM/group behavior as an accidental production authorization policy.
 
-If group messaging is enabled, configure the approved group IDs and, where required, per-group sender allowlists using the pinned Hermes configuration model.
+If group messaging is enabled, configure the approved group IDs and, where required, per-group sender allowlists using the current candidate's supported Hermes configuration model.
 
-## 5. Weixin / personal WeChat — validated 0.21.0 path
+## 5. Weixin / personal WeChat — candidate-verified path
 
 This adapter uses Tencent's iLink bot identity. It is not the WeCom enterprise adapter.
 
@@ -127,11 +124,11 @@ WEIXIN_ALLOWED_USERS=<comma-separated approved sender IDs>
 WEIXIN_HOME_CHANNEL=<optional chat ID>
 ```
 
-For the validated upstream, `WEIXIN_GROUP_POLICY=disabled` is the safe/default baseline and ordinary WeChat group delivery may not be available for iLink bot identities. Do not promise group-message support when the platform does not deliver those events.
+When the current candidate exposes the same policy, `WEIXIN_GROUP_POLICY=disabled` is the safe/default baseline and ordinary WeChat group delivery may not be available for iLink bot identities. Do not promise group-message support when the platform does not deliver those events.
 
 ## 6. Another Hermes-supported platform
 
-If company configuration selects another platform supported by the pinned Hermes release:
+If company configuration selects another platform supported by the current Hermes candidate:
 
 1. run `hermes gateway setup` under the actual Hermes service/Profile context;
 2. select only that configured platform;
@@ -141,13 +138,13 @@ If company configuration selects another platform supported by the pinned Hermes
 6. record the exact platform settings used (excluding secrets);
 7. run the same authorized/unauthorized acceptance below.
 
-If the selected platform is not supported by the pinned release, report:
+If the selected platform is not supported by the current candidate, report:
 
 ```text
-BLOCKED — SELECTED HERMES RELEASE DOES NOT SUPPORT CONFIGURED MESSAGING PLATFORM
+BLOCKED — SELECTED HERMES CANDIDATE DOES NOT SUPPORT CONFIGURED MESSAGING PLATFORM
 ```
 
-Do not silently install a second messaging framework or upgrade Hermes as part of ordinary provisioning.
+Do not silently install a second messaging framework. If a newer Hermes candidate is needed, handle that as a separate rolling-validation change under `docs/UPGRADE.md`.
 
 ## 7. Profile routing
 

@@ -68,14 +68,15 @@ def main() -> int:
 
         versions = {
             "weknora": field(weknora, "version"),
-            "hermes_agent": field(hermes, "version"),
             "open_webui": field(open_webui, "version"),
         }
         commits = {
             "weknora": field(weknora, "commit"),
-            "hermes_agent": field(hermes, "commit"),
             "open_webui": field(open_webui, "commit"),
         }
+        hermes_policy = field(hermes, "version_policy")
+        hermes_reference_version = field(hermes, "reference_version")
+        hermes_reference_commit = field(hermes, "reference_commit")
     except ValueError as exc:
         print(f"FAIL {exc}")
         return 2
@@ -123,32 +124,63 @@ def main() -> int:
         "https://github.com/NousResearch/hermes-agent.git",
         failures,
     )
+    require_equal("Hermes version policy", hermes_policy, "rolling-validated", failures)
+    require_equal("Hermes tracking ref", field(hermes, "tracking_ref"), "main", failures)
+    require_equal("Hermes permanent version pin", field(hermes, "permanent_version_pin"), "false", failures)
     require_equal(
-        "Hermes source ref type",
-        field(hermes, "source_ref_type"),
-        "commit_only_no_version_tag",
+        "Hermes resolve candidate once",
+        field(hermes, "resolve_candidate_once_per_change"),
+        "true",
         failures,
     )
     require_equal(
+        "Hermes unattended auto-update",
+        field(hermes, "automatic_unattended_update"),
+        "false",
+        failures,
+    )
+    require_equal(
+        "Hermes candidate acceptance required",
+        field(hermes, "candidate_acceptance_required"),
+        "true",
+        failures,
+    )
+    require_equal(
+        "Hermes rollback commit required",
+        field(hermes, "rollback_commit_required"),
+        "true",
+        failures,
+    )
+    if not hermes_reference_version:
+        failures.append("Hermes reference version is empty")
+    if not re.fullmatch(r"[0-9a-f]{40}", hermes_reference_commit):
+        failures.append("Hermes reference commit is not a 40-character lowercase Git SHA")
+    require_equal(
         "Hermes version source",
         field(hermes, "version_source"),
-        "pyproject.toml_at_component_commit",
+        "hermes_version_plus_git_identity",
         failures,
     )
     require_equal(
         "Hermes acquisition method",
         field(hermes, "method"),
-        "official_installer_from_component_commit",
+        "official_installer_from_resolved_candidate_commit",
+        failures,
+    )
+    require_equal(
+        "Hermes candidate resolution",
+        field(hermes, "candidate_resolution"),
+        "upstream_tracking_ref_at_transaction_start",
         failures,
     )
     installer_template = field(hermes, "installer_url_template")
-    if "{commit}" not in installer_template or "NousResearch/hermes-agent" not in installer_template:
-        failures.append("Hermes installer template is not commit-addressed to the validated upstream")
+    if "{candidate_commit}" not in installer_template or "NousResearch/hermes-agent" not in installer_template:
+        failures.append("Hermes installer template is not candidate-commit-addressed to upstream")
     require_equal("Hermes installer commit flag", field(hermes, "commit_flag"), "--commit", failures)
     require_equal(
         "Hermes source path provenance",
         field(hermes, "provenance"),
-        "scripts/install.sh_at_component_commit",
+        "scripts/install.sh_at_candidate_commit",
         failures,
     )
     require_equal(
@@ -233,9 +265,21 @@ def main() -> int:
         failures,
     )
     require_equal(
-        "Hermes runtime expected version",
-        field(hermes, "expected_version"),
-        versions["hermes_agent"],
+        "Hermes exact version recording",
+        field(hermes, "exact_version_recording_required"),
+        "true",
+        failures,
+    )
+    require_equal(
+        "Hermes source commit required",
+        field(hermes, "source_commit_required"),
+        "true",
+        failures,
+    )
+    require_equal(
+        "Hermes reference match required",
+        field(hermes, "reference_match_required"),
+        "false",
         failures,
     )
     require_equal(
@@ -272,14 +316,15 @@ def main() -> int:
     ):
         require_contains(
             path,
-            f"Derived schema pin: config/validated-stack.yaml -> Hermes Agent {versions['hermes_agent']}",
+            "Derived schema contract: config/validated-stack.yaml -> Hermes Agent rolling-validated candidate.",
             failures,
         )
 
     require_contains("DEPLOY.md", "git clone https://github.com/Tencent/WeKnora.git", failures)
     require_contains("DEPLOY.md", commits["weknora"], failures)
     require_contains("DEPLOY.md", "NousResearch/hermes-agent", failures)
-    require_contains("DEPLOY.md", commits["hermes_agent"], failures)
+    require_contains("DEPLOY.md", "HERMES_CANDIDATE_COMMIT", failures)
+    require_contains("DEPLOY.md", "git ls-remote https://github.com/NousResearch/hermes-agent.git refs/heads/main", failures)
     require_contains("DEPLOY.md", open_webui_image, failures)
     require_contains("DEPLOY.md", commits["open_webui"], failures)
     require_contains("DEPLOY.md", "RUNTIME_ROOT = deployment.runtime_root", failures)
@@ -288,13 +333,14 @@ def main() -> int:
     require_contains("DEPLOY.md", "/usr/local/lib/hermes-agent", failures)
     require_contains("DEPLOY.md", "### 4.2 Post-acquisition Core identity assertions", failures)
     require_contains("DEPLOY.md", f"wechatopenai/weknora-app:{versions['weknora'].removeprefix('v')}", failures)
-    require_contains("DEPLOY.md", "hermes --version | grep -F", failures)
+    require_contains("DEPLOY.md", "hermes --version", failures)
     require_contains("DEPLOY.md", "docker inspect -f '{{.Config.Image}}' eaio-open-webui", failures)
 
     print("Enterprise AI Office Validated Stack Consistency")
     print("-----------------------------------------------")
     print(f"WeKnora: {versions['weknora']} @ {commits['weknora'][:12]}")
-    print(f"Hermes Agent: {versions['hermes_agent']} @ {commits['hermes_agent'][:12]}")
+    print(f"Hermes Agent policy: {hermes_policy}")
+    print(f"Hermes accepted reference: {hermes_reference_version} @ {hermes_reference_commit[:12]}")
     print(f"Open WebUI: {versions['open_webui']} @ {commits['open_webui'][:12]}")
 
     if failures:

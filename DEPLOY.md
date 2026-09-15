@@ -96,18 +96,29 @@ Repository templates are a capability library, not a deployment checklist.
 
 ## 4. Validated reference stack
 
-The current reproducible Core version/commit authority is `config/validated-stack.yaml`. The historical `state/DEPLOYMENT-STATE.md` contains validation evidence from multiple past phases and is not a second version authority:
+The current reproducible Core version/commit authority is `config/validated-stack.yaml`.
+The historical `state/DEPLOYMENT-STATE.md` contains validation evidence from
+multiple past phases and is not a second version authority.
 
 ```text
 Host: Apple Silicon macOS
 Exact reference container runtime: OrbStack-provided Docker + Compose
 WeKnora: v0.8.0
-Hermes Agent: v0.21.0, host-native
+Hermes Agent: rolling-validated, host-native
+  current accepted reference: 0.21.2 / v2026.9.11
 Open WebUI: v0.11.3
 Employee Hermes long-term memory: disabled
 ```
 
-For a deployment intended to reproduce this path, use the tested versions unless the task explicitly includes upgrade qualification. Do not silently replace a tested version with `main`, `latest`, or a newer release during the same deployment.
+WeKnora and Open WebUI remain exact reference-version components for this Core
+baseline. Hermes is intentionally different: EAO does not permanently pin
+Hermes to one version.
+
+For every Hermes install or upgrade transaction, resolve one exact upstream
+candidate commit at the start, keep that candidate fixed for the entire
+transaction, validate it, record the resulting exact runtime identity, and retain
+a rollback point. Do not re-resolve a moving upstream ref halfway through the
+same transaction.
 
 The exact host family validated for this reference path is Apple Silicon macOS with
 OrbStack-provided Docker/Compose. Another Docker-compatible runtime is a compatibility
@@ -128,8 +139,12 @@ Optional components not present in the first reference deployment require their 
 ### 4.1 Deterministic Core acquisition
 
 Do not infer upstream repositories or installation methods from product names.
-Read `config/validated-stack.yaml` and acquire the exact validated component
-commit/runtime before configuration.
+Read `config/validated-stack.yaml` and follow each component's declared version
+policy.
+
+For fixed reference components, acquire the exact validated runtime. For Hermes,
+first resolve one transaction-scoped candidate commit, then use that same commit
+for source review, installer acquisition, installation, and acceptance.
 
 For the current baseline:
 
@@ -177,19 +192,39 @@ Then apply the repository WeKnora adapter and provisioning contract. Do not use
 
 #### Hermes Agent
 
-Hermes `0.21.0` is the package version at the validated commit; the upstream
-repository has no validated `v0.21.0` tag for this baseline. Pin by commit.
+Hermes uses the repository policy:
 
-Use the official installer **from the same pinned commit** rather than the
-moving installer on `main`:
-
-```sh
-HERMES_COMMIT=f1ccf436a27522c1bb5d36383a6f13b950676338
-curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES_COMMIT}/scripts/install.sh" \
-  | bash -s -- --commit "${HERMES_COMMIT}" --skip-setup
+```text
+version_policy = rolling-validated
+permanent version pin = false
+transaction-scoped candidate commit = required
+unattended production auto-update = false
 ```
 
-After installation, resolve the actual source checkout using the pinned
+Resolve the configured upstream tracking ref once at the start of the
+transaction. For the current policy this is `main`:
+
+```sh
+HERMES_CANDIDATE_COMMIT="$(
+  git ls-remote https://github.com/NousResearch/hermes-agent.git refs/heads/main |
+  awk '{print $1}'
+)"
+test -n "${HERMES_CANDIDATE_COMMIT}"
+printf '%s\n' "${HERMES_CANDIDATE_COMMIT}"
+```
+
+Record that SHA in the protected operational state before installation. From
+this point onward, do not re-resolve `main` during the same transaction.
+
+Use the official installer **from that resolved candidate commit** and ask it to
+install the same commit:
+
+```sh
+curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES_CANDIDATE_COMMIT}/scripts/install.sh" \
+  | bash -s -- --commit "${HERMES_CANDIDATE_COMMIT}" --skip-setup
+```
+
+After installation, resolve the actual source checkout using the candidate
 installer's own path rules:
 
 ```text
@@ -200,11 +235,18 @@ installer's own path rules:
    /usr/local/lib/hermes-agent
 ```
 
-These rules are recorded machine-readably in `config/validated-stack.yaml` and
-were verified against `scripts/install.sh` at the validated Hermes commit.
-Set `HERMES_SOURCE_DIR` to the resolved path, verify its checkout resolves to
-`HERMES_COMMIT`, then apply the repository-managed default/general Profile
-configuration. Do not run `hermes update` during the same reproduction task.
+Set `HERMES_SOURCE_DIR` to the resolved path, verify its checkout resolves
+exactly to `HERMES_CANDIDATE_COMMIT`, record `hermes --version`, then apply
+the repository-managed Profile configuration and run the required acceptance
+tests.
+
+The accepted Hermes reference identity in `config/validated-stack.yaml` is a
+last-known-good/reference point, not a permanent install target. If the current
+candidate fails required acceptance, stop or roll back to the recorded
+last-known-good commit according to `docs/UPGRADE.md`.
+
+Do not run a second `hermes update` or otherwise move the checkout during the
+same deployment transaction.
 
 #### Open WebUI
 
@@ -226,15 +268,23 @@ docker compose -f infrastructure/open-webui/docker-compose.yml pull
 docker compose -f infrastructure/open-webui/docker-compose.yml up -d
 ```
 
-If any resolved upstream ref, package version, image tag, or checkout differs
-from `config/validated-stack.yaml`, stop as version drift. Do not silently
-continue with a nearby release.
+For WeKnora and Open WebUI, a mismatch from their exact reference identities is
+version drift and must stop the reproduction path.
+
+For Hermes, a runtime that differs from the recorded reference is not
+automatically an error. It is acceptable only when it equals the transaction's
+recorded `HERMES_CANDIDATE_COMMIT` and the Hermes acceptance sequence passes.
+Record the exact version/commit rather than treating a nearby release as
+equivalent.
 
 ### 4.2 Post-acquisition Core identity assertions
 
-Liveness is not identity. Before configuration is treated as a reproduction of
-the validated Core, prove the acquired/running runtime matches
-`config/validated-stack.yaml`.
+Liveness is not identity. Before configuration is accepted, prove the exact
+identity of every acquired/running component.
+
+Fixed-reference components must match `config/validated-stack.yaml`. Hermes
+must match the transaction-scoped candidate commit that was resolved and
+recorded before installation.
 
 #### WeKnora
 
@@ -254,10 +304,16 @@ root/FHS layout applies.
 
 ```sh
 : "${HERMES_SOURCE_DIR:?set HERMES_SOURCE_DIR to the actual Hermes source checkout}"
+: "${HERMES_CANDIDATE_COMMIT:?set the transaction-scoped Hermes candidate commit}"
 
-test "$(git -C "${HERMES_SOURCE_DIR}" rev-parse HEAD)" = "f1ccf436a27522c1bb5d36383a6f13b950676338"
-hermes --version | grep -F "0.21.0"
+test "$(git -C "${HERMES_SOURCE_DIR}" rev-parse HEAD)" = "${HERMES_CANDIDATE_COMMIT}"
+hermes --version
 ```
+
+Record both the exact reported Hermes version and the exact Git commit in the
+protected operational state. They do not have to equal the repository's
+previous reference identity; they do have to equal the candidate selected for
+this transaction and pass the applicable acceptance tests.
 
 #### Open WebUI
 
@@ -265,9 +321,10 @@ hermes --version | grep -F "0.21.0"
 test "$(docker inspect -f '{{.Config.Image}}' eaio-open-webui)" = "ghcr.io/open-webui/open-webui:v0.11.3"
 ```
 
-A failed assertion is a version/runtime-identity failure, even if the service
-returns HTTP 200. Resolve the mismatch or perform an explicit upgrade
-qualification; do not waive the assertion as "close enough."
+A failed identity assertion is a runtime-identity failure even if the service
+returns HTTP 200. For fixed components, resolve the mismatch against the
+reference baseline. For Hermes, resolve any mismatch against the transaction's
+candidate commit. Never waive an identity mismatch as "close enough."
 
 ## 5. Required inputs
 
@@ -314,7 +371,9 @@ Exit condition: the target host and existing state are understood.
 4. Start from `default/admin + general` as the Profile baseline.
 5. Build the exact enabled capability set from company configuration.
 6. For every enabled capability, resolve its implementation path, required protected inputs, acceptance test, and state fields.
-7. Resolve exact component versions/runtime paths.
+7. Resolve exact component identities/runtime paths; for Hermes, resolve and
+   record one transaction-scoped candidate commit rather than using a permanent
+   product version pin.
 8. Produce an internal capability closure table before mutation.
 
 Do not infer organization structure or optional features from repository templates.
@@ -403,7 +462,7 @@ Open WebUI backend route from
 `core_network.hermes.open_webui_backend_base_url`. Do not copy the ARMOR
 reference bind/port/host bridge as a universal default.
 
-1. Install the pinned Hermes release through §4.1 and prove runtime identity through §4.2.
+1. Resolve and install the transaction-scoped rolling-validated Hermes candidate through §4.1, then prove that exact runtime identity through §4.2.
 2. Reconcile the privileged default/admin control plane plus baseline `general` Profile through `infrastructure/hermes/PROVISIONING.md`.
 3. On a fresh target create `general` using upstream Profile management with bundled-Skill opt-out; on an existing target reconcile it in place.
 4. Create specialist Profiles only when selected by company configuration, using the generic specialist template plus the selected role SOUL.
@@ -453,7 +512,7 @@ If the requested target is `core-ready`, continue to state recording/reporting. 
 For each company-enabled conditional capability in `config/capabilities.yaml`:
 
 1. open its referenced implementation playbook/adapter;
-2. resolve version-specific upstream behavior against the selected pinned release;
+2. resolve version-specific upstream behavior against the exact selected component identity; for Hermes, use the transaction-scoped candidate commit;
 3. deploy/configure only that requested capability;
 4. enforce the documented security boundary;
 5. run the matching conditional acceptance test;

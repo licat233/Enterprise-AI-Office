@@ -406,7 +406,7 @@ secret_refs:
     native_binding: WeKnora model credential field api_key
 ```
 
-For the pinned Hermes 0.21.0 baseline, the selected provider's
+For Hermes, the selected transaction-scoped candidate's
 `PROVIDER_REGISTRY` / provider catalog is authoritative for API-key env names
 and provider-native auth mode. For example, `openai-api` accepts
 `OPENAI_API_KEY`. Do not maintain a second universal provider credential

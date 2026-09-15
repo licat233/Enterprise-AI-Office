@@ -22,11 +22,12 @@ Runtime evidence from a specific deployment belongs in the protected operational
 [ ] Container runtime state recorded
 [ ] Existing runtime/Hermes state inspected before mutation
 [ ] Exact deployed core component versions recorded
-[ ] Core runtime identity matches `config/validated-stack.yaml`, not only service health
+[ ] Core runtime identities are recorded exactly, not inferred from service health
 [ ] WeKnora source checkout commit matches the validated commit
 [ ] WeKnora app container image matches the validated runtime image
-[ ] Hermes source checkout commit matches the validated commit
-[ ] `hermes --version` reports the validated package version
+[ ] Hermes source checkout commit matches the transaction-scoped candidate commit
+[ ] `hermes --version` is recorded and corresponds to that candidate checkout
+[ ] Hermes candidate has passed the applicable rolling-validation acceptance
 [ ] Open WebUI running container image matches the validated image
 [ ] Open WebUI backend can reach the configured host-native Hermes Profile route from inside the container runtime
 [ ] Each intended Hermes Profile base URL occurs exactly once in Open WebUI connection configuration
@@ -101,7 +102,7 @@ From `general`:
 [ ] `general` employee Profile served
 [ ] default/admin not exposed as employee Assistant
 [ ] intended model/provider used
-[ ] selected Hermes provider auth path matches the pinned provider registry/catalog
+[ ] selected Hermes provider auth path matches the transaction-scoped candidate provider registry/catalog
 [ ] when the selected Hermes provider requires an API key, every configured model credential ref resolves to a declared `secret_refs` entry whose native binding is accepted by that provider
 [ ] keyless/OAuth/account providers do not receive an invented API-key binding
 [ ] `general` exposes only approved tools

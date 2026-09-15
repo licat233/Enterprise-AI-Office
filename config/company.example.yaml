@@ -309,7 +309,7 @@ models:
     provider: <SELECT_PROVIDER>
     default_model: <SELECT_MODEL>
     # Symbolic refs only. For API-key providers, bind each selected ref to an
-    # exact credential input accepted by the pinned Hermes provider registry.
+    # exact credential input accepted by the transaction-scoped Hermes candidate provider registry.
     # Keyless/OAuth providers may legitimately use an empty list.
     credential_refs: []
   weknora:

@@ -87,9 +87,9 @@ Path for EAO-managed runtime material. Shell examples use `RUNTIME_ROOT` only
 as a convenience alias for that exact resolved value.
 
 Hermes source checkout location is different: it is an observed installation
-fact resolved from the pinned Hermes installer rules recorded in
-`config/validated-stack.yaml`. Explicit `--dir` /
-`HERMES_INSTALL_DIR` wins; otherwise the validated installer uses its
+fact resolved from the **transaction-scoped Hermes candidate installer** under
+the rolling-validation policy in `config/validated-stack.yaml`. Explicit
+`--dir` / `HERMES_INSTALL_DIR` wins; otherwise use the candidate installer's
 documented non-root or root/FHS default.
 
 Record the resolved Hermes source checkout path in protected operational state.
@@ -159,13 +159,14 @@ bootstrap admin password provisioning input.
 Model-provider credentials use the same symbolic-ref mechanism but live with
 the model role that consumes them under `models`. A selected Hermes
 API-key provider lists `models.hermes.credential_refs`; each ref must map to a
-`secret_refs` entry whose `native_binding` is accepted by the pinned Hermes
-provider registry. A selected WeKnora remote embedding/rerank model uses its
-role-specific `*_credential_ref`, whose validated v0.8.0 provisioning binding
-is WeKnora's model credential field `api_key` (create payload and supported
-credential subresource as defined by the provisioning contract). Local/keyless/OAuth paths may
-legitimately have no API-key ref, but that must follow the selected pinned
-upstream auth mechanism rather than an installer guess.
+`secret_refs` entry whose `native_binding` is accepted by the
+transaction-scoped Hermes candidate's provider registry. A selected WeKnora
+remote embedding/rerank model uses its role-specific `*_credential_ref`, whose
+validated v0.8.0 provisioning binding is WeKnora's model credential field
+`api_key` (create payload and supported credential subresource as defined by
+the provisioning contract). Local/keyless/OAuth paths may legitimately have no
+API-key ref, but that must follow the selected candidate's upstream auth
+mechanism rather than an installer guess.
 
 For WeKnora model roles, `source` is desired state, not an inference:
 v0.8.0 requires `local` or `remote` when creating a model. Do not derive it
@@ -331,18 +332,22 @@ validated-stack authority, not convenience links.
 
 The current baseline deliberately distinguishes:
 
-- tag-backed components (WeKnora and Open WebUI), whose tag→commit mapping was
-  verified;
-- Hermes Agent, whose `0.21.0` package version is verified in
-  `pyproject.toml` at the pinned commit and is installed through the official
-  installer fetched from that same commit.
+- tag-backed components (WeKnora and Open WebUI), whose exact reference
+  tag→commit mappings remain validated;
+- Hermes Agent, whose `version_policy: rolling-validated` intentionally avoids
+  a permanent product version pin. The file records the current accepted
+  reference identity plus the rules for resolving one exact candidate commit per
+  deployment/upgrade transaction.
 
-See `DEPLOY.md §4.1` for the deterministic acquisition procedure.
+See `DEPLOY.md §4.1` for the deterministic transaction-scoped acquisition
+procedure.
 
+This records the first validated Core stack, the current Hermes accepted
+reference identity, and baseline feature flags in machine-readable form.
 
-This records the first validated core stack and baseline feature flags in machine-readable form.
-
-It is a reproducibility baseline, not a permanent version policy. Use `docs/UPGRADE.md` when qualifying newer versions.
+For Hermes, the recorded reference version/commit is evidence and rollback
+context, not a permanent install requirement. Use `docs/UPGRADE.md` for the
+rolling-validation lifecycle.
 
 Optional components not present in the first validated core demo must resolve and record their own compatible version/commit when enabled.
 
