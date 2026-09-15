@@ -827,7 +827,7 @@ skills:
   ledger: true
 
 curator:
-  enabled: true
+  enabled: false
   consolidate: false
 ```
 
@@ -840,8 +840,12 @@ Important semantics:
   tested for false positives before production adoption.
 - `ledger: true` provides evidence and rollback without turning every learning
   event into a human approval task.
-- Curator consolidation remains off initially; automatic lifecycle cleanup is
-  lower risk than LLM-driven consolidation and should be evaluated separately.
+- Curator remains **off initially**. Department experience may be low-frequency
+  but high-value; inactivity alone is not evidence that a learned operating
+  method should disappear from the active department Profile.
+- Curator can be reconsidered only after the learned-Skill library becomes large
+  enough to create a measured maintenance/retrieval problem. LLM consolidation
+  remains off unless separately justified.
 - Existing company Skill directories remain external/version-controlled.
 
 ### 21.5A Tool-surface requirement
@@ -1210,26 +1214,74 @@ Then prove, on the exact build:
 
 No production setting changes are authorized by this document alone.
 
-### 21.10 Phase 1 — Shadow Learning Pilot
+### 21.10 Phase 1 — Learning Pilot
 
-Use one bounded Profile/domain and a finite test window.
+Use bounded test Profiles/domains and a finite test window. The pilot has two
+different jobs and therefore two subphases.
 
-Temporary pilot posture:
+#### Phase 1A — Shadow capture quality
+
+Goal: inspect what Background Review *tries* to learn without changing the
+department's active learned-Skill plane.
 
 ```text
 Memory                              OFF
 skills toolset                      ON for the pilot Profile
 Background Review                   ON
-Profile-local autonomous Skill path ON
 Company external Skills             READ / USE, filesystem read-only
 skills.creation_nudge_interval      LOW, chosen for observation
-skills.write_approval               ON temporarily
-Curator LLM consolidation           OFF
+skills.write_approval               ON
+Curator                             OFF
 ```
 
-The approval queue is used only by the implementation team to inspect learning
-quality during the pilot. It is not an employee workflow and it is not the
-target operating model.
+Treat pending writes as test evidence. Do not build a permanent approval
+workflow around them.
+
+Important upstream behavior: approving a staged background Skill write replays
+the mutation outside the original Background Review context. That can change its
+curator-management provenance. Therefore Phase 1A is primarily a **proposal
+quality test**, not the authoritative end-to-end refinement test.
+
+Measure:
+
+- reusable correction capture;
+- noise / over-learning;
+- duplicate proposals;
+- naming compliance;
+- review cost;
+- missed zero-tool corrections.
+
+#### Phase 1B — Isolated live-learning loop
+
+After Phase 1A shows acceptable proposal quality, use an isolated non-production
+test Profile with:
+
+```text
+Memory                              OFF
+skills toolset                      ON
+Background Review                   ON
+Profile-local autonomous Skill path ON
+Company external Skills             READ / USE, filesystem read-only
+skills.write_approval               OFF
+Curator                             OFF
+```
+
+Now test the true native lifecycle:
+
+```text
+Background Review create
+→ agent-created learned Skill
+→ later employee correction
+→ Background Review patch/refine
+→ later exception
+→ further refinement
+```
+
+This is the phase that proves Hermes can continuously maintain its own learned
+department Skills.
+
+Neither Phase 1A nor 1B is an employee knowledge-management workflow. They are
+finite implementation acceptance activities.
 
 Test cases should include:
 
@@ -1265,8 +1317,8 @@ skills.write_approval               OFF
 Profile-local agent-created Skills  autonomous within accepted low-risk scope
 Company external Skills             filesystem read-only to employee learning path
 Skill ledger                        ON
-Curator                             ON
-Curator LLM consolidation           OFF initially
+Curator                             OFF initially
+Curator LLM consolidation           OFF
 Human routine approval queue        NONE
 ```
 
@@ -1462,6 +1514,8 @@ Do not implement these in v1 unless measured use proves a gap:
 - automatic WeKnora promotion;
 - cross-Profile autonomous Skill propagation;
 - automatic company-wide Skill promotion;
+- Curator automatic stale/archive lifecycle until real learned-Skill volume
+  proves cleanup is needed;
 - Curator LLM consolidation;
 - a Self-Evolution dashboard;
 - a separate experience database;
