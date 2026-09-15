@@ -55,6 +55,7 @@ core_provisioning:
       db_password: null
       redis_password: null
       jwt_secret: null
+      system_aes_key: null
   hermes:
     default_api_key_ref: null
     profile_api_key_refs:
