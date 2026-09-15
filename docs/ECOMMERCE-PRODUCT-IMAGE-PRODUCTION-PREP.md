@@ -4,6 +4,8 @@ Status: PREPARATION ONLY / NOT INSTALLED / NOT EXPOSED
 
 Date: 2026-09-13
 
+Current-baseline review: 2026-09-15 — preparation boundary rechecked against current `main`; actual image generation/editing remains outside the accepted Operations baseline.
+
 Repository branch: `task/ecommerce-product-image-prep`
 
 ## 1. Purpose
@@ -197,7 +199,7 @@ Preparation recommendation only:
 | Sales | No |
 | Procurement | No |
 | default/admin | Control-plane only; not a normal employee invocation surface |
-| future EAO maintainer/admin Profile | Review/admin use only, subject to its own contract |
+| maintainer / EAO Admin | Review/admin use only, subject to the current maintainer and EAO Admin contracts |
 
 Actual exposure remains disabled until runtime acceptance is complete.
 
