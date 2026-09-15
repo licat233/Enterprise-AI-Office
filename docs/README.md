@@ -48,6 +48,10 @@ A historical file may explain why the current design exists. It must not silentl
 
 ## Tier 1 — Current normative system contracts
 
+For the administrator procedure for adding durable knowledge, start with
+[Knowledge Intake v1](KNOWLEDGE-INTAKE.md), then consult the broader
+[Enterprise Knowledge Standard](KNOWLEDGE.md).
+
 These describe how EAO is intended to work now.
 
 | Document | Purpose |

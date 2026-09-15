@@ -2,6 +2,10 @@
 
 This document defines how Enterprise AI Office organizes and governs company knowledge.
 
+For the canonical administrator procedure for reviewing and adding durable
+knowledge, see [Knowledge Intake v1](KNOWLEDGE-INTAKE.md). This standard
+defines the knowledge principles; the SOP defines the operational sequence.
+
 ## 1. Dual knowledge architecture
 
 Enterprise AI Office uses two complementary knowledge stores:
@@ -545,19 +549,23 @@ For critical company facts, preserve enough provenance to determine:
 [ ] Knowledge ownership is defined
 ```
 
-## 24. Maintainer contributor boundary
+## 24. Maintainer and administrator boundary
 
-The EAO maintainer may receive a bounded WeKnora contributor surface when the
-administrator capability is enabled. Pin Tencent/WeKnora v0.8.0 and use the
-official API with a separate tenant API key carrying exactly ingest and
-retrieve plus an explicit non-empty Knowledge Base allow-list. The v1A routes
-are file, URL, and manual knowledge creation plus knowledge status retrieval.
-Do not use full_access, manage_kbs, manage_agents, manage_models, MCP admin,
-tenant/system admin, platform, or runtime-management capabilities.
+The EAO Admin Review Plane may review and recommend a Knowledge Intake
+operation. The current ARMOR production baseline keeps EAO Admin Knowledge
+Mutation BLOCKED / DISABLED; it does not provide an automatic EAO write path.
+A human administrator performs the mutation through the native WeKnora surface.
 
-Keep owner/admin provisioning credentials separate from the maintainer
-contributor credential. Do not grant tenant or Knowledge Base deletion,
+If a separately authorized deployment enables a bounded maintainer contributor
+surface, pin Tencent/WeKnora v0.8.0 and use the official API with a separate
+tenant API key carrying exactly ingest and retrieve plus an explicit non-empty
+Knowledge Base allow-list. The v1A routes are file, URL, and manual knowledge
+creation plus knowledge status retrieval. Do not use full_access, manage_kbs,
+manage_agents, manage_models, MCP admin, tenant/system admin, platform, or
+runtime-management capabilities.
+
+Keep owner/admin provisioning credentials separate from any maintainer
+credential. Do not grant tenant or Knowledge Base deletion,
 embedding/reranker administration, bulk deletion, or direct database access.
 Every ingestion still requires source review, duplicate/conflict handling,
-trusted approval, parse/index completion, direct retrieval, source evidence,
-and normal Hermes retrieval before it becomes active.
+human confirmation, parse/index completion, direct retrieval, source evidence,
