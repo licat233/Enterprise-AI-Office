@@ -462,7 +462,7 @@ Open WebUI backend route from
 `core_network.hermes.open_webui_backend_base_url`. Do not copy the ARMOR
 reference bind/port/host bridge as a universal default.
 
-1. Install the pinned Hermes release through §4.1 and prove runtime identity through §4.2.
+1. Resolve and install the transaction-scoped rolling-validated Hermes candidate through §4.1, then prove that exact runtime identity through §4.2.
 2. Reconcile the privileged default/admin control plane plus baseline `general` Profile through `infrastructure/hermes/PROVISIONING.md`.
 3. On a fresh target create `general` using upstream Profile management with bundled-Skill opt-out; on an existing target reconcile it in place.
 4. Create specialist Profiles only when selected by company configuration, using the generic specialist template plus the selected role SOUL.
@@ -512,7 +512,7 @@ If the requested target is `core-ready`, continue to state recording/reporting. 
 For each company-enabled conditional capability in `config/capabilities.yaml`:
 
 1. open its referenced implementation playbook/adapter;
-2. resolve version-specific upstream behavior against the selected pinned release;
+2. resolve version-specific upstream behavior against the exact selected component identity; for Hermes, use the transaction-scoped candidate commit;
 3. deploy/configure only that requested capability;
 4. enforce the documented security boundary;
 5. run the matching conditional acceptance test;
