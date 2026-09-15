@@ -41,6 +41,33 @@ company config → target_readiness
 
 A PASS means the **repository execution paths are structurally present**. It does not prove that a real host deployment or an external integration works; runtime acceptance remains required.
 
+## `core-lifecycle-smoke.sh`
+
+Core runtime lifecycle/recreate acceptance.
+
+Read-only inspection:
+
+```sh
+EAIO_RUNTIME_ROOT=/absolute/deployment/runtime_root \
+OPENWEBUI_URL=http://127.0.0.1:<port> \
+WEKNORA_FRONTEND_URL=http://127.0.0.1:<port> \
+bash scripts/core-lifecycle-smoke.sh
+```
+
+During an explicitly authorized maintenance/acceptance window:
+
+```sh
+EAIO_RUNTIME_ROOT=/absolute/deployment/runtime_root \
+OPENWEBUI_URL=http://127.0.0.1:<port> \
+WEKNORA_FRONTEND_URL=http://127.0.0.1:<port> \
+bash scripts/core-lifecycle-smoke.sh --confirm-recreate
+```
+
+The recreate mode verifies stable Compose project identities, persistent-volume
+continuity, container-visible WeKnora `SYSTEM_AES_KEY`, WeKnora backend
+recreate without a frontend restart, frontend recreate, and Open WebUI recreate.
+Docker-daemon restart and host reboot remain separate explicit recovery tests.
+
 ## `check-frozen-baselines.py`
 
 Frozen local evidence-history check.

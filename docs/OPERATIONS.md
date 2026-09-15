@@ -401,8 +401,11 @@ Use this exact post-reboot order for the current MacBook demo:
    for `Running`.
 2. Docker Engine: run `docker info` and confirm the daemon is reachable.
 3. WeKnora containers: run `docker compose ls` and `docker ps`; confirm the
-   `weknora` project and its five containers are present.
-4. Open WebUI container: confirm `eaio-open-webui` is running and healthy.
+   `weknora` project and its required containers are present, and verify the
+   recorded PostgreSQL/file-storage volume identities have not changed.
+4. Open WebUI container: confirm `eaio-open-webui` is running and healthy,
+   verify Compose project `eaio-openwebui`, and verify the recorded data volume
+   identity has not changed.
 5. Hermes LaunchAgent: run `launchctl print gui/$(id -u)/ai.hermes.gateway`;
    confirm the service is loaded and running.
 6. Hermes API: check `http://127.0.0.1:8642/health` for HTTP 200.

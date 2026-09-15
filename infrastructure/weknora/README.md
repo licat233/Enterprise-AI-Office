@@ -36,19 +36,27 @@ Docker/Compose container IP addresses are ephemeral implementation details. EAO 
 
 The pinned WeKnora v0.8.0 frontend proxies to the backend service name `app`, but its Nginx configuration resolves that name when Nginx starts. If `app` is recreated later while the frontend keeps running, Nginx can continue using the stale IP and return `502 Bad Gateway` for every `/api/v1/*` request. The UI can then misleadingly appear to have lost models or Knowledge Bases even though PostgreSQL data is intact.
 
-Apply the EAO hardening override together with upstream Compose:
+The canonical deployment checkout is `${RUNTIME_ROOT}/runtime/WeKnora`.
+Materialize the two EAO adapter files into that checkout, then start Compose
+there:
 
 ```sh
-export EAO_WEKNORA_ADAPTER_DIR=/absolute/path/to/Enterprise-AI-Office/infrastructure/weknora
+mkdir -p "${RUNTIME_ROOT}/runtime/WeKnora/eao-adapter"
+cp infrastructure/weknora/frontend-entrypoint.sh \
+  "${RUNTIME_ROOT}/runtime/WeKnora/eao-adapter/frontend-entrypoint.sh"
+cp infrastructure/weknora/docker-compose.eaio.override.yml \
+  "${RUNTIME_ROOT}/runtime/WeKnora/docker-compose.eaio-override.yml"
 
-docker compose \
-  -f /path/to/pinned/WeKnora/docker-compose.yml \
-  -f "$EAO_WEKNORA_ADAPTER_DIR/docker-compose.eaio.override.yml" \
-  up -d
+cd "${RUNTIME_ROOT}/runtime/WeKnora"
+docker compose -f docker-compose.yml -f docker-compose.eaio-override.yml up -d
 ```
+
+This keeps the production runtime independent of the location of the EAO Git
+checkout.
 
 The adapter:
 
+- freezes the existing Compose project identity as `weknora`, protecting the project-qualified persistent-volume identity from working-directory drift;
 - preserves the official WeKnora frontend image and official `/docker-entrypoint.sh`;
 - patches only the runtime Nginx template before the official entrypoint renders it;
 - uses Docker embedded DNS (`127.0.0.11`) to re-resolve `app`;
@@ -56,6 +64,11 @@ The adapter:
 - fails closed when the expected pinned upstream template shape changes, forcing compatibility review on upgrade.
 
 Do **not** assign static container IPs merely to work around stale DNS. Stable identity is the Compose service name; container IPs remain disposable.
+
+The protected runtime must also preserve the same `SYSTEM_AES_KEY` across
+recreate, upgrade, restore, and migration. A changed/missing key can make stored
+encrypted provider/model/MCP/datasource credentials unreadable even when the
+database rows still exist.
 
 For host-native services consumed from WeKnora containers, such as Ollama or an OpenAI-compatible local gateway, use `host.docker.internal` on the validated macOS Docker path rather than `localhost`. If WeKnora SSRF validation protects that endpoint, add the exact trusted hostname to the WeKnora container's `SSRF_WHITELIST_EXTRA`; setting a host OS environment variable alone does not inject it into an already-created container.
 

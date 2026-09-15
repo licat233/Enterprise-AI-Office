@@ -57,12 +57,19 @@ from the presence of Arena or other upstream Open WebUI utilities in the UI.
 
 ## Validated local deployment pattern
 
-The tested manifest is [`docker-compose.yml`](docker-compose.yml).
+The tested manifest is [`docker-compose.yml`](docker-compose.yml). It declares
+the stable Compose project name `eaio-openwebui`; do not rely on the current
+working directory to derive project identity.
 
 Its image pin is derived from `config/validated-stack.yaml`; the current
 upstream source identity is `https://github.com/open-webui/open-webui.git`.
 Use `DEPLOY.md §4.1` for deterministic acquisition/startup and do not replace
 the image tag with `latest`.
+
+For production, materialize the Compose file and branding directory under
+`${RUNTIME_ROOT}/runtime/OpenWebUI` before starting the service. Runtime
+containers must not depend on the EAO source checkout remaining mounted from an
+administrator home directory.
 
 The first validated local demo used:
 

@@ -183,11 +183,21 @@ Use `infrastructure/weknora/docker-compose.eaio.override.yml` with the pinned up
 Operational rules:
 
 ```text
-Compose service name = stable runtime identity
+Compose project name  = stable deployment identity
+Compose service name  = stable service identity
+named volume identity = persistent state identity
 container IP          = disposable implementation detail
 ```
 
 Never encode a Docker-assigned `172.x/192.168.x` container IP into Nginx, application configuration, deployment state, or runbooks.
+
+The validated baseline freezes WeKnora project identity as `weknora` and Open
+WebUI as `eaio-openwebui`. Do not let a changed checkout/working-directory name
+silently create a second set of named volumes.
+
+The WeKnora runtime must preserve `SYSTEM_AES_KEY` as a protected continuity
+secret. Database recovery with a different/missing key is incomplete because
+encrypted credentials may become unreadable while records remain present.
 
 When a containerized WeKnora service calls a process running on the macOS host, `localhost` points back to that container. On the validated Docker Desktop/OrbStack-style path, use `host.docker.internal:<port>` and verify it from inside the actual WeKnora container. If the endpoint is protected by WeKnora SSRF validation, put the trusted host/CIDR in the container-visible `SSRF_WHITELIST_EXTRA` configuration and recreate the affected service through Compose.
 

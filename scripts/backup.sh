@@ -278,6 +278,7 @@ require_running_container "$OPENWEBUI_CONTAINER"
 DB_USER="$(env_value DB_USER "$WEKNORA_ENV_FILE")"
 DB_NAME="$(env_value DB_NAME "$WEKNORA_ENV_FILE")"
 DB_PASSWORD="$(env_value DB_PASSWORD "$WEKNORA_ENV_FILE")"
+SYSTEM_AES_KEY="$(env_value SYSTEM_AES_KEY "$WEKNORA_ENV_FILE")"
 WEKNORA_VERSION="$(env_value WEKNORA_VERSION "$WEKNORA_ENV_FILE")"
 
 POSTGRES_VOLUME="$(volume_name "$POSTGRES_CONTAINER" /var/lib/postgresql/data)"
@@ -353,6 +354,7 @@ else
   warn "Open WebUI runtime env" "not present: $OPENWEBUI_RUNTIME_DIR/.env"
 fi
 pass "WeKnora config" "runtime .env, config, skills, Compose, MCP"
+pass "WeKnora encryption continuity" "SYSTEM_AES_KEY present in protected runtime env"
 pass "Open WebUI config" "Compose manifest and protected runtime env when present"
 
 if [ -f "$COMPANY_CONFIG" ]; then
