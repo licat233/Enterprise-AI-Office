@@ -42,6 +42,7 @@
 | Media Transcription 可选能力 | ✅ 已验证 / ARMOR Reference 已启用；非 Core 默认能力 |
 | EAO 运行基线 | ✅ 已完成 / 已部署 / 已投入使用 |
 | 双知识库架构（RAG + Wiki） | ✅ 已启用 — WeKnora RAG + ARMOR Vault Wiki / Working Memory |
+| Enterprise Self-Evolution v1 | 🧭 设计基线已定义 — 从员工正常工作中内嵌学习岗位经验；运行时尚未启用，需先审计 Hermes 实际能力 |
 | 本地 AI 模型基础设施 | ✅ ARMOR Reference 已启用 — Ollama 为 WeKnora 提供视觉、音频与向量模型；Hermes 主推理模型保持独立 |
 | 部门交接准备 | ✅ 已完成 — 员工账号与私有访问资料可直接交付 |
 | 公司内部员工访问 | ✅ 已通过批准的私有网络路径验证 |
@@ -72,6 +73,25 @@
 - 第三方 Skill → [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md) → [Third-Party Skill Admission Standard](docs/SKILL-ADMISSION.md) → DIRECT / ADAPT / DELEGATE / REJECT。
 
 统一原则是：**先审查，再产生生产变更**。安装完成并不等于已经暴露给 Profile，也不等于已经获得授权。
+
+## Enterprise Self-Evolution 设计基线
+
+EAO 现在已经定义规范性的 [Enterprise Self-Evolution v1](docs/SELF-EVOLUTION.md) 设计，用于把员工在正常工作过程中自然产生的经验，逐步转化为可复用的组织智能。
+
+最核心的产品约束是：**不能最后变成人类服务 AI 系统。** 普通员工不应该为了让 EAO 变聪明而额外填写知识表单、手工分类经验、维护 AI 知识库，或者处理日常审核队列。优先采用工作内嵌式学习：
+
+```text
+员工正常工作
+→ Hermes 识别可复用的纠正 / 经验 / 例外
+→ 形成带来源与上下文的岗位经验
+→ 后续相关工作中受限复用
+→ 通过真实工作继续纠正 / 强化
+→ 持续完善
+```
+
+该设计复用现有 Open WebUI、Hermes、ARMOR Vault、WeKnora、Skills、Profile 与仓库治理体系，**不新增数据库、向量库、工作流引擎，也不要求企业新增一个“全岗位知识审核员”角色**。
+
+当前边界：Self-Evolution 架构已经定义，但运行时**尚未启用**。员工 Hermes 长期 Memory 继续保持 OFF；不授权 Hermes 自主修改生产 Skills；普通 Vault 内容不自动进入 WeKnora。下一步必须先对实际部署的 Hermes Runtime 做 Phase 0 能力审计，再决定哪些原生 Self-Improvement 能力可以安全复用。
 
 ## 仓库维护模式
 
