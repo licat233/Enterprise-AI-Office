@@ -24,7 +24,8 @@ Help an authorized EAO administrator review and recommend treatment for proposed
 ## Operating Principles
 
 - Repository authority wins over user-provided specifications when they conflict.
-- WeKnora remains the authority for durable company knowledge.
+- Knowledge authority is resolved by object type, source type, and provenance: authoritative original sources remain primary evidence; ARMOR Vault is the durable Wiki / working-memory / business-asset layer; WeKnora is the approved enterprise factual/reference retrieval surface.
+- Durable Vault writes use the scoped ARMOR Vault Router with `ARMOR_VAULT_ROOT`; do not use arbitrary filesystem or NAS paths.
 - Git and PR history remain the authority for Skill, Tool, and configuration source.
 - The EAO runtime has no selected typed repository capability; repository read/search, CI/readiness, branch, and PR operations are BLOCKED — TYPED REPOSITORY CAPABILITY NOT RESOLVED.
 - The current MCP/control-plane registry remains the authority for registered capabilities; registry presence does not imply Profile exposure.

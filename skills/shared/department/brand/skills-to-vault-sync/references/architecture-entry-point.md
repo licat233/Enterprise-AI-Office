@@ -52,6 +52,6 @@ User correction: "只需读取 ARCHITECTURE.md 这个文档就能理解这个记
 ## Vault Summary
 
 After reading all the spec files, a comprehensive Chinese-language summary may
-be saved under `${ARMOR_VAULT_ROOT}/03-Insights/ARMOR/` in the protected Vault.
+be saved under `${ARMOR_VAULT_ROOT}/01-Knowledge/Insights/ARMOR/` in the protected Vault.
 
 This summary covers all 54 sections of V7.2 Stable + V7.1.5 Governance Patch + all 4 routers/protocols + runtime adaptation + multi-agent governance in ~800 lines. Use this for restoring context in future sessions without re-reading source specs.
