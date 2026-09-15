@@ -61,6 +61,9 @@ Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.
 
 ## Repository maintenance model
 
+For the administrator procedure for adding durable knowledge, use
+[Knowledge Intake v1](docs/KNOWLEDGE-INTAKE.md).
+
 EAO is maintained as a **solo-maintainer, single-main repository**.
 
 ```text

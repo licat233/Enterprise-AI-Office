@@ -61,6 +61,9 @@
 
 ## 仓库维护模式
 
+管理员添加持久化企业知识时，请遵循
+[Knowledge Intake v1](docs/KNOWLEDGE-INTAKE.md)。
+
 EAO 采用**一人维护、单主线**模式。
 
 ```text
