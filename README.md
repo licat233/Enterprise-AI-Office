@@ -61,10 +61,19 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 
 Authoritative lifecycle state: [`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml).
 
-## Repository maintenance model
+## Administrator resource intake
 
-For the administrator procedure for adding durable knowledge, use
-[Knowledge Intake v1](docs/KNOWLEDGE-INTAKE.md).
+If an administrator discovers useful **knowledge, a Tool/MCP/service, or a third-party Skill**, start with [Administrator Resource Intake](docs/ADMIN-RESOURCE-INTAKE.md).
+
+It is the routing entry point into the existing authorities rather than a new administrator runtime:
+
+- durable knowledge → [Knowledge Intake v1](docs/KNOWLEDGE-INTAKE.md) → native WeKnora ingestion and retrieval verification;
+- Tool / MCP / service / component → [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md) → reuse first, governed change only when a real gap remains;
+- third-party Skill → [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md) → [Third-Party Skill Admission Standard](docs/SKILL-ADMISSION.md) → DIRECT / ADAPT / DELEGATE / REJECT.
+
+The common rule is **review first, mutate later**. Installation does not automatically imply exposure or authorization.
+
+## Repository maintenance model
 
 EAO is maintained as a **solo-maintainer, single-main repository**.
 

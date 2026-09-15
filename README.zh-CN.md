@@ -61,10 +61,19 @@
 
 机器可读权威状态：[`state/PROJECT-PHASE.yaml`](state/PROJECT-PHASE.yaml)。
 
-## 仓库维护模式
+## 管理员资源引入
 
-管理员添加持久化企业知识时，请遵循
-[Knowledge Intake v1](docs/KNOWLEDGE-INTAKE.md)。
+当管理员发现有价值的**知识资料、Tool / MCP / 服务，或第三方 Skill** 时，从 [Administrator Resource Intake](docs/ADMIN-RESOURCE-INTAKE.md) 开始。
+
+它只是现有权威流程的统一入口，不是新的管理员运行时：
+
+- 持久知识 → [Knowledge Intake v1](docs/KNOWLEDGE-INTAKE.md) → WeKnora 原生导入与检索验收；
+- Tool / MCP / 服务 / 组件 → [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md) → 优先复用，仅在真实能力缺口存在时走受治理变更；
+- 第三方 Skill → [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md) → [Third-Party Skill Admission Standard](docs/SKILL-ADMISSION.md) → DIRECT / ADAPT / DELEGATE / REJECT。
+
+统一原则是：**先审查，再产生生产变更**。安装完成并不等于已经暴露给 Profile，也不等于已经获得授权。
+
+## 仓库维护模式
 
 EAO 采用**一人维护、单主线**模式。
 
