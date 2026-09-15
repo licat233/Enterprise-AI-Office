@@ -137,11 +137,11 @@ The same checker also validates non-empty model-provider symbolic refs under
 `models`. Each such ref must resolve to `secret_refs`, use
 `class: model-provider-credentials`, and declare non-empty `consumer` and
 `native_binding` metadata. It does not invent provider env names: provisioning
-still resolves those against the pinned Hermes/WeKnora upstream contract.
+still resolves those against the selected Hermes candidate / validated WeKnora upstream contract.
 
 ## `check-validated-stack-consistency.py`
 
-Dependency-free cross-file check for derived Core runtime pins.
+Dependency-free cross-file check for fixed Core references plus the Hermes rolling-validation contract.
 
 Run:
 
