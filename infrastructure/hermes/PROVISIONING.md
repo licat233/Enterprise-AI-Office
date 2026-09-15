@@ -289,7 +289,7 @@ model:
 Do not silently choose a provider/model because one happens to be available.
 Do not guess provider credential variable names. For API-key providers, bind
 only the declared symbolic refs whose `native_binding` is accepted by the
-pinned Hermes provider registry.
+transaction-scoped Hermes candidate provider registry.
 
 ### Memory
 
@@ -336,7 +336,7 @@ The protected Profile `.env` must contain:
 API_SERVER_KEY=<distinct general Profile key>
 WEKNORA_API_KEY=<retrieve-only KB-scoped key>
 WEKNORA_BASE_URL=<deployed WeKnora API-v1 root>
-<resolved models.hermes.credential_refs at their exact pinned-provider native bindings, when required>
+<resolved models.hermes.credential_refs at their exact candidate-provider native bindings, when required>
 ```
 
 Do **not** set `API_SERVER_ENABLED=true` on `general` in the multiplex
@@ -347,7 +347,7 @@ Do not copy the default/admin API key into `general`.
 The model-provider secret value is available only to Profiles whose rendered
 model configuration actually uses that provider. A symbolic ref name or generic
 `model-provider-credentials` class is not enough: the exact native binding
-must be compatible with the selected pinned provider.
+must be compatible with the selected transaction-scoped Hermes candidate provider.
 
 ## 8. Reconcile the General Assistant SOUL
 
