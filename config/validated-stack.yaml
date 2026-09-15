@@ -37,11 +37,11 @@ components:
       method: git_clone_then_checkout_component_commit
       runtime_version_env:
         name: WEKNORA_VERSION
-        value: "0.8.0"
+        value: "v0.8.0"
     runtime_identity:
       source_commit_required: true
       container_name: WeKnora-app
-      container_image: wechatopenai/weknora-app:0.8.0
+      container_image: wechatopenai/weknora-app:v0.8.0
     deployment: upstream-compose-plus-thin-adapter
   hermes_agent:
     version_policy: rolling-validated
