@@ -49,6 +49,7 @@ core_provisioning:
       db_password: weknora-db-password
       redis_password: weknora-redis-password
       jwt_secret: weknora-jwt-secret
+      system_aes_key: weknora-system-aes-key
 
   hermes:
     default_api_key_ref: hermes-default-api-key
@@ -252,6 +253,11 @@ secret_refs:
     class: weknora-runtime-secrets
     consumer: weknora-app
     native_binding: JWT_SECRET
+
+  weknora-system-aes-key:
+    class: weknora-runtime-secrets
+    consumer: weknora-app
+    native_binding: SYSTEM_AES_KEY
 
   hermes-default-api-key:
     class: hermes-profile-api-keys
