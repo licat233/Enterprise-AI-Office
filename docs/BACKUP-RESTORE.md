@@ -45,9 +45,14 @@ Back up:
 - PostgreSQL data via a supported logical/native backup method;
 - uploaded/original documents and persistent file/object storage;
 - important application configuration;
-- model/provider configuration metadata as applicable.
+- model/provider configuration metadata as applicable;
+- the protected runtime secret needed to decrypt encrypted WeKnora credentials, including the exact `SYSTEM_AES_KEY` value through the approved secret-recovery mechanism.
 
-Do not assume Docker volume names remain constant forever. Discover actual persistent volumes/paths from the deployed version.
+Do not assume Docker volume names from an arbitrary working directory. EAO
+freezes Compose project identity for Core runtimes and records the actual
+project-qualified volume names in protected deployment state. Discover and
+verify those exact active mounts before backup or restore; never create a new
+empty project-qualified volume as a substitute for a missing expected volume.
 
 ### Open WebUI
 
@@ -110,6 +115,12 @@ The reference scripts use
 
 Back up production secrets using an encrypted/secure method and preserve a
 documented recovery source.
+
+For WeKnora, `SYSTEM_AES_KEY` is a mandatory continuity secret whenever it is
+configured. A restore that recovers PostgreSQL but loses/rotates this key is not
+a successful restore: encrypted model/provider/MCP/datasource credentials can
+become unreadable while their database rows still exist. Restore acceptance must
+prove the recovered key can decrypt/reuse existing protected configuration.
 
 Do not assume the optional `secrets/runtime-credentials.tar.gz` artifact is the
 only secret-bearing backup file. The current backup helper can also capture
