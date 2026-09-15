@@ -881,6 +881,49 @@ Because `skill_manage` is available in the foreground once the toolset is
 enabled, company/shared Skills must have the independent read-only deployment
 boundary described above.
 
+### 21.5A.1 Learned-Skill namespace and precedence
+
+Hermes discovers Profile-local Skills before `skills.external_dirs` and
+deduplicates by Skill name on a first-wins basis.
+
+Therefore a Profile-local Learned Skill must not accidentally shadow a formal
+Company Skill.
+
+EAO v1 reserves a naming namespace for autonomous department learning:
+
+```text
+learned-*
+```
+
+Examples:
+
+```text
+learned-supplier-evaluation
+learned-customer-follow-up
+learned-content-review
+```
+
+Company-owned version-controlled Skills must not use the reserved
+`learned-*` namespace.
+
+The department Profile's behavioral contract should tell Hermes Background
+Review to use this namespace for autonomous Skill creation.
+
+This is primarily a correctness/ownership convention, not a security boundary.
+Pilot acceptance must verify that Background Review follows it consistently.
+
+If the actual runtime repeatedly creates nonconforming names, add the smallest
+deterministic creation guard that rewrites/refuses only autonomous learned-Skill
+names. Do not add a new registry or database.
+
+Also verify that:
+
+- an existing Company Skill name cannot be duplicated by `skill_manage(create)`;
+- adding a future Company Skill does not silently become hidden behind a
+  previously learned local Skill;
+- learned-Skill names remain clear enough that administrators can distinguish
+  runtime learning state from formal company assets during maintenance.
+
 ### 21.5B Learning trigger and cadence
 
 Hermes 0.21.2 skill review is triggered by accumulated **tool-calling
