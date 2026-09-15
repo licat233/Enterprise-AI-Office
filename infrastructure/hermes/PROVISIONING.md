@@ -3,9 +3,10 @@
 This playbook turns the active Enterprise AI Office company configuration into
 the baseline Hermes control plane plus employee-facing `general` Profile.
 
-It is written against the validated Hermes Agent baseline in
-`config/validated-stack.yaml`. Acquire and verify the exact runtime through
-`DEPLOY.md §4.1–4.2` before applying this contract.
+It is written against the Hermes capability contract and rolling-validation
+policy in `config/validated-stack.yaml`. Resolve one exact Hermes candidate
+commit for the current deployment/upgrade transaction and verify that exact
+runtime through `DEPLOY.md §4.1–4.2` before applying this contract.
 
 This is a reconciliation contract around upstream Hermes capabilities. It does
 not replace Hermes Profile management, Gateway management, or configuration
@@ -67,14 +68,14 @@ storage. Both the default/admin and named Profile bindings use Hermes' native
 `API_SERVER_KEY`, but they must resolve to distinct values.
 
 Resolve model-provider authentication separately from Profile API
-authentication. For the selected Hermes provider, inspect the pinned 0.21.0
-`PROVIDER_REGISTRY` / provider catalog. When that provider uses an API key,
-each declared `models.hermes.credential_refs[]` entry must exist in
-`secret_refs`, use `class: model-provider-credentials`, and name a
-`native_binding` accepted by that pinned provider (for example,
-`openai-api` accepts `OPENAI_API_KEY`). If the selected provider is
-keyless or uses a supported OAuth/account flow, an empty API-key ref list is
-valid and the upstream native auth flow remains authoritative.
+authentication. For the selected Hermes provider, inspect the provider registry
+/ provider catalog in the **transaction-scoped Hermes candidate commit**. When
+that provider uses an API key, each declared
+`models.hermes.credential_refs[]` entry must exist in `secret_refs`, use
+`class: model-provider-credentials`, and name a `native_binding` accepted by
+that candidate runtime. If the selected provider is keyless or uses a supported
+OAuth/account flow, an empty API-key ref list is valid and the candidate
+runtime's native auth flow remains authoritative.
 
 From protected deployment input:
 
@@ -108,16 +109,19 @@ BLOCKED — REQUIRED INPUT: <specific item>
 
 Confirm the installed runtime first:
 
-Resolve the Hermes source checkout using `config/validated-stack.yaml` and the
-pinned installer's path rules. Record the resolved non-secret path in protected
-operational state; do not infer it from the ARMOR host.
+Resolve the Hermes source checkout using the path rules from the exact
+transaction-scoped candidate installer. Record the resolved non-secret path,
+candidate commit, and reported version in protected operational state; do not
+infer them from the ARMOR host or from the previous reference runtime.
 
 ```sh
 hermes --version
 hermes profile list
 ```
 
-The version must match `config/validated-stack.yaml`.
+The checkout must match the transaction-scoped candidate commit selected under
+`DEPLOY.md §4.1`. The reported version is recorded as runtime identity; it is
+not required to equal the repository's previous Hermes reference version.
 
 Inspect the default Profile and any existing `general` Profile:
 
@@ -132,18 +136,16 @@ deployment, inspect and reconcile it in place.
 Never delete/recreate an existing Profile merely to obtain a clean state. That
 can destroy sessions, state, cron jobs, Skills, memory, and local configuration.
 
-### 3.1 Pinned Hermes behavior provenance
+### 3.1 Hermes behavior provenance — candidate-scoped
 
-The provisioning behaviors below were verified against the validated Hermes
-Agent source commit recorded in `config/validated-stack.yaml`:
+Hermes is rolling-validated. The provisioning contract therefore does not bind
+these behaviors permanently to one historical Hermes version.
 
-```text
-NousResearch/hermes-agent
-commit: f1ccf436a27522c1bb5d36383a6f13b950676338
-package version at commit: 0.21.0
-```
+For every deployment/upgrade transaction, use the exact
+`HERMES_CANDIDATE_COMMIT` resolved in `DEPLOY.md §4.1` and verify the
+required behavior directly in that candidate's source before mutation.
 
-Source files used for behavior verification:
+Minimum source evidence:
 
 ```text
 hermes_cli/subcommands/profile.py
@@ -152,24 +154,24 @@ gateway/config.py
 gateway/platforms/api_server.py
 ```
 
-At that commit:
+The candidate must support or provide an accepted equivalent for:
 
-- `hermes profile create --no-skills` is a supported upstream CLI option;
-- `profiles.py` writes `.no-bundled-skills` and future bundled-Skill sync
-  honors the opt-out marker;
-- `gateway.multiplex_profiles` and
-  `gateway.multiplex_profile_allowlist` are supported config keys;
-- the API server mirrors native routes under `/p/<profile>/...` when
-  multiplexing is enabled;
-- named Profile requests resolve that Profile's own `API_SERVER_KEY` and fail
-  closed rather than inheriting the default/owner key;
-- `GET /p/<profile>/v1/models` advertises the active Profile name as the
-  primary model ID unless an explicit override is configured.
+- creating the narrow `general` Profile without unintended bundled-Skill
+  expansion;
+- explicit Profile multiplexing / served-set control;
+- native named-Profile routing under the shared API listener;
+- Profile-scoped `API_SERVER_KEY` resolution that fails closed instead of
+  inheriting the default/owner key;
+- `GET /p/<profile>/v1/models` (or the candidate's accepted equivalent)
+  advertising an unambiguous Profile model identity.
 
-These behaviors are version-specific implementation contracts. On a Hermes
-upgrade, re-read the selected commit's Profile/config/API-server implementation
-and rerun Profile creation, multiplex routing, credential-isolation, model-ID,
-tool-boundary, and restart acceptance before inheriting this playbook.
+If upstream renames or redesigns one of these mechanisms, adapt the thin EAO
+configuration/playbook to the current supported upstream capability and rerun
+the same security/behavior acceptance. Do not retain obsolete syntax merely to
+preserve compatibility with an old Hermes version.
+
+Record the exact candidate commit and the source files/functions used as
+evidence in the protected operational state or upgrade evidence.
 
 ## 4. Create the baseline employee Profile only when absent
 
@@ -416,8 +418,8 @@ Repository file presence does not authorize serving a Profile.
 
 ## 11. Verify the shared API route
 
-For Hermes Agent 0.21.0, the default shared API listener exposes a named Profile
-under:
+For the accepted rolling Hermes candidate, verify that the default shared API
+listener exposes a named Profile under (or provides an accepted equivalent to):
 
 ```text
 /p/<profile>/...
@@ -429,16 +431,18 @@ The `general` OpenAI-compatible root is therefore:
 http://<trusted-host>:<shared-port>/p/general/v1
 ```
 
-The upstream 0.21.0 API server resolves the primary `/v1/models` ID from the
-active named Profile under a `/p/<profile>/` request. Therefore:
+The candidate API server must resolve an unambiguous primary `/v1/models` ID
+from the active named Profile under a `/p/<profile>/` request (or the accepted
+candidate equivalent). Therefore verify:
 
 ```text
 GET /p/general/v1/models
 → primary model id = general
 ```
 
-No separate `API_SERVER_MODEL_NAME=general` override is required for this
-validated baseline.
+Do not add a compatibility override such as `API_SERVER_MODEL_NAME=general`
+unless the current candidate actually requires it. Prefer the candidate's native
+Profile identity behavior.
 
 ## 12. Verify credential isolation
 
