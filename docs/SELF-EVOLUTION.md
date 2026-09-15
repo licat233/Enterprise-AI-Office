@@ -1477,6 +1477,63 @@ The only remaining conditional thin-adaptation question is mutation
 serialization. Do **not** implement a lock yet. It remains evidence-gated on the
 isolated Phase 1B concurrency test.
 
+### 21.9C Isolated Skill Mutation Guard runtime acceptance
+
+The repository implementation from merged PR #114 was exercised against the
+real installed Hermes runtime in an isolated temporary Hermes state.
+
+Observed runtime:
+
+```text
+Hermes Agent v0.21.2 (2026.9.11)
+commit 939e45c91d751fadd94dcd1b873ac3cb44846213
+EAO repository 39b5742a1ac0c7aa9aa33d24624e36e9d446ee2c
+```
+
+Acceptance result:
+
+```text
+Real plugin discovery                   PASS
+pre_tool_call registration              PASS
+Foreground learned mutation             PASS
+Foreground Company mutation protection  PASS
+Symlink escape protection               PASS
+Third-party protection                  PASS
+Batch fail-before-mutation              PASS
+Fail-closed behavior                    PASS
+Temporary state cleanup                 PASS
+Production Operations changed           NO
+Production Guard registered             NO
+Self-Evolution enabled                  NO
+```
+
+The only remaining guard acceptance gap is the model-dependent Background
+Review end-to-end path:
+
+```text
+Background Review external model/provider execution
+→ NOT YET RUN
+
+Installed Background Review dispatch path
+→ VERIFIED
+
+Provider-boundary fixture
+→ VERIFIED
+
+Real guard veto through provider-boundary fixture
+→ VERIFIED
+```
+
+Therefore the Skill Mutation Guard itself is not being redesigned. The remaining
+gate before Phase 1A is narrowly:
+
+> Run one isolated real Background Review with an authorized model/provider and
+> prove that any resulting `skill_manage` call still passes through the
+> registered `pre_tool_call` guard.
+
+Do not enable the Guard in production Operations until that model-dependent
+Background Review path is accepted.
+
 ### 21.10 Phase 1 — Learning Pilot
 
 Use an **isolated non-production test Profile/domain** and a finite test window.
