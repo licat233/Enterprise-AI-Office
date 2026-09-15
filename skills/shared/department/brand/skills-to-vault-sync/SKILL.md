@@ -14,7 +14,7 @@ version: 1.0.0
 ## When to Use This Skill
 
 - Setting up multi-agent Obsidian vault (Hermes + Codex + Claude Code)
-- Vault audit reveals thin/stub files in `02-Rules/` or other layers
+- Vault audit reveals thin/stub files in `01-Knowledge/Rules/` or other layers
 - User says "other agents should know this too" or "put this in the vault"
 - Content production quality differs between agents
 - After a migration that created minimal stub files
@@ -27,7 +27,7 @@ During V7.1 migration (2026-06-06), profile files like `Profile-web-ops.md` and 
 
 ## Detection
 
-Compare vault `02-Rules/Content-Standards/` files against corresponding skills:
+Compare vault `01-Knowledge/Rules/Content-Standards/` files against corresponding skills:
 
 | Vault File | Lines | Corresponding Skill | Lines | Gap |
 |---|---|---|---|---|
@@ -79,12 +79,12 @@ Compare vault `02-Rules/Content-Standards/` files against corresponding skills:
 When the user asks "what else could go in the vault" or during a vault hygiene audit:
 
 1. **Scan all armor-* skills** — `skills_list` + `skill_view` for each
-2. **Scan vault 01-Facts/ and 02-Rules/** — `search_files` to get current coverage
+2. **Scan vault 01-Knowledge/ and 01-Knowledge/Rules/** — `search_files` to get current coverage
 3. **Compare** — for each skill, check if its knowledge already exists in vault:
-   - Brand/Company/Product facts → `01-Facts/`
-   - Content standards, platform rules → `02-Rules/Content-Standards/`
-   - Agent behavior rules → `02-Rules/Agent-Rules/`
-   - Tool discipline → `02-Rules/Architectural-Discipline/`
+   - Brand/Company/Product facts → `01-Knowledge/`
+   - Content standards, platform rules → `01-Knowledge/Rules/Content-Standards/`
+   - Agent behavior rules → `01-Knowledge/Rules/Agent-Rules/`
+   - Tool discipline → `01-Knowledge/Rules/Architectural-Discipline/`
 4. **Classify gaps**:
    - **High priority**: Operational workflows other agents need daily (writing rules, platform standards)
    - **Medium priority**: Reference detail (templates, pitfall collections)
@@ -98,20 +98,20 @@ The vault isn't only for ARMOR business knowledge. Machine infrastructure, tool 
 
 | Knowledge Type | Vault Location | Example |
 |---|---|---|
-| Machine shell environment | `02-Rules/Agent-Rules/Shell-Environment-Architecture.md` | PATH layers, fnm init, Hermes bash bridge |
-| Tool usage patterns | `02-Rules/Agent-Rules/` or `02-Rules/Architectural-Discipline/` | Web scraping fallback chain, defuddle for anti-bot |
-| Agent coordination | `02-Rules/Agent-Rules/` | Profile responsibilities, port assignments, notification channels |
-| Platform integration | `02-Rules/Platform-Standards/` | MIC standards, Feishu message format |
+| Machine shell environment | `01-Knowledge/Rules/Agent-Rules/Shell-Environment-Architecture.md` | PATH layers, fnm init, Hermes bash bridge |
+| Tool usage patterns | `01-Knowledge/Rules/Agent-Rules/` or `01-Knowledge/Rules/Architectural-Discipline/` | Web scraping fallback chain, defuddle for anti-bot |
+| Agent coordination | `01-Knowledge/Rules/Agent-Rules/` | Profile responsibilities, port assignments, notification channels |
+| Platform integration | `01-Knowledge/Rules/Platform-Standards/` | MIC standards, Feishu message format |
 
 When syncing non-ARMOR knowledge, follow the same V7.2 frontmatter and write_policy rules.
 
 ## Vault Routing for Synced Content
 
-Synced operational knowledge goes to `02-Rules/` (Class B or A depending on content):
-- Writing standards → `02-Rules/Content-Standards/`
-- Platform-specific social rules → `02-Rules/Content-Standards/Social-Media-{Platform}.md`
-- Cross-platform rules → `02-Rules/Content-Standards/Social-Media-Platform-Rules.md`
-- Product writing patterns → `02-Rules/Content-Standards/` or `03-Insights/Products/`
+Synced operational knowledge goes to `01-Knowledge/Rules/` (Class B or A depending on content):
+- Writing standards → `01-Knowledge/Rules/Content-Standards/`
+- Platform-specific social rules → `01-Knowledge/Rules/Content-Standards/Social-Media-{Platform}.md`
+- Cross-platform rules → `01-Knowledge/Rules/Content-Standards/Social-Media-Platform-Rules.md`
+- Product writing patterns → `01-Knowledge/Rules/Content-Standards/` or `01-Knowledge/Insights/Products/`
 
 ## Related Skills
 

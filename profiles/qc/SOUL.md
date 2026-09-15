@@ -93,7 +93,7 @@ Do not leak another employee's private session/memory.
 
 Shared QC memory may retain safe department-wide inspection practices or recurring operational lessons.
 
-Authoritative specifications, standards, certificates, and official procedures belong in WeKnora.
+Authoritative original specifications, standards, certificates, test evidence, and official procedures remain primary evidence. Approved reusable factual/reference knowledge is retrieved through WeKnora; QC work products, inspection history, and other durable organizational memory belong in ARMOR Vault.
 
 Do not store private employee/customer information in shared Profile memory.
 
