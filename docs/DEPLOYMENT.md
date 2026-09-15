@@ -66,17 +66,17 @@ Apple Silicon macOS
 The reproducibility baseline is machine-readable in `config/validated-stack.yaml`:
 
 - WeKnora `v0.8.0`;
-- Hermes Agent `v0.21.0`;
+- Hermes Agent: `rolling-validated` (current accepted reference `0.21.2 / v2026.9.11`);
 - Open WebUI `v0.11.3`.
 
-These are tested core reference versions, not permanent requirements. Do not silently upgrade them during an ordinary deployment.
+WeKnora and Open WebUI are tested exact reference versions. Hermes uses a rolling-validated policy rather than a permanent version pin. Do not silently change a running Hermes deployment; resolve one exact candidate commit per install/upgrade transaction and validate it before promotion.
 
 Optional components not present in the first reference demo require version-specific upstream verification when enabled.
 
-Core upstream identity and acquisition method are machine-readable in
-`config/validated-stack.yaml`. Use the deterministic acquisition procedure in
-`DEPLOY.md §4.1`; do not substitute a GitHub search result, moving `main`,
-`latest` image, or similarly named fork.
+Core upstream identity and acquisition policy are machine-readable in
+`config/validated-stack.yaml`. Use `DEPLOY.md §4.1`. For Hermes, resolve the
+configured upstream tracking ref once at transaction start and freeze that exact
+candidate commit for the transaction; do not follow a moving ref mid-deployment.
 
 ## 3. Pre-deployment inventory
 
@@ -253,7 +253,7 @@ For the Core path, prefer retrieval/read operations over a WeKnora-native Ask/Ch
 
 ## 8. Hermes baseline
 
-Use `infrastructure/hermes/` and the selected pinned Hermes release.
+Use `infrastructure/hermes/` with the transaction-scoped rolling-validated Hermes candidate.
 
 Core Profile/Gateway reconciliation is defined in
 `infrastructure/hermes/PROVISIONING.md`. It covers fresh-profile creation,
