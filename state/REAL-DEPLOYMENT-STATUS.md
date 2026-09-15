@@ -196,10 +196,12 @@ changelog/upgrade evidence.
 | Conversation history | ✅ Persists across refresh and re-login |
 | File upload | ✅ Accepted and source reference visible |
 | Unknown-company-fact behavior | ✅ Unavailable / no fabrication observed |
-| Local Embedding | ✅ `bge-m3` / 1024 dimensions |
-| WeKnora visual parsing | ✅ local Ollama → `qwen2.5vl:3b` |
-| WeKnora audio parsing | ✅ local Ollama → `karanchopda333/whisper:latest` |
-| Formal `Company Knowledge` | ✅ Created and bound to `bge-m3` |
+| Local Embedding | ✅ `qwen3-embedding:0.6b` / 1024 dimensions |
+| WeKnora visual parsing | ✅ local Ollama → `qwen3-vl:2b` |
+| WeKnora audio parsing | ✅ local Ollama → `Qwen3-ASR` |
+| Local Rerank | ✅ `Qwen3-Reranker-0.6B` via host-local `llama-server` |
+| WeKnora KnowledgeQA / Chat | ✅ 9router → `default` → OpenAI Codex OAuth |
+| Formal `Company Knowledge` | ✅ Current instance bound to `qwen3-embedding:0.6b` |
 | `general` WeKnora credential | ✅ Retrieve-only / `full_access=false` |
 | Knowledge write-denial check | ✅ HTTP 403 |
 | Hermes → WeKnora MCP | ✅ Grounded marker/source returned |
@@ -217,9 +219,10 @@ changelog/upgrade evidence.
 | Backup/restore capability | ➖ Optional / currently disabled |
 | Historical backup/restore mechanics validation | ✅ Completed during deployment work |
 | Retrieved prompt-injection source test | ✅ PASS |
-| Real Mac Studio reboot acceptance | ✅ PASS |
-| Post-reboot employee path | ✅ Grounded answer + source |
-| Post-reboot ACL / history / upload / retrieve-only boundary | ✅ PASS |
+| Historical real Mac Studio reboot acceptance | ✅ PASS — pre-Deployment-Hardening evidence |
+| Post-hardening full Mac Studio reboot revalidation | ⏸ Deferred — administrator access is currently remote-only; no reboot until local recovery is available |
+| Historical post-reboot employee path | ✅ Grounded answer + source |
+| Historical post-reboot ACL / history / upload / retrieve-only boundary | ✅ PASS |
 | Independent encrypted backup target | ➖ Optional / not currently requested |
 | Off-primary backup / retention / final external restore evidence | ➖ Optional future hardening |
 | Production Ready | ➖ Not the current delivery target |
@@ -228,36 +231,44 @@ Readiness remains evidence-based under [`docs/COMPLETENESS.md`](../docs/COMPLETE
 
 ## Current model configuration
 
-Reasoning / answer generation:
+Hermes reasoning / answer generation remains a separate provider path:
 
 ```text
-Hermes
-→ gpt-5.6-luna
+Hermes General / Operations
+→ provider: openai-codex
+→ model: gpt-5.6-luna
 ```
 
-WeKnora local AI processing backend:
+WeKnora's own optional KnowledgeQA / Chat role now uses the host-native 9router gateway:
+
+```text
+WeKnora KnowledgeQA
+→ 9router
+→ model: default
+→ OpenAI Codex OAuth
+```
+
+WeKnora local infrastructure is standardized on the Qwen family:
 
 ```text
 WeKnora v0.8.0
-→ local Ollama
-   ├─ Vision parsing  → qwen2.5vl:3b
-   ├─ Audio parsing   → karanchopda333/whisper:latest
-   └─ Embedding       → bge-m3 / 1024 dimensions
+├─ Embedding     → local Ollama → qwen3-embedding:0.6b / 1024
+├─ Rerank        → local llama-server → Qwen3-Reranker-0.6B
+├─ Vision / VLM  → local Ollama → qwen3-vl:2b
+└─ Audio / ASR   → local Ollama → Qwen3-ASR
 ```
-
-The current Core deployment does **not** require a separate WeKnora Chat/KnowledgeQA model. Hermes reasoning remains a separate model-provider decision and is not served by these WeKnora task-specific models.
 
 Current WeKnora model-role posture:
 
 ```text
-Embedding        enabled: bge-m3 / 1024
-Vision / VLM     enabled: qwen2.5vl:3b via local Ollama
-Audio / ASR      enabled: karanchopda333/whisper:latest via local Ollama
-KnowledgeQA/Chat not required for the Core retrieval path
-Rerank           disabled
+Embedding        enabled: qwen3-embedding:0.6b / 1024
+Rerank           enabled: Qwen3-Reranker-0.6B via host-local llama-server
+Vision / VLM     enabled: qwen3-vl:2b via local Ollama
+Audio / ASR      enabled: Qwen3-ASR via local Ollama
+KnowledgeQA/Chat enabled: 9router / default
 ```
 
-DashScope and `qwen-plus` are not required for the selected Core retrieval path.
+This migration is an operations simplification: keep local infrastructure models small, prefer one model family when quality is sufficient, reduce external dependencies, and reduce the number of model ecosystems administrators must understand. The previous `bge-m3`, `qwen2.5vl:3b`, and WeKnora-local Whisper model records are historical/soft-deleted records, not current desired state.
 
 The dedicated Media Transcription capability remains a separate host-native workflow. Enabling WeKnora audio parsing for knowledge ingestion does not replace that workflow:
 
@@ -298,7 +309,7 @@ WeKnora transcript compatibility was validated through a temporary retrieval-onl
 
 ```text
 Temporary KB creation          HTTP 201
-Embedding                      existing bge-m3 / 1024 only
+Embedding at time of test       bge-m3 / 1024 (historical pre-Qwen migration)
 summary_model_id               unset
 Transcript ingestion           HTTP 200
 Retrieval                      HTTP 200
@@ -308,7 +319,7 @@ Temporary document / KB        deleted after test
 Formal Company Knowledge       unchanged
 ```
 
-This evidence confirms an important deployment rule: a WeKnora UI workflow that offers or requests a Conversation/Summary model does not imply that document ingestion and retrieval require one. For retrieval-only Knowledge Bases, the deployed WeKnora v0.8.0 path can operate with Embedding bound and `summary_model_id` unset.
+This historical evidence confirms an important deployment rule: a WeKnora UI workflow that offers or requests a Conversation/Summary model does not imply that document ingestion and retrieval require one. The current formal Company Knowledge later migrated to qwen3-embedding:0.6b. For retrieval-only Knowledge Bases, the deployed WeKnora v0.8.0 path can operate with Embedding bound and `summary_model_id` unset.
 
 ## Operational hardening and recovery evidence
 

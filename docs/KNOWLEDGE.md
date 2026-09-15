@@ -330,11 +330,12 @@ A deployment may reuse the same local Ollama runtime for other WeKnora processin
 The current ARMOR reference deployment uses:
 
 ```text
-WeKnora
-→ Ollama
-   ├─ Vision parsing  → qwen2.5vl:3b
-   ├─ Audio parsing   → karanchopda333/whisper:latest
-   └─ Embedding       → bge-m3 / 1024
+WeKnora v0.8.0
+├─ Embedding     → Ollama → qwen3-embedding:0.6b / 1024
+├─ Rerank        → local llama-server → Qwen3-Reranker-0.6B
+├─ Vision / VLM  → Ollama → qwen3-vl:2b
+├─ Audio / ASR   → Ollama → Qwen3-ASR
+└─ KnowledgeQA   → 9router / default → OpenAI Codex OAuth
 ```
 
 Interpret these roles separately:
@@ -342,9 +343,11 @@ Interpret these roles separately:
 - **Vision / VLM** supports visual or multimodal parsing during knowledge ingestion.
 - **Audio / ASR** supports audio parsing / speech-to-text during knowledge ingestion.
 - **Embedding** supports vectorization and semantic retrieval.
-- **Hermes reasoning** remains a separate model-provider choice.
+- **Rerank** improves ordering of retrieved candidates when enabled.
+- **WeKnora KnowledgeQA / Chat** is an optional WeKnora reasoning role; in the ARMOR reference it is exposed through 9router `model=default`.
+- **Hermes reasoning** remains a separate model-provider choice and currently uses the direct `openai-codex` path rather than the WeKnora 9router route.
 
-Do not introduce a second local inference framework merely because more than one WeKnora model role is enabled. Reuse the existing Ollama serving layer when it satisfies the required role and acceptance checks. Conversely, do not treat every deployment as requiring these exact local models; reusable EAO deployments may choose local or remote providers according to their protected configuration, resource limits, privacy requirements, and measured quality.
+Do not introduce a second orchestration framework merely because more than one WeKnora model role is enabled. Reuse the smallest existing serving layer that fits the role: Ollama currently serves Embedding/Vision/ASR, while the local Qwen3 Reranker uses a small `llama-server` endpoint. Conversely, do not treat every deployment as requiring these exact local models; reusable EAO deployments may choose local or remote providers according to their protected configuration, resource limits, privacy requirements, and measured quality.
 
 ### Recommended local starting candidates
 
@@ -354,12 +357,12 @@ Current starting choices:
 
 | Candidate | Typical role | Why consider it |
 | --- | --- | --- |
-| `bge-m3` | validated first local choice on the first real Mac Studio deployment | mature multilingual retrieval, strong Chinese/English support, 1024-dimensional embeddings, no model-specific query instruction required for normal dense retrieval |
-| `qwen3-embedding:0.6b` | lighter fallback candidate | compact local footprint, strong Chinese/multilingual capability, 1024-dimensional output available |
+| `qwen3-embedding:0.6b` | current ARMOR local baseline | compact local footprint, 1024-dimensional output, fits the unified Qwen infrastructure strategy, and keeps the embedding role lightweight |
+| `bge-m3` | historically validated alternative | mature multilingual retrieval and strong Chinese/English support; retained as qualification evidence rather than the current default |
 
 Do **not** default to 4B/8B-class embedding models merely because the host can run them. For a shared enterprise host, the smallest model that gives acceptable retrieval quality is usually the better operational choice.
 
-### First real Mac Studio validation evidence
+### Historical first Mac Studio embedding validation evidence
 
 On 2026-09-08, the first real Mac Studio deployment completed a small WeKnora local-embedding qualification using:
 
@@ -383,7 +386,20 @@ Observed result:
 - no obvious system slowdown was observed;
 - `qwen3-embedding:0.6b` was not tested because no real quality/resource problem justified a second model.
 
-This evidence validates `bge-m3` for the current Mac Studio deployment and makes it the repository's preferred local starting choice for similar capable Apple Silicon hosts. It is **not** a universal performance guarantee for every host, corpus, language mix, or future WeKnora/Ollama version.
+This evidence validated `bge-m3` on the first Mac Studio qualification. It remains historical evidence that the model is viable, but it no longer defines the current ARMOR runtime baseline.
+
+On 2026-09-15, the active WeKnora model baseline was migrated to the Qwen family:
+
+```text
+Embedding  → qwen3-embedding:0.6b / 1024
+Rerank     → Qwen3-Reranker-0.6B
+Vision     → qwen3-vl:2b
+ASR        → Qwen3-ASR
+```
+
+The current formal `Company Knowledge` instance is bound to the Qwen3 embedding model. The previous `bge-m3`, `qwen2.5vl:3b`, and local Whisper model records remain only as soft-deleted/history evidence and must not be treated as current desired state.
+
+The migration rationale is operational: reduce model-family fragmentation and maintenance burden while keeping each local role small enough for persistent Mac Studio use. It is **not** a universal claim that Qwen is always superior for every host or corpus.
 
 ### Minimal qualification instead of a benchmark project
 
