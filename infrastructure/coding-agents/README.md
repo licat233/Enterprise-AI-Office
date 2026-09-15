@@ -54,7 +54,7 @@ Authenticate the Codex CLI under the HOME/service context actually used by the t
 
 For ordinary one-shot work, prefer the bundled Skill's `codex exec` workflow inside an explicit Git repository/workdir, then inspect the diff and run relevant tests.
 
-Hermes 0.21.0 also has an optional Codex app-server runtime. Enable it only when company configuration deliberately selects that runtime and its tool trade-offs are acceptable. It is not required merely to delegate coding tasks to the Codex CLI.
+Hermes may provide an optional Codex app-server runtime depending on the rolling-validated candidate. Inspect the current candidate's native capability before adding any adapter. Enable that runtime only when company configuration deliberately selects it and its tool trade-offs are acceptable; it is not required merely to delegate coding tasks to the Codex CLI.
 
 ### Claude Code
 
