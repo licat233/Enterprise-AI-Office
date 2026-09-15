@@ -31,6 +31,30 @@ The Hermes default/admin Profile is not an employee Assistant.
 
 Specialist groups and Assistant resources are added only when the adopting company enables the matching specialist Profile.
 
+
+## Upstream utility: Arena Model
+
+The selected Open WebUI release may expose an upstream utility named
+`Arena Model`. Treat it as an Open WebUI evaluation surface, not as an
+Enterprise AI Office work role.
+
+Arena is intended for comparative model evaluation from a configured candidate
+pool, including blind/randomized comparisons where supported by the selected
+Open WebUI release. It is **not**:
+
+- a Hermes Profile;
+- an EAO Agent or employee role;
+- an intelligent task router that selects the best model for each job;
+- a replacement for the General or specialist Assistants.
+
+EAO production employee workflows should continue to use explicitly provisioned
+Assistants backed by approved Hermes Profiles. Arena, when enabled, is an
+optional administrative/evaluation capability and its visibility must follow
+company access policy.
+
+Do not infer EAO architecture, role membership, or production routing behavior
+from the presence of Arena or other upstream Open WebUI utilities in the UI.
+
 ## Validated local deployment pattern
 
 The tested manifest is [`docker-compose.yml`](docker-compose.yml).

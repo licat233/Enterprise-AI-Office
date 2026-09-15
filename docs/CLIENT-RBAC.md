@@ -25,6 +25,21 @@ Open WebUI admin, Hermes CLI/hermes-webui when enabled, and WeKnora admin are co
 
 They are not ordinary employee clients.
 
+
+### Upstream Open WebUI utilities
+
+Open WebUI can expose upstream utilities that are not EAO employee roles. In
+particular, `Arena Model` is a model-evaluation surface for comparative
+testing; it is not a Hermes Profile, EAO Agent, employee role, or intelligent
+task router.
+
+Its presence in the Open WebUI model/resource selector must not implicitly grant
+it employee-production status. If Arena is enabled, access should be explicitly
+governed according to company policy; normal EAO work should remain on approved
+Assistant → Hermes Profile paths. See
+[`infrastructure/open-webui/README.md`](../infrastructure/open-webui/README.md)
+for the deployment boundary.
+
 ### Messaging platforms
 
 Messaging surfaces are optional extensions. Enable only those the company actually uses.

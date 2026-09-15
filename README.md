@@ -163,6 +163,7 @@ The diagram above is the **current system view**, not a statement that every dep
 Key invariants:
 
 - the reusable Core remains `Open WebUI → Hermes general → WeKnora`;
+- upstream Open WebUI utilities such as `Arena Model` are evaluation features, not EAO work roles, Hermes Profiles, or intelligent task routers; normal employee work stays on explicitly provisioned Assistant → Hermes Profile paths (see [Open WebUI deployment adapter](infrastructure/open-webui/README.md));
 - WeKnora and ARMOR Vault are complementary authorities by object/source type, not duplicate knowledge stores;
 - ordinary Vault work products do **not** automatically flow into WeKnora; promotion requires an explicit knowledge-governance decision;
 - Ollama provides task-specific local inference for WeKnora in the ARMOR reference deployment and does **not** imply that Hermes reasoning runs on a local LLM;

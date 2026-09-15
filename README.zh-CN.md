@@ -163,6 +163,7 @@ flowchart TB
 核心不变量：
 
 - 可复用 Core 始终是 `Open WebUI → Hermes general → WeKnora`；
+- Open WebUI 上游自带的 `Arena Model` 等工具属于模型评测能力，不是 EAO 工作角色、Hermes Profile 或智能任务路由器；普通员工生产工作仍应走显式配置的 Assistant → Hermes Profile 路径（见 [Open WebUI 部署适配说明](infrastructure/open-webui/README.md)）；
 - WeKnora 与 ARMOR Vault 按对象 / 来源类型分工，是互补权威，不是两套重复知识库；
 - 普通 Vault 工作产物**不会自动回灌 WeKnora**，只有经过明确 Knowledge Governance 决策后才允许晋升为可复用企业知识；
 - ARMOR Reference 中的 Ollama 为 WeKnora 提供任务型本地推理，不代表 Hermes 主推理已经迁移到本地 LLM；
