@@ -1032,7 +1032,7 @@ That violates the primary EAO constraint that humans must not serve the AI.
 Therefore:
 
 ```text
-Phase 1 shadow pilot
+Phase 1A shadow capture
 → write_approval = true
 → inspect a bounded sample to validate learning quality
 
