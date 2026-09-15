@@ -242,6 +242,8 @@ Ollama — local model serving
        └─ bge-m3:latest
 ```
 
+**Production:** `bge-m3:latest` at 1024 dimensions remains bound to the existing knowledge bases. **Candidate / evaluation only:** Qwen3-Embedding-0.6B and Qwen3-Reranker-0.6B are registered for qualification and are not production defaults or knowledge-base bindings. Matching dimensions do not make their vector spaces interchangeable. See [`docs/EAO-QWEN3-RETRIEVAL-CANDIDATE.md`](docs/EAO-QWEN3-RETRIEVAL-CANDIDATE.md) for the sanitized status and evaluation limitation.
+
 Current ARMOR reference roles:
 
 | Local model | Role in WeKnora | Model class |

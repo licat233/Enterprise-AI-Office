@@ -257,7 +257,17 @@ KnowledgeQA/Chat not required for the Core retrieval path
 Rerank           disabled
 ```
 
+The production rerank path remains disabled. The Qwen3 embedding and reranker registrations below are candidate-only and are not bound to production KBs or agents.
+
 DashScope and `qwen-plus` are not required for the selected Core retrieval path.
+
+## 2026-09-15 Qwen3 retrieval candidate qualification
+
+Production retrieval remains `bge-m3:latest` at 1024 dimensions, with existing production KB bindings unchanged. Candidate `qwen3-embedding:0.6b` (1024 dimensions) and `Qwen3-Reranker-0.6B` were registered through WeKnora's model manager. Neither is the production default, and no production KB was rebound or re-embedded.
+
+The reranker is hosted by a loopback-only user LaunchAgent on TCP 18181 and reached from WeKnora through `host.docker.internal`. Health, direct multi-document reranking, WeKnora model connectivity, Docker host-bridge connectivity, and launchd restart recovery passed. Candidate latency and memory observations, rollback, and the native Evaluation limitation are recorded in [`docs/EAO-QWEN3-RETRIEVAL-CANDIDATE.md`](../docs/EAO-QWEN3-RETRIEVAL-CANDIDATE.md).
+
+The deployed WeKnora v0.8.0 Evaluation path does not accept the prepared EAO dataset or an explicit embedding-model selection. No baseline-versus-Qwen retrieval benchmark was run; the protected local seed contains 30 rows and remains outside public Git. Candidate quality is therefore **not evaluated**, the production migration gate is not passed, and production remains on BGE-M3.
 
 The dedicated Media Transcription capability remains a separate host-native workflow. Enabling WeKnora audio parsing for knowledge ingestion does not replace that workflow:
 

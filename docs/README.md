@@ -102,6 +102,7 @@ These record accepted capability boundaries and evidence.
 | `THIRD-PARTY-SKILL-ADMISSION-PILOT.md` | Non-normative evidence from the first real DIRECT / ADAPT / DELEGATE / REJECT admission pilot |
 | `THIRD-PARTY-SKILL-ADAPT-RUNTIME-ACCEPTANCE.md` | Runtime evidence for the plugin-eval ADAPT compatibility pilot |
 | `THIRD-PARTY-SKILL-PRODUCTION-ACCEPTANCE.md` | Production admission and Operations-only runtime evidence for `competitive-intel` |
+| `EAO-QWEN3-RETRIEVAL-CANDIDATE.md` | Sanitized Mac Studio evidence for the Qwen3 retrieval candidate, resource checks, protected benchmark seed, and native Evaluation limitation |
 
 Use these when reproducing or changing the corresponding capability.
 

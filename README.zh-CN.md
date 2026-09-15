@@ -242,6 +242,8 @@ Ollama — 本地模型运行 / Serving
        └─ bge-m3:latest
 ```
 
+**生产环境：**现有知识库仍绑定 `bge-m3:latest`（1024 维）。**候选 / 仅用于评估：**Qwen3-Embedding-0.6B 和 Qwen3-Reranker-0.6B 已在 WeKnora 注册以供验证，但尚未设为生产默认，也未绑定生产知识库。维度相同不代表向量空间兼容。候选状态与评估限制见 [`docs/EAO-QWEN3-RETRIEVAL-CANDIDATE.md`](docs/EAO-QWEN3-RETRIEVAL-CANDIDATE.md)。
+
 ARMOR 当前参考部署中的角色：
 
 | 本地模型 | 在 WeKnora 中的用途 | 模型类型 |
