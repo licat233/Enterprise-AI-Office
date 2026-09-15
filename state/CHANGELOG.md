@@ -37,6 +37,45 @@ Environment:
 <known limitations / follow-up>
 ```
 
+## 2026-09-15 — Qualify Qwen3 retrieval candidate without production migration
+
+Component: WeKnora embedding/reranking candidates and host-side reranker service
+Environment: authorized Mac Studio reference deployment; host identity, private runtime paths, and product data omitted
+
+### Before
+
+- Production WeKnora knowledge bases used `bge-m3:latest` at 1024 dimensions.
+- The Qwen3 reranker had been launched manually for an initial candidate check.
+
+### After
+
+- Reused the installed Ollama Qwen3 embedding model and registered it in WeKnora as a 1024-dimensional candidate.
+- Registered the Qwen3 reranker using WeKnora's compatible remote provider and a loopback-only `llama-server` endpoint on TCP 18181.
+- Added a user LaunchAgent with automatic restart, then verified recovery after a forced process exit and rechecked Docker host-bridge connectivity.
+- Prepared a 30-row product/governance benchmark seed in protected runtime storage; it is not committed because it contains ARMOR product facts.
+- Kept BGE-M3, production KB bindings, and existing indexes unchanged.
+
+### Reason
+
+Qualify candidate serving, restart behavior, and resource requirements before any production retrieval change.
+
+### Validation
+
+- Qwen embedding output dimension 1024; WeKnora dimension/connectivity test passed.
+- Reranker health and multi-document request passed; WeKnora model connectivity and Docker-to-host health checks passed.
+- LaunchAgent recovered after SIGKILL and served health again.
+- Bounded reranker tests covered 5, 10, 20, and 30 documents. Detailed latency/memory observations are in `docs/EAO-QWEN3-RETRIEVAL-CANDIDATE.md`.
+- Inspected deployed WeKnora v0.8.0 Evaluation source. It cannot import the prepared custom dataset or select an embedding model per run; no generic bundled-dataset run was started.
+- No production KB, embedding binding, default, index, or knowledge document was changed.
+
+### Rollback
+
+Unload the candidate LaunchAgent and stop the Qwen embedding model when not in use. Remove candidate model registrations through the WeKnora model manager if desired. Production BGE-M3 and its indexes remain the rollback state.
+
+### Notes
+
+No baseline-versus-Qwen retrieval quality result is available. The production migration acceptance gate is not passed; stop before migration. The LaunchAgent starts with the user session after reboot/login, not before login.
+
 ## 2026-09-11 — Finalize trusted private-LAN Open WebUI exposure
 
 Component: Open WebUI employee network boundary and protected deployment configuration
