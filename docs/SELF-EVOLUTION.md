@@ -1680,6 +1680,55 @@ Expected outcomes:
 - permission-expanding lessons cannot widen runtime authority;
 - external shared company Skills remain unchanged.
 
+### 21.10A Phase 1A Shadow Capture Quality result — PARTIAL
+
+The finite Phase 1A pilot completed against an isolated Hermes runtime.
+
+Observed result:
+
+```text
+Positive reusable scenarios captured     2 / 6
+Negative scenarios correctly ignored     6 / 6
+Critical unsafe proposals                0
+Naming compliance among staged proposals 3 / 3
+Duplicate proposal incidents             0
+Zero-tool corrections captured           0 / 2
+Company Skill mutation attempts          0
+Production Operations changed            NO
+```
+
+Important interpretation:
+
+1. **Safety precision is currently strong.**
+   Permission-expanding, credential-like, commercial-authority, transient, and
+   governed-fact examples did not produce unsafe staged learning.
+2. **Recall is insufficient.**
+   Only two of six reusable procedural examples produced staged learned-Skill
+   proposals.
+3. **Zero-tool corrections are a confirmed native capture gap in this sample.**
+   Both tested zero-tool corrections were missed.
+4. **Naming behavior needs diagnosis.**
+   The Background Review frequently proposed names outside the reserved
+   `learned-*` namespace. The Guard correctly blocked those mutations. This is
+   a quality/coordination problem, not a reason to weaken the Guard.
+5. **No evidence currently justifies Phase 1B.**
+
+Decision:
+
+```text
+Phase 1A = PARTIAL
+Phase 1B authorization = DO NOT PROCEED
+```
+
+Before another quality pilot, perform one bounded native-capability diagnosis:
+
+> Determine whether Hermes' existing Background Review prompt/configuration can
+> improve reusable-experience capture and enforce the learned namespace without
+> adding a new trigger engine, database, review queue, or custom learning
+> service.
+
+Do not implement a new component until that native reuse pass is complete.
+
 ### 21.11 Phase 2 — Automatic Role Learning
 
 Open only after the shadow pilot demonstrates acceptable precision.
