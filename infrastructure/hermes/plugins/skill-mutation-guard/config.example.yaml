@@ -1,0 +1,10 @@
+# Example only. Do not copy into a production profile without the acceptance checks.
+plugins:
+  enabled:
+    - eao-skill-mutation-guard
+  entries:
+    eao-skill-mutation-guard:
+      settings:
+        profile: operations
+        learning_root: ~/.hermes/profiles/operations/skills
+        allowed_namespace: learned-

@@ -73,7 +73,7 @@ These describe how EAO is intended to work now.
 | `UPGRADE.md` | Version-change and upgrade rules |
 | `CAPABILITY-REUSE-PASS.md` | Mandatory reuse-before-build decision gate |
 | `SKILL-ADMISSION.md` | Third-party Skill compatibility, authority, adaptation, and delegation standard |
-| `SELF-EVOLUTION.md` | Work-embedded employee experience → organizational intelligence design; human-workload constraint, trust/promotion model, and runtime-audit gate |
+| `SELF-EVOLUTION.md` | Work-embedded employee experience → organizational intelligence design; repository-side Operations Skill mutation boundary at `../infrastructure/hermes/plugins/skill-mutation-guard/`; human-workload constraint, trust/promotion model, and runtime-audit gate |
 | `REPOSITORY-GOVERNANCE.md` | Branch, PR, CI, frozen-history, and repository authority rules |
 
 These should normally be read before specialized or historical files.

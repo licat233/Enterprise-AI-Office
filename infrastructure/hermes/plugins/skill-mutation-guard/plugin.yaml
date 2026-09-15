@@ -1,0 +1,7 @@
+name: eao-skill-mutation-guard
+version: 0.1.0
+description: Operations-scoped realpath guard for Hermes skill_manage mutations.
+author: Enterprise AI Office
+requires_hermes: ">=0.21.2"
+provides_hooks:
+  - pre_tool_call
