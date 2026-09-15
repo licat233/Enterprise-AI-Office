@@ -43,7 +43,8 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Operational EAO baseline | ✅ Complete / deployed / in use |
 | Dual knowledge architecture (RAG + Wiki) | ✅ Active — WeKnora RAG + ARMOR Vault Wiki / working memory |
 | Enterprise Self-Evolution v1 | 🧭 Design baseline defined — work-embedded employee experience learning; runtime not enabled pending Hermes capability audit |
-| Local AI model infrastructure | ✅ Active in ARMOR reference — Ollama serves task-specific vision, audio, and embedding models for WeKnora; Hermes reasoning remains separate |
+| WeKnora Qwen Local AI Stack | ✅ Active — Qwen3 Embedding + Reranker + Vision + ASR; Hermes reasoning remains separate |
+| Deployment Hardening v1 | ✅ Component-recreate / service-discovery / secret-continuity / volume-identity hardening PASS; full host reboot revalidation deferred while remote-only |
 | Department handoff readiness | ✅ Ready — employee accounts and private access details can be distributed |
 | Office-network employee access | ✅ Validated through the approved private network boundary |
 | Remote employee access | ✅ Validated through Tailscale private access; no public exposure required |
@@ -156,17 +157,28 @@ flowchart TB
   Operations -->|Scoped Vault Router| Vault
   Vault -. explicit promotion only .-> WeKnora
 
-  subgraph LocalAI["Local AI model serving — ARMOR reference"]
+  subgraph LocalAI["Qwen Local AI Stack — ARMOR reference"]
     Ollama["Ollama"]
-    VLM["qwen2.5vl:3b<br/>Vision parsing"]
-    ASR["Whisper<br/>Audio parsing"]
-    Embed["bge-m3<br/>Embedding / semantic retrieval"]
+    RerankServe["llama-server<br/>local rerank endpoint"]
+    VLM["qwen3-vl:2b<br/>Vision parsing"]
+    ASR["Qwen3-ASR<br/>Audio parsing"]
+    Embed["qwen3-embedding:0.6b<br/>Embedding / semantic retrieval"]
+    Rerank["Qwen3-Reranker-0.6B<br/>Retrieval reranking"]
     Ollama --> VLM
     Ollama --> ASR
     Ollama --> Embed
+    RerankServe --> Rerank
   end
 
-  WeKnora -->|local parsing / embedding roles| Ollama
+  NineRouter["9router<br/>OpenAI-compatible gateway<br/>WeKnora KnowledgeQA: default"]
+  Codex["OpenAI Codex OAuth"]
+
+  General -->|direct openai-codex reasoning| Codex
+  Operations -->|direct openai-codex reasoning| Codex
+  WeKnora -->|local embedding / vision / ASR| Ollama
+  WeKnora -->|rerank| RerankServe
+  WeKnora -->|KnowledgeQA / Chat| NineRouter
+  NineRouter --> Codex
 
   Operations --> Tools["Approved Skills and bounded tools<br/>Web Research · ToolScout · Media Transcription"]
 
@@ -185,7 +197,8 @@ The diagram above is the **current system view**, not a statement that every dep
 | **Hermes Operations** | ARMOR reference / deployed / frozen | Shared least-privilege department Profile with approved Skills, bounded tools, WeKnora retrieval, and scoped Vault access |
 | **WeKnora RAG** | Core knowledge layer / active | Approved enterprise factual/reference ingestion, retrieval, grounding, and source evidence |
 | **ARMOR Vault Wiki** | ARMOR knowledge layer / active | Durable Markdown working memory, work products, research, publication records, workflow standards, and business assets |
-| **Ollama local AI serving** | ARMOR reference / active | Task-specific WeKnora vision, audio, and embedding models; **not** the Hermes reasoning model |
+| **Qwen Local AI Stack** | ARMOR reference / active | WeKnora Embedding, Rerank, Vision, and ASR roles standardized on lightweight Qwen models; **not** the Hermes reasoning model |
+| **9router** | ARMOR reference / active for WeKnora KnowledgeQA | OpenAI-compatible gateway exposing the `default` combo to WeKnora; separate from Hermes' direct `openai-codex` provider path |
 | **Communication / Governed Email** | Conditional capability assets | Activated only when explicitly configured; external send remains behind human approval and governance |
 | **Repository + protected company configuration** | Control / desired-state layer | Defines the reusable blueprint, enabled capabilities, deployment contracts, and private runtime inputs |
 
@@ -195,7 +208,9 @@ Key invariants:
 - upstream Open WebUI utilities such as `Arena Model` are evaluation features, not EAO work roles, Hermes Profiles, or intelligent task routers; normal employee work stays on explicitly provisioned Assistant → Hermes Profile paths (see [Open WebUI deployment adapter](infrastructure/open-webui/README.md));
 - WeKnora and ARMOR Vault are complementary authorities by object/source type, not duplicate knowledge stores;
 - ordinary Vault work products do **not** automatically flow into WeKnora; promotion requires an explicit knowledge-governance decision;
-- Ollama provides task-specific local inference for WeKnora in the ARMOR reference deployment and does **not** imply that Hermes reasoning runs on a local LLM;
+- the ARMOR WeKnora local infrastructure is standardized on the Qwen family where practical: Embedding, Rerank, Vision, and ASR are separate infrastructure roles, not a general-purpose local reasoning stack;
+- Ollama serves the local Embedding/Vision/ASR roles, while the local Qwen3 Reranker is exposed through a small `llama-server` endpoint; this does **not** imply that Hermes reasoning runs on a local LLM;
+- Hermes General/Operations continue to use the approved direct `openai-codex` reasoning path; WeKnora's optional KnowledgeQA/Chat role is separately exposed through 9router `model=default`;
 - Operations receives only approved Skills/tools and scoped knowledge interfaces; generic shell, browser, filesystem, code execution, and generic SMTP are not employee capabilities;
 - conditional capabilities such as governed Email must fail independently without breaking the Core employee knowledge path.
 
@@ -226,31 +241,37 @@ Current Operations exposure remains least-privilege: governed Vault persistence 
 
 See [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) for the normative authority and placement rules.
 
-### Local AI model infrastructure for WeKnora
+### Qwen Local AI Stack for WeKnora
 
-The ARMOR reference deployment also uses a small, task-specific local AI model layer to support WeKnora ingestion and retrieval. This is **not** a migration of Hermes reasoning to a self-hosted LLM.
+The ARMOR reference deployment now standardizes WeKnora's local infrastructure roles on the **Qwen family**. The goal is operational simplicity, not model-brand uniformity for its own sake: use the smallest mature model that is sufficient for each infrastructure task, reduce the number of model ecosystems administrators must maintain, and keep enterprise document/image/audio processing local where practical.
 
 ```text
-WeKnora
-  ↓
-Ollama — local model serving
-  ├─ Vision parsing
-  │    └─ qwen2.5vl:3b
-  ├─ Audio parsing
-  │    └─ karanchopda333/whisper:latest
-  └─ Embedding / semantic retrieval
-       └─ bge-m3:latest
+WeKnora v0.8.0
+  ├─ Embedding
+  │    └─ Ollama → qwen3-embedding:0.6b / 1024 dimensions
+  ├─ Rerank
+  │    └─ local llama-server → Qwen3-Reranker-0.6B
+  ├─ Vision / VLM
+  │    └─ Ollama → qwen3-vl:2b
+  ├─ Audio / ASR
+  │    └─ Ollama → Qwen3-ASR
+  └─ KnowledgeQA / Chat
+       └─ 9router → model: default → OpenAI Codex OAuth
 ```
 
 Current ARMOR reference roles:
 
-| Local model | Role in WeKnora | Model class |
+| Model / gateway | Role in WeKnora | Runtime path |
 | --- | --- | --- |
-| `qwen2.5vl:3b` | Visual / multimodal parsing during knowledge ingestion | VLM |
-| `karanchopda333/whisper:latest` | Audio parsing / speech-to-text during knowledge ingestion | ASR |
-| `bge-m3:latest` | Embedding and semantic retrieval | Embedding model |
+| `qwen3-embedding:0.6b` | Embedding / semantic retrieval | Local Ollama |
+| `Qwen3-Reranker-0.6B` | Retrieval reranking | Local `llama-server` OpenAI-compatible endpoint |
+| `qwen3-vl:2b` | Visual / multimodal parsing | Local Ollama |
+| `Qwen3-ASR` (`samrito/qwen3-asr:Q8_0` in the current Ollama runtime) | Audio parsing / speech-to-text | Local Ollama |
+| `9router/default` | Optional WeKnora KnowledgeQA / Chat model | Host-native 9router → OpenAI Codex OAuth |
 
-Ollama is the **local model runtime / serving layer**. These models are infrastructure dependencies for specific WeKnora processing roles; they are not employee Profiles and they do not replace the Hermes reasoning provider. For reusable deployments, local-versus-remote model selection remains deployment-configured and should be chosen through the Capability Reuse Pass rather than by adding another inference stack.
+This **Qwen Local AI Stack is infrastructure, not EAO's main reasoning model**. Hermes General/Operations remain on the separately governed `openai-codex` provider path. The older `bge-m3`, `qwen2.5vl:3b`, and local Whisper WeKnora model records are retained only as migration/history evidence and are no longer the current ARMOR WeKnora model baseline.
+
+For reusable deployments, local-versus-remote model selection remains deployment-configured. The current ARMOR choice is evidence that a unified lightweight Qwen stack can reduce maintenance complexity without introducing another orchestration layer; it is not a rule that every adopter must use the same models.
 
 ### Employee access posture
 

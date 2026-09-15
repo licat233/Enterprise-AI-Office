@@ -493,13 +493,14 @@ unless that extra WeKnora reasoning layer is explicitly required by the chosen w
    - **remote API** when minimizing host resource use and provider dependence/cost are acceptable;
    - **local Ollama** when the host has sufficient headroom and reducing recurring embedding API cost / external data flow is preferred.
 5. Treat providers such as DashScope as optional model providers, not mandatory Enterprise AI Office components. If local embedding is selected and no WeKnora Chat/KnowledgeQA role is required, no DashScope credential is needed for Core.
-6. For local multilingual Chinese/English deployments on a capable Apple Silicon host, start with a small mature model rather than a multi-billion-parameter embedding model. Current guidance:
-   - `bge-m3` is the validated local choice for the first real Mac Studio deployment;
-   - `qwen3-embedding:0.6b` remains a lighter fallback candidate when host resource efficiency is a stronger constraint.
+6. For local multilingual Chinese/English deployments on a capable Apple Silicon host, start with a small mature model rather than a multi-billion-parameter embedding model. Current ARMOR reference guidance:
+   - `qwen3-embedding:0.6b` / 1024 dimensions is the current local baseline, selected as part of the lightweight Qwen infrastructure standardization;
+   - `bge-m3` remains historically validated as a viable multilingual alternative, but it is no longer the current ARMOR baseline and should not be reintroduced without a measured requirement.
 7. Qualify the local candidate with a small representative corpus and a few real queries. Do not create a large benchmark project unless the first candidate shows a real retrieval or resource problem.
-8. Record the selected embedding model and dimension before production-scale ingestion. Do not silently change them after indexing; changing embeddings normally requires reindexing.
-9. Create only Knowledge Bases declared by company configuration.
-10. Validate ingestion/retrieval with a small non-sensitive seed document before continuing.
+8. Record the selected embedding model and dimension before production-scale ingestion. Do not silently change them after indexing; changing embeddings normally requires reindexing. On an existing deployment, treat a switch from `bge-m3` to `qwen3-embedding:0.6b` as an embedding migration, not a cosmetic model rename.
+9. Reranking remains optional in reusable Core. The ARMOR reference currently uses a local `Qwen3-Reranker-0.6B` endpoint because it fits the same lightweight Qwen operations model; another deployment should enable reranking only when configuration or measured retrieval quality justifies it.
+10. Create only Knowledge Bases declared by company configuration.
+11. Validate ingestion/retrieval with a small non-sensitive seed document before continuing.
 
 See `docs/KNOWLEDGE.md` for embedding deployment trade-offs and `docs/DEPLOYMENT-PRACTICES.md` for lessons from real installations.
 

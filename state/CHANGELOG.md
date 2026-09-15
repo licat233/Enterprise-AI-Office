@@ -37,6 +37,86 @@ Environment:
 <known limitations / follow-up>
 ```
 
+## 2026-09-15 — Standardize WeKnora local infrastructure on Qwen family
+
+Component: WeKnora local model roles and KnowledgeQA model routing
+Environment: authorized ARMOR Mac Studio reference deployment; private endpoint/credential details omitted
+
+### Before
+
+- WeKnora local roles were split across `bge-m3` for Embedding, `qwen2.5vl:3b` for Vision, and a local Whisper model for ASR.
+- Rerank was not part of the current model-role baseline.
+- Repository README/Knowledge/Deployment documentation still described the earlier mixed-model baseline.
+
+### After
+
+- Embedding: `qwen3-embedding:0.6b` / 1024 dimensions through local Ollama.
+- Rerank: `Qwen3-Reranker-0.6B` through a small host-local `llama-server` endpoint.
+- Vision: `qwen3-vl:2b` through local Ollama.
+- ASR: Qwen3-ASR through local Ollama.
+- WeKnora KnowledgeQA / Chat: 9router `model=default` through the approved OpenAI-compatible/OAuth path.
+- Hermes General/Operations reasoning remains separate on direct `openai-codex`; the Qwen stack is infrastructure, not the employee reasoning model.
+- Older `bge-m3`, `qwen2.5vl:3b`, and WeKnora-local Whisper model records are retained only as migration/history evidence.
+
+### Reason
+
+Reduce local-model ecosystem fragmentation, simplify administrator understanding/upgrades/troubleshooting, keep infrastructure roles lightweight, and keep enterprise ingestion processing local where practical.
+
+### Validation
+
+- Current Ollama inventory contains the four intended Qwen-family artifacts.
+- Active WeKnora model records resolve to `default`, qwen3 Embedding, Qwen3 Reranker, qwen3 Vision, and Qwen3 ASR.
+- The current formal `Company Knowledge` instance is bound to qwen3 Embedding.
+- Host-local rerank serving and 9router health were observed healthy.
+
+### Rollback
+
+Rebind the affected WeKnora role only through the supported model configuration path. Any embedding rollback/change is a migration and requires compatible reindex/reingestion; do not silently point an existing vector index at an incompatible embedding model.
+
+### Notes
+
+The separate optional Media Transcription capability has its own historical acceptance/runtime contract. This change describes the current WeKnora model stack and does not silently rewrite that independent capability.
+
+## 2026-09-15 — Deployment Hardening v1
+
+Component: WeKnora/Open WebUI runtime identity, Compose lifecycle, secret continuity, and persistent-volume safety
+Environment: authorized ARMOR Mac Studio reference deployment
+
+### Before
+
+- Runtime safety depended on several implicit deployment details, including service DNS behavior, Compose project naming, and path/secret continuity.
+- A WeKnora backend recreate exposed stale Nginx upstream resolution and made existing models/Knowledge Bases appear missing even though PostgreSQL data remained intact.
+
+### After
+
+- WeKnora frontend dynamically re-resolves the backend through Docker DNS.
+- Compose project identities are frozen for WeKnora and Open WebUI.
+- Persistent volume identities are part of deployment-state/acceptance evidence.
+- `SYSTEM_AES_KEY` is treated as a continuity secret across recreate/restore.
+- Runtime assets are materialized under the canonical runtime root instead of depending on an administrator Git checkout.
+- A reusable Core lifecycle/recreate smoke test is part of the repository.
+
+### Reason
+
+Eliminate hidden runtime identity assumptions that can remain invisible until recreate, migration, upgrade, or recovery.
+
+### Validation
+
+- Repository readiness passed after the change.
+- WeKnora app recreate without frontend restart: PASS.
+- WeKnora frontend recreate: PASS.
+- Open WebUI recreate: PASS.
+- Existing persistent-volume identities remained unchanged.
+- Knowledge/model records and host-native Ollama/9router reachability remained available.
+
+### Rollback
+
+Restore the previous Compose/runtime adapter snapshots while preserving the same persistent volumes and protected secrets. Never use `down -v` as a rollback mechanism.
+
+### Notes
+
+A new full Mac Studio reboot / Docker-runtime restart was deliberately deferred because the administrator currently has remote-only access and losing the remote control path would prevent recovery. This is a safety boundary, not a failed acceptance result.
+
 ## 2026-09-11 — Finalize trusted private-LAN Open WebUI exposure
 
 Component: Open WebUI employee network boundary and protected deployment configuration

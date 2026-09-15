@@ -245,22 +245,24 @@ A cloud provider such as DashScope is optional. It is not an Enterprise AI Offic
 
 If the deployment uses local embedding and does not enable a WeKnora-native Chat/KnowledgeQA workflow, there is no reason to request a DashScope API key merely to complete Core.
 
-The first real Mac Studio deployment validated this local path:
+The current ARMOR Mac Studio reference uses:
 
 ```text
 WeKnora v0.8.0
-→ Ollama 0.30.8
-→ bge-m3
+→ local Ollama
+→ qwen3-embedding:0.6b
 → 1024 dimensions
 ```
 
-That validation showed successful Chinese, English, and cross-language retrieval without obvious host slowdown. Treat `bge-m3` as the preferred local starting choice for similar capable Apple Silicon deployments, while still validating a small representative corpus on the actual target host.
+The original Mac Studio qualification used `bge-m3` successfully; that evidence remains useful historical validation, but the current runtime has migrated to `qwen3-embedding:0.6b` to reduce local-model ecosystem complexity while keeping the embedding role lightweight. For fresh ARMOR-like deployments, use the current Qwen3 embedding baseline unless measured quality or compatibility evidence justifies another model.
 
-Use `qwen3-embedding:0.6b` as a lighter fallback candidate if resource pressure becomes the real constraint. Do not default to 4B/8B embedding models without measured need.
+Do not default to 4B/8B embedding models without measured need. Embedding changes on an existing Knowledge Base are migrations and normally require a compatible reindex/reingestion path.
 
 ### 6.4 Retrieval tuning
 
 Start with upstream/default retrieval capabilities. Add reranking or alternate retrieval infrastructure only when the configured requirement or measured retrieval quality justifies it.
+
+The ARMOR reference currently enables local reranking with `Qwen3-Reranker-0.6B` through a small host-local `llama-server` endpoint. This is a deployment choice, not a Core requirement, and does not justify introducing another orchestration platform.
 
 Embedding changes are high risk because reindexing may be required. Select and record the embedding model and vector dimension before production-scale ingestion whenever possible.
 

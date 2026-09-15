@@ -43,7 +43,8 @@
 | EAO 运行基线 | ✅ 已完成 / 已部署 / 已投入使用 |
 | 双知识库架构（RAG + Wiki） | ✅ 已启用 — WeKnora RAG + ARMOR Vault Wiki / Working Memory |
 | Enterprise Self-Evolution v1 | 🧭 设计基线已定义 — 从员工正常工作中内嵌学习岗位经验；运行时尚未启用，需先审计 Hermes 实际能力 |
-| 本地 AI 模型基础设施 | ✅ ARMOR Reference 已启用 — Ollama 为 WeKnora 提供视觉、音频与向量模型；Hermes 主推理模型保持独立 |
+| WeKnora Qwen Local AI Stack | ✅ 已启用 — Qwen3 Embedding + Reranker + Vision + ASR；Hermes 主推理保持独立 |
+| Deployment Hardening v1 | ✅ 容器重建安全 / 服务发现 / Secret 连续性 / Volume Identity 已 PASS；当前仅远程控制，整机重启复验暂缓 |
 | 部门交接准备 | ✅ 已完成 — 员工账号与私有访问资料可直接交付 |
 | 公司内部员工访问 | ✅ 已通过批准的私有网络路径验证 |
 | 公司外远程访问 | ✅ 已通过 Tailscale 私有访问验证；无需公开暴露服务 |
@@ -156,17 +157,28 @@ flowchart TB
   Operations -->|Scoped Vault Router| Vault
   Vault -. 仅显式知识晋升 .-> WeKnora
 
-  subgraph LocalAI["本地 AI 模型 Serving — ARMOR Reference"]
+  subgraph LocalAI["Qwen Local AI Stack — ARMOR Reference"]
     Ollama["Ollama"]
-    VLM["qwen2.5vl:3b<br/>视觉解析"]
-    ASR["Whisper<br/>音频解析"]
-    Embed["bge-m3<br/>Embedding / 语义检索"]
+    RerankServe["llama-server<br/>本地 Rerank Endpoint"]
+    VLM["qwen3-vl:2b<br/>视觉解析"]
+    ASR["Qwen3-ASR<br/>音频解析"]
+    Embed["qwen3-embedding:0.6b<br/>Embedding / 语义检索"]
+    Rerank["Qwen3-Reranker-0.6B<br/>检索重排"]
     Ollama --> VLM
     Ollama --> ASR
     Ollama --> Embed
+    RerankServe --> Rerank
   end
 
-  WeKnora -->|本地解析 / Embedding 角色| Ollama
+  NineRouter["9router<br/>OpenAI-compatible Gateway<br/>WeKnora KnowledgeQA: default"]
+  Codex["OpenAI Codex OAuth"]
+
+  General -->|直接 openai-codex 推理| Codex
+  Operations -->|直接 openai-codex 推理| Codex
+  WeKnora -->|本地 Embedding / Vision / ASR| Ollama
+  WeKnora -->|Rerank| RerankServe
+  WeKnora -->|KnowledgeQA / Chat| NineRouter
+  NineRouter --> Codex
 
   Operations --> Tools["已批准 Skills 与受限工具<br/>Web Research · ToolScout · Media Transcription"]
 
@@ -185,7 +197,8 @@ flowchart TB
 | **Hermes Operations** | ARMOR Reference / 已部署 / 已冻结 | 共享的最小权限部门 Profile，使用已批准 Skills、受限工具、WeKnora 检索与 Scoped Vault 能力 |
 | **WeKnora RAG** | Core 知识层 / 已启用 | 已批准企业事实 / 参考知识的摄取、检索、Grounding 与来源证据 |
 | **ARMOR Vault Wiki** | ARMOR 知识层 / 已启用 | 长期 Markdown Working Memory、工作产物、Research、发布记录、流程标准与 Business Assets |
-| **Ollama 本地 AI Serving** | ARMOR Reference / 已启用 | 为 WeKnora 提供任务专用的视觉、音频与向量模型；**不是** Hermes 主推理模型 |
+| **Qwen Local AI Stack** | ARMOR Reference / 已启用 | WeKnora 的 Embedding、Rerank、Vision、ASR 统一采用轻量 Qwen 模型；**不是** Hermes 主推理模型 |
+| **9router** | ARMOR Reference / WeKnora KnowledgeQA 已启用 | 向 WeKnora 暴露 `default` 组合的 OpenAI-compatible Gateway；与 Hermes 直接使用 `openai-codex` 的路径彼此独立 |
 | **Communication / Governed Email** | 条件能力资产 | 只有显式配置后才启用；任何对外发送仍受人工 Approval 与 Governance 边界约束 |
 | **Git 仓库 + 企业受保护配置** | 控制 / Desired State 层 | 定义可复用蓝图、启用能力、部署合同以及私有 Runtime 输入 |
 
@@ -195,7 +208,9 @@ flowchart TB
 - Open WebUI 上游自带的 `Arena Model` 等工具属于模型评测能力，不是 EAO 工作角色、Hermes Profile 或智能任务路由器；普通员工生产工作仍应走显式配置的 Assistant → Hermes Profile 路径（见 [Open WebUI 部署适配说明](infrastructure/open-webui/README.md)）；
 - WeKnora 与 ARMOR Vault 按对象 / 来源类型分工，是互补权威，不是两套重复知识库；
 - 普通 Vault 工作产物**不会自动回灌 WeKnora**，只有经过明确 Knowledge Governance 决策后才允许晋升为可复用企业知识；
-- ARMOR Reference 中的 Ollama 为 WeKnora 提供任务型本地推理，不代表 Hermes 主推理已经迁移到本地 LLM；
+- ARMOR 当前将 WeKnora 的本地基础设施模型尽量统一到 Qwen 系列：Embedding、Rerank、Vision、ASR 是彼此独立的基础设施角色，不是通用本地推理模型；
+- Ollama 承载 Embedding / Vision / ASR，本地 Qwen3 Reranker 通过轻量 `llama-server` Endpoint 提供；这不代表 Hermes 主推理迁移到了本地 LLM；
+- Hermes General / Operations 继续使用批准的 `openai-codex` 直接推理路径；WeKnora 可选 KnowledgeQA / Chat 则通过 9router 的 `model=default` 独立提供；
 - Operations 只获得已批准 Skills / Tools 与受限知识接口；普通员工不获得 generic shell、browser、filesystem、code execution 或 generic SMTP；
 - Governed Email 等条件能力必须能够独立失败，不能破坏 Core 员工知识路径。
 
@@ -226,31 +241,37 @@ Operations 仍维持最小权限：通过 Scoped ARMOR Vault Adapter 进行受�
 
 规范性的知识权威与内容归属规则见 [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md)。
 
-### WeKnora 的本地 AI 模型基础设施
+### WeKnora Qwen Local AI Stack
 
-ARMOR 当前参考部署已经使用一套轻量、任务专用的本地 AI 模型层，为 WeKnora 的知识摄取与检索提供能力。这**不代表** Hermes 的主推理模型已经迁移到本地 LLM。
+ARMOR 当前参考部署已经把 WeKnora 的本地基础设施模型尽量统一到 **Qwen 系列**。目标不是为了“全家桶”本身，而是在各角色质量够用的前提下，用更统一、轻量的模型体系降低部署、升级、排障与维护复杂度，并尽可能让企业文档、图片与音频处理留在 Mac Studio 本地。
 
 ```text
-WeKnora
-  ↓
-Ollama — 本地模型运行 / Serving
-  ├─ 视觉解析
-  │    └─ qwen2.5vl:3b
-  ├─ 音频解析
-  │    └─ karanchopda333/whisper:latest
-  └─ 向量化 / 语义检索
-       └─ bge-m3:latest
+WeKnora v0.8.0
+  ├─ Embedding
+  │    └─ Ollama → qwen3-embedding:0.6b / 1024 dimensions
+  ├─ Rerank
+  │    └─ 本地 llama-server → Qwen3-Reranker-0.6B
+  ├─ Vision / VLM
+  │    └─ Ollama → qwen3-vl:2b
+  ├─ Audio / ASR
+  │    └─ Ollama → Qwen3-ASR
+  └─ KnowledgeQA / Chat
+       └─ 9router → model: default → OpenAI Codex OAuth
 ```
 
 ARMOR 当前参考部署中的角色：
 
-| 本地模型 | 在 WeKnora 中的用途 | 模型类型 |
+| 模型 / Gateway | 在 WeKnora 中的用途 | 当前运行路径 |
 | --- | --- | --- |
-| `qwen2.5vl:3b` | 知识摄取过程中的视觉 / 多模态解析 | VLM |
-| `karanchopda333/whisper:latest` | 知识摄取过程中的音频解析 / 语音转文字 | ASR |
-| `bge-m3:latest` | Embedding / 语义检索 | Embedding Model |
+| `qwen3-embedding:0.6b` | Embedding / 语义检索 | 本地 Ollama |
+| `Qwen3-Reranker-0.6B` | 检索结果重排 | 本地 `llama-server` OpenAI-compatible Endpoint |
+| `qwen3-vl:2b` | 视觉 / 多模态解析 | 本地 Ollama |
+| `Qwen3-ASR`（当前 Ollama 中为 `samrito/qwen3-asr:Q8_0`） | 音频解析 / 语音转文字 | 本地 Ollama |
+| `9router/default` | 可选 WeKnora KnowledgeQA / Chat | 宿主机 9router → OpenAI Codex OAuth |
 
-Ollama 是这里的**本地模型运行与 Serving 层**。这些模型属于 WeKnora 特定处理角色所依赖的基础设施，不属于员工 Profile，也不替代 Hermes 的推理模型。对于其它 EAO 部署，本地模型还是远程模型应由具体部署条件决定，并继续遵守 Capability Reuse Pass，不能因为需要某种模型能力就额外再造一套推理基础设施。
+这套 **Qwen Local AI Stack 是基础设施，不是 EAO 的主推理模型**。Hermes General / Operations 仍使用独立受治理的 `openai-codex` Provider。旧的 `bge-m3`、`qwen2.5vl:3b` 与 WeKnora 本地 Whisper 模型记录仅保留为迁移 / 历史证据，不再属于当前 ARMOR WeKnora 模型基线。
+
+其它 EAO 部署仍应根据自身资源、隐私和质量要求选择 local / remote 模型。ARMOR 当前选择说明：在不新增另一套编排系统的前提下，统一的轻量 Qwen 模型家族可以显著降低本地 AI 基础设施复杂度；它不是要求所有部署复制完全相同的模型。
 
 ### 员工访问状态
 
