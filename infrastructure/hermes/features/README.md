@@ -18,7 +18,7 @@ Do not enable Kanban merely to run a short synchronous subtask; use normal deleg
 
 ### Deployment
 
-On the validated Hermes 0.21.0 reference, Kanban is built into Hermes. The default dispatcher runs inside the Gateway. No external Kanban server should be added.
+Kanban is a native Hermes capability on the accepted reference runtime. For each rolling-validated candidate, confirm the current upstream Kanban contract before enablement. Do not add an external Kanban server when the candidate's native capability satisfies the requirement.
 
 Minimal activation/verification flow:
 
@@ -110,7 +110,7 @@ Messaging is an alternate employee access/delivery surface, not a separate Agent
 
 The company configuration must select an actual platform before deployment. Do not enable multiple messaging platforms for completeness.
 
-Supported Hermes Gateway platforms evolve by release. For the selected pinned Hermes version, inspect and use that release's official setup documentation/CLI for the chosen platform.
+Supported Hermes Gateway platforms evolve quickly. For the transaction-scoped Hermes candidate, inspect and use that candidate's official setup documentation/CLI for the chosen platform.
 
 Typical Enterprise AI Office choices may include Feishu/Lark, WeCom, or Weixin when the company actually uses them.
 
