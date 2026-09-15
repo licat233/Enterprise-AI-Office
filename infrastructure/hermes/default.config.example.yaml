@@ -1,5 +1,5 @@
 # Enterprise AI Office baseline Hermes default/admin Profile
-# Derived schema pin: config/validated-stack.yaml -> Hermes Agent 0.21.0.
+# Derived schema contract: config/validated-stack.yaml -> Hermes Agent rolling-validated candidate.
 # Copy/adapt into the protected default Hermes home. Do not put secrets here.
 
 gateway:
