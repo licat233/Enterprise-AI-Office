@@ -1534,6 +1534,60 @@ gate before Phase 1A is narrowly:
 Do not enable the Guard in production Operations until that model-dependent
 Background Review path is accepted.
 
+### 21.9D Background Review provider E2E acceptance — PASS
+
+The final pre-Phase-1A guard gate was completed with a real external provider
+and the actual installed Hermes Background Review path.
+
+Observed acceptance:
+
+```text
+Hermes                          0.21.2
+Hermes commit                   939e45c91d751fadd94dcd1b873ac3cb44846213
+EAO repository                  39b5742a1ac0c7aa9aa33d24624e36e9d446ee2c
+Provider                        openai-codex
+Model                           gpt-5.6-luna
+
+Real external provider call     PASS
+Real Background Review          PASS
+Background Review skill_manage  PASS
+pre_tool_call reached           PASS
+Guard ALLOW path                PASS
+Guard BLOCK path                PASS
+Protected target unchanged      PASS
+Temporary credentials cleanup   PASS
+Temporary runtime cleanup       PASS
+Production Operations changed   NO
+Production Guard registered     NO
+Self-Evolution enabled          NO
+```
+
+Conclusion:
+
+> **Company Skill Mutation Boundary = CLOSED / VALIDATED**
+
+The Guard has now been proven through the complete provider-backed path:
+
+```text
+employee/session context
+→ real Background Review
+→ real external model/provider
+→ skill_manage
+→ Hermes tool dispatch
+→ pre_tool_call
+→ EAO Skill Mutation Guard
+→ ALLOW learned-* / BLOCK protected Company Skill
+```
+
+There is no remaining blocker before the isolated Phase 1A Shadow Capture
+Quality Pilot.
+
+The next question is no longer whether Hermes can learn safely. Phase 1A asks
+whether the things Hermes chooses to learn are actually useful, appropriately
+scoped, non-duplicative, and low-noise.
+
+Concurrency, persistence, and rollback remain explicitly deferred to Phase 1B.
+
 ### 21.10 Phase 1 — Learning Pilot
 
 Use an **isolated non-production test Profile/domain** and a finite test window.
