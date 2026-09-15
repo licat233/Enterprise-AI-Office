@@ -171,7 +171,7 @@ Do not substitute ARMOR reference addresses when these values are unresolved.
 
 ### Stage B — WeKnora
 
-1. Install the validated upstream WeKnora baseline through `DEPLOY.md §4.1` and prove runtime identity through §4.2.
+1. Install the validated upstream WeKnora baseline into the canonical `deployment.runtime_root/runtime/WeKnora` checkout through `DEPLOY.md §4.1` and prove runtime identity through §4.2.
 2. Reconcile tenant/owner bootstrap, embedding model, company Knowledge Base(s), retrieval credentials, and official MCP bridge through `infrastructure/weknora/PROVISIONING.md`.
 3. Record the resulting non-secret logical-ID → runtime-ID mappings and retrieval-key record metadata in the protected operational state created from `state/DEPLOYMENT-STATE.template.md`.
 4. Verify direct listing/search/retrieval, source evidence, credential denial, and cross-KB scoping before connecting Hermes.
@@ -194,7 +194,7 @@ Do not substitute ARMOR reference addresses when these values are unresolved.
 1. Deploy the validated Open WebUI container through `DEPLOY.md §4.1` and prove runtime identity through §4.2.
 2. Reconcile groups, Hermes Profile connections, employee-visible Model/Assistant ACL resources, and feature permissions through `infrastructure/open-webui/PROVISIONING.md`.
 3. Consume the Hermes Profile route/model handoff and company logical group mappings from the protected operational state; resolve API-key values only from protected secret storage.
-4. Preserve persistent data and unrelated legitimate administrator-owned resources.
+4. Preserve persistent data and unrelated legitimate administrator-owned resources; verify the frozen Compose project/volume identities before any recreate.
 5. Grant resource READ ACLs rather than workspace management rights.
 6. Preserve WeKnora as the company-knowledge authority; do not attach a duplicate EAO-managed native Open WebUI company Knowledge corpus.
 7. Validate login, backend-to-Hermes connectivity, employee model visibility, chat history, file upload, reload persistence, unauthorized model denial, and unauthenticated denial.
@@ -386,6 +386,9 @@ The ARMOR reference deployment proved several non-obvious requirements:
 - Open WebUI resource ACLs and feature permissions are separate concerns; employee groups can have empty workspace permission objects while receiving explicit model READ ACLs.
 - Tailscale/private-network access can coexist with LAN publication; it is not a reason to expose internal admin services publicly.
 - Runtime acceptance must verify employee-visible behavior after restart, not just configuration files before restart.
+- Compose project names and named-volume identities are deployment state, not harmless working-directory defaults.
+- WeKnora `SYSTEM_AES_KEY` is part of recoverable secret continuity; restoring the database without the matching key is incomplete.
+- Production runtime assets should be materialized under `deployment.runtime_root`; containers must not depend on an administrator's mutable Git checkout path.
 
 These are architecture lessons, not hard-coded hostnames, IP addresses, credentials, or company secrets.
 
