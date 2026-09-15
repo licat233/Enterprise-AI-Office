@@ -343,6 +343,30 @@ If the provider exposes an upstream default URL, use it unless protected company
 configuration deliberately overrides it. A custom/generic provider may require
 an explicit approved base URL.
 
+### 5.1.1 Host-native provider endpoints from Docker
+
+When WeKnora runs in Docker but the selected provider/gateway runs on the host,
+do not use `localhost` or `127.0.0.1` as the WeKnora model base URL. Inside
+the container those addresses refer to the WeKnora container itself.
+
+On the validated Apple Silicon macOS Docker path use:
+
+```text
+http://host.docker.internal:<port>
+```
+
+and prove reachability from inside the actual `WeKnora-app` container before
+saving the model configuration.
+
+If WeKnora SSRF validation rejects that trusted host, configure
+`SSRF_WHITELIST_EXTRA` in the WeKnora runtime environment consumed by Docker
+Compose and recreate the affected service. A host OS/global environment setting
+that was not present when Compose rendered/created the container is not evidence
+that the container received the value.
+
+Whitelist the narrow trusted hostname/IP/CIDR actually required. Do not disable
+SSRF validation broadly.
+
 Never substitute another provider merely because the configured provider is unavailable.
 
 ### 5.2 Required baseline model
