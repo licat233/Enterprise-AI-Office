@@ -29,6 +29,9 @@ Runtime evidence from a specific deployment belongs in the protected operational
 [ ] `hermes --version` is recorded and corresponds to that candidate checkout
 [ ] Hermes candidate has passed the applicable rolling-validation acceptance
 [ ] Open WebUI running container image matches the validated image
+[ ] WeKnora Compose project identity is exactly the configured/frozen identity (`weknora` for the validated baseline)
+[ ] Open WebUI Compose project identity is exactly the configured/frozen identity (`eaio-openwebui` for the validated baseline)
+[ ] Persistent volume identities for WeKnora PostgreSQL/files and Open WebUI data are recorded from the running containers
 [ ] Open WebUI backend can reach the configured host-native Hermes Profile route from inside the container runtime
 [ ] Each intended Hermes Profile base URL occurs exactly once in Open WebUI connection configuration
 [ ] Recorded/observed Open WebUI connection index resolves to that exact intended Profile URL; no historical index is trusted by itself
@@ -53,8 +56,13 @@ Verify services required by the selected WeKnora release:
 [ ] WeKnora frontend reaches backend through service-name/Docker-DNS discovery rather than a fixed container IP
 [ ] Recreating only the WeKnora `app` container does not require restarting `frontend`; after backend health returns, a proxied protected API route returns an auth/application response rather than 502
 [ ] No stale backend IP remains in effective Nginx upstream configuration after app recreate
+[ ] Recreating only `frontend` preserves API reachability after startup
+[ ] Recreating Open WebUI preserves users/resources/history and reuses the same persistent data volume
+[ ] A Docker daemon/container-runtime restart preserves the same Compose projects and persistent volumes before Core Ready is reasserted
 [ ] Each required WeKnora model role has explicit `source` (`local` / `remote`) from active company desired state
 [ ] Each remote WeKnora model credential, when required, resolves from its symbolic ref to the supported model `api_key` credential binding; no secret is inferred from another role/provider
+[ ] `SYSTEM_AES_KEY` is present through the declared symbolic secret ref and is container-visible
+[ ] Encryption-key continuity is proven across recreate/restart; existing encrypted model/provider/MCP/datasource credentials remain readable
 ```
 
 ## 3. Seed-document ingestion
