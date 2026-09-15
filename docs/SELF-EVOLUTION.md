@@ -1175,42 +1175,82 @@ A learned Skill can influence reasoning, but it cannot grant the Profile a tool,
 credential, permission, or external side effect that the runtime did not
 already authorize.
 
-### 21.9 Phase 0 — actual production runtime audit contract
+### 21.9 Phase 0 — actual production runtime read-only audit contract
+
+Phase 0 is **strictly read-only**. Its purpose is to prove that the deployed
+runtime has the prerequisites for the proposed design before any Self-Evolution
+write path is enabled.
 
 Before changing the ARMOR reference runtime, verify on the designated host:
 
 ```text
 Hermes version
 Hermes source commit
+actual Hermes source checkout path
 active Operations Profile path/config
 employee memory flags
 auxiliary.background_review effective config
 skills.external_dirs
 skills.create_dir
+skills.creation_nudge_interval
 skills.write_approval
 skills.guard_agent_created
 skills.ledger
 curator enabled/consolidate settings
 effective Operations tool surface
-actual shared/frozen Skill directories
+actual Profile-local Skill directory
+actual shared/frozen Company Skill directories
+filesystem ownership/mode for those Skill directories
 ```
 
-Then prove, on the exact build:
+Phase 0 must prove, without writing:
 
-1. Memory remains unavailable to the employee Profile.
-2. Background Review can still perform Skill-only self-improvement.
-3. The target employee Profile exposes the `skills` toolset but does not gain
-   terminal, generic filesystem, browser, coding delegation, secrets, or new
-   MCP authority merely because Self-Evolution is enabled.
-4. A Background Review-created Skill lands only in the intended Profile-local
-   Skill directory and is recorded as autonomously managed learning state.
-5. A Skill in an EAO company `external_dirs` directory cannot be autonomously
-   patched or deleted by Background Review.
-6. The deployed company-Skill directory is read-only to the employee learning
-   path, and a foreground `skill_manage` mutation attempt cannot persist there.
-7. Profile-local Skill create/patch still succeeds.
-8. A restart preserves the intended Profile-local learned Skill and does not
-   alter the external shared Skill baseline.
+1. The exact deployed Hermes version/commit and whether the v1 design assumptions
+   match that build.
+2. Employee Memory remains OFF.
+3. Whether the Operations API surface currently includes the Hermes `skills`
+   toolset / `skill_manage`.
+4. Enabling that toolset would not inherently add terminal, generic filesystem,
+   browser, coding delegation, secrets, or unrelated MCP authority.
+5. The exact Profile-local Skill path that would become the writable learning
+   plane.
+6. The exact Company/shared Skill paths and whether the employee Hermes runtime
+   identity currently has filesystem write permission to them.
+7. The deployed source contains the expected Background Review trigger,
+   external-Skill autonomous-write guard, write-approval gate, provenance,
+   ledger, and Skill precedence behavior used by this proposal.
+8. Any gap between the public reproducibility baseline and the live runtime is
+   recorded explicitly rather than silently normalized.
+
+Phase 0 must **not**:
+
+- create, patch, edit, delete, approve, reject, or adopt a Skill;
+- change `skills.write_approval`;
+- add the `skills` toolset;
+- change file permissions or ownership;
+- enable Background Review;
+- enable Memory;
+- enable Curator;
+- restart Hermes or any EAO service;
+- upgrade/downgrade Hermes;
+- modify protected Profile config;
+- modify the repository.
+
+The following are intentionally **not** Phase 0 tests because they require
+writes and belong in the isolated Phase 1B live-learning pilot:
+
+```text
+Background Review creates learned-* Skill
+later correction patches/refines it
+foreground mutation cannot change read-only Company Skill
+concurrent sessions do not lose updates
+restart preserves learned Skill
+ledger/rollback works on real learned mutations
+```
+
+If a prerequisite cannot be established read-only, report it as
+`BLOCKED — requires isolated mutation test` rather than changing production to
+find out.
 
 No production setting changes are authorized by this document alone.
 
