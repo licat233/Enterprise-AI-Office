@@ -1346,12 +1346,145 @@ B. Profile/per-Skill mutation serialization only if Phase 1B proves lost-update 
 Do not build a new Self-Evolution engine, database, review queue, event bus, or
 experience store.
 
+### 21.9B Company Skill mutation boundary decision
+
+A follow-up read-only Capability Reuse Pass confirmed that native Hermes
+configuration alone cannot enforce the required write boundary.
+
+Rejected native-only mechanisms:
+
+- `skills.external_dirs` protects autonomous curation but does not deny
+  foreground `skill_manage` edits;
+- `skills.create_dir` controls new-Skill placement, not edits to existing
+  discovered Skills;
+- `guard_agent_created` is a security/content scan, not a path-authorization
+  mechanism;
+- organization-mirror semantics do not provide the required foreground
+  edit/patch denial;
+- `write_approval` creates recurring human work and is not a security
+  boundary;
+- toolset filtering cannot distinguish learned targets from Company targets.
+
+A same-user filesystem-only design was also rejected as the default v1
+solution. The Hermes runtime and the EAO repository are currently owned by the
+same runtime identity, so chmod/ACL arrangements would either be weak or require
+a larger publication/ownership architecture than the measured gap justifies.
+
+Hermes 0.21.2 provides a supported `pre_tool_call` plugin hook before tool
+execution. The installed runtime routes both foreground and Background Review
+tool execution through that extension point.
+
+Therefore the accepted v1 boundary design is:
+
+> **A required Operations-only Hermes `pre_tool_call` policy plugin that
+> fail-closes every `skill_manage` mutation outside the Profile's autonomous
+> `learned-*` plane.**
+
+Required policy:
+
+```text
+skill_manage mutation requested
+        ↓
+resolve operation + target
+        ↓
+realpath / symlink resolution
+        ↓
+IF target name starts with learned-
+AND resolved target remains inside the approved Operations Profile-local
+learning root
+AND target does not escape through symlink traversal
+    → ALLOW
+
+ELSE
+    → BLOCK
+```
+
+The guard must cover every mutation operation supported by the installed
+`skill_manage` surface, including:
+
+```text
+create
+edit
+patch
+delete
+write_file
+remove_file
+batch mutations
+```
+
+Read-only operations such as listing/viewing Skills remain unaffected.
+
+Fail-closed requirements:
+
+- malformed operation → block;
+- unresolved target → block;
+- unknown mutation operation → block;
+- configuration/path-resolution failure → block;
+- plugin callback internal exception → catch and return an explicit block;
+- missing required plugin registration during rolling validation → acceptance
+  failure.
+
+The plugin must resolve symlinks before deciding authority. A Profile-local
+symlink pointing into the EAO repository is a **Company Skill**, not a writable
+learned Skill.
+
+Conceptual authority boundary:
+
+```text
+/Users/armor/.hermes/profiles/operations/skills/learned-*
+→ autonomous learning plane
+→ skill_manage mutation allowed
+
+resolved EAO Company Skill targets
+→ read/use only
+→ skill_manage mutation denied
+
+approved third-party Skills
+→ read/use only unless separately governed
+→ skill_manage mutation denied
+```
+
+This policy is an authorization guard, not an employee workflow. It requires:
+
+```text
+new service       NO
+new database      NO
+new review queue  NO
+new runtime user  NO
+Hermes source fork/patch NO
+```
+
+It should be implemented as a small removable EAO adapter using the supported
+Hermes plugin extension point.
+
+Because EAO uses a rolling-validated Hermes policy, every future Hermes
+candidate must revalidate:
+
+1. the `pre_tool_call` hook still exists or has a supported equivalent;
+2. the hook still executes before foreground and Background Review
+   `skill_manage`;
+3. a blocking result still prevents the mutation;
+4. the guard is actually registered in the target Profile/runtime;
+5. all Company Skill mutation negative tests still fail closed;
+6. Profile-local `learned-*` positive tests still succeed.
+
+If Hermes upstream later provides an equivalent native path-authorization
+mechanism, prefer the native mechanism and remove this adapter.
+
+This closes the Phase 0 Company Skill authority design gap.
+
+The only remaining conditional thin-adaptation question is mutation
+serialization. Do **not** implement a lock yet. It remains evidence-gated on the
+isolated Phase 1B concurrency test.
+
 ### 21.10 Phase 1 — Learning Pilot
 
 Use an **isolated non-production test Profile/domain** and a finite test window.
-Do not use the live Operations Profile for mutation testing until the Company
-Skill mutation boundary is accepted. The pilot has two different jobs and
-therefore two subphases.
+Do not use the live Operations Profile for mutation testing until the
+`pre_tool_call` Company Skill mutation guard has passed repository tests and
+isolated runtime acceptance.
+
+The pilot has two different jobs and therefore two subphases.
 
 #### Phase 1A — Shadow capture quality
 
@@ -1614,6 +1747,7 @@ A production-ready v1 implementation must prove all of the following.
 - other Profiles do not inherit them unless explicitly designed to;
 - Company Skills are not mutated, whether exposed through local symlinks or
   `external_dirs`;
+- the required `pre_tool_call` mutation guard is registered and fail-closed;
 - WeKnora remains authoritative for approved company facts.
 
 #### Security
