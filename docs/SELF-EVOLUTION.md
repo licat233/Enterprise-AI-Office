@@ -1902,6 +1902,46 @@ temporarily lower `skills.creation_nudge_interval` inside the isolated pilot.
 
 No production setting change is authorized.
 
+### 21.10E Native Background Review trigger pilot
+
+A four-test isolated trigger pilot established that the previous trigger model
+was incomplete for the active `openai-codex` Responses route.
+
+Observed result:
+
+```text
+Result                              NATIVE TRIGGER BEHAVIOR DIFFERS FROM ASSUMPTION
+zero-tool response increments native review counter   YES
+zero-tool correction triggered review                 YES
+prior correction visible in later review input        YES
+T2 learned-namespace proposal                         staged in temporary Profile
+T3/T4 protected/noncompliant proposals                blocked by Guard
+production auth changed                               NO
+production Operations changed                         NO
+Self-Evolution enabled                                NO
+temporary runtime cleanup                             PASS
+```
+
+Key correction to the earlier model:
+
+> On the active Codex Responses execution route, a response can contribute to the
+> native Background Review counter even when the foreground turn makes no tool
+> call.
+
+Therefore the clean 0/6 run with `creation_nudge_interval=15` should be read as
+a short-scenario threshold mismatch, not evidence that zero-tool experience is
+intrinsically invisible to Background Review.
+
+The trigger pilot also confirmed that zero-tool correction content can be
+visible to Background Review once the native review fires.
+
+For the next isolated Phase 1A quality measurement, use the native trigger with
+a deliberately low **pilot-only** `skills.creation_nudge_interval` so every
+short synthetic scenario is actually reviewed. Do not carry that test interval
+into production without a separate operating-cost/noise decision.
+
+Phase 1B remains not authorized until the quality gate passes.
+
 ### 21.11 Phase 2 — Automatic Role Learning
 
 Open only after the shadow pilot demonstrates acceptable precision.
