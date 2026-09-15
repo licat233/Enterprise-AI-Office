@@ -1231,19 +1231,127 @@ The employee experience remains unchanged: employees work normally, correct
 Hermes normally, and receive better future behavior without doing knowledge
 administration.
 
+### 21.11A Multi-employee concurrency acceptance
+
+A department Profile can serve multiple employees concurrently. Therefore two
+independent sessions may trigger Background Review against the same Profile-local
+Skill at nearly the same time.
+
+Hermes 0.21.2 uses atomic file replacement and targeted patch operations, but
+the inspected Skill Manager does not expose a Profile-wide mutation lock that
+can be assumed to serialize every concurrent Skill update.
+
+Do not introduce a queue or database pre-emptively.
+
+The Phase 1 pilot must include a two-session concurrency test:
+
+```text
+Session A reads learned Skill v1
+Session B reads learned Skill v1
+        ↓
+A proposes refinement A
+B proposes refinement B
+        ↓
+verify final Skill preserves both valid refinements
+or safely rejects/retries one stale mutation
+```
+
+Acceptance:
+
+- no silent last-writer-wins loss;
+- no corrupted SKILL.md;
+- no duplicated competing Skills created as a workaround;
+- failed stale patches are observable and recoverable;
+- the next Background Review can reconcile a safe rejected/stale mutation.
+
+If the exact deployed Hermes build fails this test, the smallest justified EAO
+adaptation is a **Profile-scoped Skill mutation lock** around the existing
+`skill_manage` path.
+
+That lock must:
+
+- serialize only Skill mutations for the same Profile;
+- leave reads concurrent;
+- add no new database;
+- add no human approval;
+- add no workflow engine;
+- preserve upstream Skill semantics;
+- remain removable if a later Hermes release provides equivalent native
+  serialization.
+
+The concurrency problem is an engineering consistency concern, not a reason to
+abandon Collaborative Department Learning.
+
+### 21.11B Convergence without employee scoring
+
+EAO does not need a voting system, employee-reputation score, or per-experience
+confidence database to make a department Profile mature.
+
+The default convergence mechanism is simpler:
+
+```text
+real work
+→ employee correction
+→ Skill refinement
+→ later real work
+→ another correction / exception
+→ further refinement
+```
+
+Do not record "Employee A is 80% reliable" or use learning data as a hidden
+performance system.
+
+The Profile should preserve useful **business conditions**, not interpersonal
+winning/losing:
+
+```text
+A says X
+B says Y
+→ ask what business context makes X or Y useful
+→ encode conditions / exceptions / decision criteria
+```
+
+Where two practices genuinely cannot be reconciled, the learned Skill may keep
+both as explicit branches rather than inventing consensus.
+
+Example:
+
+```text
+IF standard catalog purchase:
+  prioritize inventory exposure and MOQ discipline
+
+IF project-specific custom purchase:
+  evaluate MOQ against committed project quantity and project margin
+```
+
+This is preferable to declaring one employee correct and the other wrong.
+
 ### 21.12 Promotion is exceptional, not required for learning value
 
 A learned role procedure can remain useful for years without becoming a
 company-wide shared Skill.
 
 Promotion is only justified when there is a real need to widen authority or
-reuse:
+reuse. Promotion is **pull-driven**, not a standing review queue:
 
 ```text
-Profile-local role Skill
-        ↓ only when warranted
+Profile-local department Skill
+        ↓ only when another department / formal process actually needs it
 version-controlled shared company Skill
 ```
+
+Typical pull signals are:
+
+- another Profile needs the same mature procedure;
+- the company decides the method has become a formal cross-department SOP;
+- a production automation depends on a stable version-controlled procedure;
+- an administrator is already performing related maintenance and intentionally
+  promotes the method.
+
+Do not create a recurring "review learned Skills for promotion" duty.
+
+A Profile-local learned Skill is allowed to remain local indefinitely when it
+continues to serve the department well.
 
 Likewise:
 
