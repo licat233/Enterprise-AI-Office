@@ -1,6 +1,6 @@
 # Enterprise AI Office
 
-> **EAO baseline: COMPLETE / deployed / handoff-ready / in use.** Enterprise AI Office is ARMOR's self-hosted AI workspace built around **WeKnora + Hermes Agent + Open WebUI**. The reference system has been installed on the designated company Mac Studio, operational acceptance has passed, employee access has been prepared, and the system is ready for departmental handoff. This repository now serves two roles at once: the maintained source of truth for the deployed reference system, and an agent-readable / agent-executable blueprint that another capable AI Agent can use to reconstruct the same architecture from explicit private deployment inputs.
+> **EAO baseline: COMPLETE / deployed / handoff-ready / in use.** Enterprise AI Office is ARMOR's self-hosted AI workspace built around **WeKnora RAG + ARMOR Vault Wiki + Hermes Agent + Open WebUI**. The reference system has been installed on the designated company Mac Studio, operational acceptance has passed, employee access has been prepared, and the system is ready for departmental handoff. This repository now serves two roles at once: the maintained source of truth for the deployed reference system, and an agent-readable / agent-executable blueprint that another capable AI Agent can use to reconstruct the same architecture from explicit private deployment inputs.
 
 **[简体中文 README](./README.zh-CN.md)**
 
@@ -41,6 +41,8 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Operations employee RBAC v1 | ✅ Closed / Frozen / PASS |
 | Media Transcription optional capability | ✅ Validated / enabled in ARMOR reference; not Core default |
 | Operational EAO baseline | ✅ Complete / deployed / in use |
+| Dual knowledge architecture (RAG + Wiki) | ✅ Active — WeKnora RAG + ARMOR Vault Wiki / working memory |
+| Local AI model infrastructure | ✅ Active in ARMOR reference — Ollama serves task-specific vision, audio, and embedding models for WeKnora; Hermes reasoning remains separate |
 | Department handoff readiness | ✅ Ready — employee accounts and private access details can be distributed |
 | Office-network employee access | ✅ Validated through the approved private network boundary |
 | Remote employee access | ✅ Validated through Tailscale private access; no public exposure required |
@@ -51,7 +53,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Release Ready | ✅ Opened; phase-open status does not itself declare RELEASE READY |
 | ARMOR real deployment | ✅ Active / deployed / in use; runtime details remain private and only sanitized status is published |
 
-> **Operational status:** the ARMOR reference EAO baseline is installed on the designated company Mac Studio, has passed the current acceptance baseline, and is ready for departmental handoff. Employee accounts and the approved private access address can be distributed to department staff for normal use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. Access has been validated both on the approved office/private network path and remotely through Tailscale, allowing authorized employees to reach EAO from outside the office without exposing the employee surface publicly. The Mac Studio internal disk is the current EAO runtime and primary data storage. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
+> **Operational status:** the ARMOR reference EAO baseline is installed on the designated company Mac Studio, has passed the current acceptance baseline, and is ready for departmental handoff. Employee accounts and the approved private access address can be distributed to department staff for normal use. Employees can authenticate to Open WebUI and use the approved General/Operations AI paths. Access has been validated both on the approved office/private network path and remotely through Tailscale, allowing authorized employees to reach EAO from outside the office without exposing the employee surface publicly. The Mac Studio internal disk is the current EAO runtime and primary data storage. The canonical ARMOR Vault also lives on the Mac Studio internal SSD and is exposed to authorized humans only through the approved private SMB boundary; the former NAS copy is not a runtime write target. Backup/restore is an optional capability and is not currently enabled; it may be adopted later if business need and storage conditions justify it.
 >
 > The public blueprint lifecycle is repository-governance state, not a proxy for whether the separately authorized ARMOR deployment exists or is usable. With the baseline system deployed and `CONFIGURED READY — PASS`, ongoing EAO work should primarily be feedback-driven maintenance and bounded capability extensions rather than continued core-platform construction.
 >
@@ -93,47 +95,132 @@ See [Repository governance](docs/REPOSITORY-GOVERNANCE.md) for the full contract
 
 ## Architecture overview
 
-![Enterprise AI Office v2 architecture](./enterprise-ai-office-architecture.svg)
+The current Enterprise AI Office architecture is centered on four stable boundaries: a private employee access surface, Hermes Profile-based work execution, a dual knowledge layer, and capability-specific governed integrations. ARMOR-specific capabilities are layered on top of the reusable Core rather than redefining it.
 
-The SVG is a v2 system-design view focused on the separation between the Core General path and governed Communication/Email. The Communication/Email lane is a **conditional capability**, not part of mandatory Core, and is instantiated only when the active company configuration enables it. The diagram is **not an exhaustive snapshot of every capability currently enabled in the ARMOR reference deployment**. The ARMOR real deployment is already active and in use behind a private access boundary. Public repository content intentionally exposes only sanitized deployment evidence. The repository's default `real_deployment_task.active: false` is only a fresh-clone/new-target authorization safety default; it does not describe the ARMOR deployment status.
+The Communication/Email lane is a **conditional capability**, not part of mandatory Core, and is instantiated only when the active company configuration enables it.
 
-The validated Core employee path is intentionally independent from the governed v2 communication path:
+```mermaid
+flowchart TB
+  Employee["Authorized employee"]
+  Access["Private access<br/>Office LAN / Tailscale"]
+  WebUI["Open WebUI<br/>Identity · RBAC · Chat · History"]
 
+  Employee --> Access --> WebUI
 
-```text
-Employee
-  ↓
-Open WebUI
-  ├─ General Assistant
-  │    ↓
-  │  Hermes `general`
-  │    ↓
-  │  WeKnora
-  │
-  └─ Communication Assistant
-       ├─ Hermes `communication` Profile for reasoning
-       └─ Open WebUI server-side governed Email actions/tools
-            ↓
-          eao-email-governance
-            ├─ Governance SQLite
-            └─ Email Provider
+  subgraph Hermes["Hermes Agent — work runtime"]
+    General["General Profile<br/>Core"]
+    Operations["Operations Profile<br/>ARMOR reference"]
+    Communication["Communication Profile<br/>Conditional"]
+  end
+
+  WebUI --> General
+  WebUI --> Operations
+  WebUI -. if enabled .-> Communication
+
+  subgraph Knowledge["Knowledge and business memory"]
+    WeKnora["WeKnora RAG<br/>Approved factual / reference knowledge"]
+    Vault["ARMOR Vault Wiki<br/>Markdown working memory / business assets"]
+  end
+
+  General -->|retrieve| WeKnora
+  Operations -->|operations-weknora · retrieve-only| WeKnora
+  Operations -->|Scoped Vault Router| Vault
+  Vault -. explicit promotion only .-> WeKnora
+
+  subgraph LocalAI["Local AI model serving — ARMOR reference"]
+    Ollama["Ollama"]
+    VLM["qwen2.5vl:3b<br/>Vision parsing"]
+    ASR["Whisper<br/>Audio parsing"]
+    Embed["bge-m3<br/>Embedding / semantic retrieval"]
+    Ollama --> VLM
+    Ollama --> ASR
+    Ollama --> Embed
+  end
+
+  WeKnora -->|local parsing / embedding roles| Ollama
+
+  Operations --> Tools["Approved Skills and bounded tools<br/>Web Research · ToolScout · Media Transcription"]
+
+  Communication --> EmailActions["Governed Email actions<br/>Draft / review boundary"]
+  WebUI -->|human approval| EmailActions
+  EmailActions --> Governance["eao-email-governance<br/>Approval evidence · audit · reconciliation"]
+  Governance --> Provider["Email Provider"]
 ```
 
-A v2 Email failure must not break:
+The diagram above is the **current system view**, not a statement that every depicted lane is mandatory for every deployment.
 
-```text
-Open WebUI → General Assistant → Hermes general → WeKnora
-```
-
-Current employee-lane interpretation:
-
-| Lane | Status | Meaning |
+| Layer / lane | Current status | Architectural meaning |
 | --- | --- | --- |
-| **General** | Core / validated | Reusable baseline: Open WebUI → Hermes `general` → WeKnora |
-| **Operations** | ARMOR reference / frozen | Deployed least-privilege department capability using approved Skills, `operations-weknora`, Web Research, ToolScout, and scoped Vault Router boundaries |
-| **Communication** | v2 governed capability assets | Governed Email design/runtime assets exist in the repository; this does not imply a real company mailbox is already connected or autonomous send is enabled |
+| **Open WebUI** | Core / deployed | Employee identity, RBAC, chat UX, history, and approved Assistant access |
+| **Hermes General** | Core / validated | Default employee work runtime and reasoning path |
+| **Hermes Operations** | ARMOR reference / deployed / frozen | Shared least-privilege department Profile with approved Skills, bounded tools, WeKnora retrieval, and scoped Vault access |
+| **WeKnora RAG** | Core knowledge layer / active | Approved enterprise factual/reference ingestion, retrieval, grounding, and source evidence |
+| **ARMOR Vault Wiki** | ARMOR knowledge layer / active | Durable Markdown working memory, work products, research, publication records, workflow standards, and business assets |
+| **Ollama local AI serving** | ARMOR reference / active | Task-specific WeKnora vision, audio, and embedding models; **not** the Hermes reasoning model |
+| **Communication / Governed Email** | Conditional capability assets | Activated only when explicitly configured; external send remains behind human approval and governance |
+| **Repository + protected company configuration** | Control / desired-state layer | Defines the reusable blueprint, enabled capabilities, deployment contracts, and private runtime inputs |
 
-For the current sanitized ARMOR runtime, see [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md). For reusable capability enablement, use [`config/capabilities.yaml`](config/capabilities.yaml) rather than copying the ARMOR lane set.
+Key invariants:
+
+- the reusable Core remains `Open WebUI → Hermes general → WeKnora`;
+- WeKnora and ARMOR Vault are complementary authorities by object/source type, not duplicate knowledge stores;
+- ordinary Vault work products do **not** automatically flow into WeKnora; promotion requires an explicit knowledge-governance decision;
+- Ollama provides task-specific local inference for WeKnora in the ARMOR reference deployment and does **not** imply that Hermes reasoning runs on a local LLM;
+- Operations receives only approved Skills/tools and scoped knowledge interfaces; generic shell, browser, filesystem, code execution, and generic SMTP are not employee capabilities;
+- conditional capabilities such as governed Email must fail independently without breaking the Core employee knowledge path.
+
+For the reusable architecture contract, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). For the current sanitized ARMOR runtime, see [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md). Capability enablement remains configuration-driven through [`config/capabilities.yaml`](config/capabilities.yaml).
+
+### Dual knowledge architecture — RAG + Wiki
+
+The ARMOR reference deployment now uses two complementary knowledge stores with different jobs rather than two competing copies of the same authority:
+
+```text
+WeKnora RAG
+= approved enterprise factual/reference knowledge
+= retrieval, grounding, source evidence
+= "What is true / what does ARMOR know?"
+
+ARMOR Vault Wiki
+= human-readable Markdown business memory
+= work products, project memory, research, publication records,
+  governed workflow standards, and durable business assets
+= "What have we done / what are we working on?"
+```
+
+Authority is **by object and source type**, not by declaring either system the global source of truth for everything. Authoritative original datasheets, manuals, tests, and certifications remain primary evidence for exact technical facts. WeKnora is the approved RAG retrieval surface for enterprise factual/reference knowledge. ARMOR Vault is the durable Wiki/working-memory and business-asset layer.
+
+The Wiki layer is the existing Markdown-based ARMOR Vault, not a separate Wiki server or database. In the ARMOR reference deployment its canonical copy is stored on the Mac Studio internal SSD. Authorized human access uses macOS SMB over the trusted LAN or existing Tailscale private network. Open WebUI native Knowledge, Hermes Memory, and a second vector database are not used as competing durable authorities.
+
+Current Operations exposure remains least-privilege: governed Vault persistence is enabled through the scoped ARMOR Vault adapter; generic filesystem access remains disabled. Scoped Vault retrieval/search is a bounded adaptation surface and must not be replaced by generic filesystem access.
+
+See [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) for the normative authority and placement rules.
+
+### Local AI model infrastructure for WeKnora
+
+The ARMOR reference deployment also uses a small, task-specific local AI model layer to support WeKnora ingestion and retrieval. This is **not** a migration of Hermes reasoning to a self-hosted LLM.
+
+```text
+WeKnora
+  ↓
+Ollama — local model serving
+  ├─ Vision parsing
+  │    └─ qwen2.5vl:3b
+  ├─ Audio parsing
+  │    └─ karanchopda333/whisper:latest
+  └─ Embedding / semantic retrieval
+       └─ bge-m3:latest
+```
+
+Current ARMOR reference roles:
+
+| Local model | Role in WeKnora | Model class |
+| --- | --- | --- |
+| `qwen2.5vl:3b` | Visual / multimodal parsing during knowledge ingestion | VLM |
+| `karanchopda333/whisper:latest` | Audio parsing / speech-to-text during knowledge ingestion | ASR |
+| `bge-m3:latest` | Embedding and semantic retrieval | Embedding model |
+
+Ollama is the **local model runtime / serving layer**. These models are infrastructure dependencies for specific WeKnora processing roles; they are not employee Profiles and they do not replace the Hermes reasoning provider. For reusable deployments, local-versus-remote model selection remains deployment-configured and should be chosen through the Capability Reuse Pass rather than by adding another inference stack.
 
 ### Employee access posture
 
@@ -157,7 +244,8 @@ The validated core stack provides:
 
 - **Open WebUI** as the employee-facing web client;
 - **Hermes Agent** as the Agent runtime;
-- **WeKnora** as the authoritative company-knowledge layer;
+- **WeKnora RAG** as the approved enterprise factual/reference retrieval layer;
+- **ARMOR Vault Wiki** as the durable human-readable business-memory, work-product, evidence, and governed asset layer;
 - grounded answers with source evidence;
 - Open WebUI user/group/Assistant access controls;
 - distinct Hermes Profile API boundaries;
@@ -232,8 +320,10 @@ Operations can prepare reviewed business work products and persist them only
 through the closed ARMOR Vault Router contracts. It cannot use generic shell,
 terminal, filesystem, browser, computer-use, code-execution, delegation, or
 automatic publication paths. Hermes Memory and employee Profile Memory are
-off. WeKnora is the shared company-knowledge retrieval layer; Vault rules are
-the durable business authority.
+off. WeKnora is the approved enterprise factual/reference retrieval layer. ARMOR
+Vault is the durable Wiki/working-memory and business-asset layer. Authority
+is resolved by object/source type rather than by treating either store as the
+global authority for every kind of knowledge.
 
 The definitive matrix, runtime evidence, migration ledger disposition,
 permission boundary, E2E results, and deferred work are recorded in
@@ -312,12 +402,11 @@ The detailed v2 scope contract remains [`docs/V2-SCOPE.md`](docs/V2-SCOPE.md).
 | Calendar integration | Deferred | Simple follow-up reminders can use Hermes Cron; Calendar is not needed to prove governed email | scheduling/meeting actions become a real core workflow |
 | Employee long-term memory | Disabled / deferred | User isolation and privacy boundaries must be proven before re-enabling it | isolation is validated and real employee continuity value justifies it |
 | SSO expansion | Deferred unless independently required | Open WebUI already provides the reference identity surface; expanding identity infrastructure would enlarge scope | production access requirements actually require enterprise SSO |
-| `armor-memory` synchronization | Deferred | Would create a second continuity/memory integration problem before the baseline needs it | a concrete cross-system memory requirement exists |
 | n8n / another workflow engine | Rejected for baseline | Hermes Cron/Kanban already cover the narrow scheduling and durable-task needs | a workflow is proven that existing Hermes capabilities cannot safely express |
 | Second scheduler | Rejected | Hermes Cron is already the scheduling authority | Cron is demonstrably insufficient for a required workflow |
-| Additional vector database / new RAG layer | Rejected for baseline | WeKnora is already the company-knowledge authority; another vector store would duplicate state and maintenance | measured retrieval limits cannot be solved inside WeKnora/upstream |
+| Additional vector database / new RAG layer | Rejected for baseline | The current dual architecture already separates WeKnora RAG from the Markdown ARMOR Vault Wiki; another vector store would duplicate the RAG layer and add synchronization/maintenance risk | measured retrieval limits cannot be solved inside WeKnora/upstream |
 | Prometheus/Grafana-style large observability stack | Deferred | Small-system health checks and operating procedures are sufficient at the current scale | operating scale or incidents justify dedicated observability infrastructure |
-| Local-LLM infrastructure project | Deferred | Model-hosting infrastructure is independent from proving the Enterprise AI Office architecture | privacy/cost/offline requirements make local inference a real deployment need |
+| General-purpose local LLM for Hermes reasoning | Deferred | ARMOR already uses task-specific Ollama models for WeKnora parsing and embedding; moving the main Hermes reasoning model to a self-hosted LLM is a separate decision and is not required by the baseline | privacy, cost, offline operation, or measured workload needs justify replacing or supplementing the current reasoning provider |
 | Custom Agent framework | Rejected | Hermes already owns Agent runtime/orchestration; building another framework would duplicate the core platform | Hermes cannot satisfy a demonstrated essential capability |
 | Graph database / generic Ontology Runtime | Rejected for baseline | Ontology is currently a governance/design contract; a graph runtime would add a new database/reasoning platform without proven need | a real cross-system workflow requires graph-native enforcement/query semantics |
 | Dedicated employee portal | Rejected | Open WebUI already provides the employee surface | a required employee workflow cannot be safely delivered through Open WebUI |
@@ -443,7 +532,8 @@ PRODUCTION READY
 | --- | --- |
 | Blueprint lifecycle / real deployment gate | `state/PROJECT-PHASE.yaml` |
 | System & installation blueprint | normative repository contracts |
-| Company knowledge | WeKnora |
+| Approved enterprise factual/reference knowledge | WeKnora RAG |
+| Durable business work / project memory / research / publication records / governed assets | ARMOR Vault Wiki |
 | Agent role / behavior / tools | Hermes Profiles / SOUL / Skills / tools |
 | Employee Web identity/access | Open WebUI / selected enterprise identity layer |
 | Mailbox and provider delivery facts | Email Provider |
@@ -463,12 +553,16 @@ HumanActor
 ≠ provider/mailbox credential
 ```
 
-### Knowledge is not memory
+### Knowledge, working memory, and Agent memory are different layers
 
 ```text
-WeKnora = authoritative shared company knowledge
+WeKnora RAG = approved enterprise factual/reference retrieval
+ARMOR Vault Wiki = durable business working memory and assets
 Hermes memory = optional continuity state subject to isolation rules
 ```
+
+Do not auto-ingest ordinary Vault work products into WeKnora. Promotion to RAG
+requires an explicit knowledge-governance decision.
 
 ### Natural language is not formal approval
 
@@ -506,6 +600,7 @@ Container runtime: OrbStack / Docker
 WeKnora: v0.8.0
 Hermes Agent: v0.21.0, host-native
 Open WebUI: v0.11.3
+Ollama: local AI model serving for WeKnora parsing / embedding in the ARMOR reference
 Employee Hermes long-term memory: disabled
 ```
 

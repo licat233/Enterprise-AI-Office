@@ -1,11 +1,18 @@
 # EAO Administrator Console v1A
 
-Status: REPOSITORY CAPABILITY ARTIFACT / NOT RUNTIME DEPLOYED
+Status: REVIEW PLANE ACCEPTED / KNOWLEDGE MUTATION BLOCKED / DISABLED
 
 This contract defines the smallest governed administrator entry point for
 Enterprise AI Office. It composes existing Open WebUI, Hermes, WeKnora,
-ToolScout, MCP control-plane, Git/PR, and approval patterns. It does not create
+ToolScout, MCP control-plane, Git/PR, and review patterns. It does not create
 a separate admin platform.
+
+Production closure: `EAO Administrators → EAO Admin → maintainer` is the
+accepted administrator-only review/governance plane. Knowledge Mutation
+through EAO Admin is `BLOCKED / DISABLED` because replay/audit durability was
+not accepted on the current Open WebUI v0.11.3 + WeKnora v0.8.0 stack. The
+approval Action and operation-envelope code remain reference artifacts only;
+they are not required or accepted for production mutation.
 
 ## 1. Authority and phase
 
@@ -30,8 +37,9 @@ real_deployment_task, or authorize a live Mac Studio mutation.
 
 An authorized EAO administrator can submit a URL, Git repository, PDF, DOCX,
 text, Skill package, Tool reference, or MCP/backend reference and receive a
-governed review result. Approved Knowledge candidates may use the bounded
-WeKnora contributor path defined below. Skill, Tool, and MCP changes remain
+governed review/recommendation. Knowledge candidates receive classification,
+provenance, duplicate/conflict, metadata, and read-only retrieval review;
+Knowledge Mutation through EAO Admin is blocked. Skill, Tool, and MCP changes remain
 repository proposals through the external short-lived branch and PR workflow;
 the EAO runtime repository path is currently blocked because no approved typed
 repository capability is selected.
@@ -42,11 +50,11 @@ repository capability is selected.
 | --- | --- | --- |
 | Open WebUI | REUSE_EXISTING | human identity, group/resource ACL, conversational surface, native confirmation UI |
 | Hermes Profiles/Skills | REUSE_EXISTING | maintainer role, shared intake Skill, Profile-scoped tools |
-| WeKnora | REUSE_EXISTING | Company Knowledge authority, bounded contributor/retrieval operations |
+| WeKnora | REUSE_EXISTING | Company Knowledge authority, read-only retrieval and review evidence |
 | ToolScout | REUSE_EXISTING | first review for installed/commodity tools |
 | MCP/control-plane registry | REUSE_EXISTING | typed capability registration and Profile exposure binding |
 | Git + repository workflow | REUSE_EXISTING as authority | canonical Skill/Tool/config source, branches, PRs, CI; no selected typed EAO runtime binding |
-| Existing HumanActor/email approval pattern | EXTEND_EXISTING | trusted Open WebUI server-side identity, exact-plan hash, expiry, stale-plan denial |
+| Existing HumanActor/email approval pattern | REUSE_EXISTING as reference | future mutation review only; not accepted as current durable mutation control |
 | New admin portal/service/database | REJECT | no verified gap and explicitly disallowed by the v1A scope |
 
 ### Verified gap
@@ -60,7 +68,7 @@ Assistant contract, or non-email generic operation-envelope primitive.
 - the maintainer Profile template plus least-privilege Hermes routing overlay;
 - the shared eao-resource-intake Skill;
 - the EAO Admin Open WebUI provisioning contract;
-- the bounded Open WebUI Knowledge Approval Action;
+- the disabled/reference-only Open WebUI Knowledge Approval Action;
 - a side-effect-free operation-envelope/hash helper and offline tests;
 - explicit reuse of Enterprise Web Research for source inspection and ToolScout for tool review;
 - capability/configuration/acceptance/readiness wiring.
@@ -80,7 +88,7 @@ v1A provides:
 - first-step classification into Knowledge, Skill, Tool, MCP/External Backend,
   or Unsupported/Ignore;
 - Capability Reuse Pass integration;
-- bounded Knowledge review and approved WeKnora ingestion;
+- bounded Knowledge review, recommendation, metadata preparation, and read-only WeKnora verification;
 - actual-source Skill review and recommendation;
 - ToolScout-first Tool review and recommendation through the maintainer review-only subset;
 - public URL/GitHub source inspection through Enterprise Web Research web_search/web_fetch only;
@@ -111,12 +119,12 @@ destructive deletion, or EAO Runtime Reconciler actions.
 | Docker / SSH / sudo/root | DENY |
 | default/admin switching | DENY |
 | Raw secrets | DENY |
-| Knowledge | read-only WeKnora retrieval in Hermes; configured Company Knowledge contributor target in the Action |
+| Knowledge | read-only WeKnora retrieval in Hermes; no EAO Admin contributor write path |
 | Source inspection | Enterprise Web Research web_search + web_fetch only; no raw browser/provider surface |
 | Tool review | ToolScout review-only subset; no maintainer ToolScout memory-write tools |
 | Repository | runtime repository operations blocked until an approved typed capability is selected |
 | Allowed work | classify, review, inspect, and recommend; material operation fields are re-derived server-side |
-| Material mutation | only the exact approved typed WeKnora operation executed by the Open WebUI Action, never a model-authored command |
+| Material mutation | BLOCKED / DISABLED through EAO Admin; no accepted production mutation path |
 
 Profile isolation is not host sandboxing. The runtime must enforce the tool
 boundary in Hermes/Open WebUI/control-plane configuration, not only in SOUL
@@ -158,9 +166,8 @@ Every resource follows:
     → current authority review
     → source/provenance/license/security/dependency review
     → proposed action + risk/impact
-    → immutable operation envelope
-    → trusted administrator approval when material
-    → bounded typed operation
+    → exact review/recommendation result
+    → read-only verification
     → acceptance evidence
 
 Classification itself cannot create or modify a Knowledge document, Skill, Tool,
@@ -168,52 +175,30 @@ MCP registration, Profile, branch, PR, or runtime state.
 
 ### Knowledge
 
-Use WeKnora and the configured Knowledge Base. The path is:
+Use WeKnora for read-only Company Knowledge review and retrieval verification.
+The accepted path is:
 
     source review
     → classification and provenance
     → duplicate/supersession/conflict check
-    → metadata preparation
-    → approval
-    → bounded WeKnora ingestion
-    → parse/index completion
-    → direct retrieval verification
-    → normal Hermes retrieval verification
-    → ACTIVE
+    → exact metadata/recommendation preparation
+    → read-only retrieval verification
+    → review result
 
-At minimum distinguish Company Authoritative and External Reference, and
-reuse status values such as current, reference, draft, superseded, and legacy.
+Distinguish Company Authoritative and External Reference, preserve source
+identity/fingerprint/version/owner/effective-date/status/confidentiality, and
+surface conflicts rather than silently reconciling them. Do not report new
+Knowledge as ACTIVE through EAO Admin.
 
-The pinned v0.8.0 contributor contract uses WeKnora's official API with a
-separate scoped tenant API key:
+Knowledge Mutation through EAO Admin is explicitly:
 
-    X-API-Key
-    full_access: false
-    capabilities: [ingest, retrieve]
-    knowledge_base_ids: [<EAO_KNOWLEDGE_BASE_ID>]
+    BLOCKED / DISABLED
+    BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT STACK
 
-The allowed routes are:
-
-    POST /api/v1/knowledge-bases/{id}/knowledge/file
-    POST /api/v1/knowledge-bases/{id}/knowledge/url
-    POST /api/v1/knowledge-bases/{id}/knowledge/manual
-    GET  /api/v1/knowledge/{id}
-
-The key must set full_access=false and carry exactly ingest and retrieve. It
-must not carry manage_kbs, manage_agents, manage_models, MCP admin,
-tenant/system admin, platform, or runtime-management capabilities. The explicit
-non-empty Knowledge Base allow-list is required. No owner/admin credential,
-direct database write, destructive clear, or unbounded WeKnora API is part of
-v1A.
-
-Contributor acceptance must prove that the scoped key can ingest into the
-allowed Knowledge Base, can GET /api/v1/knowledge/:id for knowledge in that
-Knowledge Base, and can inspect parse_status through that route; access to an
-out-of-scope Knowledge Base and Knowledge Base lifecycle/admin operations must
-be denied.
-A failed parse/index remains inactive. Conflicting authoritative sources are
-surfaced, not silently reconciled. No Knowledge Base deletion, bulk destructive
-delete, embedding change, or direct database write is part of v1A.
+The v0.8.0 scoped contributor routes and the Open WebUI Action remain
+reference-only material for a future separately approved replacement path.
+Do not invoke them, shorten operation markers, enable audit, add a ledger or
+database, patch Open WebUI/WeKnora, or substitute filesystem/Vault state.
 
 ### Skill
 
@@ -237,7 +222,7 @@ automatically turn a Tool into MCP. A justified MCP/backend receives only the
 required typed operations, narrow credentials, intended Profile bindings, and
 positive/negative access tests through the existing control plane.
 
-## 7. Operation Envelope
+## 7. Operation Envelope (reference-only; mutation blocked)
 
 Every material operation has:
 
@@ -271,21 +256,14 @@ The model cannot provide or forge:
 - expiry;
 - current-state evidence.
 
-The trusted Open WebUI server-side Action resolves the current authenticated
-user/groups and the exact parent user source from the current owned chat. It
-computes source fingerprint, operation_id, target, expected current state,
-plan hash, and HMAC binding server-side. After the native confirmation dialog,
-it re-resolves group membership and source/current state before invoking the
-bounded typed WeKnora operation. Natural-language approval text is not formal
-approval.
-
-The helper intentionally persists nothing. The Action stores only sanitized
-operation result/replay evidence in the existing Open WebUI assistant-message
-metadata; this is not a new approval database and contains no contributor key,
-HMAC key, or trusted signature. Durable business evidence remains in WeKnora,
-Git/PR history, MCP registry, runtime state, and Open WebUI history.
-OUTCOME_UNKNOWN requires reconciliation and must not be blindly retried. A
-repeated completed operation_id resolves to the existing/current result.
+The trusted Action and envelope described here are retained as reference-only
+artifacts. Their Open WebUI message/meta replay evidence did not survive the
+healthy post-Action lifecycle, the WeKnora-native candidate exceeded the
+deployed 50-character channel limit, and native Open WebUI audit was disabled.
+Therefore no production mutation, approval, replay marker, or reconciliation
+claim may be made from this section. Do not invoke the Action or retry an
+unknown outcome; prepare exact metadata/state for a separately approved
+external/manual path once one is defined.
 
 ## 8. Repository and runtime gates
 

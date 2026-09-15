@@ -6,25 +6,111 @@ For the canonical administrator procedure for reviewing and adding durable
 knowledge, see [Knowledge Intake v1](KNOWLEDGE-INTAKE.md). This standard
 defines the knowledge principles; the SOP defines the operational sequence.
 
-## 1. Knowledge platform
+## 1. Dual knowledge architecture
 
-WeKnora is the enterprise knowledge platform.
+Enterprise AI Office uses two complementary knowledge stores:
 
-It owns document ingestion, parsing, chunking, embedding, retrieval, source traceability, metadata, and Knowledge Base management.
+```text
+WeKnora RAG
+= approved enterprise factual/reference knowledge
+= ingestion, parsing, chunking, embedding, retrieval, source evidence
 
-## 2. Knowledge vs memory
+ARMOR Vault Wiki
+= durable human-readable Markdown business memory
+= work products, project memory, research, publication records,
+  governed workflow standards, and long-lived business assets
+```
 
-Do not use Hermes Profile memory as the primary store for durable company facts.
+These stores are not peer copies of the same content and neither is declared the
+global source of truth for every object type. Authority is resolved by
+**object type, source type, and provenance**.
+
+For exact technical facts, authoritative original sources such as datasheets,
+manuals, test records, and certifications remain primary evidence. WeKnora is
+the approved RAG retrieval surface for enterprise factual/reference knowledge.
+ARMOR Vault is the durable Wiki / working-memory / business-asset layer.
+
+The ARMOR Vault Wiki is a Markdown/file architecture, not a separate Wiki
+server or database. A deployment may expose the canonical Vault to authorized
+humans through an approved private file-sharing boundary while keeping Agent
+access separately scoped.
+
+## 2. Knowledge vs working memory
+
+Do not use Hermes Profile memory as the primary store for durable company
+knowledge or durable business work.
 
 ```text
 WeKnora
-= authoritative shared company knowledge
+= approved factual/reference knowledge retrieval
+
+ARMOR Vault
+= durable Wiki / working memory / business assets
 
 Hermes Profile memory
-= optional operating continuity/context subject to its memory policy
+= optional short operating continuity/context subject to memory policy
 ```
 
-Company facts such as specifications, manuals, SOPs, policies, company profile, certifications, brand guidance, training material, and technical FAQs belong in WeKnora.
+### Put in WeKnora
+
+Use WeKnora for approved reusable company knowledge that employees or Agents
+need to retrieve as factual/reference context, including:
+
+- product specifications and approved product knowledge;
+- manuals and controlled technical references;
+- SOPs and policies;
+- company profile and certifications;
+- approved brand guidance;
+- training material;
+- approved technical FAQs.
+
+### Put in ARMOR Vault
+
+Use ARMOR Vault for durable work and organizational memory whose primary
+question is "what have we done, decided, produced, researched, or published?",
+including:
+
+- Website Article packages and editorial assets;
+- Social Media packages;
+- MIC / Website Product Materials / Product Visual work products;
+- project work products and project memory;
+- research sources and notes;
+- publication evidence and historical snapshots;
+- governed workflow standards and other approved durable business assets.
+
+### Promotion boundary
+
+Do **not** automatically ingest every Agent-generated Article, Social post,
+report, project file, or other Vault work product into WeKnora.
+
+A Vault asset may be promoted or compiled into WeKnora only when a deliberate
+knowledge-governance decision establishes that the material has become approved
+reusable enterprise factual/reference knowledge, for example an approved FAQ,
+SOP, official positioning rule, product knowledge entry, or training material.
+
+This prevents recursive knowledge pollution:
+
+```text
+Agent writes work product
+→ work product stays in ARMOR Vault
+→ human / governed workflow approves reusable knowledge when warranted
+→ approved knowledge may enter WeKnora
+```
+
+Normal work-product persistence is not a RAG-ingestion trigger.
+
+### Runtime access boundary
+
+General employee factual retrieval continues through the approved
+Hermes → WeKnora path.
+
+ARMOR Vault access must remain scoped. A department Profile must not receive a
+generic filesystem merely because the Wiki exists. Governed persistence and
+retrieval should be exposed through bounded Vault capabilities appropriate to
+that Profile.
+
+Open WebUI native Knowledge and Hermes Memory must not be used as additional
+durable company-knowledge authorities.
 
 ## 3. Knowledge Base baseline
 
@@ -237,6 +323,29 @@ Open WebUI
    → local Ollama embedding model
 ```
 
+### Task-specific local AI model roles
+
+A deployment may reuse the same local Ollama runtime for other WeKnora processing roles when the active WeKnora configuration requires them. This is a **task-specific local inference layer**, not a requirement to run the Hermes reasoning model locally.
+
+The current ARMOR reference deployment uses:
+
+```text
+WeKnora
+→ Ollama
+   ├─ Vision parsing  → qwen2.5vl:3b
+   ├─ Audio parsing   → karanchopda333/whisper:latest
+   └─ Embedding       → bge-m3 / 1024
+```
+
+Interpret these roles separately:
+
+- **Vision / VLM** supports visual or multimodal parsing during knowledge ingestion.
+- **Audio / ASR** supports audio parsing / speech-to-text during knowledge ingestion.
+- **Embedding** supports vectorization and semantic retrieval.
+- **Hermes reasoning** remains a separate model-provider choice.
+
+Do not introduce a second local inference framework merely because more than one WeKnora model role is enabled. Reuse the existing Ollama serving layer when it satisfies the required role and acceptance checks. Conversely, do not treat every deployment as requiring these exact local models; reusable EAO deployments may choose local or remote providers according to their protected configuration, resource limits, privacy requirements, and measured quality.
+
 ### Recommended local starting candidates
 
 For multilingual enterprise knowledge, especially Chinese + English, use a small mature embedding model first and increase model size only when measured retrieval failures justify it.
@@ -370,7 +479,7 @@ not use those features as a second durable company-knowledge authority.
 
 Provisioning therefore must not duplicate governed company documents into an
 EAO-managed Open WebUI Knowledge workspace merely for convenience. Employee
-Assistants should obtain authoritative company facts through their approved
+Assistants should obtain approved enterprise factual/reference knowledge through their approved
 Hermes → WeKnora path.
 
 Existing unrelated Open WebUI native Knowledge resources are not automatically

@@ -1,9 +1,16 @@
 # EAO Administrator Console v1A Acceptance
 
-This is the conditional acceptance contract for
-capabilities.eao_administrator_console.enabled: true. It applies only on an
-explicitly authorized validation/deployment target. Offline tests prove only
-the repository contract.
+This is the conditional acceptance contract for the accepted administrator
+review plane when `capabilities.eao_administrator_console.enabled: true`.
+It applies only on an explicitly authorized validation target. Offline tests
+prove only the repository contract. Knowledge Mutation through EAO Admin is
+not part of the accepted baseline and remains `BLOCKED / DISABLED`.
+
+Production blocker: `BLOCKED — REPLAY/AUDIT DURABILITY NOT ACCEPTED ON CURRENT
+STACK`. Open WebUI v0.11.3 message/meta durability and the current WeKnora
+v0.8.0 native candidate did not qualify durable replay reconciliation, and
+Open WebUI native audit is disabled. Do not redesign or enable those paths in
+this acceptance.
 
 ## Preconditions
 
@@ -42,31 +49,28 @@ the repository contract.
     [ ] classification does not change WeKnora, Git, Open WebUI, Hermes, or runtime state
     [ ] Capability Reuse Pass records inspected capabilities and exact gap
 
-## Knowledge intake
+## Knowledge review (mutation blocked)
+
+The accepted v1A Knowledge scope is classification, provenance, confidentiality,
+duplicate/supersession/conflict review, exact metadata/recommendation
+preparation, and read-only WeKnora retrieval/verification. It does not include
+Knowledge Mutation through EAO Admin.
 
     [ ] Company Authoritative vs External Reference is explicit
     [ ] duplicate/version/supersession check passes
     [ ] authoritative conflict is surfaced and remains inactive
     [ ] exact metadata/source fingerprint is preserved
-    [ ] Open WebUI Action resolves the exact parent user source from the current owned chat rather than accepting a source/path/target from model text
-    [ ] uploaded file approval resolves through Open WebUI Files + Storage and verifies current HumanActor ownership
-    [ ] URL/manual/file source fingerprint is computed server-side
-    [ ] operation_id, target Knowledge Base and expected current state are derived server-side
-    [ ] trusted approval binds to the exact immutable operation plan and server-side HMAC signature
-    [ ] WeKnora contributor credential is an official v0.8.0 scoped key with full_access=false, exactly ingest + retrieve, and an explicit non-empty knowledge_base_ids allow-list
-    [ ] scoped contributor key ingests into the allowed Knowledge Base
-    [ ] scoped contributor key can GET /api/v1/knowledge/:id for knowledge in the allowed Knowledge Base
-    [ ] scoped contributor key can inspect parse_status through GET /api/v1/knowledge/:id
+    [N/A] Open WebUI approval Action and server-side HumanActor binding are reference-only; not accepted mutation authority
+    [N/A] contributor credential and WeKnora write routes are retired/disabled for EAO Admin
+    [ ] existing Company Knowledge can be read through the bounded WeKnora retrieval path
+    [ ] read-only WeKnora retrieval can GET /api/v1/knowledge/:id and inspect parse_status
     [ ] out-of-scope Knowledge Base access is denied
     [ ] Knowledge Base lifecycle/admin operations remain denied
     [ ] owner/admin credentials, tenant/system admin, MCP admin, and direct database access remain unavailable
-    [ ] bounded WeKnora contributor operation succeeds
-    [ ] ingestion completes
-    [ ] parsing completes
-    [ ] indexing completes
+    [N/A] bounded WeKnora contributor operation, ingestion, parsing, and indexing are blocked
     [ ] representative fact is retrievable directly
     [ ] source evidence is correct
-    [ ] normal Hermes retrieval returns the same evidence
+    [ ] normal Hermes retrieval returns the same evidence for existing Company Knowledge
     [ ] failed parse/index remains inactive
     [ ] unknown information is not invented
 
@@ -102,10 +106,10 @@ A future typed repository binding must independently prove reviewed-HEAD
 binding, changed-HEAD invalidation, negative access tests, Repository Readiness,
 and human review before it can enter the v1A runtime operation set.
 
-## Deterministic approval and replay
+## Deterministic approval and replay (reference-only / not accepted)
 
     [ ] model-generated actor/group/approval/hash values have no authority
-    [ ] trusted Open WebUI server-side HumanActor is resolved
+    [N/A] trusted Open WebUI server-side HumanActor mutation binding is not accepted on the current stack
     [ ] exact operation fields are shown before approval
     [ ] approval TTL is bounded (default and maximum 30 minutes)
     [ ] canonical plan is bound to a protected server-side HMAC signature
@@ -117,11 +121,11 @@ and human review before it can enter the v1A runtime operation set.
     [ ] removed EAO Administrators membership between display and commit is denied
     [ ] unauthorized human is denied
     [ ] Cancel creates no effect
-    [ ] sanitized OUTCOME_UNKNOWN replay marker is persisted before the external write
+    [N/A] sanitized OUTCOME_UNKNOWN replay marker is not accepted as durable production evidence
     [ ] replay metadata contains no contributor key, HMAC key, or trusted signature
-    [ ] repeated completed operation_id returns existing/current result
+    [N/A] repeated completed operation_id reconciliation is not qualified
     [ ] OUTCOME_UNKNOWN with a known knowledge_id reconciles through GET /api/v1/knowledge/:id
-    [ ] OUTCOME_UNKNOWN without a bounded knowledge_id becomes RECONCILIATION_REQUIRED
+    [N/A] OUTCOME_UNKNOWN reconciliation is not qualified and must not be retried
     [ ] unknown outcome is not blindly retried
 
 ## Frozen baseline and runtime gate
@@ -133,16 +137,16 @@ Baseline assertion: Operations and General employee RBAC are unchanged.
     [ ] default/admin remains control-plane only
     [ ] Cron/Kanban/Messaging remain OFF for maintainer v1A
     [ ] maintainer WeKnora contributor credential is absent from Hermes Profile/MCP environment
-    [ ] contributor credential exists only in the server-side Open WebUI Action binding
+    [ ] EAO Admin contributor credential is absent from maintainer and retired/disabled in the runtime
     [ ] no EAO Runtime Reconciler exists in v1A
     [ ] repository/offline PASS is not reported as runtime deployment
-    [ ] state records exact evidence or BLOCKED — REQUIRED INPUT
+    [ ] state records exact evidence, including review-plane PASS and mutation BLOCKED / DISABLED
 
 ## Result
 
 Record:
 
-    PASS — EAO ADMIN CONSOLE V1A
+    PASS — EAO ADMIN CONSOLE V1A REVIEW PLANE; KNOWLEDGE MUTATION BLOCKED / DISABLED
 
 only when all enabled-target tests pass. Otherwise report the specific failed
 boundary, or BLOCKED — REQUIRED INPUT: <specific item> when protected external

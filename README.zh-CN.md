@@ -1,6 +1,6 @@
 # Enterprise AI Office
 
-> **EAO 基线：已完成 / 已部署 / 已具备交付条件 / 已投入使用。** Enterprise AI Office 是 ARMOR 基于 **WeKnora + Hermes Agent + Open WebUI** 搭建的自托管企业 AI 办公系统。参考系统已经完成在指定公司 Mac Studio 上的安装与验收，员工访问条件已经准备完成，可以直接进行部门交接。本仓库现在同时承担两个角色：一是当前已部署参考系统的维护型权威来源；二是可供其它有能力的 AI Agent 在获得明确私有部署输入后，从零复建同类 EAO 的系统蓝图与安装蓝图。
+> **EAO 基线：已完成 / 已部署 / 已具备交付条件 / 已投入使用。** Enterprise AI Office 是 ARMOR 基于 **WeKnora RAG + ARMOR Vault Wiki + Hermes Agent + Open WebUI** 搭建的自托管企业 AI 办公系统。参考系统已经完成在指定公司 Mac Studio 上的安装与验收，员工访问条件已经准备完成，可以直接进行部门交接。本仓库现在同时承担两个角色：一是当前已部署参考系统的维护型权威来源；二是可供其它有能力的 AI Agent 在获得明确私有部署输入后，从零复建同类 EAO 的系统蓝图与安装蓝图。
 
 **[English README](./README.md)**
 
@@ -41,6 +41,8 @@
 | Operations 员工 RBAC v1 | ✅ 已关闭 / 冻结 / PASS |
 | Media Transcription 可选能力 | ✅ 已验证 / ARMOR Reference 已启用；非 Core 默认能力 |
 | EAO 运行基线 | ✅ 已完成 / 已部署 / 已投入使用 |
+| 双知识库架构（RAG + Wiki） | ✅ 已启用 — WeKnora RAG + ARMOR Vault Wiki / Working Memory |
+| 本地 AI 模型基础设施 | ✅ ARMOR Reference 已启用 — Ollama 为 WeKnora 提供视觉、音频与向量模型；Hermes 主推理模型保持独立 |
 | 部门交接准备 | ✅ 已完成 — 员工账号与私有访问资料可直接交付 |
 | 公司内部员工访问 | ✅ 已通过批准的私有网络路径验证 |
 | 公司外远程访问 | ✅ 已通过 Tailscale 私有访问验证；无需公开暴露服务 |
@@ -91,49 +93,134 @@ merge
 
 完整规则见 [仓库治理规范](docs/REPOSITORY-GOVERNANCE.md)。
 
-## 系统架构图
+## 系统架构总览
 
-![Enterprise AI Office v2 中文架构图](./enterprise-ai-office-architecture.zh-CN.svg)
+当前 Enterprise AI Office 的整体架构围绕四条稳定边界展开：私有员工访问入口、基于 Hermes Profile 的工作执行层、双知识层，以及按业务能力独立启用的受治理集成。ARMOR 的专用能力建立在可复用 Core 之上，而不是反过来重定义 Core。
 
-这张 SVG 是 v2 系统设计视图，重点表达 Core General 路径与受治理 Communication/Email 路径的隔离关系。Communication/Email 是**条件能力**，不是强制 Core，只有在当前公司配置显式启用时才实例化；它**不是 ARMOR 当前参考部署全部能力的完整快照**。ARMOR 的真实部署已经激活并投入使用，运行在私有访问边界内。公开仓库只发布脱敏后的部署证据。仓库中的默认 `real_deployment_task.active: false` 仅表示“Fresh Clone / 新目标默认不自动获得真实部署授权”，并不代表 ARMOR 真实部署未激活。
+Communication/Email 是**条件能力**，不属于强制 Core；只有当前公司配置显式启用时才会实例化。
 
-已经验证的 Core General 路径与新增的 v2 Communication 路径刻意相互隔离：
+```mermaid
+flowchart TB
+  Employee["授权员工"]
+  Access["私有访问<br/>公司 LAN / Tailscale"]
+  WebUI["Open WebUI<br/>身份 · RBAC · 对话 · History"]
 
+  Employee --> Access --> WebUI
 
-```text
-Employee
-  ↓
-Open WebUI
-  ├─ General Assistant
-  │    ↓
-  │  Hermes `general`
-  │    ↓
-  │  WeKnora
-  │
-  └─ Communication Assistant
-       ├─ Hermes `communication` Profile：负责推理
-       └─ Open WebUI 服务端受治理 Email Tool / Approval Action
-            ↓
-          eao-email-governance
-            ├─ Governance SQLite
-            └─ Email Provider
+  subgraph Hermes["Hermes Agent — 工作运行时"]
+    General["General Profile<br/>Core"]
+    Operations["Operations Profile<br/>ARMOR Reference"]
+    Communication["Communication Profile<br/>条件能力"]
+  end
+
+  WebUI --> General
+  WebUI --> Operations
+  WebUI -. 启用时 .-> Communication
+
+  subgraph Knowledge["知识与业务记忆层"]
+    WeKnora["WeKnora RAG<br/>已批准事实 / 参考知识"]
+    Vault["ARMOR Vault Wiki<br/>Markdown Working Memory / Business Assets"]
+  end
+
+  General -->|retrieve| WeKnora
+  Operations -->|operations-weknora · retrieve-only| WeKnora
+  Operations -->|Scoped Vault Router| Vault
+  Vault -. 仅显式知识晋升 .-> WeKnora
+
+  subgraph LocalAI["本地 AI 模型 Serving — ARMOR Reference"]
+    Ollama["Ollama"]
+    VLM["qwen2.5vl:3b<br/>视觉解析"]
+    ASR["Whisper<br/>音频解析"]
+    Embed["bge-m3<br/>Embedding / 语义检索"]
+    Ollama --> VLM
+    Ollama --> ASR
+    Ollama --> Embed
+  end
+
+  WeKnora -->|本地解析 / Embedding 角色| Ollama
+
+  Operations --> Tools["已批准 Skills 与受限工具<br/>Web Research · ToolScout · Media Transcription"]
+
+  Communication --> EmailActions["受治理 Email Actions<br/>Draft / Review 边界"]
+  WebUI -->|人工 Approval| EmailActions
+  EmailActions --> Governance["eao-email-governance<br/>Approval Evidence · Audit · Reconciliation"]
+  Governance --> Provider["Email Provider"]
 ```
 
-v2 Email 即使故障，也不能破坏：
+上图表达的是**当前 EAO 的整体系统视图**，并不表示每个部署都必须启用图中的所有能力。
 
-```text
-Open WebUI → General Assistant → Hermes general → WeKnora
-```
-
-当前员工能力路径应这样理解：
-
-| 路径 | 状态 | 含义 |
+| 层 / 路径 | 当前状态 | 架构含义 |
 | --- | --- | --- |
-| **General** | Core / 已验证 | 可复用基础路径：Open WebUI → Hermes `general` → WeKnora |
-| **Operations** | ARMOR Reference / 已冻结 | 已部署的最小权限部门能力，使用已批准 Skills、`operations-weknora`、Web Research、ToolScout 与受限 Vault Router |
-| **Communication** | v2 受治理能力资产 | 仓库已经具备 Governed Email 设计与 runtime 资产；这不代表真实企业邮箱已经接入，也不代表允许自动发送 |
+| **Open WebUI** | Core / 已部署 | 员工身份、RBAC、对话 UX、History 与已批准 Assistant 访问入口 |
+| **Hermes General** | Core / 已验证 | 默认员工工作运行时与推理路径 |
+| **Hermes Operations** | ARMOR Reference / 已部署 / 已冻结 | 共享的最小权限部门 Profile，使用已批准 Skills、受限工具、WeKnora 检索与 Scoped Vault 能力 |
+| **WeKnora RAG** | Core 知识层 / 已启用 | 已批准企业事实 / 参考知识的摄取、检索、Grounding 与来源证据 |
+| **ARMOR Vault Wiki** | ARMOR 知识层 / 已启用 | 长期 Markdown Working Memory、工作产物、Research、发布记录、流程标准与 Business Assets |
+| **Ollama 本地 AI Serving** | ARMOR Reference / 已启用 | 为 WeKnora 提供任务专用的视觉、音频与向量模型；**不是** Hermes 主推理模型 |
+| **Communication / Governed Email** | 条件能力资产 | 只有显式配置后才启用；任何对外发送仍受人工 Approval 与 Governance 边界约束 |
+| **Git 仓库 + 企业受保护配置** | 控制 / Desired State 层 | 定义可复用蓝图、启用能力、部署合同以及私有 Runtime 输入 |
 
-ARMOR 当前脱敏运行状态以 [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md) 为准。其它公司部署时应依据 [`config/capabilities.yaml`](config/capabilities.yaml) 选择能力，而不是复制 ARMOR 的完整 lane 集合。
+核心不变量：
+
+- 可复用 Core 始终是 `Open WebUI → Hermes general → WeKnora`；
+- WeKnora 与 ARMOR Vault 按对象 / 来源类型分工，是互补权威，不是两套重复知识库；
+- 普通 Vault 工作产物**不会自动回灌 WeKnora**，只有经过明确 Knowledge Governance 决策后才允许晋升为可复用企业知识；
+- ARMOR Reference 中的 Ollama 为 WeKnora 提供任务型本地推理，不代表 Hermes 主推理已经迁移到本地 LLM；
+- Operations 只获得已批准 Skills / Tools 与受限知识接口；普通员工不获得 generic shell、browser、filesystem、code execution 或 generic SMTP；
+- Governed Email 等条件能力必须能够独立失败，不能破坏 Core 员工知识路径。
+
+可复用架构合同见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)；当前 ARMOR 脱敏运行状态见 [`state/REAL-DEPLOYMENT-STATUS.md`](state/REAL-DEPLOYMENT-STATUS.md)；能力启用仍由 [`config/capabilities.yaml`](config/capabilities.yaml) 驱动。
+
+### 双知识库架构：RAG + Wiki
+
+ARMOR 当前参考部署采用两套职责互补、而不是互相竞争的知识存储：
+
+```text
+WeKnora RAG
+= 已批准的企业事实 / 参考知识
+= 检索、grounding、来源证据
+= “什么是真的 / ARMOR 已知什么？”
+
+ARMOR Vault Wiki
+= 人类可读写的 Markdown 业务记忆
+= 工作产物、项目记忆、Research、发布记录、
+  受治理的流程标准与长期业务资产
+= “我们做过什么 / 正在做什么？”
+```
+
+权威边界按**对象类型与来源类型**划分，而不是宣布某一套系统对所有知识拥有全局唯一权威。原始 Datasheet、Manual、测试记录、认证文件等仍然是精确技术事实的一级证据；WeKnora 是企业事实/参考知识的 RAG 检索层；ARMOR Vault 是长期 Wiki / Working Memory / Business Asset 层。
+
+这里的 Wiki 指现有的 Markdown ARMOR Vault，不是额外部署一套 Wiki Server 或数据库。ARMOR 参考部署中的 canonical Vault 位于 Mac Studio 内置 SSD；授权人类通过受控 macOS SMB，在可信 LAN 或现有 Tailscale 私网中访问。Open WebUI Native Knowledge、Hermes Memory 与第二套 Vector DB 不作为竞争性的长期权威来源。
+
+Operations 仍维持最小权限：通过 Scoped ARMOR Vault Adapter 进行受治理的 Vault 持久化，通用 filesystem 仍关闭。Vault 的受限检索/搜索属于同一适配边界的后续受控能力，不能用通用文件系统权限替代。
+
+规范性的知识权威与内容归属规则见 [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md)。
+
+### WeKnora 的本地 AI 模型基础设施
+
+ARMOR 当前参考部署已经使用一套轻量、任务专用的本地 AI 模型层，为 WeKnora 的知识摄取与检索提供能力。这**不代表** Hermes 的主推理模型已经迁移到本地 LLM。
+
+```text
+WeKnora
+  ↓
+Ollama — 本地模型运行 / Serving
+  ├─ 视觉解析
+  │    └─ qwen2.5vl:3b
+  ├─ 音频解析
+  │    └─ karanchopda333/whisper:latest
+  └─ 向量化 / 语义检索
+       └─ bge-m3:latest
+```
+
+ARMOR 当前参考部署中的角色：
+
+| 本地模型 | 在 WeKnora 中的用途 | 模型类型 |
+| --- | --- | --- |
+| `qwen2.5vl:3b` | 知识摄取过程中的视觉 / 多模态解析 | VLM |
+| `karanchopda333/whisper:latest` | 知识摄取过程中的音频解析 / 语音转文字 | ASR |
+| `bge-m3:latest` | Embedding / 语义检索 | Embedding Model |
+
+Ollama 是这里的**本地模型运行与 Serving 层**。这些模型属于 WeKnora 特定处理角色所依赖的基础设施，不属于员工 Profile，也不替代 Hermes 的推理模型。对于其它 EAO 部署，本地模型还是远程模型应由具体部署条件决定，并继续遵守 Capability Reuse Pass，不能因为需要某种模型能力就额外再造一套推理基础设施。
 
 ### 员工访问状态
 
@@ -157,7 +244,8 @@ ARMOR 参考部署已经实际验证公司内部私有网络路径与 Tailscale 
 
 - **Open WebUI**：员工 Web 入口；
 - **Hermes Agent**：主要 Agent Runtime；
-- **WeKnora**：企业知识权威来源；
+- **WeKnora RAG**：企业事实 / 参考知识的批准检索层；
+- **ARMOR Vault Wiki**：人类可读写的长期业务记忆、工作产物、证据与受治理资产层；
 - 基于企业知识的 grounded answer + source；
 - Open WebUI 用户、Group、Assistant 访问控制；
 - Hermes Profile API 隔离；
@@ -230,7 +318,7 @@ Visual 准备流程。Product Visual 只到有来源约束的 brief/prompt/prove
 Operations 只能通过封闭的 ARMOR Vault Router 合同保存经过审核的业务工作
 产物，不能使用通用 shell、terminal、filesystem、browser、computer-use、
 code execution、delegation 或自动发布路径。Hermes Memory 与员工 Profile
-Memory 均关闭。WeKnora 是共享企业知识检索层；Vault 规则是持久化业务权威。
+Memory 均关闭。WeKnora 是企业事实 / 参考知识的批准检索层；ARMOR Vault 是长期 Wiki / Working Memory / Business Asset 层。权威按对象与来源类型划分，不再把任一存储定义为所有知识的全局唯一权威。
 
 完整能力矩阵、运行时证据、迁移账本、权限边界、E2E 结果和延后事项见：
 [`docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md`](docs/ENTERPRISE-OPERATIONS-V1.0-ACCEPTANCE.md)。
@@ -310,12 +398,11 @@ ID-7 已经补齐：
 | Calendar | 延后 | 简单 Follow-up 可以先用 Hermes Cron，不需要为了提醒功能引入 Calendar integration | Meeting / Scheduling 成为核心真实工作流 |
 | 员工长期记忆 | 关闭 / 延后 | 需要先证明用户隔离与隐私边界，不能为了便利提前扩大风险 | 隔离被验证，且真实员工连续性价值足够高 |
 | SSO 扩展 | 延后，除非生产访问独立要求 | Open WebUI 已经承担 reference identity surface；提前扩展身份系统会增加复杂度 | 真实生产访问政策明确要求企业 SSO |
-| `armor-memory` 同步 | 延后 | 会提前引入第二套 Memory/Continuity 同步问题 | 出现明确的跨系统记忆需求 |
 | n8n / 新 Workflow Engine | baseline 拒绝 | Hermes Cron / Kanban 已经能覆盖当前定时与持久多步任务 | 出现已验证、Hermes 无法安全表达的真实工作流 |
 | 第二个 Scheduler | 拒绝 | Hermes Cron 已经是调度权威 | Cron 被真实需求证明无法满足 |
-| 额外 Vector DB / 新 RAG Layer | baseline 拒绝 | WeKnora 已经是企业知识权威，再加一套会造成状态与维护重复 | 测量证明 WeKnora / upstream 无法解决真实检索瓶颈 |
+| 额外 Vector DB / 新 RAG Layer | baseline 拒绝 | 当前双知识库已经把 WeKnora RAG 与 Markdown ARMOR Vault Wiki 分工；再加 Vector Store 会重复 RAG 层并增加同步和维护风险 | 测量证明 WeKnora / upstream 无法解决真实检索瓶颈 |
 | Prometheus / Grafana 大型 Observability Stack | 延后 | 当前规模用 health check + operations procedure 已足够 | 实际运行规模、故障频率或 SLA 证明需要专门观测平台 |
-| Local LLM 基础设施 | 延后 | 本地模型基础设施不是证明 Enterprise AI Office 架构所必需 | 隐私、成本或离线要求成为真实部署需求 |
+| Hermes 主推理使用通用本地 LLM | 延后 | ARMOR 已经使用 Ollama 为 WeKnora 提供任务专用的视觉、音频与向量模型；是否把 Hermes 主推理迁移到自托管 LLM 是另一项独立决策，并非 baseline 必需 | 隐私、成本、离线运行或真实负载需求证明有必要替换或补充当前推理 Provider |
 | 自研 Agent Framework | 拒绝 | Hermes 已经是 Agent Runtime / Orchestration，再造一套只会重复核心平台 | Hermes 无法满足某项已证明的关键能力 |
 | Graph DB / Generic Ontology Runtime | baseline 拒绝 | Ontology 当前只需要作为 Governance / Design Contract；没必要提前再建数据库与推理平台 | 真实跨系统流程要求 graph-native 查询或执行期约束 |
 | 独立 Employee Portal | 拒绝 | Open WebUI 已经提供员工入口 | 某个必要员工流程无法安全地通过 Open WebUI 完成 |
@@ -444,7 +531,8 @@ PRODUCTION READY
 | --- | --- |
 | Blueprint lifecycle / real deployment gate | `state/PROJECT-PHASE.yaml` |
 | System / Installation Blueprint | 仓库中的 normative contracts |
-| 企业知识 | WeKnora |
+| 已批准的企业事实 / 参考知识 | WeKnora RAG |
+| 长期业务工作 / 项目记忆 / Research / 发布记录 / 受治理资产 | ARMOR Vault Wiki |
 | AI 角色 / 行为 / Skills / Tools | Hermes Profiles |
 | 员工 Web 身份与访问 | Open WebUI / 企业 Identity Layer |
 | Mailbox / Email Provider Delivery Fact | Email Provider |
@@ -460,12 +548,16 @@ PRODUCTION READY
 
 Hermes Profile 是 AI 工作角色/能力边界，不是员工账号。
 
-### Knowledge ≠ Memory
+### 企业知识、Working Memory 与 Agent Memory 是不同层
 
 ```text
-WeKnora = 权威共享企业知识
+WeKnora RAG = 已批准的企业事实 / 参考知识检索
+ARMOR Vault Wiki = 长期业务 Working Memory 与资产
 Hermes Memory = 可选连续性状态，需要单独满足隔离条件
 ```
+
+普通 Vault 工作产物不能自动回灌 WeKnora。只有经过明确 Knowledge Governance
+决策、成为可复用企业知识后，才允许进入 RAG。
 
 ### 自然语言 ≠ 正式 Approval
 
@@ -503,6 +595,7 @@ Container runtime: OrbStack / Docker
 WeKnora: v0.8.0
 Hermes Agent: v0.21.0, host-native
 Open WebUI: v0.11.3
+Ollama: ARMOR Reference 中用于 WeKnora 解析 / Embedding 的本地 AI 模型 Serving
 Employee Hermes long-term memory: disabled
 ```
 
