@@ -3,10 +3,17 @@
 Production priority is:
 
 ```text
-Stable > Newest
+Validated Current > Unvalidated Latest
 ```
 
-New upstream releases are reviewed, not automatically installed.
+Hermes Agent is a **rolling-validated dependency**. EAO does not permanently pin
+Hermes to one version. New Hermes capabilities should remain available to EAO,
+but each production change must resolve one exact candidate commit, hold that
+candidate stable for the transaction, validate it, record the resulting runtime
+identity, and preserve a rollback point.
+
+"Rolling" does not mean unattended auto-update. New upstream changes are
+reviewed and validated before they replace the current production runtime.
 
 ## 1. Components covered
 
@@ -43,7 +50,12 @@ Upgrade when at least one meaningful reason exists:
 - end-of-support/dependency pressure;
 - planned maintenance consolidation with acceptable risk.
 
-Do not upgrade solely because a release exists.
+Do not upgrade a stateful core component solely because a release exists.
+
+For Hermes Agent, frequent upstream evolution is itself a legitimate reason to
+periodically evaluate a newer candidate because EAO follows an upstream-first /
+Capability Reuse Pass strategy. Evaluation still does not imply automatic
+production promotion.
 
 ## 4. Pre-upgrade questions
 
@@ -153,26 +165,58 @@ Before changing:
 
 Do not combine an embedding migration with unrelated large infrastructure changes if avoidable.
 
-## 11. Hermes upgrades
+## 11. Hermes rolling-validated upgrades
 
-Before upgrading Hermes:
+Hermes is intentionally different from fixed-image Core components:
+
+```text
+permanent Hermes version pin: NO
+exact identity for every running deployment: YES
+transaction-scoped candidate commit: YES
+unattended production auto-update: NO
+post-change acceptance: YES
+rollback point: YES
+```
+
+At the start of a Hermes install/upgrade transaction:
+
+1. record the current production version and commit;
+2. preserve that accepted commit as the rollback / last-known-good point;
+3. resolve the configured upstream tracking ref (normally `main`) once;
+4. record that exact commit as `HERMES_CANDIDATE_COMMIT`;
+5. use that same commit for source review, installer acquisition, installation,
+   and acceptance during the whole transaction.
+
+Do not re-resolve upstream halfway through a transaction.
+
+Before promoting the candidate:
 
 - inspect Profile/multiplex/Gateway changes;
-- re-verify the provisioning behavior against the selected commit's
+- re-verify the provisioning behavior against the candidate commit's
   `hermes_cli/subcommands/profile.py`, `hermes_cli/profiles.py`,
   `gateway/config.py`, and `gateway/platforms/api_server.py`;
-- confirm `--no-skills` opt-out marker semantics still prevent unintended
-  bundled-Skill expansion;
+- confirm current bundled-Skill opt-out / Skill discovery semantics;
 - confirm `/p/<profile>/` routing, Profile-scoped `API_SERVER_KEY`
   resolution/fail-closed behavior, and Profile model-ID advertisement;
 - inspect API server changes;
-- inspect Skills sync behavior;
+- inspect Skills / Background Review / Curator behavior when those capabilities
+  are relevant;
 - inspect Cron/Kanban changes;
 - inspect memory/session behavior;
 - inspect tool/terminal security changes;
-- inspect Codex/Claude Code integration changes.
+- inspect Codex/Claude Code integration changes;
+- run the applicable Profile, RBAC, knowledge, tool-boundary, and capability
+  acceptance tests.
 
 After upgrade verify every production Profile, not only the default Profile.
+
+If the candidate fails acceptance, do not normalize the failure as expected
+drift. Restore the last-known-good Hermes commit/configuration and record the
+failed candidate.
+
+A successful candidate becomes the new observed/accepted runtime. Updating the
+repository's Hermes reference identity records that accepted evidence; it does
+not create a permanent product version lock.
 
 ## 12. Open WebUI upgrades
 
@@ -228,21 +272,21 @@ Security-sensitive Skills require review of:
 1. Read AGENTS.md and relevant docs
 2. Read the protected operational state created from state/DEPLOYMENT-STATE.template.md
 3. Inspect actual runtime/status
-4. Confirm current version against config/validated-stack.yaml plus runtime identity
-5. Read target release notes
-6. Identify breaking/migration changes
-7. Create pre-upgrade backup including protected operational state
-8. Verify backup exists
-9. Record previous version/config/runtime identity
-10. Apply upgrade
-11. Run component health and runtime-identity checks
+4. Record the current component runtime identity and last-known-good point
+5. For Hermes, resolve one exact upstream candidate commit for this transaction
+6. Read target release/source changes
+7. Identify breaking/migration changes
+8. Create the required pre-upgrade recovery point
+9. Verify the recovery point exists
+10. Apply the selected candidate
+11. Run component health and exact runtime-identity checks
 12. Run integration smoke tests
 13. Run security/RBAC tests
 14. Run relevant Golden Questions
-15. Verify Cron/Kanban if affected
+15. Verify Cron/Kanban and other affected capabilities
 16. Update the protected operational deployment state
-17. Record the exact version transition and evidence in state/CHANGELOG.md when it affects the reusable/reference baseline
-18. Update config/validated-stack.yaml only after the new Core baseline is explicitly qualified
+17. Record the exact version/commit transition and evidence in state/CHANGELOG.md when it affects the reusable/reference baseline
+18. For Hermes, update the reference identity only after acceptance; never reinterpret it as a permanent version pin
 ```
 
 ## 17. Rollback decision
@@ -296,8 +340,10 @@ After a successful upgrade or rollback:
   `state/DEPLOYMENT-STATE.template.md`;
 - update `state/CHANGELOG.md` when the change affects the reusable/reference
   baseline or materially changes deployment behavior;
-- update `config/validated-stack.yaml` only after explicit qualification of a
-  new reproducible Core baseline;
+- for fixed Core components, update `config/validated-stack.yaml` only after
+  explicit qualification of a new reference baseline;
+- for Hermes, update its reference/last-known-good identity after acceptance
+  while preserving `version_policy: rolling-validated`;
 - update relevant docs if upstream integration syntax changed.
 
 Do not rewrite the historical public `state/DEPLOYMENT-STATE.md` as the live
@@ -325,5 +371,6 @@ Avoid:
 - changing embedding and retrieval stack simultaneously without benchmark;
 - accepting major behavioral drift because the containers are healthy;
 - forgetting to update protected operational deployment state;
-- changing a reference-runtime version without an explicit changelog/evidence trail;
+- treating the Hermes reference identity as a permanent version lock;
+- changing a Hermes production commit without an explicit acceptance/changelog evidence trail;
 - treating a historical deployment-state observation as the current version authority.
