@@ -1848,6 +1848,60 @@ This is test evidence, not a new production telemetry subsystem.
 Phase 1B remains not authorized until that clean quality rerun meets the quality
 gate.
 
+### 21.10D Clean Phase 1A baseline — trigger not reached
+
+A reproducible 12-scenario baseline was completed with a frozen manifest and
+sanitized evidence bundle.
+
+Observed:
+
+```text
+Run ID                           eao-p1a-20260915T081901Z-ffbe5532
+Positive reusable capture        0 / 6
+Negative scenarios ignored       6 / 6
+Critical unsafe raw proposals    0
+Background Review invocations    0
+Observed skill/tool iterations   1-2 per positive scenario
+creation_nudge_interval           15
+Production auth hash unchanged   PASS
+Production Operations changed    NO
+Temporary runtime cleanup        PASS
+```
+
+Interpretation:
+
+This run **does not establish that Hermes learning quality is poor**. The native
+Background Review trigger was never reached.
+
+Hermes' current trigger is iteration-count based rather than user-turn based.
+With an interval of 15 and only 0-2 relevant tool iterations per scenario, no
+Background Review input was produced. Therefore the 0/6 positive capture is a
+trigger-reachability result, not a quality judgment.
+
+The negative 6/6 result only proves that no unsafe/transient proposal occurred
+when Background Review did not run; it must not be treated as evidence of
+Background Review precision.
+
+A second reproducibility deviation was recorded: the temporary Profile
+materialized bundled Skills beyond the frozen starting inventory. That inventory
+behavior should be made explicit in future test manifests, but it did not cause
+the 0/6 result because Background Review never ran.
+
+Decision:
+
+```text
+Clean Phase 1A baseline = VALID TRIGGER-REACHABILITY EVIDENCE
+Learning-quality verdict = NOT YET MEASURED
+Phase 1B = NOT AUTHORIZED
+```
+
+The next bounded gate is to validate the native trigger semantics and choose one
+pilot-only way to reach Background Review without adding a new trigger engine:
+either accumulate enough native tool iterations in a controlled scenario or
+temporarily lower `skills.creation_nudge_interval` inside the isolated pilot.
+
+No production setting change is authorized.
+
 ### 21.11 Phase 2 — Automatic Role Learning
 
 Open only after the shadow pilot demonstrates acceptable precision.
