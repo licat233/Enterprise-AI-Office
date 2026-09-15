@@ -163,16 +163,26 @@ one. The existing fail-closed shell assertions intentionally stop when
 
 ```sh
 : "${RUNTIME_ROOT:?set RUNTIME_ROOT to the approved deployment runtime root}"
-mkdir -p "${RUNTIME_ROOT}/upstream"
-git clone https://github.com/Tencent/WeKnora.git "${RUNTIME_ROOT}/upstream/WeKnora"
-git -C "${RUNTIME_ROOT}/upstream/WeKnora" checkout --detach 1edcd54b43606d9079bb36650efe3f68707a79ea
-git -C "${RUNTIME_ROOT}/upstream/WeKnora" rev-parse HEAD
+mkdir -p "${RUNTIME_ROOT}/runtime"
+WEKNORA_DIR="${RUNTIME_ROOT}/runtime/WeKnora"
+git clone https://github.com/Tencent/WeKnora.git "${WEKNORA_DIR}"
+git -C "${WEKNORA_DIR}" checkout --detach 1edcd54b43606d9079bb36650efe3f68707a79ea
+git -C "${WEKNORA_DIR}" rev-parse HEAD
+
+mkdir -p "${WEKNORA_DIR}/eao-adapter"
+cp infrastructure/weknora/frontend-entrypoint.sh "${WEKNORA_DIR}/eao-adapter/frontend-entrypoint.sh"
+cp infrastructure/weknora/docker-compose.eaio.override.yml "${WEKNORA_DIR}/docker-compose.eaio-override.yml"
 ```
 
 The checkout must resolve exactly to the component `commit` in
 `config/validated-stack.yaml`. Its tag `v0.8.0` is verified to point to that
-commit. For the upstream Compose runtime set `WEKNORA_VERSION=0.8.0` in the
+commit. For the upstream Compose runtime set `WEKNORA_VERSION=v0.8.0` in the
 protected/runtime WeKnora environment.
+
+The canonical WeKnora runtime path is `${RUNTIME_ROOT}/runtime/WeKnora`.
+Do not maintain a second active checkout under `upstream/WeKnora`; installation,
+upgrade, backup, diagnosis, and adapter application must all address the same
+runtime checkout.
 
 Before starting the standard runtime, resolve the active private company's
 `core_provisioning.weknora.runtime_secret_refs` through `secret_refs` and
@@ -182,13 +192,28 @@ protected storage, then bind the values to the upstream v0.8.0 native names:
 db_password    → DB_PASSWORD
 redis_password → REDIS_PASSWORD
 jwt_secret     → JWT_SECRET
+system_aes_key → SYSTEM_AES_KEY
 ```
 
 Do not reuse the upstream example passwords or `weknora-jwt-secret`, and do
 not invent alternate variable names such as `WEKNORA_DB_PASSWORD`.
 
-Then apply the repository WeKnora adapter and provisioning contract. Do not use
-`latest`.
+`SYSTEM_AES_KEY` is a continuity secret, not a disposable startup value.
+WeKnora uses it to encrypt stored credentials. Reusing the database with a
+different/missing key can leave records present while model/API/MCP/datasource
+credentials become unreadable. Preserve the exact secret across recreate,
+upgrade, backup/restore, and host migration.
+
+Start the canonical runtime from the runtime checkout, with the EAO override:
+
+```sh
+cd "${WEKNORA_DIR}"
+docker compose -f docker-compose.yml -f docker-compose.eaio-override.yml up -d
+```
+
+The override freezes the Compose project identity as `weknora`. Do not change
+that project name on an existing deployment unless a deliberate named-volume
+migration has been planned and verified. Do not use `latest`.
 
 #### Hermes Agent
 
@@ -261,12 +286,33 @@ The upstream tag `v0.11.3` is verified to point to source commit
 `2a960a59fe1dbbd35282f0556b3666d81102e781`, matching the component commit
 in `config/validated-stack.yaml`.
 
+Materialize the Open WebUI runtime so production does not depend on the EAO Git
+checkout remaining at a particular path:
+
+```sh
+: "${RUNTIME_ROOT:?set RUNTIME_ROOT to the approved deployment runtime root}"
+OPENWEBUI_DIR="${RUNTIME_ROOT}/runtime/OpenWebUI"
+mkdir -p "${OPENWEBUI_DIR}"
+cp infrastructure/open-webui/docker-compose.yml "${OPENWEBUI_DIR}/docker-compose.yml"
+rm -rf "${OPENWEBUI_DIR}/branding"
+cp -R infrastructure/open-webui/branding "${OPENWEBUI_DIR}/branding"
+```
+
+Copy only additional approved runtime adapter assets required by enabled
+capabilities. Keep protected runtime `.env` values in the runtime directory,
+not in Git.
+
 Provide the required protected administrator environment values, then use:
 
 ```sh
-docker compose -f infrastructure/open-webui/docker-compose.yml pull
-docker compose -f infrastructure/open-webui/docker-compose.yml up -d
+cd "${OPENWEBUI_DIR}"
+docker compose pull
+docker compose up -d
 ```
+
+The Compose file freezes the project identity as `eaio-openwebui`, so the
+persistent `open-webui-data` volume retains the same project-qualified identity
+regardless of shell working directory.
 
 For WeKnora and Open WebUI, a mismatch from their exact reference identities is
 version drift and must stop the reproduction path.
@@ -290,10 +336,11 @@ recorded before installation.
 
 ```sh
 : "${RUNTIME_ROOT:?set RUNTIME_ROOT to the approved deployment runtime root}"
-WEKNORA_DIR="${RUNTIME_ROOT}/upstream/WeKnora"
+WEKNORA_DIR="${RUNTIME_ROOT}/runtime/WeKnora"
 
 test "$(git -C "${WEKNORA_DIR}" rev-parse HEAD)" = "1edcd54b43606d9079bb36650efe3f68707a79ea"
-test "$(docker inspect -f '{{.Config.Image}}' WeKnora-app)" = "wechatopenai/weknora-app:0.8.0"
+test "$(docker inspect -f '{{.Config.Image}}' WeKnora-app)" = "wechatopenai/weknora-app:v0.8.0"
+test "$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' WeKnora-app)" = "weknora"
 ```
 
 #### Hermes Agent
@@ -319,6 +366,7 @@ this transaction and pass the applicable acceptance tests.
 
 ```sh
 test "$(docker inspect -f '{{.Config.Image}}' eaio-open-webui)" = "ghcr.io/open-webui/open-webui:v0.11.3"
+test "$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' eaio-open-webui)" = "eaio-openwebui"
 ```
 
 A failed identity assertion is a runtime-identity failure even if the service
