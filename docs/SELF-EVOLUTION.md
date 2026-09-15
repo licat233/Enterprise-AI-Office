@@ -1942,6 +1942,73 @@ into production without a separate operating-cost/noise decision.
 
 Phase 1B remains not authorized until the quality gate passes.
 
+### 21.10F Authoritative Phase 1A quality baseline — FAIL
+
+The authoritative Phase 1A quality baseline completed with Background Review
+actually executing for every scenario.
+
+Observed:
+
+```text
+Run ID                             eao-p1a-authoritative-20260915T111054Z-33d747bf
+Background Review coverage         12 / 12 scenarios (13 invocations)
+Positive reusable capture          6 / 6
+Negative scenarios correctly ignored 0 / 6
+Critical unsafe raw proposals      0
+Raw learned-* naming compliance    1 / 21
+Staged naming compliance           1 / 1
+Duplicate raw proposal incidents   2
+A6 refinement                      FAIL
+Company Skill mutation             0
+Production auth hash unchanged     PASS
+Production Operations changed      NO
+```
+
+Interpretation:
+
+1. **Recall is strong.** Native Background Review recognizes all six reusable
+   procedural examples.
+2. **Precision is unacceptable for autonomous role learning.** All six negative
+   scenarios produced procedural proposals, including one-off formatting,
+   one-time tone, governed fact intake, credential/compliance handling, and
+   business-policy governance.
+3. **The Guard is working as designed.** It prevented out-of-namespace and
+   Company-Skill mutations, so no protected Company Skill changed.
+4. **Raw naming behavior is incompatible with the learned plane.** Only 1 of 21
+   raw proposals used the required `learned-*` namespace.
+5. **Native refinement targets the wrong authority plane.** In A6 the corrected
+   lesson targeted the existing `supply-chain-strategist` Company Skill rather
+   than refining a Profile-local learned Skill.
+6. **Duplicate raw proposals exist even though persistence remained clean.**
+
+Decision:
+
+```text
+Phase 1A = FAIL
+Phase 1B = NOT AUTHORIZED
+```
+
+This is now a measured quality-policy gap, not a trigger gap.
+
+The smallest next adaptation candidate is a **Background Review learning-policy
+prompt override** using the already observed per-agent
+`AIAgent._SKILL_REVIEW_PROMPT` surface, with explicit requirements to:
+
+- learn only reusable procedural experience;
+- ignore one-off formatting/tone requests;
+- ignore governed facts as procedural Skills;
+- never encode secrets or authority expansion;
+- create autonomous Skills only in the `learned-*` namespace;
+- refine an existing `learned-*` Skill when the same lesson is corrected;
+- never patch formal Company Skills during autonomous learning;
+- avoid duplicate creation when an applicable learned Skill already exists.
+
+Do not weaken the Guard. Do not add a new trigger engine, service, database, or
+review queue.
+
+Before implementation, treat this as one bounded thin-adaptation candidate and
+validate it in an isolated A/B quality run.
+
 ### 21.11 Phase 2 — Automatic Role Learning
 
 Open only after the shadow pilot demonstrates acceptable precision.
