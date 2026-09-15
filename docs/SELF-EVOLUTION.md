@@ -710,7 +710,7 @@ employee naturally corrects or reinforces it
 Background Review patches/refines the same role Skill
 ```
 
-This is **role learning**, not personal employee memory.
+This is **collaborative department-role learning**, not personal employee memory.
 
 The built-in employee Memory stores remain disabled:
 
@@ -719,8 +719,10 @@ memory.memory_enabled = false
 memory.user_profile_enabled = false
 ```
 
-A shared department Profile therefore learns the department's working methods
-without creating a parallel store of personal employee profiles.
+A shared department Profile therefore becomes the collective learning surface
+for that department: multiple employees continuously teach, correct, and refine
+the same role intelligence without creating parallel personal employee-memory
+stores.
 
 ### 21.3 Separate the learning plane from the company Skill plane
 
@@ -865,32 +867,107 @@ steady state after acceptance
 Human approval remains appropriate for promotion into formal shared company
 behavior, not for every ordinary learning event.
 
-### 21.7 Shared Profile reality
+### 21.7 Collaborative Department Learning
 
-A department Profile may be used by multiple employees.
+In EAO, a Hermes Profile represents a **department / organizational role**, not
+one employee.
 
-Therefore a Profile-local learned Skill is effectively **shared role
-experience** for that Profile, not private memory for one employee.
-
-This is the intended organizational benefit, but it is also the main v1 risk:
+Therefore the learning unit is the shared department Profile itself:
 
 ```text
-one employee correction
-→ may influence later work for other employees on the same Profile
+Employee A ─┐
+Employee B ─┼→ Department Profile → evolving role intelligence
+Employee C ─┘
 ```
 
-EAO must control this risk primarily through:
+A Profile-local learned Skill is intentionally shared role experience. This is
+not primarily a contamination problem to eliminate; it is the mechanism by
+which the department collectively teaches and improves its Agent.
 
-- limiting autonomous learning to low-risk procedural Skills;
-- preserving company/shared Skills as external read-only authorities;
-- keeping permissions and tools unchanged;
-- preserving authoritative WeKnora precedence for company facts;
-- preserving provenance where the learned procedure depends on context;
-- validating extraction quality in a bounded shadow pilot;
-- ledger-backed rollback;
-- natural future correction by employees using the same role.
+Normal evolution may look like:
 
-Do not solve this risk by creating a permanent human review department.
+```text
+Employee A teaches a useful rule
+        ↓
+Profile learns v1
+        ↓
+Employee B encounters a case where v1 is incomplete
+        ↓
+Hermes refines the rule
+        ↓
+Employee C encounters an exception
+        ↓
+Hermes adds an applicability boundary
+        ↓
+department method becomes more mature
+```
+
+No employee is assumed to hold the final truth. Different employees can bring
+different valid experience, and disagreement is expected.
+
+The desired behavior is **continuous correction and convergence**, not
+last-write-wins.
+
+When two employee experiences differ, Hermes should prefer:
+
+```text
+conflict
+→ inspect context
+→ preserve the useful parts of both
+→ add applicability conditions / exceptions / decision criteria
+→ refine the existing role method
+```
+
+rather than:
+
+```text
+newest statement
+→ overwrite earlier statement
+```
+
+The core learning operations are:
+
+- **Add** — capture a genuinely new reusable procedure or heuristic;
+- **Refine** — enrich an existing method with conditions, exceptions, reasons,
+  or better sequencing;
+- **Supersede** — replace an older method only when later work shows it is
+  genuinely obsolete or wrong for the intended scope.
+
+In a healthy department Profile, **Refine** should be more common than blind
+replacement.
+
+The long-term target is not:
+
+```text
+50 employees
+→ 50 disconnected opinions
+```
+
+It is:
+
+```text
+50 employees
+→ repeated real work
+→ corrections + exceptions + practical feedback
+→ increasingly mature shared role methods
+```
+
+This is a primary business value of Shared Profiles: when employees teach the
+same department Agent through normal work, individual tacit knowledge can
+gradually become organizational operating intelligence.
+
+Safety controls still apply around authority:
+
+- learned procedures remain inside the role-learning plane;
+- company/shared Skills remain separate formal authorities;
+- permissions and tools remain unchanged;
+- WeKnora remains authoritative for approved company facts;
+- high-impact policy or authorization changes do not emerge from role learning
+  alone;
+- ledger/rollback remains available for clearly bad learned procedures.
+
+These controls bound authority. They are not intended to suppress normal
+department disagreement or require routine human arbitration.
 
 ### 21.8 What autonomous learning may and may not change
 
@@ -1047,10 +1124,14 @@ A production-ready v1 implementation must prove all of the following.
 
 #### Learning quality
 
-- a real employee correction can improve later same-role work;
-- repeated correction can refine an existing learned procedure;
+- a real employee correction can improve later same-department work;
+- different employees can refine the same learned procedure over time;
+- conflicting experience is normally reconciled through context, conditions,
+  and exceptions rather than simple last-write-wins;
+- repeated correction can mature an existing procedure instead of spawning
+  duplicate rules;
 - transient instructions do not cause unacceptable persistent noise;
-- contradictions can supersede or narrow prior learning.
+- genuinely obsolete guidance can be superseded cleanly.
 
 #### Isolation
 
@@ -1100,6 +1181,7 @@ Do not implement these in v1 unless measured use proves a gap:
 
 The v1 objective is narrower:
 
-> **Prove that Hermes can quietly learn safe, reusable role procedures from
-> normal employee work, and improve future work, without increasing human
-> maintenance burden.**
+> **Prove that a shared department Hermes Profile can quietly learn, reconcile,
+> and refine safe reusable work methods from normal multi-employee work, becoming
+> increasingly adapted to that department without increasing human maintenance
+> burden.**
