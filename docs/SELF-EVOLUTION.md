@@ -133,7 +133,7 @@ Existing components already cover most of the lifecycle:
 | --- | --- |
 | Employee work surface | Open WebUI |
 | Agent reasoning and work execution | Hermes Agent |
-| Durable work / organizational memory | ARMOR Vault Wiki |
+| Durable work / organizational memory | Existing governed Vault / Wiki working-memory authority; ARMOR reference: ARMOR Vault |
 | Approved enterprise factual/reference retrieval | WeKnora |
 | Reusable procedures | Hermes Skills |
 | Runtime role behavior | Hermes Profiles / SOUL |
@@ -250,10 +250,11 @@ employee to type it.
 Do not retain secrets, passwords, tokens, unnecessary private employee data, or
 customer-confidential content merely because it appeared in a learning moment.
 
-## 8. Default retention target: ARMOR Vault role experience
+## 8. Default retention target: existing Vault / Wiki working-memory authority
 
 The default durable landing place for employee-derived experience is the
-existing ARMOR Vault Wiki, using a bounded logical area such as:
+existing governed Vault / Wiki working-memory authority. In the ARMOR reference
+deployment, this is ARMOR Vault Wiki. Use a bounded logical area such as:
 
 ```text
 organizational-intelligence/
@@ -349,7 +350,7 @@ different authority type.
 ```text
 Role Experience
    │
-   ├─ remains experience → ARMOR Vault
+   ├─ remains experience → governed Vault / Wiki working memory
    │
    ├─ stable factual/reference knowledge → WeKnora
    │
