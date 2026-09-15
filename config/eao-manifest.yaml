@@ -47,6 +47,8 @@ architecture:
   scheduling: Hermes Cron
   durable_agent_work: Hermes Kanban
   employee_long_term_memory_default: disabled
+  self_evolution_runtime: not_enabled_design_defined
+  self_evolution_design: docs/SELF-EVOLUTION.md
   generic_shell_for_employees: prohibited
   generic_browser_for_employees: prohibited
   generic_smtp_for_employees: prohibited
@@ -84,6 +86,7 @@ normative_docs:
   backup_restore: docs/BACKUP-RESTORE.md
   upgrade: docs/UPGRADE.md
   capability_reuse: docs/CAPABILITY-REUSE-PASS.md
+  self_evolution: docs/SELF-EVOLUTION.md
   fresh_agent_validation: VALIDATE.md
 
 frozen_reference_baselines:
