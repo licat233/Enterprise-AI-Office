@@ -96,9 +96,9 @@ Repository templates are a capability library, not a deployment checklist.
 
 ## 4. Validated reference stack
 
-`config/validated-stack.yaml` records the current Core reference identities and
-version policies. The historical `state/DEPLOYMENT-STATE.md` contains validation
-evidence from past phases and is not a second version authority.
+The current reproducible Core version/commit authority is `config/validated-stack.yaml`.
+The historical `state/DEPLOYMENT-STATE.md` contains validation evidence from
+multiple past phases and is not a second version authority.
 
 ```text
 Host: Apple Silicon macOS

@@ -182,6 +182,8 @@ For Hermes, `config/validated-stack.yaml` now defines the rolling-validation
 policy and current accepted reference identity. Future Hermes changes must record
 their exact candidate/runtime commit and acceptance evidence, but they do not
 require EAO to remain on one historical release.
+future reference-runtime version changes must be accompanied by explicit
+changelog/upgrade evidence.
 | Signup | ✅ Disabled |
 | Employee groups / baseline ACL | ✅ Reconciled |
 | General Assistant | ✅ Configured |

@@ -68,8 +68,9 @@ storage. Both the default/admin and named Profile bindings use Hermes' native
 `API_SERVER_KEY`, but they must resolve to distinct values.
 
 Resolve model-provider authentication separately from Profile API
-authentication. For the selected Hermes provider, inspect the provider registry
-/ provider catalog in the **transaction-scoped Hermes candidate commit**. When
+authentication. For the selected Hermes provider, inspect the candidate's
+`PROVIDER_REGISTRY` / provider catalog in the **transaction-scoped Hermes
+candidate commit**. When
 that provider uses an API key, each declared
 `models.hermes.credential_refs[]` entry must exist in `secret_refs`, use
 `class: model-provider-credentials`, and name a `native_binding` accepted by
@@ -160,8 +161,8 @@ The candidate must support or provide an accepted equivalent for:
   expansion;
 - explicit Profile multiplexing / served-set control;
 - native named-Profile routing under the shared API listener;
-- Profile-scoped `API_SERVER_KEY` resolution that fails closed instead of
-  inheriting the default/owner key;
+- named Profile requests resolve that Profile's own `API_SERVER_KEY` and fail
+  closed rather than inheriting the default/owner key;
 - `GET /p/<profile>/v1/models` (or the candidate's accepted equivalent)
   advertising an unambiguous Profile model identity.
 
