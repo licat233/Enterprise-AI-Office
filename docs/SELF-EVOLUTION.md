@@ -1790,6 +1790,64 @@ Before any further Phase 1A quality run, perform one bounded audit covering only
 
 Do not add a new trigger engine or learning service during that audit.
 
+### 21.10C Attribution + provider-auth isolation audit
+
+The follow-up audit determined that the prior Phase 1A and tuning aggregates
+cannot be treated as equivalent or fully auditable experiments because their
+scenario manifests, turn boundaries, effective configs/prompts, review timing,
+raw tool-call chains, pending-write state, and starting Skill state were not
+preserved.
+
+Observed conclusions:
+
+```text
+original Phase 1A 2/6 baseline equivalence   UNPROVEN
+later 6/6 tuning baseline equivalence        UNPROVEN
+historical raw proposal attribution          UNRECOVERABLE FROM CURRENT EVIDENCE
+historical zero-tool causal attribution      UNRESOLVED
+historical unsafe-proposal origin            UNRESOLVED
+historical duplicate origin                  UNRESOLVED
+```
+
+Do not continue comparing those aggregate scores as if they were measurements
+from the same controlled baseline.
+
+The provider-auth portion did produce one reusable acceptance result:
+
+```text
+temporary HOME
++ temporary HERMES_HOME
++ temporary CODEX_HOME
++ protected temporary Codex auth state
+→ real openai-codex provider call PASS
+→ production auth.json hash unchanged PASS
+```
+
+Therefore future isolated quality pilots must use that auth-isolation pattern and
+must capture a complete per-run evidence bundle from the beginning.
+
+Because the original run bundles do not exist in the available evidence, EAO
+should not create work around trying to reconstruct unverifiable history.
+
+The next bounded action is a clean, reproducible Phase 1A quality rerun with:
+
+- one frozen scenario manifest;
+- one frozen effective runtime/config snapshot;
+- deterministic per-scenario state reset;
+- explicit Background Review invocation/event IDs;
+- raw `skill_manage` proposal capture before Guard filtering;
+- Guard decision capture;
+- write-approval/staging outcome capture;
+- zero-tool review-input visibility capture;
+- before/after Skill + pending-write snapshots;
+- provider-auth before/after hashes;
+- one machine-readable run manifest.
+
+This is test evidence, not a new production telemetry subsystem.
+
+Phase 1B remains not authorized until that clean quality rerun meets the quality
+gate.
+
 ### 21.11 Phase 2 — Automatic Role Learning
 
 Open only after the shadow pilot demonstrates acceptable precision.
