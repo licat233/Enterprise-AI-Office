@@ -48,14 +48,17 @@ A historical file may explain why the current design exists. It must not silentl
 
 ## Tier 1 — Current normative system contracts
 
-For the administrator procedure for adding durable knowledge, start with
-[Knowledge Intake v1](KNOWLEDGE-INTAKE.md), then consult the broader
-[Enterprise Knowledge Standard](KNOWLEDGE.md).
+For an administrator-discovered resource, start with
+[Administrator Resource Intake](ADMIN-RESOURCE-INTAKE.md). It routes knowledge,
+Tools/MCPs/services, and third-party Skills into the existing authoritative
+procedures. For durable knowledge, continue to [Knowledge Intake v1](KNOWLEDGE-INTAKE.md)
+and the broader [Enterprise Knowledge Standard](KNOWLEDGE.md).
 
 These describe how EAO is intended to work now.
 
 | Document | Purpose |
 | --- | --- |
+| `ADMIN-RESOURCE-INTAKE.md` | Administrator routing entry point for Knowledge, Tool/MCP/service, and third-party Skill intake |
 | `ARCHITECTURE.md` | Component responsibilities and architecture boundaries |
 | `SECURITY.md` | Security model and least-privilege rules |
 | `KNOWLEDGE.md` | WeKnora authority, knowledge boundaries, embedding/retrieval model |
@@ -202,8 +205,11 @@ Use this shortcut:
 | Understand EAO | `README.md` → `AGENTS.md` → `REPRODUCE.md` |
 | Rebuild EAO | `REPRODUCE.md` → `DEPLOY.md` |
 | Validate a fresh Agent | `VALIDATE.md` |
+| Introduce an administrator-discovered resource | `ADMIN-RESOURCE-INTAKE.md` |
+| Add durable knowledge | `ADMIN-RESOURCE-INTAKE.md` → `KNOWLEDGE-INTAKE.md` |
+| Assess a new Tool / MCP / service | `ADMIN-RESOURCE-INTAKE.md` → `CAPABILITY-REUSE-PASS.md` |
 | Add a capability | `CAPABILITY-REUSE-PASS.md` → `config/capabilities.yaml` |
-| Assess a third-party Skill | `CAPABILITY-REUSE-PASS.md` → `SKILL-ADMISSION.md` (pilot report is example evidence, not authority) |
+| Assess a third-party Skill | `ADMIN-RESOURCE-INTAKE.md` → `CAPABILITY-REUSE-PASS.md` → `SKILL-ADMISSION.md` (pilot report is example evidence, not authority) |
 | Change architecture | `AGENTS.md` → `ARCHITECTURE.md` → `SECURITY.md` |
 | Maintain repository / GitHub workflow | `REPOSITORY-GOVERNANCE.md` |
 | Work with knowledge | `KNOWLEDGE.md` |
