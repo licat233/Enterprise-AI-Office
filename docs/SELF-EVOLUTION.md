@@ -484,6 +484,7 @@ ordinary employee
 If the deployed version lacks a safe native primitive, prefer a thin adaptation
 around existing Vault/Skill authorities. Do not introduce a new learning
 platform unless a precise residual gap remains after the Capability Reuse Pass.
+The repository-side Operations Skill mutation boundary is implemented in [infrastructure/hermes/plugins/skill-mutation-guard/](../infrastructure/hermes/plugins/skill-mutation-guard/) and remains disabled until the Phase 0 audit and isolated runtime acceptance are complete.
 
 ## 16. Implementation phases
 
