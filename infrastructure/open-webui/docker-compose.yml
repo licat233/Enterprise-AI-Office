@@ -1,3 +1,5 @@
+name: eaio-openwebui
+
 # Enterprise AI Office validated Open WebUI reference adapter.
 # Derived pin: config/validated-stack.yaml -> Open WebUI v0.11.3.
 # Review upgrades through docs/UPGRADE.md; do not change this tag independently.
