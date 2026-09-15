@@ -42,6 +42,7 @@ Before proposing any new component, run the mandatory [Capability Reuse Pass](do
 | Media Transcription optional capability | ✅ Validated / enabled in ARMOR reference; not Core default |
 | Operational EAO baseline | ✅ Complete / deployed / in use |
 | Dual knowledge architecture (RAG + Wiki) | ✅ Active — WeKnora RAG + ARMOR Vault Wiki / working memory |
+| Enterprise Self-Evolution v1 | 🧭 Design baseline defined — work-embedded employee experience learning; runtime not enabled pending Hermes capability audit |
 | Local AI model infrastructure | ✅ Active in ARMOR reference — Ollama serves task-specific vision, audio, and embedding models for WeKnora; Hermes reasoning remains separate |
 | Department handoff readiness | ✅ Ready — employee accounts and private access details can be distributed |
 | Office-network employee access | ✅ Validated through the approved private network boundary |
@@ -72,6 +73,25 @@ It is the routing entry point into the existing authorities rather than a new ad
 - third-party Skill → [Capability Reuse Pass](docs/CAPABILITY-REUSE-PASS.md) → [Third-Party Skill Admission Standard](docs/SKILL-ADMISSION.md) → DIRECT / ADAPT / DELEGATE / REJECT.
 
 The common rule is **review first, mutate later**. Installation does not automatically imply exposure or authorization.
+
+## Enterprise Self-Evolution design baseline
+
+EAO now defines a normative [Enterprise Self-Evolution v1](docs/SELF-EVOLUTION.md) design for turning experience that naturally appears during employee work into reusable organizational intelligence.
+
+The central product constraint is: **humans must not end up serving the AI system**. Ordinary employees should not be asked to complete knowledge forms, classify lessons, maintain an AI knowledge base, or process a routine review queue. The preferred loop is work-embedded:
+
+```text
+normal employee work
+→ Hermes detects a reusable correction / lesson / exception
+→ source-aware role experience
+→ scoped reuse in later work
+→ real-world correction / reinforcement
+→ refinement
+```
+
+The design reuses the existing Open WebUI, Hermes, ARMOR Vault, WeKnora, Skills, Profile, and repository-governance authorities. It introduces **no new database, vector store, workflow engine, or universal knowledge-review role**.
+
+Current boundary: the architecture is defined, but the Self-Evolution runtime is **not enabled**. Employee Hermes long-term memory remains OFF, autonomous production Skill mutation is not authorized, and ordinary Vault content is not automatically promoted to WeKnora. The next required step is a Phase 0 audit of the actual deployed Hermes runtime before any native self-improvement capability is enabled.
 
 ## Repository maintenance model
 
