@@ -631,6 +631,8 @@ WeKnora: v0.8.0
 Hermes Agent: rolling-validated, host-native
   current accepted ARMOR reference: 0.21.2 / v2026.9.11
 Open WebUI: v0.11.3
+WeKnora container networking: Compose service names + Docker DNS; container IPs are disposable
+Host-native services from containers: validated through `host.docker.internal` on the macOS reference path
 Ollama: local AI model serving for WeKnora parsing / embedding in the ARMOR reference
 Employee Hermes long-term memory: disabled
 ```
