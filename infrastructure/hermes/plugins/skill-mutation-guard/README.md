@@ -90,7 +90,8 @@ plugin is enabled:
 - the block directive still prevents execution;
 - foreground skill_manage passes through the hook;
 - Background Review skill_manage passes through the hook;
-- the plugin is discovered and registered for Operations;
+- Hermes' `PluginContext` exposes `ctx.profile_name` to `register(ctx)` and resolves the serving Profile;
+- the plugin is discovered and live-registered for Operations;
 - negative Company, third-party, traversal, absolute-path, and symlink tests pass;
 - positive learned-* fixture tests pass.
 
