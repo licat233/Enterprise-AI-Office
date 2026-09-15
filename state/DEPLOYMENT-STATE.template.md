@@ -24,6 +24,13 @@ EAO revision changes during this deployment: `none | <explicitly authorized rest
 | Storage/free space | `<...>` |
 | Container runtime/version | `<...>` |
 | Runtime root | `<...>` |
+| WeKnora runtime checkout | `<runtime_root/runtime/WeKnora>` |
+| WeKnora Compose project | `<...>` |
+| WeKnora PostgreSQL volume | `<...>` |
+| WeKnora file-storage volume | `<...>` |
+| Open WebUI runtime directory | `<runtime_root/runtime/OpenWebUI>` |
+| Open WebUI Compose project | `<...>` |
+| Open WebUI data volume | `<...>` |
 | Hermes source checkout | `<resolved installer path>` |
 | Hermes runtime home | `<resolved HERMES_HOME / active ~/.hermes path>` |
 
@@ -59,6 +66,15 @@ Add rows only for optional components actually enabled.
 | Hermes default/general | `<api-key / OAuth / keyless / ...>` | `<...>` | `<...>` | `<symbolic ref + native binding, or none>` | `<...>` |
 | WeKnora embedding | `<local / remote>` | `<... or n/a>` | `<...>` | `<symbolic ref + native binding, or none>` | dimension `<...>` |
 | WeKnora rerank | `<disabled / local / remote>` | `<...>` | `<...>` | `<symbolic ref + native binding, or none>` | `<...>` |
+
+WeKnora runtime-secret continuity:
+```text
+DB_PASSWORD ref/native binding: <...>
+REDIS_PASSWORD ref/native binding: <...>
+JWT_SECRET ref/native binding: <...>
+SYSTEM_AES_KEY ref/native binding: <...>
+SYSTEM_AES_KEY continuity check across recreate/restore: <PASS/FAIL/NOT TESTED>
+```
 
 Do not record API keys/secrets here. Record only the selected non-secret auth
 mechanism and symbolic credential-ref/native-binding metadata needed to rebind
