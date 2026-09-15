@@ -749,25 +749,42 @@ useful role experience
 
 #### B. Company-owned shared / frozen Skills
 
-These remain version-controlled EAO/company assets and should be exposed through
+These remain version-controlled EAO/company assets and may be exposed through
 Hermes `skills.external_dirs`.
 
-They may be read and used by a Profile, but autonomous Background Review must
-not mutate them.
+Hermes 0.21.2 source-level behavior provides an important but limited guard:
+autonomous Background Review treats external Skills as externally owned and
+refuses to mutate them.
 
-This produces the safety boundary:
+That guard is **not** a complete write-protection boundary. A foreground,
+user-directed `skill_manage` call may still update an external Skill when the
+Hermes process has filesystem write permission to that directory.
+
+Therefore the EAO boundary must be:
 
 ```text
 Profile-local agent-created Skills
+→ writable
 → autonomous low-risk learning allowed
 
 company shared/frozen Skills in external_dirs
-→ autonomous Background Review mutation denied
-→ normal repository governance remains authoritative
+→ readable by the Profile
+→ filesystem read-only to the employee Hermes learning path
+→ version-controlled source remains authoritative
 ```
 
-The first implementation must verify this behavior against the exact deployed
-Hermes build before enablement.
+This is a one-time deployment boundary, not a recurring human approval
+workflow.
+
+The first implementation must prove both behaviors on the exact deployed build:
+
+1. Background Review cannot mutate an external company Skill.
+2. A foreground `skill_manage` attempt also cannot persist changes to that
+   company Skill because the deployed company-Skill path is read-only to the
+   employee Profile runtime.
+
+Do not rely on prompt wording such as "do not modify shared Skills" as the
+security boundary.
 
 ### 21.4 Do not redirect autonomous creation into the shared company Skill tree
 
@@ -802,8 +819,9 @@ auxiliary:
 
 skills:
   external_dirs:
-    - <APPROVED_COMPANY_SHARED_SKILL_DIRS>
+    - <READ_ONLY_APPROVED_COMPANY_SHARED_SKILL_DIRS>
   create_dir: ""
+  creation_nudge_interval: <PILOT_MEASURED_VALUE>
   write_approval: false
   guard_agent_created: true
   ledger: true
@@ -825,6 +843,118 @@ Important semantics:
 - Curator consolidation remains off initially; automatic lifecycle cleanup is
   lower risk than LLM-driven consolidation and should be evaluated separately.
 - Existing company Skill directories remain external/version-controlled.
+
+### 21.5A Tool-surface requirement
+
+Hermes' native Skill self-improvement does not run merely because
+`auxiliary.background_review.enabled=true`.
+
+The Skill trigger requires `skill_manage` to exist in the active Agent tool
+surface. In EAO, employee API Profiles use explicit toolset allowlists, so the
+Self-Evolution pilot must deliberately add the Hermes `skills` toolset to the
+target Profile's API surface.
+
+Conceptually:
+
+```yaml
+platform_toolsets:
+  api_server:
+    - skills
+    - <existing approved toolsets>
+```
+
+The Hermes `skills` toolset contains:
+
+```text
+skills_list
+skill_view
+skill_manage
+```
+
+This is a real capability change and must receive the same acceptance treatment
+as any other Profile tool-surface change.
+
+It does **not** grant terminal, generic filesystem, browser, coding-agent,
+credential, or new MCP authority.
+
+Because `skill_manage` is available in the foreground once the toolset is
+enabled, company/shared Skills must have the independent read-only deployment
+boundary described above.
+
+### 21.5B Learning trigger and cadence
+
+Hermes 0.21.2 skill review is triggered by accumulated **tool-calling
+iterations**:
+
+```text
+skills.creation_nudge_interval = N
+→ after N qualifying tool iterations
+→ completed turn
+→ Background Review may run
+→ Skill-only review when built-in Memory is OFF
+```
+
+It is not a guaranteed "review every N employee messages" mechanism.
+
+This matters for EAO:
+
+- tool-rich work naturally contributes toward the trigger;
+- a correction during a zero-tool conversational turn may not cause an
+  immediate review;
+- if the same session later reaches the trigger, the review can still inspect
+  the conversation snapshot and recover earlier learning signals;
+- a correction made at the end of a short zero-tool session may be missed.
+
+Do **not** immediately solve this residual gap by building a new event engine.
+
+Use the shadow pilot to measure:
+
+```text
+capture rate
+false-positive rate
+duplicate-Skill rate
+review token/cost overhead
+time-to-reuse
+missed zero-tool corrections
+```
+
+Pilot strategy:
+
+- use a low `creation_nudge_interval` to maximize observable learning events;
+- keep `skills.write_approval=true` so proposed writes can be inspected;
+- route Background Review to an approved lower-cost model if the actual runtime
+  supports it reliably;
+- do not ask employees to manually trigger `/refine` as part of normal work.
+
+The production interval must be chosen from pilot evidence rather than copied
+from the upstream default.
+
+If missed zero-tool corrections are materially harming learning quality after
+the native pilot, that becomes a precisely measured residual gap eligible for a
+minimal adapter. Until then, no new trigger service is justified.
+
+### 21.5C Background learning owns autonomous Skill creation
+
+For Self-Evolution, the preferred creator of automatically learned Skills is
+the Background Review path.
+
+In Hermes 0.21.2 provenance handling:
+
+- Skills created by Background Review are recorded as agent-created /
+  curator-managed and can be refined by later Background Reviews.
+- Skills created through ordinary foreground `skill_manage(create)` are
+  user-owned and autonomous Background Review intentionally treats them as
+  off-limits unless explicitly adopted.
+
+Therefore EAO should not instruct employees to "create a Skill" whenever they
+teach Hermes something.
+
+Normal employee behavior remains ordinary conversation. The Background Review
+is responsible for deciding whether the lesson deserves an autonomously
+evolving role Skill.
+
+Foreground `skill_manage` remains available as part of the upstream toolset,
+but it is not the primary Self-Evolution mechanism.
 
 ### 21.6 Why approval gating is a pilot tool, not the steady-state product
 
@@ -1022,13 +1152,17 @@ Then prove, on the exact build:
 
 1. Memory remains unavailable to the employee Profile.
 2. Background Review can still perform Skill-only self-improvement.
-3. A Background Review-created Skill lands only in the intended Profile-local
-   Skill directory.
-4. A Skill in an EAO company `external_dirs` directory cannot be autonomously
-   patched or deleted.
-5. The learning path does not expose terminal, generic filesystem, browser,
-   coding delegation, secrets, or new MCP authority.
-6. A restart preserves the intended Profile-local learned Skill and does not
+3. The target employee Profile exposes the `skills` toolset but does not gain
+   terminal, generic filesystem, browser, coding delegation, secrets, or new
+   MCP authority merely because Self-Evolution is enabled.
+4. A Background Review-created Skill lands only in the intended Profile-local
+   Skill directory and is recorded as autonomously managed learning state.
+5. A Skill in an EAO company `external_dirs` directory cannot be autonomously
+   patched or deleted by Background Review.
+6. The deployed company-Skill directory is read-only to the employee learning
+   path, and a foreground `skill_manage` mutation attempt cannot persist there.
+7. Profile-local Skill create/patch still succeeds.
+8. A restart preserves the intended Profile-local learned Skill and does not
    alter the external shared Skill baseline.
 
 No production setting changes are authorized by this document alone.
@@ -1041,9 +1175,11 @@ Temporary pilot posture:
 
 ```text
 Memory                              OFF
+skills toolset                      ON for the pilot Profile
 Background Review                   ON
 Profile-local autonomous Skill path ON
-Company external Skills             READ / USE, autonomous mutation denied
+Company external Skills             READ / USE, filesystem read-only
+skills.creation_nudge_interval      LOW, chosen for observation
 skills.write_approval               ON temporarily
 Curator LLM consolidation           OFF
 ```
@@ -1079,10 +1215,12 @@ Target posture:
 
 ```text
 Memory                              OFF
+skills toolset                      ON for approved department Profiles
 Background Review                   ON
+skills.creation_nudge_interval      evidence-based production value
 skills.write_approval               OFF
 Profile-local agent-created Skills  autonomous within accepted low-risk scope
-Company external Skills             autonomously immutable
+Company external Skills             filesystem read-only to employee learning path
 Skill ledger                        ON
 Curator                             ON
 Curator LLM consolidation           OFF initially
