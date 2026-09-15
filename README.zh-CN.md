@@ -623,13 +623,19 @@ OUTCOME_UNKNOWN
 Host: Apple Silicon macOS
 Container runtime: OrbStack / Docker
 WeKnora: v0.8.0
-Hermes Agent: v0.21.0, host-native
+Hermes Agent: rolling-validated, host-native
+  当前已接受的 ARMOR Reference: 0.21.2 / v2026.9.11
 Open WebUI: v0.11.3
 Ollama: ARMOR Reference 中用于 WeKnora 解析 / Embedding 的本地 AI 模型 Serving
 Employee Hermes long-term memory: disabled
 ```
 
-机器可读版本基线：[`config/validated-stack.yaml`](config/validated-stack.yaml)。
+Hermes **不做永久版本锁定**。每次安装或升级事务开始时解析一个明确的
+upstream candidate commit，并在本次事务内固定该 commit；通过验收后记录真实
+运行版本/commit，并保留 rollback point。这样 EAO 可以持续复用 Hermes 的新
+能力，同时不会把生产环境变成无人值守的 `latest` 自动追踪器。
+
+机器可读策略 / Reference：[`config/validated-stack.yaml`](config/validated-stack.yaml)。
 
 Reference instance evidence：[`state/DEPLOYMENT-STATE.md`](state/DEPLOYMENT-STATE.md)。
 
