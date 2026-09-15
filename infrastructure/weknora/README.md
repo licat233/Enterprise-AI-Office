@@ -30,6 +30,35 @@ Baseline requirements:
 
 The repository does not require optional vector databases, graph databases, tracing stacks, or other feature services unless a real requirement justifies them.
 
+## Container service discovery hardening
+
+Docker/Compose container IP addresses are ephemeral implementation details. EAO must never rely on a specific container IP remaining stable across recreate, upgrade, or recovery.
+
+The pinned WeKnora v0.8.0 frontend proxies to the backend service name `app`, but its Nginx configuration resolves that name when Nginx starts. If `app` is recreated later while the frontend keeps running, Nginx can continue using the stale IP and return `502 Bad Gateway` for every `/api/v1/*` request. The UI can then misleadingly appear to have lost models or Knowledge Bases even though PostgreSQL data is intact.
+
+Apply the EAO hardening override together with upstream Compose:
+
+```sh
+export EAO_WEKNORA_ADAPTER_DIR=/absolute/path/to/Enterprise-AI-Office/infrastructure/weknora
+
+docker compose \
+  -f /path/to/pinned/WeKnora/docker-compose.yml \
+  -f "$EAO_WEKNORA_ADAPTER_DIR/docker-compose.eaio.override.yml" \
+  up -d
+```
+
+The adapter:
+
+- preserves the official WeKnora frontend image and official `/docker-entrypoint.sh`;
+- patches only the runtime Nginx template before the official entrypoint renders it;
+- uses Docker embedded DNS (`127.0.0.11`) to re-resolve `app`;
+- keeps routing based on the stable Compose service name rather than a container IP;
+- fails closed when the expected pinned upstream template shape changes, forcing compatibility review on upgrade.
+
+Do **not** assign static container IPs merely to work around stale DNS. Stable identity is the Compose service name; container IPs remain disposable.
+
+For host-native services consumed from WeKnora containers, such as Ollama or an OpenAI-compatible local gateway, use `host.docker.internal` on the validated macOS Docker path rather than `localhost`. If WeKnora SSRF validation protects that endpoint, add the exact trusted hostname to the WeKnora container's `SSRF_WHITELIST_EXTRA`; setting a host OS environment variable alone does not inject it into an already-created container.
+
 ## Models
 
 The validated reference deployment proved that the architecture can use a provider other than the initial attempted provider.

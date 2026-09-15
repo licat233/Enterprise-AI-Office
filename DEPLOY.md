@@ -390,6 +390,8 @@ authorized.
 1. Deploy the pinned WeKnora release using the supported upstream deployment plus the repository adapter.
 2. Keep database/cache/parser internals private.
 3. Persist database and uploaded documents.
+4. Apply the repository WeKnora runtime hardening adapter so frontend→app routing uses dynamic Docker service discovery and survives `app` recreation without a frontend restart.
+5. Treat container IPs as ephemeral; never record or configure them as service identities.
 
 ### Core model-role rule
 

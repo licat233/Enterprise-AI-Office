@@ -626,6 +626,8 @@ WeKnora: v0.8.0
 Hermes Agent: rolling-validated, host-native
   当前已接受的 ARMOR Reference: 0.21.2 / v2026.9.11
 Open WebUI: v0.11.3
+WeKnora 容器网络：以 Compose service name + Docker DNS 作为稳定身份，容器 IP 可随重建变化
+Host-native 服务：在 macOS Reference 路径中由容器通过 `host.docker.internal` 访问
 Ollama: ARMOR Reference 中用于 WeKnora 解析 / Embedding 的本地 AI 模型 Serving
 Employee Hermes long-term memory: disabled
 ```

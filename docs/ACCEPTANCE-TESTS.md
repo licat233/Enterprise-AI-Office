@@ -50,6 +50,9 @@ Verify services required by the selected WeKnora release:
 [ ] Parser/DocReader healthy when required
 [ ] Uploaded-file storage persistent
 [ ] Database/cache/parser internals not publicly exposed
+[ ] WeKnora frontend reaches backend through service-name/Docker-DNS discovery rather than a fixed container IP
+[ ] Recreating only the WeKnora `app` container does not require restarting `frontend`; after backend health returns, a proxied protected API route returns an auth/application response rather than 502
+[ ] No stale backend IP remains in effective Nginx upstream configuration after app recreate
 [ ] Each required WeKnora model role has explicit `source` (`local` / `remote`) from active company desired state
 [ ] Each remote WeKnora model credential, when required, resolves from its symbolic ref to the supported model `api_key` credential binding; no secret is inferred from another role/provider
 ```

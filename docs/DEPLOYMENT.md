@@ -169,12 +169,29 @@ Use the selected pinned upstream release plus `infrastructure/weknora/`.
 Requirements:
 
 - persistent database and uploaded documents;
+- service-to-service routing by Compose service name/Docker DNS, never by a remembered container IP;
+- WeKnora frontend proxying that survives backend container recreation without requiring a frontend restart;
 - internal database/cache/parser services not publicly exposed;
 - only the model roles required by the selected workflow configured;
 - only configured Knowledge Bases created;
 - non-sensitive seed document ingested and retrieved before Hermes integration.
 
-### 6.1 Core model responsibilities
+### 6.1 Container lifecycle and host-service networking
+
+Use `infrastructure/weknora/docker-compose.eaio.override.yml` with the pinned upstream Compose runtime. The EAO frontend wrapper keeps the upstream image/entrypoint but makes the `app` upstream dynamically resolvable through Docker DNS, preventing stale-IP `502` failures after backend recreation.
+
+Operational rules:
+
+```text
+Compose service name = stable runtime identity
+container IP          = disposable implementation detail
+```
+
+Never encode a Docker-assigned `172.x/192.168.x` container IP into Nginx, application configuration, deployment state, or runbooks.
+
+When a containerized WeKnora service calls a process running on the macOS host, `localhost` points back to that container. On the validated Docker Desktop/OrbStack-style path, use `host.docker.internal:<port>` and verify it from inside the actual WeKnora container. If the endpoint is protected by WeKnora SSRF validation, put the trusted host/CIDR in the container-visible `SSRF_WHITELIST_EXTRA` configuration and recreate the affected service through Compose.
+
+### 6.2 Core model responsibilities
 
 The Enterprise AI Office Core path deliberately separates reasoning from retrieval:
 
@@ -200,7 +217,7 @@ Do not confuse "WeKnora supports this model type" with "Enterprise AI Office Cor
 
 For the normal employee path, Hermes receives retrieved WeKnora evidence and its own selected reasoning model produces the final answer. A separate WeKnora Chat/KnowledgeQA model would duplicate reasoning and add another provider/cost/failure boundary unless a concrete WeKnora-native workflow needs it.
 
-### 6.2 Embedding may be remote or local
+### 6.3 Embedding may be remote or local
 
 Embedding is an independent provider/runtime choice.
 
@@ -231,7 +248,7 @@ That validation showed successful Chinese, English, and cross-language retrieval
 
 Use `qwen3-embedding:0.6b` as a lighter fallback candidate if resource pressure becomes the real constraint. Do not default to 4B/8B embedding models without measured need.
 
-### 6.3 Retrieval tuning
+### 6.4 Retrieval tuning
 
 Start with upstream/default retrieval capabilities. Add reranking or alternate retrieval infrastructure only when the configured requirement or measured retrieval quality justifies it.
 
