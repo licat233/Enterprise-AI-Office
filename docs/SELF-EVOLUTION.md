@@ -250,31 +250,41 @@ employee to type it.
 Do not retain secrets, passwords, tokens, unnecessary private employee data, or
 customer-confidential content merely because it appeared in a learning moment.
 
-## 8. Default retention target: existing Vault / Wiki working-memory authority
+## 8. Retention follows the object type; do not force every experience into Vault
 
-The default durable landing place for employee-derived experience is the
-existing governed Vault / Wiki working-memory authority. In the ARMOR reference
-deployment, this is ARMOR Vault Wiki. Use a bounded logical area such as:
+The design baseline originally identified the existing governed Vault / Wiki
+working-memory authority as the natural durable home for employee-derived
+experience. The runtime capability audit shows that this is too broad for the
+first implementation.
+
+EAO should preserve the existing object-type boundaries:
 
 ```text
-organizational-intelligence/
-  role-experience/
-    procurement/
-    finance/
-    sales/
-    operations/
-    marketing/
-  lessons/
+repeatable procedural experience
+→ Hermes Profile-local agent-created Skill
+
+case history / lesson / work record
+→ governed Vault / Wiki working memory
+
+approved factual/reference knowledge
+→ WeKnora
+
+formal company procedure / shared Skill
+→ version-controlled company Skill authority
 ```
 
-This is a logical information architecture, not a requirement to add a new
-database or Wiki application.
+For v1, do **not** add a new Vault capture adapter merely to copy procedural
+learning out of Hermes. First prove that Hermes' native Profile-local
+self-improvement loop is sufficient for low-risk role learning.
 
-The existing scoped Vault boundary remains mandatory. Self-Evolution must not be
-implemented by granting ordinary employee Profiles a generic filesystem.
+The ARMOR Vault remains the durable Wiki / working-memory authority for cases,
+work history, lessons, research, and business assets. The existing scoped Vault
+boundary remains mandatory. Self-Evolution must not be implemented by granting
+ordinary employee Profiles a generic filesystem.
 
-The exact runtime write/read interface is an implementation decision that must
-reuse or minimally extend the existing scoped Vault capability.
+If real usage later proves that procedural Skill learning loses important case
+context that belongs in the Vault, close only that measured gap with the
+smallest bounded adapter.
 
 ## 9. Trust grows through work, not through a central review queue
 
@@ -350,11 +360,13 @@ different authority type.
 ```text
 Role Experience
    │
-   ├─ remains experience → governed Vault / Wiki working memory
+   ├─ repeatable role procedure → Profile-local agent-created Hermes Skill
+   │
+   ├─ case / lesson / work record → governed Vault / Wiki working memory
    │
    ├─ stable factual/reference knowledge → WeKnora
    │
-   ├─ repeatable work method → Hermes Skill
+   ├─ mature shared work method → version-controlled company Skill
    │
    └─ formal behavior / company policy → Profile/SOUL or controlled policy source
 ```
@@ -641,3 +653,453 @@ New review job/role: NOT REQUIRED
 The next action is Phase 0 runtime capability audit on the designated EAO host.
 That audit must inspect the actual Hermes installation before any Self-Evolution
 runtime feature is enabled.
+
+
+## 21. Runtime architecture proposal — Native Role Learning
+
+Status: **PROPOSAL FOR DESIGN REVIEW / NOT ENABLED**
+
+The Phase 0 source-level capability audit changes the preferred implementation
+direction in one important way: the first EAO Self-Evolution runtime should
+reuse Hermes' native post-turn self-improvement loop rather than introduce an
+EAO-specific experience engine.
+
+### 21.1 Capability evidence
+
+The EAO reproducibility baseline pins Hermes Agent 0.21.0, and the current ARMOR
+production runtime has separately been normalized to an official pinned Hermes
+release. The exact live build must still be verified on-host before any runtime
+change.
+
+The inspected Hermes source already provides the primitives EAO needs:
+
+- post-turn Background Review;
+- skill-only review when built-in Memory is disabled;
+- Profile-local Skill storage;
+- `skill_manage` create / patch / edit / supporting-file operations;
+- `skills.write_approval` staging for validation periods;
+- mutation ledger / rollback evidence;
+- Curator lifecycle for agent-created Skills;
+- explicit protection against autonomous Background Review mutating Skills in
+  `skills.external_dirs`;
+- additional protection for bundled, hub-installed, pinned, and non-agent-owned
+  Skills.
+
+Therefore the residual problem is **configuration and acceptance**, not a new
+Self-Evolution service.
+
+### 21.2 Proposed v1 learning loop
+
+The first runtime design is:
+
+```text
+employee performs normal work
+        ↓
+employee corrects / teaches / explains / reports a pitfall
+        ↓
+Hermes Background Review
+        ↓
+extract reusable procedural lesson
+        ↓
+Profile-local agent-created Skill
+        ↓
+same role Profile reuses it in later work
+        ↓
+employee naturally corrects or reinforces it
+        ↓
+Background Review patches/refines the same role Skill
+```
+
+This is **role learning**, not personal employee memory.
+
+The built-in employee Memory stores remain disabled:
+
+```text
+memory.memory_enabled = false
+memory.user_profile_enabled = false
+```
+
+A shared department Profile therefore learns the department's working methods
+without creating a parallel store of personal employee profiles.
+
+### 21.3 Separate the learning plane from the company Skill plane
+
+EAO must keep two Skill classes distinct.
+
+#### A. Role-learning Skills
+
+These are Profile-local, Hermes agent-created Skills.
+
+Purpose:
+
+- capture low-risk procedural experience from normal work;
+- evolve automatically from later corrections;
+- remain scoped to the Profile that learned them;
+- remain reversible and observable.
+
+Authority:
+
+```text
+useful role experience
+≠ formal company policy
+≠ approved shared company Skill
+```
+
+#### B. Company-owned shared / frozen Skills
+
+These remain version-controlled EAO/company assets and should be exposed through
+Hermes `skills.external_dirs`.
+
+They may be read and used by a Profile, but autonomous Background Review must
+not mutate them.
+
+This produces the safety boundary:
+
+```text
+Profile-local agent-created Skills
+→ autonomous low-risk learning allowed
+
+company shared/frozen Skills in external_dirs
+→ autonomous Background Review mutation denied
+→ normal repository governance remains authoritative
+```
+
+The first implementation must verify this behavior against the exact deployed
+Hermes build before enablement.
+
+### 21.4 Do not redirect autonomous creation into the shared company Skill tree
+
+Hermes supports `skills.create_dir`, but EAO v1 should **not** point this at a
+shared company Skill directory.
+
+Required initial posture:
+
+```text
+skills.create_dir = unset / empty
+```
+
+so a Background Review-created Skill lands in the active Profile's own Hermes
+Skill directory.
+
+The company Skill directories are consumption authorities, not autonomous
+learning targets.
+
+### 21.5 Proposed steady-state configuration shape
+
+This is a design target, not a deployment instruction. Exact keys must be
+verified against the installed Hermes build.
+
+```yaml
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+
+auxiliary:
+  background_review:
+    enabled: true
+
+skills:
+  external_dirs:
+    - <APPROVED_COMPANY_SHARED_SKILL_DIRS>
+  create_dir: ""
+  write_approval: false
+  guard_agent_created: true
+  ledger: true
+
+curator:
+  enabled: true
+  consolidate: false
+```
+
+Important semantics:
+
+- `write_approval: false` is intentional **only after the shadow pilot passes**.
+  The steady-state product must not create a daily human approval queue for
+  routine low-risk learning.
+- `guard_agent_created: true` is a candidate hardening setting and must be
+  tested for false positives before production adoption.
+- `ledger: true` provides evidence and rollback without turning every learning
+  event into a human approval task.
+- Curator consolidation remains off initially; automatic lifecycle cleanup is
+  lower risk than LLM-driven consolidation and should be evaluated separately.
+- Existing company Skill directories remain external/version-controlled.
+
+### 21.6 Why approval gating is a pilot tool, not the steady-state product
+
+Hermes can stage every Skill write with:
+
+```yaml
+skills:
+  write_approval: true
+```
+
+That is valuable for a finite engineering validation because it exposes exactly
+what the Background Review *would* have learned.
+
+It is not the preferred steady-state EAO design.
+
+Permanent approval gating would create:
+
+```text
+normal employee work
+→ autonomous learning proposal
+→ human review queue
+→ approve / reject
+→ repeat forever
+```
+
+That violates the primary EAO constraint that humans must not serve the AI.
+
+Therefore:
+
+```text
+Phase 1 shadow pilot
+→ write_approval = true
+→ inspect a bounded sample to validate learning quality
+
+steady state after acceptance
+→ write_approval = false for Profile-local low-risk learning
+→ rely on scope isolation + protected external company Skills + ledger + rollback
+```
+
+Human approval remains appropriate for promotion into formal shared company
+behavior, not for every ordinary learning event.
+
+### 21.7 Shared Profile reality
+
+A department Profile may be used by multiple employees.
+
+Therefore a Profile-local learned Skill is effectively **shared role
+experience** for that Profile, not private memory for one employee.
+
+This is the intended organizational benefit, but it is also the main v1 risk:
+
+```text
+one employee correction
+→ may influence later work for other employees on the same Profile
+```
+
+EAO must control this risk primarily through:
+
+- limiting autonomous learning to low-risk procedural Skills;
+- preserving company/shared Skills as external read-only authorities;
+- keeping permissions and tools unchanged;
+- preserving authoritative WeKnora precedence for company facts;
+- preserving provenance where the learned procedure depends on context;
+- validating extraction quality in a bounded shadow pilot;
+- ledger-backed rollback;
+- natural future correction by employees using the same role.
+
+Do not solve this risk by creating a permanent human review department.
+
+### 21.8 What autonomous learning may and may not change
+
+Allowed v1 learning surface:
+
+- task sequence;
+- checklists;
+- pitfalls;
+- decision heuristics;
+- formatting/work-product conventions specific to a role;
+- safe escalation reminders;
+- tool-use procedure **inside already-authorized tools**.
+
+Not automatically authoritative:
+
+- product specifications;
+- legal/compliance claims;
+- prices or commercial commitments;
+- payment authority;
+- credentials/secrets;
+- RBAC;
+- Profile tool grants;
+- system configuration;
+- customer-facing send/publish authority;
+- formal company policy.
+
+A learned Skill can influence reasoning, but it cannot grant the Profile a tool,
+credential, permission, or external side effect that the runtime did not
+already authorize.
+
+### 21.9 Phase 0 — actual production runtime audit contract
+
+Before changing the ARMOR reference runtime, verify on the designated host:
+
+```text
+Hermes version
+Hermes source commit
+active Operations Profile path/config
+employee memory flags
+auxiliary.background_review effective config
+skills.external_dirs
+skills.create_dir
+skills.write_approval
+skills.guard_agent_created
+skills.ledger
+curator enabled/consolidate settings
+effective Operations tool surface
+actual shared/frozen Skill directories
+```
+
+Then prove, on the exact build:
+
+1. Memory remains unavailable to the employee Profile.
+2. Background Review can still perform Skill-only self-improvement.
+3. A Background Review-created Skill lands only in the intended Profile-local
+   Skill directory.
+4. A Skill in an EAO company `external_dirs` directory cannot be autonomously
+   patched or deleted.
+5. The learning path does not expose terminal, generic filesystem, browser,
+   coding delegation, secrets, or new MCP authority.
+6. A restart preserves the intended Profile-local learned Skill and does not
+   alter the external shared Skill baseline.
+
+No production setting changes are authorized by this document alone.
+
+### 21.10 Phase 1 — Shadow Learning Pilot
+
+Use one bounded Profile/domain and a finite test window.
+
+Temporary pilot posture:
+
+```text
+Memory                              OFF
+Background Review                   ON
+Profile-local autonomous Skill path ON
+Company external Skills             READ / USE, autonomous mutation denied
+skills.write_approval               ON temporarily
+Curator LLM consolidation           OFF
+```
+
+The approval queue is used only by the implementation team to inspect learning
+quality during the pilot. It is not an employee workflow and it is not the
+target operating model.
+
+Test cases should include:
+
+- employee gives a reusable workflow correction;
+- employee explains a real pitfall;
+- employee gives a one-off formatting instruction;
+- employee contradicts an earlier learned procedure;
+- employee states a company fact already governed by WeKnora;
+- employee tries to teach a permission-expanding rule;
+- an existing external company Skill appears relevant but is wrong/incomplete.
+
+Expected outcomes:
+
+- reusable procedural corrections produce good role-learning candidates;
+- transient/one-off instructions do not routinely become persistent procedures;
+- later corrections refine rather than endlessly duplicate prior learning;
+- company facts do not become replacement procedural authority;
+- permission-expanding lessons cannot widen runtime authority;
+- external shared company Skills remain unchanged.
+
+### 21.11 Phase 2 — Automatic Role Learning
+
+Open only after the shadow pilot demonstrates acceptable precision.
+
+Target posture:
+
+```text
+Memory                              OFF
+Background Review                   ON
+skills.write_approval               OFF
+Profile-local agent-created Skills  autonomous within accepted low-risk scope
+Company external Skills             autonomously immutable
+Skill ledger                        ON
+Curator                             ON
+Curator LLM consolidation           OFF initially
+Human routine approval queue        NONE
+```
+
+The employee experience remains unchanged: employees work normally, correct
+Hermes normally, and receive better future behavior without doing knowledge
+administration.
+
+### 21.12 Promotion is exceptional, not required for learning value
+
+A learned role procedure can remain useful for years without becoming a
+company-wide shared Skill.
+
+Promotion is only justified when there is a real need to widen authority or
+reuse:
+
+```text
+Profile-local role Skill
+        ↓ only when warranted
+version-controlled shared company Skill
+```
+
+Likewise:
+
+```text
+case / work history → Vault
+stable factual knowledge → WeKnora
+formal company rule → existing policy/Profile governance
+```
+
+Do not introduce a scheduled promotion-review meeting, central queue, or new
+knowledge-maintenance role merely because candidates exist.
+
+### 21.13 Acceptance for Native Role Learning
+
+A production-ready v1 implementation must prove all of the following.
+
+#### Learning quality
+
+- a real employee correction can improve later same-role work;
+- repeated correction can refine an existing learned procedure;
+- transient instructions do not cause unacceptable persistent noise;
+- contradictions can supersede or narrow prior learning.
+
+#### Isolation
+
+- learned Skills stay in the intended Profile-local learning plane;
+- other Profiles do not inherit them unless explicitly designed to;
+- company `external_dirs` Skills are not autonomously mutated;
+- WeKnora remains authoritative for approved company facts.
+
+#### Security
+
+- Memory remains OFF;
+- no new runtime permission is granted by a learned Skill;
+- no generic employee filesystem/shell/browser capability is added;
+- no autonomous customer-facing side effect is added;
+- rollback of an erroneous learned Skill is demonstrable.
+
+#### Human workload
+
+- no employee experience form;
+- no mandatory tags or metadata entry;
+- no routine employee approval prompts;
+- no permanent EAO Admin review queue;
+- no new knowledge-review job;
+- the normal teaching mechanism is ordinary work and ordinary correction.
+
+#### Business value
+
+The pilot must show that repeated tasks become materially better or require
+fewer corrections over time.
+
+If the learning loop generates more cleanup/review work than it eliminates, do
+not proceed to automatic role learning.
+
+### 21.14 Deferred items
+
+Do not implement these in v1 unless measured use proves a gap:
+
+- automatic Vault mirroring of every learned Skill;
+- automatic WeKnora promotion;
+- cross-Profile autonomous Skill propagation;
+- automatic company-wide Skill promotion;
+- Curator LLM consolidation;
+- a Self-Evolution dashboard;
+- a separate experience database;
+- a scoring system for employees or learned experiences;
+- Cron jobs whose only purpose is to manufacture governance work.
+
+The v1 objective is narrower:
+
+> **Prove that Hermes can quietly learn safe, reusable role procedures from
+> normal employee work, and improve future work, without increasing human
+> maintenance burden.**
