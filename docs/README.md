@@ -52,13 +52,16 @@ For an administrator-discovered resource, start with
 [Administrator Resource Intake](ADMIN-RESOURCE-INTAKE.md). It routes knowledge,
 Tools/MCPs/services, and third-party Skills into the existing authoritative
 procedures. For durable knowledge, continue to [Knowledge Intake v1](KNOWLEDGE-INTAKE.md)
-and the broader [Enterprise Knowledge Standard](KNOWLEDGE.md).
+and the broader [Enterprise Knowledge Standard](KNOWLEDGE.md). For organization
+changes, use [Administrator Department Provisioning](ADMIN-DEPARTMENT-PROVISIONING.md)
+so Open WebUI Groups are not confused with Hermes Profiles.
 
 These describe how EAO is intended to work now.
 
 | Document | Purpose |
 | --- | --- |
 | `ADMIN-RESOURCE-INTAKE.md` | Administrator routing entry point for Knowledge, Tool/MCP/service, and third-party Skill intake |
+| `ADMIN-DEPARTMENT-PROVISIONING.md` | Administrator workflow for department Groups, Profile reuse/creation, Assistant ACLs, and acceptance |
 | `ARCHITECTURE.md` | Component responsibilities and architecture boundaries |
 | `SECURITY.md` | Security model and least-privilege rules |
 | `KNOWLEDGE.md` | WeKnora authority, knowledge boundaries, embedding/retrieval model |

@@ -75,6 +75,8 @@
 
 统一原则是：**先审查，再产生生产变更**。安装完成并不等于已经暴露给 Profile，也不等于已经获得授权。
 
+如果是新增或调整**部门**，使用 [Administrator Department Provisioning](docs/ADMIN-DEPARTMENT-PROVISIONING.md)。Open WebUI Group 表示人员/RBAC 结构，Hermes Profile 表示 AI 工作角色；新建部门 Group 不会、也不应该自动生成同名 Profile。优先复用 general 或现有已批准 Specialist，只有当工作行为、知识范围、工具/凭证、自动化所有权或风险边界确实不同，才新增 Profile。
+
 ## Enterprise Self-Evolution 设计基线
 
 EAO 现在已经定义规范性的 [Enterprise Self-Evolution v1](docs/SELF-EVOLUTION.md) 设计，用于把员工在正常工作过程中自然产生的经验，逐步转化为可复用的组织智能。

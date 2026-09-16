@@ -75,6 +75,8 @@ It is the routing entry point into the existing authorities rather than a new ad
 
 The common rule is **review first, mutate later**. Installation does not automatically imply exposure or authorization.
 
+For a new or reorganized **department**, use [Administrator Department Provisioning](docs/ADMIN-DEPARTMENT-PROVISIONING.md). Open WebUI Groups represent human/RBAC structure; Hermes Profiles represent AI work roles. Creating a department Group does not automatically create a same-named Profile. Reuse general or an existing approved specialist unless a durable behavior/knowledge/tool/credential/automation/risk boundary justifies a new Profile.
+
 ## Enterprise Self-Evolution design baseline
 
 EAO now defines a normative [Enterprise Self-Evolution v1](docs/SELF-EVOLUTION.md) design for turning experience that naturally appears during employee work into reusable organizational intelligence.

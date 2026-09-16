@@ -81,7 +81,7 @@ recorded as a mapping rather than copied into generic configuration.
 
 Create additional groups only when a real authorization boundary requires them.
 
-A department name by itself is not sufficient reason to create a group unless different resource access is needed.
+A department name by itself is not sufficient reason to create a group unless different resource access is needed. Creating an Open WebUI Group does **not** create a Hermes Profile. Department administration must follow [Administrator Department Provisioning](ADMIN-DEPARTMENT-PROVISIONING.md), including the Profile reuse/creation gate.
 
 ## 4. Default employee permissions
 

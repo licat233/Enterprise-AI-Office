@@ -135,6 +135,7 @@ for path in \
   scripts/run-public-offline-tests.sh \
   config/eao-manifest.yaml \
   docs/CAPABILITY-REUSE-PASS.md \
+  docs/ADMIN-DEPARTMENT-PROVISIONING.md \
   docs/README.md \
   docs/REPOSITORY-GOVERNANCE.md \
   docs/DEPLOYMENT-PRACTICES.md \
@@ -435,6 +436,8 @@ require_text VALIDATE.md 'approved off-primary copy' 'Authorized validation chec
 require_text DEPLOY.md 'infrastructure/hermes/PROVISIONING.md' 'Golden Path uses Hermes provisioning contract'
 require_text config/capabilities.yaml 'infrastructure/hermes/PROVISIONING.md' 'Core capability registry includes Hermes provisioning contract'
 require_text docs/CLIENT-RBAC.md 'Company logical ID' 'Client RBAC distinguishes company group IDs from display names'
+require_text docs/ADMIN-DEPARTMENT-PROVISIONING.md 'Creating a department Group MUST NOT automatically create a same-named Hermes Profile' 'Department provisioning preserves Group/Profile separation'
+require_text docs/ADMIN-DEPARTMENT-PROVISIONING.md 'Capability Reuse Pass before creating a Profile' 'Department provisioning requires capability reuse gate'
 require_text DEPLOY.md 'company logical ID → display name → runtime group UUID' 'Golden Path preserves three-layer group identity'
 require_no_text DEPLOY.md 'Create baseline groups `All-Employees` and `AI-Admins`' 'Golden Path does not invent transformed Open WebUI group names'
 require_text infrastructure/open-webui/PROVISIONING.md 'company logical ID' 'Open WebUI provisioning preserves three-layer group identity'

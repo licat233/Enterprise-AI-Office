@@ -31,7 +31,7 @@ profiles/
 └── engineering/SOUL.md
 ```
 
-Specialist templates are a library. A deployment should instantiate only the Profiles justified by its real roles, workflows, knowledge boundaries, tool permissions, credentials, automation ownership, or risk boundaries.
+Specialist templates are a library. A deployment should instantiate only the Profiles justified by its real roles, workflows, knowledge boundaries, tool permissions, credentials, automation ownership, or risk boundaries. An Open WebUI department Group must not be treated as an instruction to instantiate the same-named template automatically; use docs/ADMIN-DEPARTMENT-PROVISIONING.md.
 
 ## Template rules
 
