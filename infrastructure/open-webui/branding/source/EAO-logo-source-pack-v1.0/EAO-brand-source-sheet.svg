@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<rect width="1600" height="1000" fill="#FAFAF8"/>
+<text x="70" y="70" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700" fill="#111111">EAO</text>
+<text x="145" y="70" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#111111">Enterprise AI Office · Logo Source Sheet v1.0</text>
+<line x1="70" y1="95" x2="1530" y2="95" stroke="#D7D7D4"/>
+
+
+<g transform="translate(110,165) scale(1.65)">
+  <path fill="#111111" d="M0 0H180V30H40V55H150V85H40V110H180V140H0Z"/>
+  <path fill="#111111" d="M215 140L300 0H338L423 140H381L319 35L257 140Z"/>
+  <circle cx="319" cy="100" r="13" fill="#00E6D1"/>
+  <path fill="#111111" fill-rule="evenodd"
+    d="M470 0H610Q650 0 650 40V100Q650 140 610 140H470Q430 140 430 100V40Q430 0 470 0ZM485 30Q470 30 470 45V95Q470 110 485 110H595Q610 110 610 95V45Q610 30 595 30Z"/>
+</g>
+<text x="115" y="465" font-family="Arial,Helvetica,sans-serif" font-size="32" letter-spacing="12" fill="#111111">ENTERPRISE AI OFFICE</text>
+
+<text x="960" y="180" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#111111">CORE IDEA</text>
+<text x="960" y="225" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700" fill="#111111">AI at the center of enterprise work.</text>
+<text x="960" y="275" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#4F555A">E = Enterprise structure</text>
+<text x="960" y="310" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#4F555A">A = AI / intelligence / action</text>
+<text x="960" y="345" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#4F555A">O = Office / workspace</text>
+<text x="960" y="400" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#4F555A">Teal point = active AI core</text>
+
+<line x1="70" y1="535" x2="1530" y2="535" stroke="#D7D7D4"/>
+
+<text x="70" y="590" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#111111">APP ICON</text>
+<rect x="70" y="625" width="210" height="210" rx="52" fill="#111111"/>
+<path fill="#FFFFFF" d="M105 780L160 688H190L245 780H216L175 711L134 780Z"/>
+<circle cx="175" cy="754" r="14" fill="#00E6D1"/>
+
+<text x="350" y="590" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#111111">MONOCHROME</text>
+<rect x="350" y="625" width="475" height="210" fill="#FFFFFF" stroke="#E2E2DF"/>
+
+<g transform="translate(395,675) scale(0.62)">
+  <path fill="#111111" d="M0 0H180V30H40V55H150V85H40V110H180V140H0Z"/>
+  <path fill="#111111" d="M215 140L300 0H338L423 140H381L319 35L257 140Z"/>
+  <circle cx="319" cy="100" r="13" fill="#111111"/>
+  <path fill="#111111" fill-rule="evenodd"
+    d="M470 0H610Q650 0 650 40V100Q650 140 610 140H470Q430 140 430 100V40Q430 0 470 0ZM485 30Q470 30 470 45V95Q470 110 485 110H595Q610 110 610 95V45Q610 30 595 30Z"/>
+</g>
+
+<text x="890" y="590" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#111111">COLOR TOKENS</text>
+<circle cx="950" cy="690" r="42" fill="#111111"/>
+<text x="1010" y="683" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#111111">Graphite</text>
+<text x="1010" y="710" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#6A6A68">#111111</text>
+
+<circle cx="950" cy="785" r="42" fill="#00E6D1"/>
+<text x="1010" y="778" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#111111">AI Teal</text>
+<text x="1010" y="805" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#6A6A68">#00E6D1</text>
+
+<circle cx="1295" cy="690" r="42" fill="#F5F6F7" stroke="#E1E1DE"/>
+<text x="1355" y="683" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#111111">Stone</text>
+<text x="1355" y="710" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#6A6A68">#F5F6F7</text>
+
+<text x="70" y="930" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="#777772">Editable vector master · Figma / Illustrator / Affinity Designer / Inkscape compatible</text>
+</svg>

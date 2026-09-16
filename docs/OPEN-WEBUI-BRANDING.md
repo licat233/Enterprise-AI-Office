@@ -1,39 +1,42 @@
-# Open WebUI Branding
+# EAO Open WebUI Branding
 
-This deployment uses the user-provided 彩色 logo icon.svg as the only brand source. The repository source master is [infrastructure/open-webui/branding/logo-source.svg](../infrastructure/open-webui/branding/logo-source.svg); the original source file is preserved outside this repository.
+This deployment uses the user-provided EAO Logo Source Pack v1.0 as its only logo source. The full source pack is committed under infrastructure/open-webui/branding/source/EAO-logo-source-pack-v1.0/; infrastructure/open-webui/branding/logo-source.svg is the primary EAO wordmark source master.
 
-## Generated assets
+## Generated and deployed assets
 
-| File | Purpose |
-| --- | --- |
-| favicon.ico | Browser favicon with common 16/24/32/48/64 px frames |
-| favicon.svg | Vector favicon |
-| favicon.png, favicon-dark.png, favicon-96x96.png | Transparent browser/shortcut icons |
-| logo.png | Transparent full page logo |
-| splash.png, splash-dark.png | Centered light/dark loading artwork |
-| web-app-manifest-192x192.png, web-app-manifest-512x512.png | PWA manifest icons |
+The following ten Open WebUI assets are EAO-branded and are mounted read-only at /app/build/static/<filename>:
 
-The source SVG is already an independent icon mark, so the favicon set uses the complete mark without cropping or redesign. The dark variants currently use the same source artwork because the white mark remains visible on dark backgrounds.
+- favicon.ico
+- favicon.svg
+- favicon.png
+- favicon-dark.png
+- favicon-96x96.png
+- logo.png
+- splash.png
+- splash-dark.png
+- web-app-manifest-192x192.png
+- web-app-manifest-512x512.png
 
-## Runtime integration
+Mapping: the EAO app icon supplies favicon/ICO/PWA assets; the EAO primary wordmark supplies the transparent page logo and light splash; the EAO dark wordmark supplies the dark splash. The old ARMOR artwork is no longer used.
 
-The pinned Open WebUI v0.11.3 service mounts each asset read-only at /app/build/static/<filename>. At startup, this release copies the frontend static files into its backend static directory, so the same assets are served through /static/ after startup. WEBUI_NAME=Enterprise AI Office is set; this release appends the upstream attribution and displays Enterprise AI Office (Open WebUI).
+## Runtime
 
-The public Compose blueprint uses OPEN_WEBUI_BRANDING_DIR:-./branding. The protected enterprise runtime uses the absolute repository path on armor@MacStudio.local. The named open-webui-data volume is unchanged.
+- Open WebUI: v0.11.3
+- Image: ghcr.io/open-webui/open-webui:v0.11.3
+- Container: eaio-open-webui
+- Runtime branding directory: /Users/Shared/enterprise-ai-office/runtime/OpenWebUI/branding
+- Compose project: eaio-openwebui
+- Static target: /app/build/static/<filename>
+- Data volume: eaio-openwebui_open-webui-data (unchanged)
+- Application name: WEBUI_NAME=Enterprise AI Office
 
-## Replacing the logo
+Open WebUI copies the frontend static files into its backend static directory during startup. Restart and recreate checks therefore validate both the mounted frontend path and the backend-served /static/ path.
 
-1. Replace the repository assets while keeping the exact filenames and transparency/safe-margin rules.
-2. Validate the SVG and PNG/ICO files locally, then compare checksums against the repository.
-3. From the protected runtime directory, recreate only Open WebUI:
+## Recreate procedure
 
 ~~~sh
 cd /Users/Shared/enterprise-ai-office/runtime/OpenWebUI
 /Users/armor/.orbstack/bin/docker compose -p eaio-openwebui -f docker-compose.bootstrap.yml up -d --force-recreate --no-deps open-webui
 ~~~
 
-Do not run down -v; preserve the named data volume. After an asset change, verify /static/ URLs and use a hard refresh/private window if a browser cache shows the previous logo. If the pinned Open WebUI version changes, re-check its static paths and startup-copy behavior before reusing these mounts.
-
-## Generation tooling
-
-The asset set was generated locally with qlmanage, ImageMagick magick, cp, identify, and xmllint; no new dependency or generation script was added. The exact rasterization recipe is kept in infrastructure/open-webui/branding/README.md.
+Do not run down -v; this task does not alter authentication, users, groups, conversations, Hermes, WeKnora, ports, or networking. When the upstream version changes, re-check its actual static references and startup-copy behavior before reuse.

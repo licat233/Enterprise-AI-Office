@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360">
+<rect width="1200" height="360" fill="#111111"/>
+
+<g transform="translate(90,62) scale(1.42)">
+  <path fill="#FFFFFF" d="M0 0H180V30H40V55H150V85H40V110H180V140H0Z"/>
+  <path fill="#FFFFFF" d="M215 140L300 0H338L423 140H381L319 35L257 140Z"/>
+  <circle cx="319" cy="100" r="13" fill="#00E6D1"/>
+  <path fill="#FFFFFF" fill-rule="evenodd"
+    d="M470 0H610Q650 0 650 40V100Q650 140 610 140H470Q430 140 430 100V40Q430 0 470 0ZM485 30Q470 30 470 45V95Q470 110 485 110H595Q610 110 610 95V45Q610 30 595 30Z"/>
+</g>
+<text x="92" y="315" font-family="Arial,Helvetica,sans-serif" font-size="31" letter-spacing="11" fill="#FFFFFF">ENTERPRISE AI OFFICE</text>
+</svg>
