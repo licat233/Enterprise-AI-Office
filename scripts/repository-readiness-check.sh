@@ -231,6 +231,7 @@ for path in \
   docs/EAO-ADMIN-CONSOLE-V1A.md \
   docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md \
   profiles/maintainer/SOUL.md \
+  profiles/management/SOUL.md \
   profiles/procurement/SOUL.md \
   profiles/finance/SOUL.md \
   skills/shared/eao-resource-intake/SKILL.md \
@@ -440,6 +441,7 @@ require_text config/capabilities.yaml 'infrastructure/hermes/PROVISIONING.md' 'C
 require_text docs/CLIENT-RBAC.md 'Company logical ID' 'Client RBAC distinguishes company group IDs from display names'
 require_text docs/ADMIN-DEPARTMENT-PROVISIONING.md 'Creating a department Group MUST NOT automatically create a same-named Hermes Profile' 'Department provisioning preserves Group/Profile separation'
 require_text docs/ADMIN-DEPARTMENT-PROVISIONING.md 'Capability Reuse Pass before creating a Profile' 'Department provisioning requires capability reuse gate'
+require_text docs/ADMIN-DEPARTMENT-PROVISIONING.md 'This does **not** make the management Group an EAO administrator' 'Management business access stays separate from EAO admin authority'
 require_text DEPLOY.md 'company logical ID → display name → runtime group UUID' 'Golden Path preserves three-layer group identity'
 require_no_text DEPLOY.md 'Create baseline groups `All-Employees` and `AI-Admins`' 'Golden Path does not invent transformed Open WebUI group names'
 require_text infrastructure/open-webui/PROVISIONING.md 'company logical ID' 'Open WebUI provisioning preserves three-layer group identity'

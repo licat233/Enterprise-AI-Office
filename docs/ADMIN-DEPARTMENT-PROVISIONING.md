@@ -170,6 +170,32 @@ directly to the Open WebUI database.
 
 A Group that uses only general does not require a duplicate department Assistant.
 
+### Cross-department management access
+
+A management/executive Group may legitimately receive read/use access to
+multiple department Assistants when company policy authorizes that visibility.
+
+Example:
+
+~~~text
+Management
+→ General Assistant
+→ Operations Assistant
+→ Sales Assistant
+→ Procurement Assistant
+→ Finance Assistant
+→ Management Assistant
+~~~
+
+This does **not** make the management Group an EAO administrator. Do not grant
+Hermes default, maintainer, EAO Admin, provider administration, system settings,
+or infrastructure credentials merely because a business leader can view all
+departments.
+
+A separate Management Assistant/Profile is appropriate when management has a
+durable cross-department synthesis and decision-support role. Department
+credentials and action capabilities remain owned by their specialist Profiles.
+
 ## 6. New employee onboarding
 
 Department membership and Assistant authorization are additive.

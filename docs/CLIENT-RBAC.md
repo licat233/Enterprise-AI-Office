@@ -113,6 +113,11 @@ Use Open WebUI's native permission model for the installed release rather than s
 
 Every Hermes-backed employee Assistant should be private/restricted and explicitly shared with intended groups/users.
 
+A business-management Group may be authorized to read/use several department
+Assistants at once. Cross-department business visibility remains separate from
+EAO administrative authority: management access must not implicitly grant the
+maintainer/EAO Admin or privileged default Profile.
+
 Baseline:
 
 ```text
