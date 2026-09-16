@@ -231,6 +231,8 @@ for path in \
   docs/EAO-ADMIN-CONSOLE-V1A.md \
   docs/acceptance/EAO-ADMIN-CONSOLE-V1A.md \
   profiles/maintainer/SOUL.md \
+  profiles/procurement/SOUL.md \
+  profiles/finance/SOUL.md \
   skills/shared/eao-resource-intake/SKILL.md \
   infrastructure/hermes/maintainer-routing.example.yaml \
   infrastructure/hermes/maintainer.env.example \

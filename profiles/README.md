@@ -26,6 +26,8 @@ The privileged Hermes `default` / admin Profile belongs to the control plane and
 ```text
 profiles/
 ├── sales/SOUL.md
+├── procurement/SOUL.md
+├── finance/SOUL.md
 ├── qc/SOUL.md
 ├── marketing/SOUL.md
 └── engineering/SOUL.md
